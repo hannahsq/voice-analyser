@@ -1,0 +1,19 @@
+# Defaults mirror vocal_analysis/config.py; override per machine with
+#   va <cmd> --set data.root=D:/corpora
+data:
+  root: data            # one subdirectory per corpus, named as in `va manifest all`
+  manifests: data/manifests
+
+device:
+  device: auto
+  disable_miopen: rnn   # Windows ROCm: MIOpen runtime kernel compile fails (docs/decisions.md D-002)
+
+frames:
+  sample_rate: 16000
+  hop_s: 0.010
+
+eval:
+  bootstrap_resamples: 1000
+  bootstrap_seed: 0
+  f0_bands_hz: [150, 300, 500]
+  formant_tolerances: [[0.20, 200], [0.25, 250], [0.30, 300]]
