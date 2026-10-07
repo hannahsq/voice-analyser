@@ -268,7 +268,7 @@ Stratify everything by f0 band (< 150, 150–300, 300–500, > 500 Hz), vowel or
 ### 6.5 Baselines (regenerated with one command)
 
 - Praat defaults.
-- Praat multi-ceiling sweep with FastTrack-style selection.
+- Praat multi-ceiling sweep with FastTrack-style selection, both as specified in §5.4 (4000–8000 Hz for every talker) and FastTrack-faithful (per-talker-group ranges; decisions D-008).
 - FormantNet and/or DeepFormants, if they run.
 - PESTO and CREPE for f0.
 - TVLP (time-varying LP with temporal smoothing) from `voice-dataset-labeler` (decisions D-007). The MK I Whisper probe is not scored.
@@ -428,7 +428,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 - **CPU (16 Zen 5 cores):** DataLoader workers for cheap on-the-fly augmentation, WORLD resynthesis for T2/T3 pairs, and tube-model synthesis to shards.
 - **128 GB unified memory:** cache resynthesised corpora and feature shards in RAM; batch size is not a constraint for models this size.
-- **GPU:** verified with AMD's ROCm 10 / torch 2.13 gfx1151 wheels (conv, matmul, FFT, bf16 autocast). MIOpen's RNN kernels fail on Windows, so RNNs run on native kernels via `device.rnn_guard()` (decisions D-002). CPU and GPU share memory bandwidth on this platform, so profile whether synthesis or training is the bottleneck.
+- **GPU:** verified with AMD's ROCm 10 / torch 2.13 gfx1151 wheels (conv, matmul, FFT, bf16 autocast). MIOpen is unreliable on Windows (runtime-compiled kernels fail, some conv shapes crash), so it's disabled and training uses native kernels in bf16, which is the fastest measured configuration (decisions D-002). CPU and GPU share memory bandwidth on this platform, so profile whether synthesis or training is the bottleneck.
 - **Precision:** try bf16 autocast and fall back to fp32 if numerics misbehave. The models are small enough that fp32 is affordable.
 - **Fallback:** student-sized models are trainable on the CPU if the GPU stack misbehaves.
 - **Data format:** shards (e.g. WebDataset tar files or numpy memmaps) with manifests; regeneration is deterministic under a fixed seed.
@@ -438,10 +438,10 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 ### M0: Foundations
 - [x] Repo skeleton, config system, CLI entry points.
-- [ ] Manifests for all corpora (`path, corpus, speaker_id, split, sr, duration, licence`) and the leakage test (§6.4).
+- [ ] Manifests for all corpora (`path, corpus, speaker_id, split, sr, duration, licence`) and the leakage test (§6.4). *Gold sets and the leakage test done; training-pool manifests come with those corpora (M2).*
 - [x] Gold-set loaders: Hillenbrand, PTDB-TUG, MIR-1K, MDB-stem-synth (all verified on real data). VTR-TIMIT deferred: no LDC licence.
 - [x] Metrics (§6.2) with unit tests on hand-computed cases; bootstrap intervals by speaker.
-- [ ] Baselines (§6.5) written to `reports/baselines.md` by a single command.
+- [x] Baselines (§6.5) written to `reports/baselines.md` by a single command (`va baselines`). Formants: Praat defaults, §5.4 sweep, FastTrack-faithful, TVLP. f0: PESTO, CREPE, Praat autocorrelation, plus PTDB-TUG phonation subsets from the laryngograph (decisions D-008, D-009).
 
 **Accept when:** the baseline report regenerates end to end and every baseline, including the earlier TVLP tracker, is scored on the same footing.
 
@@ -451,7 +451,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 - [ ] Back end v1 (§8.1–8.4) with synthetic tests: harmonic fit < 0.1 dB on clean frames; corrected H1–H2 matches source H1–H2 when the true F/B are supplied (< 0.5 dB *(proposed)*).
 - [ ] Teacher v1 trained on synthetic data only.
 
-**Accept when:** teacher v1 beats Praat defaults on Hillenbrand and VTR (MAE and detection rate), and the sim-to-real gap is documented per f0 band.
+**Accept when:** teacher v1 beats Praat defaults on Hillenbrand (MAE and detection rate; VTR deferred, no TIMIT licence), and the sim-to-real gap is documented per f0 band. See §13 #14 on how hard this bar is.
 
 ### M2: Resynthesis labeller, teacher v2
 - [ ] Inverse filtering (IAIF; QCP later), track smoothing and perturbation, time-varying resonator cascade, QC, and label export including source H1–H2.
@@ -508,6 +508,9 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 | 10 | Physical rig | defer to M6 unless high-f0 results stall |
 | 11 | Accompaniment | out of scope for v1 |
 | 12 | Exposed formants | F1–F4, plus a cluster-centre output in the singer's-formant regime? |
+| 13 | PESTO weights vs MIR-1K gold (decisions D-008) | Bundled PESTO checkpoints are trained on MIR-1K. Proposed: retrain PESTO (self-supervised, so no labels are needed) on the training pools, which exclude every gold set, and use those weights in §7.1. Alternative: drop MIR-1K as a gold set and rely on MDB-stem-synth (which CREPE has seen) plus PTDB-TUG |
+| 14 | M1 acceptance vs Hillenbrand's LPC-derived reference (decisions D-008) | Praat defaults already reach DR(20 %, 200 Hz) ≈ 99 / 93 / 88 % on Hillenbrand F1–F3, partly because the reference is LPC-based. Proposed: keep "beat Praat defaults" but judge it per f0 band and speaker group (children, high f0) with bootstrap intervals, and weight the hard-case synthetic suite and resynthesised sets more heavily |
+| 15 | f0 output on non-modal phonation (decisions D-009) | On period-doubled frames autocorrelation trackers report the two-cycle period and neural trackers the cycle rate; creak has no single f0. Proposed: output the cycle rate, and have the voicing/voice-quality heads flag "irregular" frames (PTDB-TUG's EGG categories give labelled examples), so downstream users can tell an f0 estimate from a guess. Score f0 accuracy on modal frames, with modal < 85 Hz as the hard-mode target, and describe non-modal behaviour rather than score it. Also: PESTO breaks down below 70 Hz, so retrained f0 weights (#13) need low male speech and vocal fry in the training pool |
 
 ## 14. Risks and mitigations
 

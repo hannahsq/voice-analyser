@@ -44,6 +44,19 @@ def scan(root: str | Path) -> list[ManifestRow]:
     return rows
 
 
+def frame_labels(root: str | Path, row: ManifestRow, item: GoldItem) -> np.ndarray:
+    """Phonation category per reference frame, from the laryngograph channel (eval/phonation.py)."""
+    import soundfile as sf
+
+    from .. import phonation
+
+    lar = Path(root) / row.path.replace("/MIC/", "/LAR/").replace("mic_", "lar_", 1)
+    egg, sr = sf.read(lar, dtype="float64")
+    if egg.ndim > 1:
+        egg = egg.mean(axis=1)
+    return phonation.classify(*phonation.egg_lag_correlations(egg, sr, item.times, item.f0))
+
+
 def load(root: str | Path, row: ManifestRow) -> GoldItem:
     root = Path(root)
     data = np.loadtxt(_ref_path(root, row.path), ndmin=2)

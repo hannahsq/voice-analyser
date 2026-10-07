@@ -127,3 +127,43 @@ def test_stratified():
     s = np.array(["lo", "hi", "lo", "hi"])
     out = M.stratified(lambda i: {"mean": x[i].mean()}, s)
     assert out == {"all": {"mean": 2.5}, "hi": {"mean": 3.0}, "lo": {"mean": 2.0}}
+
+
+def test_frame_stats_sum_to_metric_functions():
+    rng = np.random.default_rng(0)
+    ref = rng.uniform(300, 3000, 500)
+    ref[rng.random(500) < 0.1] = nan
+    est = ref * rng.normal(1, 0.2, 500)
+    est[rng.random(500) < 0.1] = nan
+    fs = {k: v.sum() for k, v in M.formant_frame_stats(est, ref, [(0.2, 200.0), (0.3, 300.0)]).items()}
+    fe = M.formant_errors(est, ref)
+    assert fs["abs_err"] / fs["n_both"] == pytest.approx(fe["mae_hz"])
+    assert fs["abs_pct"] / fs["n_both"] == pytest.approx(fe["mae_pct"])
+    assert np.sqrt(fs["sq_err"] / fs["n_both"]) == pytest.approx(fe["rmse_hz"])
+    assert fs["gross"] / fs["n_ref"] == pytest.approx(fe["gross_rate"])
+    assert fs["det_0.2_200"] / fs["n_ref"] == pytest.approx(M.detection_rate(est, ref, 0.2, 200.0))
+    assert fs["det_0.3_300"] / fs["n_ref"] == pytest.approx(M.detection_rate(est, ref, 0.3, 300.0))
+
+    f0_ref = np.where(rng.random(500) < 0.3, 0.0, rng.uniform(80, 800, 500))
+    f0_est = f0_ref * 2.0 ** rng.choice([0, 0, 0, 1, -1, 0.3], 500) * rng.normal(1, 0.01, 500)
+    ev = rng.random(500) < 0.7
+    ps = {k: v.sum() for k, v in M.pitch_frame_stats(f0_est, f0_ref, ev).items()}
+    pm = M.pitch_metrics(f0_est, f0_ref, est_voiced=ev)
+    for k in ("rpa", "rca", "gross"):
+        assert ps[k] / ps["n_voiced"] == pytest.approx(pm[k if k != "gross" else "gross_error_rate"])
+    assert ps["octave"] / ps["n_voiced"] == pytest.approx(pm["octave_error_rate"])
+    p, r = ps["tp"] / (ps["tp"] + ps["fp"]), ps["tp"] / (ps["tp"] + ps["fn"])
+    assert (p, r) == (pytest.approx(pm["voicing_precision"]), pytest.approx(pm["voicing_recall"]))
+
+
+def test_bootstrap_sums_matches_index_bootstrap():
+    rng = np.random.default_rng(1)
+    spk = np.repeat(np.arange(25), rng.integers(5, 40, 25))
+    correct = (rng.random(len(spk)) < 0.6 + 0.01 * (spk % 10)).astype(float)
+    ids, sums = M.group_sums({"num": correct, "den": np.ones_like(correct)}, spk)
+    fast = M.bootstrap_sums(sums, lambda s: s["num"] / s["den"], n_resamples=4000, seed=0)
+    slow = M.speaker_bootstrap(lambda i: correct[i].mean(), spk, n_resamples=4000, seed=0)
+    assert fast.estimate == pytest.approx(slow.estimate)
+    # Different random streams, same distribution: CIs agree to Monte Carlo error.
+    assert fast.low == pytest.approx(slow.low, abs=0.01) and fast.high == pytest.approx(slow.high, abs=0.01)
+

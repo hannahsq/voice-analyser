@@ -24,10 +24,11 @@ class DataConfig:
 @dataclass
 class DeviceConfig:
     device: str = "auto"  # auto | cuda | cpu
-    # MIOpen's runtime kernel compiler is broken on the Windows ROCm build
-    # (D-002). "rnn" disables it only around RNN calls; "all" disables it
-    # everywhere; "none" leaves it on.
-    disable_miopen: str = "rnn"
+    # MIOpen is unreliable on the Windows ROCm build (D-002): runtime-compiled
+    # kernels (RNN, batch norm) fail and some conv shapes crash. "all" disables
+    # it everywhere (native kernels; bf16 is fastest); "rnn" only around RNN
+    # calls; "none" leaves it on.
+    disable_miopen: str = "all"
 
 
 @dataclass

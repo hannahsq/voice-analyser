@@ -6,7 +6,7 @@ data:
 
 device:
   device: auto
-  disable_miopen: rnn   # Windows ROCm: MIOpen runtime kernel compile fails (docs/decisions.md D-002)
+  disable_miopen: all   # Windows ROCm: MIOpen is unreliable here (docs/decisions.md D-002)
 
 frames:
   sample_rate: 16000

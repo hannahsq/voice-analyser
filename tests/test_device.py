@@ -13,7 +13,7 @@ pytestmark = pytest.mark.gpu
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="no GPU")
 @pytest.mark.parametrize("bf16", [False, True])
 def test_conv_bigru_train_step_on_gpu(bf16):
-    dev = setup_device(DeviceConfig(device="cuda", disable_miopen="rnn"))
+    dev = setup_device(DeviceConfig(device="cuda"))
     torch.manual_seed(0)
     conv = torch.nn.Conv2d(2, 8, 3, padding=1).to(dev)
     gru = torch.nn.GRU(8 * 16, 32, batch_first=True, bidirectional=True).to(dev)

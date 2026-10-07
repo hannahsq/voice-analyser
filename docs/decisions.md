@@ -6,7 +6,7 @@ Divergences from, and refinements of, [voice-analyser-mk2-plan.md](voice-analyse
 
 The training stack uses AMD's ROCm wheels for gfx1151 (`torch 2.13.0+rocm10.0.0`, `rocm 10.0.0`, HIP 7.15). If `torch` appeared in `pyproject.toml`, `pip install -e .` could replace that build with a generic wheel. So torch is installed separately from AMD's index, and the package is installed with `pip install -e . --no-deps` plus the explicit dependencies. Everything outside model code (metrics, manifests, loaders) imports without torch.
 
-## D-002 (2026-10-07): GPU verified on gfx1151; MIOpen RNNs disabled
+## D-002 (2026-10-07): GPU verified on gfx1151; MIOpen disabled
 
 Verified on the Radeon 8060S (gfx1151), with ~78 GiB visible to torch:
 
@@ -18,7 +18,16 @@ Verified on the Radeon 8060S (gfx1151), with ~78 GiB visible to torch:
 | `nn.GRU` via MIOpen | **fails**: `miopenStatusUnknownError`. MIOpen compiles these kernels at runtime with hipRTC, which can't find `<type_traits>` on this Windows build |
 | `nn.GRU` with cuDNN/MIOpen disabled (native kernels), fp32 and bf16 | ok |
 
-Decision: `device.disable_miopen: rnn` (the default) wraps RNN forward calls in `vocal_analysis.device.rnn_guard()`, keeping MIOpen for convolutions. Use `all` if other MIOpen ops (e.g. batch norm, some activations) hit the same compile error. `tests/test_device.py` is the regression check, so rerun it after any ROCm upgrade. The RNN workaround can go once MIOpen runtime compilation works on Windows.
+~~Decision: `device.disable_miopen: rnn`~~. **Revised the same day: the default is now `all`, MIOpen off everywhere.** Batch norm hits the same compile error (CREPE), and MIOpen convolutions on CREPE's layer shapes crashed the GPU ("unspecified launch failure"). With MIOpen off, PyTorch's native kernels are slower in fp32 but fastest overall in bf16:
+
+| 4× Conv2d(32→32), batch 16×128×200, fwd+bwd | fp32 | bf16 autocast |
+|---|---|---|
+| MIOpen | 45.6 ms | 67.5 ms |
+| native | 93.5 ms | **38.0 ms** |
+
+So train in bf16 with native kernels. `tests/test_device.py` is the regression check.
+
+To re-enable MIOpen later: hipRTC needs C++ standard headers, and none are on this machine (no Visual Studio / Build Tools, and the ROCm wheels don't bundle libc++). The most likely fix is VS 2022 Build Tools with "Desktop development with C++". That's not worth doing now: it only speeds up fp32, and it wouldn't explain the convolution crash. Revisit after a ROCm upgrade.
 
 ## D-003 (2026-10-07): speaker ids are corpus-prefixed; TIMIT-derived sets share corpus `timit`
 
@@ -57,3 +66,58 @@ Archives are also copied to `Z:\datasets\voice-analyser\` (NAS) as a backup; tra
 - **TVLP formant tracker** from `hannahsq/voice-dataset-labeler`: a git submodule at `external/voice-dataset-labeler`, pinned to `0ab5568`. `extractors/tvlp.py` imports only numpy and the standard library, so the baseline adapter loads that single file by path (`importlib.util.spec_from_file_location`). Nothing goes on `sys.path`, so the repo's generic top-level names (`extractors`, `labeller`, `synth`) can't clash with anything. A submodule rather than a copy keeps the exact commit that was scored on record. The usual alternative, a `pkg @ git+https://...@sha` dependency, needs the other repo to be packaged, which this one isn't.
 - **MK I Whisper-probe** (`hannahsq/formant-extractor`): not scored. It was a small experiment training an MLP head on frozen Whisper features. Re-scoring it would mean fetching Whisper weights from the Hugging Face hub and rebuilding its evaluation, because its `KFold` split by token put the same speakers in train and validation folds. Plan §7.6 already argues against frozen encoders.
 - **"AST-head probe"** in plan §6.5: no such code exists, and the reference probably came from chat memories. Removed from the plan.
+
+## D-008 (2026-10-07): baseline protocol and findings (M0)
+
+`va baselines` writes `reports/baselines.md` and `.json`. Predictions are cached per (baseline, corpus) in `runs/baselines/`, keyed by baseline version and manifest hash; long runs checkpoint and resume.
+
+**Formant baselines (Hillenbrand: 4 frames per token, F4 at steady state only).**
+- `praat_default`: Burg with Praat's defaults (5500 Hz ceiling for everyone).
+- `praat_sweep`: the plan's §5.4 sweep, 4000–8000 Hz for every talker, with the ceiling chosen by DCT smoothness. It does **worse** than defaults for children (girls F2 DR 70 % vs 83 %). With low ceilings, merged formants give smooth tracks that a smoothness score in Hz rewards; for girls it picked a median 4750 Hz ceiling where the most accurate is about 6000 Hz.
+- `praat_fasttrack`: FastTrack's documented protocol, with the ceiling range set by talker size (men 4500–6500, women 5000–7000, children 5500–7500 Hz), its error measure (intercept + 5 cosines, frames with ≥ 4 formants), and selection on F1–F3. It's the strongest baseline. It uses the speaker group plus the oracle vowel span, as FastTrack users would supply them, and both are stated in the report. The ranges come from FastTrack's own documentation, **not** from tuning on Hillenbrand.
+- `tvlp`: voice-dataset-labeler @ `0ab5568`.
+
+**Caveat on Hillenbrand as a formant reference.** Its values are LPC peaks with hand checking, so LPC-family trackers agree with it partly by construction (plan §5.4's correlated-error point). Praat defaults already reach DR(20 %, 200 Hz) ≈ 99 / 93 / 88 % on F1–F3. This bears on the M1 acceptance criterion; see plan §13 #14.
+
+**f0 baselines.** PESTO (`mir-1k_g7`, the package default) and CREPE (`full`, torchcrepe, Viterbi), both at 16 kHz with a 10 ms hop and evaluated at reference times by nearest frame (±5 ms). The synthetic step test confirms both report frame-centre times. Voicing thresholds are fixed in advance (PESTO confidence ≥ 0.5; CREPE periodicity ≥ 0.21, from the torchcrepe docs) and never tuned on gold data. CREPE runs in fp32 as published: bf16 was 3.4× faster but moved estimates by a median 8 cents. PESTO is called with a cached model (bit-identical to `pesto.predict`, which reloads the checkpoint on every call).
+
+**Training overlap with gold sets** (marked † in the report): both bundled PESTO checkpoints are trained on MIR-1K; CREPE's training data includes MIR-1K and MDB-stem-synth. PTDB-TUG is the only f0 gold set that neither has seen.
+
+**Plan conflict this exposes:** §7.1 uses pretrained PESTO as the f0 module, but its weights were trained on MIR-1K, which §6.4 treats as gold. Any pipeline f0 number on MIR-1K would then be contaminated. Options are in plan §13 #13.
+
+## D-009 (2026-10-07): PTDB-TUG failure modes; laryngograph phonation subsets; Praat f0 baseline
+
+**Praat autocorrelation added as a traditional f0 baseline** (`praat_ac`: parselmouth `to_pitch_ac`, defaults except a 50–1000 Hz range that covers every gold set, sampled on the 10 ms grid). It isn't trained on anything, so it's a clean reference point. On raw pitch accuracy it's within about 2 points of PESTO on every corpus, it decides voicing much better on speech, and it runs at 0.002× real time on the CPU. The step-timing test now uses a fifth (220→330 Hz) rather than an octave: after an octave step the old period still fits the signal, which delays autocorrelation trackers for reasons unrelated to timestamps.
+
+**What the PTDB-TUG errors are.** PTDB-TUG's reference is RAPT run on the laryngograph (EGG) channel, which we also have. For every voiced reference frame (period T), `eval/phonation.py` correlates the high-passed EGG with itself at lag T (r1) and T/2 (rh) and assigns a category from the EGG alone:
+
+| Category | Rule | Meaning | Share |
+|---|---|---|---|
+| modal | r1 ≥ 0.75, rh ≤ −0.5 | regular vibration at the reference f0 | 83.0 % |
+| ref_error_2x | rh ≥ 0.75 | folds cycle at 2 × the reference: the reference halved | 0.5 % |
+| alternating | r1 ≥ 0.75, −0.5 < rh < 0.75 | alternate cycles differ (period doubling); reference and 2 × both defensible | 3.7 % |
+| aperiodic | r1 < 0.75, rh < 0.75 | creak / irregular phonation; no single f0 | 9.2 % |
+| weak_egg | EGG RMS < 0.1 × the file's median | no usable EGG, so the reference is unreliable | 3.6 % |
+
+The thresholds are round numbers read off the EGG distributions (modal frames: median r1 0.99, rh −0.81). Estimator errors played no part in choosing them, so the categories can't favour any estimator. Synthetic EGG tests in `tests/test_phonation.py` cover each category.
+
+Findings (all three baselines on all of PTDB-TUG; the full tables are in `reports/baselines.md`):
+- **Reference errors are rare.** Only 0.5 % of frames show the reference halved, and there the neural trackers are right (PESTO 89 %, CREPE 88 % at 2 × the reference). Praat repeats the halving 59 % of the time, since it shares the autocorrelation family with RAPT.
+- **Period doubling splits trackers by method.** On alternating frames, autocorrelation reports the two-cycle period (Praat 87 % at the reference); neural trackers often report the cycle rate (PESTO 31 %, CREPE 33 % at 2 ×). Neither is wrong.
+- **Creak is a voicing-decision problem.** On aperiodic frames PESTO judges 22 % voiced, CREPE 78 %, Praat 70 %. PESTO's 0.5 confidence threshold is also strict on speech generally: it judges only 67 % of modal frames voiced (CREPE and Praat 95 %).
+- **PESTO fails on low modal voices.** On male modal frames its error grows as f0 falls: median +5 cents at 150–250 Hz, +13 at 85–100, +21 at 70–85, and +1062 below 70 Hz (it breaks down). Praat stays within 0–7 cents across the whole range. CREPE holds up better at low f0 (72 % RPA on modal frames below 85 Hz, against PESTO's 63 % and Praat's 73 %). This is a training-data gap: PESTO's checkpoint was trained on MIR-1K singing, with little below about 80 Hz.
+- **An earlier heuristic was dropped.** Flagging reference frames below 0.6 × the speaker median was tried first. Only 13.5 % of the frames it flagged were reference errors (41 % alternating, 28 % weak EGG, 14 % aperiodic), so it was replaced by the EGG categories before any M1 model was scored.
+
+**Evaluation protocol for PTDB-TUG f0 from here on** (`va baselines` implements it):
+- Headline RPA over **all** voiced reference frames (unchanged).
+- RPA on **modal** frames: the fairest accuracy figure. Also **modal with reference below 85 Hz**: the f0 is well defined but trackers miss it, so this is the hard-mode accuracy target.
+- Female/male splits.
+- For the non-modal categories, an outcome table (% at the reference / 2 × / ½, % judged voiced) rather than an accuracy, because "the" f0 is undefined or the reference unreliable there.
+
+| PTDB-TUG RPA % | all | modal | modal, < 85 Hz | female modal | male modal |
+|---|---|---|---|---|---|
+| PESTO | 84.5 | 90.5 | 62.8 | 96.0 | 85.7 |
+| Praat AC | 83.9 | 89.9 | 73.4 | 94.0 | 86.4 |
+| CREPE | 84.9 | 91.5 | 72.1 | 95.6 | 87.9 |
+
+Open for M1 (plan §13 #15): what the model should output on alternating and aperiodic frames: the cycle rate, the two-cycle period, or "irregular, no single f0" with the voicing/voice-quality heads flagging it.

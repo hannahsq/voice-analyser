@@ -252,6 +252,93 @@ def speaker_bootstrap(
     return BootstrapResult(point, float(lo), float(hi), len(groups))
 
 
+def group_sums(values: Mapping[str, np.ndarray], groups: np.ndarray) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    """Per-group sums of per-frame statistics (counts, error sums, indicator flags).
+
+    Returns (group_ids, {name: (G,) sums}). Ratio metrics computed from these
+    sums are exact, and resampling groups is cheap (see bootstrap_sums).
+    """
+    ids, inverse = np.unique(np.asarray(groups), return_inverse=True)
+    return ids, {k: np.bincount(inverse, weights=np.asarray(v, float), minlength=len(ids)) for k, v in values.items()}
+
+
+def bootstrap_sums(
+    sums: Mapping[str, np.ndarray],
+    stat: Callable[[Mapping[str, np.ndarray]], np.ndarray],
+    n_resamples: int = 1000,
+    alpha: float = 0.05,
+    seed: int = 0,
+) -> BootstrapResult:
+    """Speaker bootstrap on per-group sums: equivalent to speaker_bootstrap for ratio metrics.
+
+    `stat` maps a dict of summed statistics (scalars or (B,) arrays) to the
+    metric; it is called once on the full totals and once, vectorised, on all
+    resamples.
+    """
+    n_groups = len(next(iter(sums.values())))
+    point = float(stat({k: v.sum() for k, v in sums.items()}))
+    rng = np.random.default_rng(seed)
+    weights = np.zeros((n_resamples, n_groups))
+    picks = rng.integers(0, n_groups, (n_resamples, n_groups))
+    np.add.at(weights, (np.arange(n_resamples)[:, None], picks), 1.0)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        stats = np.asarray(stat({k: weights @ v for k, v in sums.items()}), float)
+    lo, hi = np.nanpercentile(stats, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+    return BootstrapResult(point, float(lo), float(hi), n_groups)
+
+
+def formant_frame_stats(
+    est: np.ndarray, ref: np.ndarray, tolerances: Sequence[Sequence[float]] = ((0.20, 200.0),), gross_rel: float = 0.30, mode: str = "and"
+) -> dict[str, np.ndarray]:
+    """Per-frame quantities whose sums give formant_errors / detection_rate exactly."""
+    est, ref = np.asarray(est, float), np.asarray(ref, float)
+    has_ref = np.isfinite(ref)
+    both = has_ref & np.isfinite(est)
+    err = np.where(both, np.abs(est - ref), 0.0)
+    safe_ref = np.where(has_ref, ref, 1.0)
+    out = {
+        "n_ref": has_ref.astype(float),
+        "n_both": both.astype(float),
+        "abs_err": err,
+        "abs_pct": np.where(both, 100.0 * err / safe_ref, 0.0),
+        "sq_err": err**2,
+        "gross": (has_ref & ~(both & (err / safe_ref <= gross_rel))).astype(float),
+    }
+    for rel, ab in tolerances:
+        rel_ok, abs_ok = err <= rel * safe_ref, err <= ab
+        ok = (rel_ok & abs_ok) if mode == "and" else (rel_ok | abs_ok)
+        out[f"det_{rel:g}_{ab:g}"] = (both & ok).astype(float)
+    return out
+
+
+def pitch_frame_stats(
+    est_hz: np.ndarray, ref_hz: np.ndarray, est_voiced: np.ndarray, tol_cents: float = 50.0, gross_rel: float = 0.20
+) -> dict[str, np.ndarray]:
+    """Per-frame quantities whose sums give pitch_metrics exactly."""
+    est_hz, ref_hz = np.asarray(est_hz, float), np.asarray(ref_hz, float)
+    rv = np.isfinite(ref_hz) & (ref_hz > 0)
+    ev = np.asarray(est_voiced, bool)
+    has_est = rv & np.isfinite(est_hz) & (est_hz > 0)
+    c = np.full(len(ref_hz), np.inf)
+    c[has_est] = cents_error(est_hz[has_est], ref_hz[has_est])
+    folded = np.full(len(ref_hz), np.inf)
+    folded[has_est] = np.abs((c[has_est] + 600.0) % 1200.0 - 600.0)
+    rel = np.full(len(ref_hz), np.inf)
+    rel[has_est] = np.abs(est_hz[has_est] - ref_hz[has_est]) / ref_hz[has_est]
+    with np.errstate(invalid="ignore"):
+        octave = (folded <= tol_cents) & (np.abs(c) > tol_cents) & (np.round(c / 1200.0) != 0)
+    return {
+        "n_voiced": rv.astype(float),
+        "rpa": (rv & (np.abs(c) <= tol_cents)).astype(float),
+        "rca": (rv & (folded <= tol_cents)).astype(float),
+        "octave": (rv & octave).astype(float),
+        "gross": (rv & (rel > gross_rel)).astype(float),
+        "tp": (ev & rv).astype(float),
+        "fp": (ev & ~rv).astype(float),
+        "fn": (~ev & rv).astype(float),
+    }
+
+
 def stratified(
     metric: Callable[[np.ndarray], Mapping[str, float]], strata: np.ndarray
 ) -> dict[str, Mapping[str, float]]:

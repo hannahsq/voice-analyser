@@ -4,6 +4,7 @@
     va download <corpus>...|all    fetch, verify and extract public corpora into data.root
     va manifest <corpus>|all       scan a corpus under data.root and write its manifest
     va leakage                     run the leakage rules over data/manifests/
+    va baselines [--only NAME...]  run/score baselines -> reports/baselines.md (cached in runs/)
     va config                      print the resolved config
 
 Every command takes --config FILE and repeated --set key.sub=value overrides.
@@ -101,6 +102,13 @@ def cmd_download(cfg: Config, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_baselines(cfg: Config, args: argparse.Namespace) -> int:
+    from .eval.report import build_report
+
+    build_report(cfg, Path(args.out), args.only, args.force, log=lambda m: print(m, flush=True))
+    return 0
+
+
 def cmd_leakage(cfg: Config, args: argparse.Namespace) -> int:
     from .data.manifest import read_manifests
     from .eval.leakage import check_leakage
@@ -130,6 +138,11 @@ def build_parser() -> argparse.ArgumentParser:
     d.add_argument("corpora", nargs="+", help="corpus names, or 'all'")
     d.set_defaults(fn=cmd_download)
     sub.add_parser("leakage", parents=[common]).set_defaults(fn=cmd_leakage)
+    b = sub.add_parser("baselines", parents=[common])
+    b.add_argument("--only", nargs="+", default=None, help="baseline names to run (default: all)")
+    b.add_argument("--force", action="store_true", help="ignore cached predictions")
+    b.add_argument("--out", default="reports/baselines.md")
+    b.set_defaults(fn=cmd_baselines)
     return p
 
 

@@ -1,5 +1,7 @@
 """Torch device selection, including the MIOpen workaround for Windows ROCm (D-002).
 
+Default policy disables MIOpen (cuDNN flag) process-wide; see DeviceConfig.
+
 torch is imported lazily so the rest of the package (metrics, manifests,
 loaders) works in environments without it.
 """
