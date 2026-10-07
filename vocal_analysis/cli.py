@@ -121,6 +121,39 @@ def cmd_leakage(cfg: Config, args: argparse.Namespace) -> int:
     return 0 if rep.ok else 1
 
 
+def cmd_synth(cfg: Config, args: argparse.Namespace) -> int:
+    from .synth.sampler import SynthConfig
+    from .synth.shards import write_set, write_suite
+
+    log = lambda m: print(m, flush=True)  # noqa: E731
+    root = Path(cfg.data.root) / "synth"
+    if args.what == "suite":
+        write_suite(Path(args.out or root / "suite_v1"), args.n or 64, args.workers, log=log)
+    else:
+        write_set(Path(args.out or root / "train_v1"), args.n or 100_000, SynthConfig(), seed=args.seed,
+                  workers=args.workers, log=log)
+    return 0
+
+
+def cmd_train(cfg: Config, args: argparse.Namespace) -> int:
+    from .models.teacher import TeacherConfig
+    from .train.teacher import TrainConfig, train
+
+    tc = TrainConfig(data=args.data, out=args.out, steps=args.steps, batch=args.batch, workers=args.workers)
+    for kv in args.train_set:
+        k, v = kv.split("=", 1)
+        setattr(tc, k, type(getattr(tc, k))(v))
+    train(tc, TeacherConfig(comb=not args.no_comb), log=lambda m: print(m, flush=True))
+    return 0
+
+
+def cmd_eval(cfg: Config, args: argparse.Namespace) -> int:
+    from .eval.teacher_eval import build_teacher_report
+
+    build_teacher_report(cfg, args.ckpt, args.out, args.suite, log=lambda m: print(m, flush=True))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--config", default=None, help="YAML config (default: configs/default.yaml if present)")
@@ -143,6 +176,28 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--force", action="store_true", help="ignore cached predictions")
     b.add_argument("--out", default="reports/baselines.md")
     b.set_defaults(fn=cmd_baselines)
+    s = sub.add_parser("synth", parents=[common], help="generate synthetic training data or the hard-case suite")
+    s.add_argument("what", choices=["train", "suite"])
+    s.add_argument("--n", type=int, default=None, help="clips (train: total, default 100000; suite: per case, default 64)")
+    s.add_argument("--seed", type=int, default=1)
+    s.add_argument("--workers", type=int, default=None)
+    s.add_argument("--out", default=None, help="default: <data.root>/synth/{train_v1,suite_v1}")
+    s.set_defaults(fn=cmd_synth)
+    t = sub.add_parser("train", parents=[common], help="train a model on synthetic data")
+    t.add_argument("model", choices=["teacher"])
+    t.add_argument("--data", default="data/synth/train_v1")
+    t.add_argument("--out", default="runs/teacher_v1")
+    t.add_argument("--steps", type=int, default=30000)
+    t.add_argument("--batch", type=int, default=32)
+    t.add_argument("--workers", type=int, default=12)
+    t.add_argument("--no-comb", action="store_true", help="ablation: no harmonic-comb input channel")
+    t.add_argument("--train-set", action="append", default=[], metavar="KEY=VALUE", help="other TrainConfig fields")
+    t.set_defaults(fn=cmd_train)
+    e = sub.add_parser("eval", parents=[common], help="evaluate a trained teacher against the gold sets and the suite")
+    e.add_argument("ckpt")
+    e.add_argument("--out", default="reports/teacher_v1.md")
+    e.add_argument("--suite", default="data/synth/suite_v1")
+    e.set_defaults(fn=cmd_eval)
     return p
 
 

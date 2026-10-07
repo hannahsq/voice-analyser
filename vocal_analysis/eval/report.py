@@ -490,7 +490,14 @@ def _render_f0(report: dict) -> list[str]:
     return L
 
 
-def build_report(cfg: Config, out_path: Path, only: list[str] | None, force: bool, log: Callable = print) -> Path:
+def build_report(cfg: Config, out_path: Path, only: list[str] | None, force: bool, log: Callable = print,
+                 extra_formant: dict | None = None, extra_f0: dict | None = None, title: str = "Baseline report",
+                 extra_sections: Callable[[dict], list[str]] | None = None) -> Path:
+    """Score baselines (and any extra models, e.g. a trained teacher) on the gold sets and write the report.
+
+    extra_formant/extra_f0 are {name: FormantBaseline/F0Baseline} scored alongside the registered
+    baselines; extra_sections(report) returns markdown lines inserted before the provenance.
+    """
     from ..baselines import F0_BASELINES, FORMANT_BASELINES
     from ..device import setup_device
 
@@ -499,7 +506,7 @@ def build_report(cfg: Config, out_path: Path, only: list[str] | None, force: boo
     want = lambda name: only is None or name in only  # noqa: E731
     report = {"provenance": provenance(cfg), "formant_baselines": {}, "formants": {}, "f0_baselines": {}, "f0": {}}
 
-    for name, b in FORMANT_BASELINES.items():
+    for name, b in {**FORMANT_BASELINES, **(extra_formant or {})}.items():
         if not want(name):
             continue
         log(f"[{name}] {FORMANT_CORPUS}")
@@ -507,7 +514,7 @@ def build_report(cfg: Config, out_path: Path, only: list[str] | None, force: boo
         report["formant_baselines"][name] = b.description
         report["formants"][name] = score_formants(res, cfg)
     labels: dict[str, np.ndarray | None] = {}
-    for name, b in F0_BASELINES.items():
+    for name, b in {**F0_BASELINES, **(extra_f0 or {})}.items():
         if not want(name):
             continue
         report["f0_baselines"][name] = {"description": b.description, "trained_on": list(b.trained_on)}
@@ -519,7 +526,11 @@ def build_report(cfg: Config, out_path: Path, only: list[str] | None, force: boo
             report["f0"].setdefault(corpus, {})[name] = score_f0(res, b.voicing_threshold, cfg, corpus, labels[corpus])
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(render(report), encoding="utf-8")
+    text = render(report).replace("# Baseline report", f"# {title}", 1)
+    if extra_sections:
+        head, sep, tail = text.partition("\n## Provenance")
+        text = head + "\n".join(extra_sections(report)) + "\n" + sep + tail
+    out_path.write_text(text, encoding="utf-8")
     out_path.with_suffix(".json").write_text(json.dumps(report, indent=1, default=float), encoding="utf-8")
     log(f"wrote {out_path} and {out_path.with_suffix('.json')}")
     return out_path

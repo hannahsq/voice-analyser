@@ -499,7 +499,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 | 1 | Internal sample rate | 16 kHz (24 kHz if more headroom above F4 is needed) |
 | 2 | Hop size | 10 ms |
 | 3 | Student lookahead | ablate 0 / 10 / 20 ms |
-| 4 | f0 source | PESTO module for v1; joint head later |
+| 4 | f0 source | ~~PESTO module for v1; joint head later~~ Teacher v1 has its own f0 head trained on exact synthetic f0, with the comb rendered from it (decisions D-010); compare with PESTO on PTDB-TUG |
 | 5 | Reconstruction renderer | cascade + tilt + nuisance; ablate a parallel (FormantNet-style) renderer |
 | 6 | VTL outputs | apparent per frame + anatomical aggregate |
 | 7 | Slope measure set | Kreiman/Garellek set + dB/octave regression; CPP/HNR optional |
