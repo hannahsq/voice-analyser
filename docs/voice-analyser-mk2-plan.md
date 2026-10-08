@@ -467,7 +467,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 ### M3: Resynthesis labeller, teacher v3
 - [ ] Training-pool corpora (§5.6) downloaded, licences recorded, manifests and leakage test extended.
-- [ ] Inverse filtering (IAIF; QCP later), track smoothing and perturbation, time-varying resonator cascade, QC, and label export including source H1–H2. *Implemented and tested on synthetic voices (`va resynth`, decisions D-016); the QC threshold is still to be calibrated on real data, and whether f0/voicing losses apply to resynthesised clips is open.*
+- [ ] Inverse filtering (IAIF; QCP later), track smoothing and perturbation, time-varying resonator cascade, QC, and label export including source H1–H2. *Implemented and tested on synthetic voices (`va resynth`, decisions D-016); the QC threshold is still to be calibrated on real data; f0 and voicing losses are masked on resynthesised clips.*
 - [ ] Resynthesised speech and singing corpora.
 - [ ] Teacher v3 trained on synthetic + resynthesised data.
 - [ ] Iseli–Alwan validation with predicted F/B, by f0 band.
