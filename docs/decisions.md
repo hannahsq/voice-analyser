@@ -265,3 +265,25 @@ Plan §5.2, in `vocal_analysis/resynth/` (`va resynth <pool> --teacher CKPT`). P
 - **Non-sonorant stretches keep the original audio**, cross-faded over 20 ms, so consonants stay real. Frames inside a cross-fade get no formant labels. The re-filtered signal is level-matched to the original over sonorant samples.
 - **Shards** hold the recordings of `files_per_shard` files and a varying number of clips. `index.json` lists `shard_clips`, and `ShardReader` uses it. An interrupted run resumes; changed settings are refused.
 - **Cost:** about 0.3 s CPU per second of audio for the source stage. Each variant is nearly free.
+
+## D-017 (2026-10-08): licences; M4Singer, Common Voice and Zeroth as training pools; M4Singer songs shared with MIR-1K
+
+**Licensing.** The project is personal and research use; it was never meant to be commercial.
+- *Code:* MIT (`LICENSE`).
+- *Model weights:* carry the most restrictive licence among the corpora they were trained on, with attribution to all of them. The question of whether weights adapt their training data is unsettled, and this is the conservative reading. Weights from synthetic data plus CC BY or CC0 pools are CC BY 4.0, the least restrictive licence those pools allow. Anything trained on M4Singer is CC BY-NC-SA 4.0.
+- *Commercial use:* anyone who wants it can retrain on suitably licensed data, since the code is MIT.
+
+`ATTRIBUTION.md` lists every corpus, with its role, licence and citation. Literature stays cited in the plan (§16) and this log. Evaluation-only corpora don't bear on weights.
+
+**New training pools.** Their archives are already on the NAS (`Z:\datasets`), downloaded for another project. Resynthesis needs audio and speaker ids only, so their transcriptions are not needed.
+- **M4Singer** (Zhang et al. 2022), `m4singer.zip`: Mandarin pop singing by 20 singers (Soprano/Alto/Tenor/Bass 1–7), 419 songs, 20,861 utterances, each with a MIDI and TextGrid.
+  - *Licence:* CC BY-NC-SA 4.0, per `dataset_license.md` in the M4Singer repository. The archive carries no licence file.
+  - *Value:* the largest singing pool, about three times VocalSet.
+- **Zeroth-Korean**, `zeroth_korean.tar.gz` (10.3 GB): read Korean speech, the first speech pool. Its licence will be recorded from the archive.
+- **Common Voice 27.0 Korean**, `cv-corpus-27.0-2026-09-11-ko.tar.gz`: 7185 MP3 clips, 10.39 h (2.56 h validated), 213 speakers on their own microphones.
+  - *Licence:* CC0. The download terms add an agreement not to try to identify the speakers. Nothing here tries to; speaker ids stay opaque `client_id` hashes.
+  - *Value:* small, and already lossy-coded. It is most useful for channel diversity and as unlabelled audio for M4's self-supervision.
+
+**M4Singer songs that are also in MIR-1K are excluded from training.** The singers are different people, so this is not speaker leakage. But the same songs mean the same melodies, and MIR-1K is an f0 gold set. f0 losses are masked on resynthesised clips, but the shared trunk would still hear those melodies.
+- *Method:* matching each MIR-1K singer-song's lyrics (Big5, traditional characters) against each M4Singer song's (`meta.json`, simplified) by character trigrams. A song's best match is about 0.02 for 90 % of MIR-1K singer-songs. Matches of 0.25–0.42 identify 8 shared songs despite the script difference: 成全, 听海, 童话, 当你, 一个像夏天一个像秋天, 水手, 千里之外, 今天你要嫁给我. 情歌王 (0.12–0.17) and 一首简单的歌 (0.18) are weaker matches. 情歌王 is a medley quoting other songs, and both are excluded to be safe.
+- *Enforcement:* the M4Singer scanner will mark these 10 songs as excluded, so they never enter a training manifest.

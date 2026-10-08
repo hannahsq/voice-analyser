@@ -7,6 +7,8 @@ name = "vocal-analysis"
 version = "0.0.1"
 description = "Real-time vocal analysis pipeline (MK II)"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
 # torch is deliberately not listed: it must come from AMD's ROCm wheel index
 # (gfx1151 build), and letting pip resolve it would replace that build with a
 # CPU/CUDA wheel. See docs/decisions.md (D-001).
