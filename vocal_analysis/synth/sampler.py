@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field
 
 import numpy as np
 
-from . import tract
+from . import tract, tube
 from .glottal import RD_MAX, RD_MIN, source_h_db
 from .voice import CTRL, FS, Trajectories, synthesize
 
@@ -43,6 +43,8 @@ class SynthConfig:
     gap_kinds: dict = field(default_factory=lambda: {"silence": 0.5, "whisper": 0.25, "frication": 0.25})
     target_every_s: tuple[float, float] = (0.08, 0.4)
     transition_s: tuple[float, float] = (0.03, 0.15)
+    p_tube: float = 0.6  # per clip: Story area function + lossy tube (plan §5.1 preferred), else the resonator-cascade prior
+    p_tube_constrict: float = 0.15  # per tube target: approximant-like tier II constriction
     p_uniform_formants: float = 0.3
     p_cluster: float = 0.1
     p_nasal: float = 0.15
@@ -225,7 +227,17 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     while pos < n:
         pos += rng.uniform(*cfg.target_every_s) * 1000
         tt.append(pos)
-    targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster) for _ in tt])
+    use_tube = cfg.p_tube > 0 and rng.random() < cfg.p_tube  # no draw at p_tube = 0, so cascade-only seeds reproduce
+    tube_info = None
+    if use_tube:
+        spk = tube.sample_speaker(rng, length)
+        drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict) for _ in tt]
+        targets = np.array([d[0] for d in drawn])
+        tube_bws = np.array([d[1] for d in drawn])
+        tube_info = {"speaker": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in asdict(spk).items()},
+                     "targets": [d[2] for d in drawn]}
+    else:
+        targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster) for _ in tt])
     if cfg.formant_constraint:
         f0_at = f0[np.clip(np.array(tt).astype(int), 0, n - 1)]
         targets = np.array([_constrain(rng, t, f, cfg.formant_constraint) for t, f in zip(targets, f0_at)])
@@ -233,7 +245,10 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     widths = rng.uniform(*cfg.transition_s, len(tt) - 1) * 1000
     logf = np.stack([_raised_cosine_steps(n, np.array(tt[1:]), targets[:, k], widths) for k in range(tract.N_POLES)], 1)
     formants = np.exp(logf)  # NaN poles stay NaN (log(NaN))
-    bw_targets = np.stack([tract.sample_bandwidths(rng, np.exp(targets[i]), centre) for i in range(len(tt))])
+    if use_tube:  # the tube's own bandwidths (constraints move only frequencies)
+        bw_targets = tube_bws
+    else:
+        bw_targets = np.stack([tract.sample_bandwidths(rng, np.exp(targets[i]), centre) for i in range(len(tt))])
     logb = np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.log(np.nan_to_num(bw_targets[:, k], nan=100.0)), widths)
                      for k in range(tract.N_POLES)], 1)
     bws = np.where(np.isfinite(formants), np.exp(logb), np.nan)
@@ -276,6 +291,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         "index": index, "seed": seed, "fs": FS, "duration_s": len(audio) / FS, "length_cm": length,
         "contour": contour, "register_steps": register_steps, "segments": segments,
         "jitter": jitter, "shimmer_db": shimmer, "hnr_db": hnr, "gain": gain,
+        "tract": "tube" if use_tube else "cascade", "tube": tube_info,
         "extras": {k: v.tolist() for k, v in extras.items()}, "n_extra_poles": n_ep, "n_extra_zeros": n_ez,
         "config": asdict(cfg),
     }

@@ -123,7 +123,7 @@ Purpose: exact labels everywhere, including regions real data rarely covers (hig
 - Vibrato: rate 4–8 Hz, semi-extent 0–150 cents (bulk 40–100 cents), with onset delay and slow rate/extent drift.
 
 **Tract**
-- Preferred: a lossy tube model driven by randomised area functions (Story's parametric model: neutral shape plus modes), scaled to length L ∈ [10, 20] cm. Compute the transfer function with wall losses and lip radiation, and extract poles to get exact Fn and Bn. L is the VTL label.
+- Preferred: a lossy tube model driven by randomised area functions (Story's parametric model: neutral shape plus modes), scaled to length L ∈ [10, 20] cm. Compute the transfer function with wall losses and lip radiation, and extract poles to get exact Fn and Bn. L is the VTL label. *Implemented (decisions D-011); use the 2009 erratum's Table IV.*
 - Fallback and mixing: a cascade of second-order resonators with formants sampled from a VTL-scaled vowel space and bandwidths from Hawks & Miller × log-uniform(0.6, 1.6).
 - Optional articulatory realism: VocalTractLab.
 - Extras: poles above F4 (F5–F8) consistent with L; nasal pole–zero pairs in ~200–1200 Hz with random coupling; weak subglottal coupling (roughly 600/1400/2200 Hz in adults, scaled by size); radiation as a first difference.
@@ -132,7 +132,7 @@ Purpose: exact labels everywhere, including regions real data rarely covers (hig
 - Room impulse responses, measured and simulated (e.g. pyroomacoustics), T60 0.1–1.0 s.
 - Additive noise, SNR 5–40 dB.
 - Mic and EQ: high-pass 40–300 Hz, low-pass 4–8 kHz, random parametric EQ ±6 dB.
-- Codecs via ffmpeg (Opus, AAC, MP3) at varied bitrates.
+- Codecs via ffmpeg (Opus, AAC, MP3, plus AMR-WB/NB) at varied bitrates, delay-compensated (decisions D-011).
 - Gain changes; rare mild clipping.
 
 **Labels emitted per frame:** Fn and Bn (n ≤ 6), f0, voicing, sonorant mask, L, Rd, source-only harmonic amplitudes (ground truth for H1\*–H2\*), channel parameters.

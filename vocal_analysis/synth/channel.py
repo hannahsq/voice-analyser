@@ -1,8 +1,9 @@
 """Channel augmentation (plan §5.1). Cheap enough to apply on the fly in DataLoader workers.
 
-Every operation keeps timing (no added delay), so frame labels stay valid. Codecs need
-ffmpeg, which isn't installed yet; a phone channel is emulated instead (band-pass
-300-3400 Hz, 8 kHz resampling, mu-law quantisation).
+Every operation keeps timing (no added delay), so frame labels stay valid. A phone channel is
+emulated (band-pass 300-3400 Hz, 8 kHz resampling, mu-law quantisation), and lossy codecs run
+through ffmpeg (`codecs.py`, delay-compensated). The codec stage comes last and draws its random
+numbers last, so channels drawn with p_codec = 0 are unchanged from before it existed.
 """
 
 from __future__ import annotations
@@ -32,6 +33,8 @@ class ChannelConfig:
     p_phone: float = 0.05
     gain_db: tuple[float, float] = (-20.0, 0.0)
     p_clip: float = 0.03
+    p_codec: float = 0.15
+    codecs: tuple[str, ...] = ("opus", "aac", "mp3", "amr_wb", "amr_nb")
 
 
 def _biquad_peaking(f0: float, gain_db: float, q: float, fs: float = FS) -> np.ndarray:
@@ -144,4 +147,11 @@ def augment(x: np.ndarray, rng: np.random.Generator, cfg: ChannelConfig | None =
         lim = np.max(np.abs(x)) * rng.uniform(0.3, 0.8)
         x = np.clip(x, -lim, lim)
         params["clip_frac"] = float(lim)
+    if cfg.p_codec > 0 and rng.random() < cfg.p_codec:  # after gain and clipping: the recording is what gets coded
+        from . import codecs
+
+        name = str(rng.choice(cfg.codecs))
+        kbps = float(rng.choice(codecs.CODECS[name][2]))
+        x = codecs.apply(x, name, kbps)
+        params.update(codec=name, codec_kbps=kbps)
     return x.astype(np.float32), params

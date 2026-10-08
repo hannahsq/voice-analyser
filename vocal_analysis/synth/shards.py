@@ -62,11 +62,31 @@ def _make_shard(args) -> str:
     return path
 
 
+# Values that config fields had before they existed, for comparing against older index.json files.
+LEGACY_DEFAULTS = {"synth_config": {"p_tube": 0.0, "p_tube_constrict": 0.15},
+                   "channel_config": {"p_codec": 0.0, "codecs": ["opus", "aac", "mp3", "amr_wb", "amr_nb"]}}
+
+
 def write_set(out_dir: str | Path, n_clips: int, cfg: SynthConfig, seed: int, shard_size: int = 256,
               workers: int | None = None, channel: ChannelConfig | None = None, channel_seed: int = 0,
               extra_index: dict | None = None, log=print) -> Path:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
+    index = {"format_version": FORMAT_VERSION, "n_clips": n_clips, "shard_size": shard_size, "seed": seed,
+             "synth_config": asdict(cfg), "channel_config": asdict(channel) if channel else None,
+             "channel_seed": channel_seed, **(extra_index or {})}
+    index_path = out / "index.json"
+    if index_path.exists():  # resuming: the shards already there must come from the same settings
+        old = json.loads(index_path.read_text(encoding="utf-8"))
+        for key, legacy in LEGACY_DEFAULTS.items():  # fields added after a set was written had these values then
+            if old.get(key) is not None:
+                old[key] = legacy | old[key]
+        new = json.loads(json.dumps(index))
+        diff = sorted(k for k in new if old.get(k) != new[k])
+        if diff:
+            raise ValueError(f"{out} was written with different settings ({', '.join(diff)}); use a new directory")
+    else:
+        index_path.write_text(json.dumps(index | {"complete": False}, indent=1), encoding="utf-8")
     jobs = []
     for s, start in enumerate(range(0, n_clips, shard_size)):
         path = out / f"shard_{s:05d}.npz"
@@ -78,10 +98,7 @@ def write_set(out_dir: str | Path, n_clips: int, cfg: SynthConfig, seed: int, sh
         for k, _ in enumerate(ex.map(_make_shard, jobs), 1):
             if k % 10 == 0 or k == len(jobs):
                 log(f"  {k}/{len(jobs)} shards")
-    index = {"format_version": FORMAT_VERSION, "n_clips": n_clips, "shard_size": shard_size, "seed": seed,
-             "synth_config": asdict(cfg), "channel_config": asdict(channel) if channel else None,
-             "channel_seed": channel_seed, "git_commit": _git_commit(), **(extra_index or {})}
-    (out / "index.json").write_text(json.dumps(index, indent=1), encoding="utf-8")
+    index_path.write_text(json.dumps(index | {"git_commit": _git_commit()}, indent=1), encoding="utf-8")
     return out
 
 
@@ -122,13 +139,18 @@ class ShardReader:
 
 SUITE_SEED = 20261007
 SUITE_CHANNEL_SEED = 1
-_CLEAN = ChannelConfig(p_clean=1.0)
+_CLEAN = ChannelConfig(p_clean=1.0, p_codec=0.0)
+# The original ten cases are pinned to the settings suite_v1 was written with, so their audio stays
+# bit-identical as the training defaults move on; later cases are appended (each case's seed is its position).
+_V1_SYNTH = {"p_tube": 0.0}
+_V1_CHANNEL = {"p_codec": 0.0}
 
 
 def suite_cases() -> dict[str, tuple[SynthConfig, ChannelConfig]]:
     """Plan §5.1 hard cases. Each case changes one thing from the training defaults; the channel
     is clean except where the channel is the hard case."""
-    base = SynthConfig()
+    base = replace(SynthConfig(), **_V1_SYNTH)
+    ch = lambda **kw: ChannelConfig(**(_V1_CHANNEL | kw))  # noqa: E731
     return {
         "reference": (base, _CLEAN),
         "high_f0": (replace(base, p_high_f0=1.0, high_f0_hz=(400.0, 1300.0)), _CLEAN),
@@ -139,8 +161,12 @@ def suite_cases() -> dict[str, tuple[SynthConfig, ChannelConfig]]:
         "breathy": (replace(base, rd=(2.0, 2.7)), _CLEAN),
         "wide_vibrato": (replace(base, p_high_f0=0.7, contour_probs_low={"singing": 1}, contour_probs_high={"singing": 1},
                                  p_vibrato=1.0, p_vibrato_wide=0.0, vibrato_extent_cents=(100.0, 150.0)), _CLEAN),
-        "low_snr": (base, ChannelConfig(p_clean=0.0, p_noise=1.0, snr_db=(0.0, 10.0))),
-        "phone": (base, ChannelConfig(p_clean=0.0, p_phone=1.0, p_noise=0.5, snr_db=(15.0, 35.0))),
+        "low_snr": (base, ch(p_clean=0.0, p_noise=1.0, snr_db=(0.0, 10.0))),
+        "phone": (base, ch(p_clean=0.0, p_phone=1.0, p_noise=0.5, snr_db=(15.0, 35.0))),
+        # added with the tube tract and codecs (D-011)
+        "tube": (replace(base, p_tube=1.0), _CLEAN),
+        "codec": (base, ChannelConfig(p_clean=0.0, p_rir=0.0, p_noise=0.0, p_highpass=0.0, p_lowpass=0.0, p_eq=0.0,
+                                      p_phone=0.0, gain_db=(0.0, 0.0), p_clip=0.0, p_codec=1.0)),
     }
 
 

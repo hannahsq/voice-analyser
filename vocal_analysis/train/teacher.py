@@ -10,7 +10,7 @@ import json
 import math
 import subprocess
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 
 import numpy as np
@@ -46,6 +46,14 @@ class TrainConfig:
 def _git() -> dict:
     run = lambda *a: subprocess.run(["git", *a], capture_output=True, text=True).stdout.strip()  # noqa: E731
     return {"commit": run("rev-parse", "--short", "HEAD"), "dirty": bool(run("status", "--porcelain"))}
+
+
+def _saved_channel(out: Path) -> ChannelConfig:
+    """The channel a run was started with. Runs from before the channel was recorded predate codecs."""
+    saved = json.loads((out / "config.json").read_text()).get("channel")
+    if saved is None:
+        return replace(ChannelConfig(), p_codec=0.0)
+    return ChannelConfig(**{k: tuple(v) if isinstance(v, list) else v for k, v in saved.items()})
 
 
 def _lr(step: int, cfg: TrainConfig) -> float:
@@ -127,7 +135,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
     step = 0
     last = out / "ckpt_last.pt"
+    channel = ChannelConfig()
     if last.exists():
+        channel = _saved_channel(out)
         ck = torch.load(last, map_location="cpu", weights_only=False)
         model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
@@ -136,13 +146,19 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     else:
         index = json.loads((Path(cfg.data) / "index.json").read_text())
         (out / "config.json").write_text(json.dumps({"train": asdict(cfg), "model": asdict(model_cfg), "git": _git(),
-                                                     "data_index": index, "n_params": n_params(model)}, indent=1))
+                                                     "data_index": index, "n_params": n_params(model),
+                                                     "channel": asdict(channel)}, indent=1))
+    if channel.p_codec > 0:
+        from ..synth import codecs
+
+        if not codecs.available():
+            raise FileNotFoundError("channel.p_codec > 0 needs ffmpeg (winget install ffmpeg, or set VA_FFMPEG)")
     log(f"teacher: {n_params(model):,} parameters; {len(train_ids):,} train / {len(val_ids)} val clips")
 
-    ds = SynthCrops(flat, train_ids, cfg.n_frames, ChannelConfig(), seed=cfg.seed, epoch_size=cfg.batch * 1000)
+    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=cfg.batch * 1000)
     loader = DataLoader(ds, cfg.batch, num_workers=cfg.workers, collate_fn=collate, persistent_workers=True,
                         pin_memory=False, prefetch_factor=4, drop_last=True)
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, ChannelConfig(), seed=12345)
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345)
     val_loader = DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate)
     vq = TorchVQT(device)
     rng = np.random.default_rng(cfg.seed + step)

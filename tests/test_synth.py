@@ -151,3 +151,50 @@ def test_channel_keeps_timing():
         assert np.isfinite(y).all() and len(y) == len(x)
         if not params.get("noise") and not params.get("phone"):
             assert abs(int(np.argmax(np.abs(y))) - 8000) <= 2, params
+
+
+# --------------------------------------------------------------------------- data sets
+
+
+def test_original_suite_cases_are_pinned():
+    """suite_v1's first ten cases keep the settings they were written with (no tube, no codec)."""
+    from vocal_analysis.synth.shards import suite_cases
+
+    cases = suite_cases()
+    assert list(cases)[:10] == ["reference", "high_f0", "f1_near_h1", "f1_near_h2", "f2_f3_close", "nasal", "breathy",
+                                "wide_vibrato", "low_snr", "phone"]
+    for name in list(cases)[:10]:
+        synth, ch = cases[name]
+        assert synth.p_tube == 0.0 and ch.p_codec == 0.0, name
+    assert cases["tube"][0].p_tube == 1.0 and cases["codec"][1].p_codec == 1.0
+
+
+def test_write_set_refuses_different_settings(tmp_path):
+    from dataclasses import replace
+
+    from vocal_analysis.synth.shards import write_set
+
+    cfg = replace(STEADY, duration_s=(0.3, 0.3))
+    write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)
+    write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)  # same settings: resumes
+    with pytest.raises(ValueError, match="synth_config"):
+        write_set(tmp_path, 2, replace(cfg, p_tube=0.5), seed=0, shard_size=2, workers=1, log=lambda m: None)
+
+
+def test_write_set_reads_old_indexes_with_legacy_defaults(tmp_path):
+    """An index written before p_tube existed means p_tube = 0: same settings at 0, different at 0.6."""
+    import json
+    from dataclasses import asdict, replace
+
+    from vocal_analysis.synth.shards import write_set
+
+    cfg = replace(STEADY, duration_s=(0.3, 0.3), p_tube=0.0)
+    write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)
+    idx = json.loads((tmp_path / "index.json").read_text())
+    for k in ("p_tube", "p_tube_constrict"):
+        idx["synth_config"].pop(k)
+    (tmp_path / "index.json").write_text(json.dumps(idx))
+    write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)
+    assert json.loads((tmp_path / "index.json").read_text())["synth_config"] == json.loads(json.dumps(asdict(cfg)))
+    with pytest.raises(ValueError):
+        write_set(tmp_path, 2, replace(cfg, p_tube=0.6), seed=0, shard_size=2, workers=1, log=lambda m: None)

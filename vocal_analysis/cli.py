@@ -130,7 +130,7 @@ def cmd_synth(cfg: Config, args: argparse.Namespace) -> int:
     if args.what == "suite":
         write_suite(Path(args.out or root / "suite_v1"), args.n or 64, args.workers, log=log)
     else:
-        write_set(Path(args.out or root / "train_v1"), args.n or 100_000, SynthConfig(), seed=args.seed,
+        write_set(Path(args.out or root / "train_v2"), args.n or 100_000, SynthConfig(), seed=args.seed,
                   workers=args.workers, log=log)
     return 0
 
@@ -181,7 +181,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--n", type=int, default=None, help="clips (train: total, default 100000; suite: per case, default 64)")
     s.add_argument("--seed", type=int, default=1)
     s.add_argument("--workers", type=int, default=None)
-    s.add_argument("--out", default=None, help="default: <data.root>/synth/{train_v1,suite_v1}")
+    s.add_argument("--out", default=None, help="default: <data.root>/synth/{train_v2,suite_v1}")
     s.set_defaults(fn=cmd_synth)
     t = sub.add_parser("train", parents=[common], help="train a model on synthetic data")
     t.add_argument("model", choices=["teacher"])
