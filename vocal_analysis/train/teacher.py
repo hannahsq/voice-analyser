@@ -158,7 +158,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=cfg.batch * 1000)
     loader = DataLoader(ds, cfg.batch, num_workers=cfg.workers, collate_fn=collate, persistent_workers=True,
                         pin_memory=False, prefetch_factor=4, drop_last=True)
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345)
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True)
     val_loader = DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate)
     vq = TorchVQT(device)
     rng = np.random.default_rng(cfg.seed + step)

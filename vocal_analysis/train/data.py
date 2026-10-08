@@ -68,13 +68,15 @@ class SynthCrops:
     """
 
     def __init__(self, flat_dir: str | Path, clip_ids: np.ndarray, n_frames: int = 200,
-                 channel: ChannelConfig | None = ChannelConfig(), seed: int = 0, epoch_size: int | None = None):
+                 channel: ChannelConfig | None = ChannelConfig(), seed: int = 0, epoch_size: int | None = None,
+                 fixed: bool = False):
         self.dir = Path(flat_dir)
         self.clip_ids = np.asarray(clip_ids)
         self.n_frames = n_frames
         self.channel = channel
         self.seed = seed
         self.epoch_size = epoch_size or len(self.clip_ids)
+        self.fixed = fixed  # same crop and channel for an item every time (validation)
         self._arrays = None
 
     def _open(self):
@@ -92,8 +94,9 @@ class SynthCrops:
         import torch
 
         arr = self._open()
-        # torch's per-worker RNG is reseeded every epoch by the DataLoader, so crops and channels differ per epoch.
-        rng = np.random.default_rng([self.seed, item, int(torch.randint(1 << 30, (1,)))])
+        # torch's per-worker RNG is reseeded every epoch by the DataLoader, so crops and channels differ per epoch,
+        # unless the set is fixed (validation: every eval must see the same crops, or checkpoints can't be compared).
+        rng = np.random.default_rng([self.seed, item] if self.fixed else [self.seed, item, int(torch.randint(1 << 30, (1,)))])
         cid = self.clip_ids[rng.integers(len(self.clip_ids))] if self.epoch_size != len(self.clip_ids) else self.clip_ids[item]
         a0, a1 = arr["a_off"][cid], arr["a_off"][cid + 1]
         f0_, f1_ = arr["f_off"][cid], arr["f_off"][cid + 1]

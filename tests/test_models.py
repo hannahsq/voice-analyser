@@ -43,6 +43,32 @@ def test_crops_align_audio_and_labels(tmp_path):
         assert np.array_equal(lab["voiced"], clip_lab["voiced"][start : start + 50])
 
 
+def test_fixed_crops_ignore_worker_seed(tmp_path):
+    """Validation items are identical across evals (new DataLoader workers reseed torch); training items vary."""
+    from dataclasses import replace
+
+    from vocal_analysis.synth.channel import ChannelConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.data import SynthCrops, consolidate
+
+    root = write_set(tmp_path / "s", 2, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=2, workers=1, log=lambda m: None)
+    flat = consolidate(root, log=lambda m: None)
+    ch = replace(ChannelConfig(), p_clean=0.0, p_codec=0.0)
+
+    def draw(fixed):
+        out = []
+        for worker_seed in (1, 2):
+            torch.manual_seed(worker_seed)
+            out.append(SynthCrops(flat, np.arange(2), n_frames=50, channel=ch, seed=7, fixed=fixed)[1][0])
+        return out
+
+    a, b = draw(True)
+    assert np.array_equal(a, b)
+    a, b = draw(False)
+    assert not np.array_equal(a, b)
+
+
 def test_teacher_forward_shapes_and_comb():
     from vocal_analysis.models.teacher import Teacher, TeacherConfig
 
