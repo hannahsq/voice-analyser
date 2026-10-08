@@ -288,6 +288,13 @@ Plan §5.2, in `vocal_analysis/resynth/` (`va resynth <pool> --teacher CKPT`). P
   - *Licence:* CC0. The download terms add an agreement not to try to identify the speakers. Nothing here tries to; speaker ids stay opaque `client_id` hashes.
   - *Value:* small, and already lossy-coded. It is most useful for channel diversity and as unlabelled audio for M4's self-supervision.
 
+**Where they live.** Corpora shared with other projects are kept once, in `C:\github\datasets\`, and each repository links to them with directory junctions:
+- `data/zeroth_korean` → `datasets\zeroth_korean`;
+- `data/cv_ko` → `datasets\cv-corpus-27.0-2026-09-11\ko`;
+- `data/m4singer` → `datasets\m4singer`.
+
+The two Korean corpora were moved there from `minimal-pairs/data`, which links back to them under their old names, so that project's paths are unchanged. Manifests store paths relative to the corpus root, so they don't depend on the layout. The archives on `Z:\datasets` remain the backup. The corpora gold-set and VocalSet use stay in `data/` as before.
+
 **M4Singer songs that are also in MIR-1K are excluded from training.** The singers are different people, so this is not speaker leakage. But the same songs mean the same melodies, and MIR-1K is an f0 gold set. f0 losses are masked on resynthesised clips, but the shared trunk would still hear those melodies.
 - *Method:* matching each MIR-1K singer-song's lyrics (Big5, traditional characters) against each M4Singer song's (`meta.json`, simplified) by character trigrams. A song's best match is about 0.02 for 90 % of MIR-1K singer-songs. Matches of 0.25–0.42 identify 8 shared songs despite the script difference: 成全, 听海, 童话, 当你, 一个像夏天一个像秋天, 水手, 千里之外, 今天你要嫁给我. 情歌王 (0.12–0.17) and 一首简单的歌 (0.18) are weaker matches. 情歌王 is a medley quoting other songs, and both are excluded to be safe.
 - *Enforcement:* the M4Singer scanner will mark these 10 songs as excluded, so they never enter a training manifest.
