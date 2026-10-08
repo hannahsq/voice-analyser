@@ -1,4 +1,4 @@
-"""Train the teacher on synthetic data (plan M1). `va train teacher` drives this.
+"""Train the teacher on synthetic data (plan M1, M2). `va train teacher` drives this.
 
 Every run directory holds config.json (train + model config, git commit, data index),
 log.jsonl (one line per log/eval step) and checkpoints; a run resumes from ckpt_last.pt.

@@ -438,30 +438,44 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 ### M0: Foundations
 - [x] Repo skeleton, config system, CLI entry points.
-- [ ] Manifests for all corpora (`path, corpus, speaker_id, split, sr, duration, licence`) and the leakage test (§6.4). *Gold sets and the leakage test done; training-pool manifests come with those corpora (M2).*
+- [ ] Manifests for all corpora (`path, corpus, speaker_id, split, sr, duration, licence`) and the leakage test (§6.4). *Gold sets and the leakage test done; training-pool manifests come with those corpora (M3).*
 - [x] Gold-set loaders: Hillenbrand, PTDB-TUG, MIR-1K, MDB-stem-synth (all verified on real data). VTR-TIMIT deferred: no LDC licence.
 - [x] Metrics (§6.2) with unit tests on hand-computed cases; bootstrap intervals by speaker.
 - [x] Baselines (§6.5) written to `reports/baselines.md` by a single command (`va baselines`). Formants: Praat defaults, §5.4 sweep, FastTrack-faithful, TVLP. f0: PESTO, CREPE, Praat autocorrelation, plus PTDB-TUG phonation subsets from the laryngograph (decisions D-008, D-009).
 
 **Accept when:** the baseline report regenerates end to end and every baseline, including the earlier TVLP tracker, is scored on the same footing.
 
-### M1: Synthetic generator, back end v1, teacher v1
-- [ ] Generator (§5.1) with label emission, sampler configs and channel augmentation; tests (poles equal labels, determinism).
-- [ ] Hard-case synthetic suite.
-- [ ] Back end v1 (§8.1–8.4) with synthetic tests: harmonic fit < 0.1 dB on clean frames; corrected H1–H2 matches source H1–H2 when the true F/B are supplied (< 0.5 dB *(proposed)*).
-- [ ] Teacher v1 trained on synthetic data only.
+### M1: Synthetic generator, back end v1, teacher v1 *(done: decisions D-010, D-014; `reports/teacher_v1.md`)*
+- [x] Generator (§5.1) with label emission, sampler configs and channel augmentation; tests (poles equal labels, determinism).
+- [x] Hard-case synthetic suite.
+- [x] Back end v1 (§8.1–8.4) with synthetic tests: harmonic fit < 0.1 dB on clean frames; corrected H1–H2 matches source H1–H2 when the true F/B are supplied (< 0.5 dB *(proposed)*).
+- [x] Teacher v1 trained on synthetic data only.
 
-**Accept when:** teacher v1 beats Praat defaults on Hillenbrand (MAE and detection rate; VTR deferred, no TIMIT licence), and the sim-to-real gap is documented per f0 band. See §13 #14 on how hard this bar is.
+**Accept when:** on the synthetic `reference` suite case, F1–F3 detection rate ≥ 95 % and f0 RPA ≥ 99 %; gold-set results reported against all baselines with bootstrap intervals; the sim-to-real gap documented per f0 band. *Revised after teacher v1's results (decisions D-014); v1 meets it (99.3 / 99.6 / 98.1 %, RPA 99.9 %).* ~~Teacher v1 beats Praat defaults on Hillenbrand (MAE and detection rate; VTR deferred, no TIMIT licence), and the sim-to-real gap is documented per f0 band.~~ Outcome against the original: met for F2–F4 (F3 MAE tied), not for F1 (MAE 37 vs 18 Hz).
 
-### M2: Resynthesis labeller, teacher v2
+### M2: Synthetic data iteration, teacher v2
+- [x] Story area-function tube tract and ffmpeg codec augmentation (decisions D-011).
+- [x] f0 × tract-length coverage, F1 band, formants on whispered frames, new suite cases (D-012).
+- [x] WSD schedule with decay branches at 6k / 16k / 26k / 36k steps (D-013).
+- [ ] Teacher v2 trained on `train_v2`; branches scored on the fixed validation sets, the suite and the gold sets.
+
+**Accept when** (set before any gold-set or decayed-branch result of v2 existed; decisions D-014), comparing the chosen v2 branch with v1 in the same report:
+- Hillenbrand F1 MAE for women and children improves beyond bootstrap noise.
+- No regression beyond bootstrap noise in Hillenbrand F2–F4 MAE and DR, or in PTDB-TUG f0 RPA (all frames and modal frames).
+- The ten original suite cases each lose no more than 1 point of F1–F3 DR.
+- `whisper` suite case: F1–F2 DR ≥ 85 % and voicing accuracy ≥ 95 %. `adult_high_f0`: F1 DR higher than v1's.
+
+### M3: Resynthesis labeller, teacher v3
+- [ ] Training-pool corpora (§5.6) downloaded, licences recorded, manifests and leakage test extended.
 - [ ] Inverse filtering (IAIF; QCP later), track smoothing and perturbation, time-varying resonator cascade, QC, and label export including source H1–H2.
 - [ ] Resynthesised speech and singing corpora.
-- [ ] Teacher v2 trained on synthetic + resynthesised data.
+- [ ] Teacher v3 trained on synthetic + resynthesised data.
 - [ ] Iseli–Alwan validation with predicted F/B, by f0 band.
+- [ ] Settle the women's and children's F1 offset of M1/M2 (decisions D-012): with exact labels on real voices, measure how much is the model and how much is Hillenbrand's LPC-based reference.
 
-**Accept when:** gold-set metrics improve over v1 beyond bootstrap noise, with no hard-suite regression.
+**Accept when:** gold-set metrics improve over v2 beyond bootstrap noise, with no hard-suite regression.
 
-### M3: Self-supervision and candidate rounds
+### M4: Self-supervision and candidate rounds
 - [ ] Differentiable renderer and reconstruction loss (harmonic-sampled at high f0).
 - [ ] Equivariance T1 (on the fly) and T2/T3 (precomputed WORLD pairs).
 - [ ] Candidate generator and Viterbi with teacher emissions; gated LP refinement.
@@ -471,7 +485,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 **Accept when:** each accepted round improves gold metrics beyond noise, and the ablations justify every retained loss.
 
-### M4: Real-time student
+### M5: Real-time student
 - [ ] Streaming VQT and equivalence tests.
 - [ ] Causal student with configurable lookahead, trained with distillation and supervised losses.
 - [ ] `StreamingAnalyzer` with explicit state; ONNX export and equivalence test.
@@ -479,7 +493,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 **Accept when:** the student is within an agreed tolerance of the teacher on gold sets *(proposed: detection rate within 3 points, MAE within 10 %)*, and the latency (§10.1) and compute budgets are met.
 
-### M5: Calibration and packaging
+### M6: Calibration and packaging
 - [ ] Per-head temperature scaling on held-out real data; coverage report.
 - [ ] VTL calibration against MRI; within-speaker stability report.
 - [ ] Causal display smoothing (§8.5).
@@ -487,7 +501,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 **Accept when:** interval coverage is within a few points of nominal and the demo runs live within budget.
 
-### M6 (optional): Physical rig and personal data
+### M7 (optional): Physical rig and personal data
 - [ ] Printed tracts, driver and sweep measurement; recordings across f0 with vibrato.
 - [ ] High-f0 evaluation of the teacher and student.
 - [ ] Personal singing set with targeted hand corrections (held-out portion kept as gold).
@@ -505,11 +519,11 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 | 7 | Slope measure set | Kreiman/Garellek set + dB/octave regression; CPP/HNR optional |
 | 8 | Real-time target hardware and runtime | CPU + ONNX Runtime; devices TBD |
 | 9 | TIMIT/VTR access | needs an LDC licence; otherwise rely on Hillenbrand and the other sets |
-| 10 | Physical rig | defer to M6 unless high-f0 results stall |
+| 10 | Physical rig | defer to M7 unless high-f0 results stall |
 | 11 | Accompaniment | out of scope for v1 |
 | 12 | Exposed formants | F1–F4, plus a cluster-centre output in the singer's-formant regime? |
 | 13 | PESTO weights vs MIR-1K gold (decisions D-008) | Bundled PESTO checkpoints are trained on MIR-1K. Proposed: retrain PESTO (self-supervised, so no labels are needed) on the training pools, which exclude every gold set, and use those weights in §7.1. Alternative: drop MIR-1K as a gold set and rely on MDB-stem-synth (which CREPE has seen) plus PTDB-TUG |
-| 14 | M1 acceptance vs Hillenbrand's LPC-derived reference (decisions D-008) | Praat defaults already reach DR(20 %, 200 Hz) ≈ 99 / 93 / 88 % on Hillenbrand F1–F3, partly because the reference is LPC-based. Proposed: keep "beat Praat defaults" but judge it per f0 band and speaker group (children, high f0) with bootstrap intervals, and weight the hard-case synthetic suite and resynthesised sets more heavily |
+| 14 | M1 acceptance vs Hillenbrand's LPC-derived reference (decisions D-008) | Praat defaults already reach DR(20 %, 200 Hz) ≈ 99 / 93 / 88 % on Hillenbrand F1–F3, partly because the reference is LPC-based. Proposed: keep "beat Praat defaults" but judge it per f0 band and speaker group (children, high f0) with bootstrap intervals, and weight the hard-case synthetic suite and resynthesised sets more heavily. *Resolved in decisions D-014: M1's criterion revised; settling the reference question moves to M3.* |
 | 15 | f0 output on non-modal phonation (decisions D-009) | On period-doubled frames autocorrelation trackers report the two-cycle period and neural trackers the cycle rate; creak has no single f0. Proposed: output the cycle rate, and have the voicing/voice-quality heads flag "irregular" frames (PTDB-TUG's EGG categories give labelled examples), so downstream users can tell an f0 estimate from a guess. Score f0 accuracy on modal frames, with modal < 85 Hz as the hard-mode target, and describe non-modal behaviour rather than score it. Also: PESTO breaks down below 70 Hz, so retrained f0 weights (#13) need low male speech and vocal fry in the training pool |
 
 ## 14. Risks and mitigations

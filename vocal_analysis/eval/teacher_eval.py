@@ -1,4 +1,4 @@
-"""Evaluate a trained teacher (plan M1 acceptance): gold sets alongside the baselines, the synthetic
+"""Evaluate a trained teacher (plan M1/M2 acceptance): gold sets alongside the baselines, the synthetic
 hard-case suite, and the sim-to-real gap per f0 band.
 
 The teacher is wrapped as a FormantBaseline and an F0Baseline, so it goes through the same
