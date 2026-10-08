@@ -263,7 +263,11 @@ def test_crops_carry_loss_weights(tmp_path):
 
 def test_loss_weights():
     torch = pytest.importorskip("torch")
-    from vocal_analysis.train.losses import teacher_loss
+    from vocal_analysis.train.losses import teacher_loss as loss_fn
+
+    def teacher_loss(out, lab):
+        total, parts = loss_fn(out, lab)
+        return total, {k: float(v) for k, v in parts.items()}
 
     g = torch.Generator().manual_seed(0)
     b, t = 4, 20
