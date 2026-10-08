@@ -37,6 +37,10 @@ class TrainConfig:
     workers: int = 12
     # Learning rate: linear warmup, then "wsd" (constant; a branch decays as 1 - sqrt over decay_steps from
     # decay_start, Hagele et al. 2024) or "cosine" to 0 at `steps` (teacher v1).
+    # "adamw" with `schedule`, or "schedulefree": AdamW-ScheduleFree (Defazio et al. 2024), which needs no decay
+    # (any checkpoint is meant to be final-quality); `schedule` and the decay fields are then unused, and lr
+    # warms up over `warmup` steps inside the optimiser.
+    optimizer: str = "adamw"
     schedule: str = "wsd"
     decay_start: int | None = None
     decay_steps: int = 4000
@@ -182,7 +186,18 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         model_cfg = TeacherConfig(**ck["teacher_config"])  # the checkpoint's architecture, whatever was passed
     model_cfg = model_cfg or TeacherConfig()
     model = Teacher(model_cfg).to(device)
-    opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+    sf = cfg.optimizer == "schedulefree"
+    if sf:
+        import schedulefree
+
+        opt = schedulefree.AdamWScheduleFree(model.parameters(), lr=cfg.lr, warmup_steps=cfg.warmup, weight_decay=cfg.weight_decay)
+    elif cfg.optimizer == "adamw":
+        opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+    else:
+        raise ValueError(f"unknown optimizer {cfg.optimizer!r}")
+    # Schedule-free keeps the evaluation weights (an average) apart from the training point: checkpoints and
+    # evaluations use the former, so they are saved in eval mode, and training resumes in train mode.
+    sf_mode = lambda mode: getattr(opt, mode)() if sf else None  # noqa: E731
     step = 0
     if ck is not None:
         model.load_state_dict(ck["model"])
@@ -233,21 +248,25 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     rng = np.random.default_rng(cfg.seed + step)
 
     def save(path):
+        sf_mode("eval")
         tmp = path.with_suffix(".tmp")
         torch.save({"model": model.state_dict(), "opt": opt.state_dict(), "step": step,
                     "teacher_config": asdict(model_cfg), "train_config": asdict(cfg), "git": _git()}, tmp)
         tmp.replace(path)
+        sf_mode("train")
 
     logf = (out / "log.jsonl").open("a", encoding="utf-8")
     t0, seen = time.time(), 0
     acc: dict[str, float] = {}
     model.train()
+    sf_mode("train")
     while step < cfg.steps:
         for audio, lab in loader:
             if step >= cfg.steps:
                 break
-            for g in opt.param_groups:
-                g["lr"] = _lr(step, cfg)
+            if not sf:
+                for g in opt.param_groups:
+                    g["lr"] = _lr(step, cfg)
             audio, lab = audio.to(device, non_blocking=True), _to(lab, device)
             p_truth = _p_comb_truth(step, cfg)
             truth = rng.random() < p_truth
@@ -266,7 +285,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 acc[k] = acc.get(k, 0.0) + v
             if step % cfg.log_every == 0:
                 dt = time.time() - t0
-                rec = {"step": step, "lr": _lr(step, cfg), "p_comb_truth": p_truth,
+                rec = {"step": step, "lr": opt.param_groups[0].get("scheduled_lr", cfg.lr) if sf else _lr(step, cfg), "p_comb_truth": p_truth,
                        **{k: v / cfg.log_every for k, v in acc.items()},
                        "audio_s_per_s": seen * cfg.n_frames / 100 / dt, "time": time.time()}
                 logf.write(json.dumps(rec) + "\n")
@@ -277,6 +296,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             if step % cfg.ckpt_every == 0 or step == cfg.steps:
                 save(last)
             if step % cfg.eval_every == 0 or step == cfg.steps:
+                sf_mode("eval")
                 ev = evaluate(model, val_loader, vq, device)
                 logf.write(json.dumps({"step": step, "eval": ev, "time": time.time()}) + "\n")
                 logf.flush()
@@ -286,6 +306,6 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                     logf.write(json.dumps({"step": step, f"eval_resynth:{name}": ev, "time": time.time()}) + "\n")
                     logf.flush()
                     log(f"eval {name} " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if k[:2] in ("F1", "F2", "F3") and "f0" not in k))
-                save(out / f"ckpt_{step:06d}.pt")
+                save(out / f"ckpt_{step:06d}.pt")  # leaves schedule-free in train mode
     logf.close()
     return out

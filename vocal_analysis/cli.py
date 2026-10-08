@@ -207,7 +207,7 @@ def cmd_train(cfg: Config, args: argparse.Namespace) -> int:
     else:
         tc = TrainConfig(data=args.data, out=args.out or "runs/teacher_v2", steps=args.steps, batch=args.batch,
                          workers=args.workers, resynth=tuple(args.resynth), resynth_frac=args.resynth_frac,
-                         resynth_val=tuple(args.resynth_val))
+                         resynth_val=tuple(args.resynth_val), optimizer=args.optimizer)
     for kv in args.train_set:
         k, v = kv.split("=", 1)
         cur = getattr(tc, k)
@@ -261,6 +261,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="start a decay branch of a wsd run from this checkpoint (other options come from that run)")
     t.add_argument("--decay-steps", type=int, default=None, help="branch decay length (default: the run's, 4000)")
     t.add_argument("--batch", type=int, default=32)
+    t.add_argument("--optimizer", choices=["adamw", "schedulefree"], default="adamw",
+                   help="schedulefree: AdamW-ScheduleFree, no decay schedule or branches (D-018)")
     t.add_argument("--workers", type=int, default=12)
     t.add_argument("--no-comb", action="store_true", help="ablation: no harmonic-comb input channel")
     t.add_argument("--resynth", action="append", default=[], metavar="DIR", help="resynthesised training set (repeatable)")

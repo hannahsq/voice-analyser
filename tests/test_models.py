@@ -109,3 +109,26 @@ def test_wsd_schedule_and_branch_config(tmp_path):
     (tmp_path / "config.json").write_text(json.dumps({"train": asdict(v1)}))
     with pytest.raises(ValueError, match="cosine"):
         branch_config(tmp_path, 6000, "o")
+
+
+def test_schedulefree_training_saves_averaged_weights_and_resumes(tmp_path):
+    """Checkpoints hold schedule-free's evaluation weights; a resumed run continues from them (D-018)."""
+    pytest.importorskip("schedulefree")
+    import json
+    from dataclasses import replace
+
+    from vocal_analysis.models.teacher import TeacherConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.teacher import TrainConfig, train
+
+    data = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    cfg = TrainConfig(data=str(data), out=str(tmp_path / "run"), steps=4, batch=4, n_frames=50, workers=1, log_every=2,
+                      eval_every=2, ckpt_every=2, val_clips=4, optimizer="schedulefree", warmup=2)
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16)
+    out = train(cfg, small, log=lambda *a: None)
+    ck = torch.load(out / "ckpt_000004.pt", map_location="cpu", weights_only=False)
+    assert all(g["train_mode"] is False for g in ck["opt"]["param_groups"])  # saved in eval mode
+    train(replace(cfg, steps=6), small, log=lambda *a: None)
+    recs = [json.loads(line) for line in (out / "log.jsonl").read_text().splitlines()]
+    assert [r["step"] for r in recs if "eval" in r] == [2, 4, 6] and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
