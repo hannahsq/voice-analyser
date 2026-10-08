@@ -57,9 +57,10 @@ def cmd_env(cfg: Config, args: argparse.Namespace) -> int:
 
 def cmd_manifest(cfg: Config, args: argparse.Namespace) -> int:
     from .data.manifest import write_manifest
+    from .data.pools import registry as pools
     from .eval.datasets import registry
 
-    reg = registry()
+    reg = registry() | pools()  # gold sets and training pools
     names = sorted(reg) if args.corpus == "all" else [args.corpus]
     status = 0
     for name in names:

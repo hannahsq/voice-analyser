@@ -1,6 +1,7 @@
 """Reproducible corpus downloads: pinned URLs, checksums, safe extraction.
 
-    va download hillenbrand ptdb_tug mir1k mdb_stem_synth
+    va download hillenbrand ptdb_tug mir1k mdb_stem_synth   # gold sets
+    va download vocalset                                    # training pools
 
 Archives go to <data.root>/downloads/, and each corpus is extracted into its
 own <data.root>/<corpus>/ directory. Nothing inside an archive is ever
@@ -58,6 +59,15 @@ SOURCES: dict[str, Source] = {
         filename="MDB-stem-synth.tar.gz",
         checksum="md5:31c1f6b4888e5fd108af91c69789a809",
         size=1845117819,
+    ),
+    # ---- training pools (plan §5.6): never gold, speakers disjoint from every gold set
+    "vocalset": Source(
+        url="https://zenodo.org/api/records/1442513/files/VocalSet11.zip/content",
+        filename="VocalSet11.zip",
+        checksum="md5:0c09396242f946e7111ad7d8fc649b81",
+        size=2077243579,
+        note="VocalSet v1.1 (Wilkins et al. 2018), CC BY 4.0, from Zenodo record 1442513 (v1.2). v1.2's own zip "
+        "holds the same audio three times (by singer, technique, vowel); v1.1 has it once, by singer.",
     ),
 }
 
