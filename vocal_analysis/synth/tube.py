@@ -266,28 +266,40 @@ def sample_target(rng: np.random.Generator, spk: TubeSpeaker, n_poles: int, f_ma
 
     q1, q2 are uniform over the Table IV box (Story's Fig. 10); shapes whose substrate narrows below min_area_cm2 (at Story's
     size) are redrawn, so the tract stays open (sonorant). Optional tier II constriction (approximant-like,
-    0.15-0.8 cm^2 at Story's size) and tier III larynx / lip length changes.
+    0.15-0.8 cm^2 at Story's size) and tier III larynx / lip length changes. A shape whose poles can't be
+    found is redrawn and listed under info["rejected"]; the first shape's draws are unchanged by this.
     """
     rel = spk.length_cm / STORY_LENGTH_CM
-    for _ in range(100):
-        q1, q2 = rng.uniform(*Q1_RANGE), rng.uniform(*Q2_RANGE)
-        if vowel_areas(q1, q2, OMEGA * spk.omega_warp).min() >= min_area_cm2:
+    rejected: list[dict] = []
+    for _attempt in range(20):
+        for _ in range(100):
+            q1, q2 = rng.uniform(*Q1_RANGE), rng.uniform(*Q2_RANGE)
+            if vowel_areas(q1, q2, OMEGA * spk.omega_warp).min() >= min_area_cm2:
+                break
+        else:
+            raise RuntimeError("no open tract shape found")
+        info: dict = {"q1": float(q1), "q2": float(q2)}
+        constrict = None
+        if rng.random() < p_constrict:
+            constrict = {"lc": float(rng.uniform(14, 42)), "rc": float(rng.uniform(4, 12)),
+                         "sc": float(np.exp(rng.uniform(np.log(1 / 3), np.log(3)))),
+                         "ac": float(rng.uniform(0.15, 0.8) * spk.area_scale)}
+            info["constrict"] = constrict
+        pg = float(rng.uniform(-0.5, 0.5) * rel) if rng.random() < p_larynx else 0.0
+        pm = float(rng.uniform(-0.3, 1.0) * rel) if rng.random() < p_lips else 0.0
+        info.update(pg_cm=pg, pm_cm=pm)
+        shape = build_shape(q1, q2, spk.length_cm, pharynx_ratio=spk.pharynx_ratio, area_scale=spk.area_scale,
+                            omega_warp=spk.omega_warp, constrict=constrict, pg=pg, pm=pm, perimeter_factor=spk.perimeter_factor)
+        try:
+            f, b = poles(shape, f_max_hz)
             break
+        except RuntimeError as e:  # rare shapes the pole search can't follow: redraw (kept in meta for diagnosis)
+            rejected.append(info | {"error": str(e)})
     else:
-        raise RuntimeError("no open tract shape found")
-    info: dict = {"q1": float(q1), "q2": float(q2)}
-    constrict = None
-    if rng.random() < p_constrict:
-        constrict = {"lc": float(rng.uniform(14, 42)), "rc": float(rng.uniform(4, 12)),
-                     "sc": float(np.exp(rng.uniform(np.log(1 / 3), np.log(3)))),
-                     "ac": float(rng.uniform(0.15, 0.8) * spk.area_scale)}
-        info["constrict"] = constrict
-    pg = float(rng.uniform(-0.5, 0.5) * rel) if rng.random() < p_larynx else 0.0
-    pm = float(rng.uniform(-0.3, 1.0) * rel) if rng.random() < p_lips else 0.0
-    shape = build_shape(q1, q2, spk.length_cm, pharynx_ratio=spk.pharynx_ratio, area_scale=spk.area_scale,
-                        omega_warp=spk.omega_warp, constrict=constrict, pg=pg, pm=pm, perimeter_factor=spk.perimeter_factor)
-    f, b = poles(shape, f_max_hz)
-    info.update(pg_cm=pg, pm_cm=pm, length_cm=shape.length_cm)
+        raise RuntimeError("tube pole search failed on 20 shapes in a row")
+    if rejected:
+        info["rejected"] = rejected
+    info["length_cm"] = shape.length_cm
     freqs, bws = np.full(n_poles, np.nan), np.full(n_poles, np.nan)
     k = min(len(f), n_poles)
     freqs[:k], bws[:k] = f[:k], b[:k] * spk.bw_scale
