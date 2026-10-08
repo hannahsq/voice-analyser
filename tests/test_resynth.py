@@ -316,3 +316,17 @@ def test_resynth_f0_label_is_defined_everywhere(tmp_path):
 
     reader = ShardReader(_resynth_set(tmp_path))
     assert all(np.all(np.isfinite(reader[i][1]["f0"])) for i in range(len(reader)))
+
+
+def test_poles_never_switch_on_or_off_within_a_recording():
+    """A recursive section switched on mid-signal clicks (heard in the first VocalSet trial), so each pole
+    track is present on every frame or on none, in the labels and in the inverse filter."""
+    t = 200
+    base = np.tile([700.0, 1500.0, 2700.0, 3900.0], (t, 1)) * np.exp(0.15 * np.sin(np.arange(t) / 15))[:, None]
+    p = tracks.perturb(base, np.full(t, 300.0), np.ones(t, bool), np.random.default_rng(0),
+                       tracks.PerturbConfig(alpha=(0.8, 0.8)))
+    present = np.isfinite(p["formants"])
+    assert np.all(present.all(0) | ~present.any(0)) and not present.all()  # some upper poles dropped, none partially
+    assert np.array_equal(np.isfinite(p["bandwidths"]), present)
+    up = tracks.whole_tracks(np.array([[5000.0, 7000.0], [5200.0, np.nan]]))
+    assert np.isfinite(up[:, 0]).all() and np.isnan(up[:, 1]).all()

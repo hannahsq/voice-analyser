@@ -15,6 +15,9 @@ from ..manifest import ManifestRow, audio_info, speaker_key
 CORPUS = "vocalset"
 LICENCE = "CC-BY-4.0"
 _SINGER = re.compile(r"^(female|male)(\d+)$")
+# Techniques with no vowel-like tract to resynthesise: with the lips vibrating, tracked formants mean nothing
+# and the result sounds gargled. `va resynth` skips them (D-016); they stay in the manifest.
+RESYNTH_SKIP_TECHNIQUES = frozenset({"lip_trill"})
 
 
 def _canonical(token: str) -> str | None:
@@ -50,3 +53,8 @@ def scan(root: str | Path) -> list[ManifestRow]:
     if unknown:
         raise ValueError(f"test singers not found in FULL/: {sorted(unknown)}")
     return rows
+
+
+def resynth_ok(row: ManifestRow) -> bool:
+    """Whether `va resynth` should use this recording (FULL/<singer>/<context>/<technique>/<file>)."""
+    return row.path.split("/")[3] not in RESYNTH_SKIP_TECHNIQUES

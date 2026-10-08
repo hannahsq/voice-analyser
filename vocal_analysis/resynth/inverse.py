@@ -124,7 +124,9 @@ def track_inverse(x: np.ndarray, formants: np.ndarray, bandwidths: np.ndarray, f
     f = np.asarray(formants, float)
     b = np.asarray(bandwidths, float)
     if upper:
-        up = upper_poles(f, fs)
+        from .tracks import whole_tracks
+
+        up = whole_tracks(upper_poles(f, fs))  # fixed pole set: no section switching on or off (clicks)
         f, b = np.concatenate([f, up], 1), np.concatenate([b, np.full(up.shape, np.nan)], 1)
     b = np.where(np.isfinite(b), b, bandwidth_prior(f, 132.0))
     fs_ = frames_to_samples(f, len(x), hop)

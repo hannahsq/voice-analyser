@@ -263,6 +263,13 @@ Plan §5.2, in `vocal_analysis/resynth/` (`va resynth <pool> --teacher CKPT`). P
   - *Measured:* source_h_db, on the recovered source and on its own scale, so only differences such as H1–H2 mean anything.
   - *Not available:* rd and length_cm are NaN.
 - **Non-sonorant stretches keep the original audio**, cross-faded over 20 ms, so consonants stay real. Frames inside a cross-fade get no formant labels. The re-filtered signal is level-matched to the original over sonorant samples.
+- **Listening check on the first trial, and fixes.** Six excerpts (female1 arpeggios), each heard as the original and two variants.
+  - *High-frequency artifacts and clicks, worst at α = 0.85.* Every affected clip had pole tracks crossing 7.6 kHz, so recursive sections switched on and off mid-signal and restarted from the wrong state. They also had 5–13 dB too much energy at 6.5–8 kHz. The clip judged perfect had no such crossings.
+
+    Fix: each recording keeps a fixed set of poles. A track that leaves the band on any frame is left out for the whole recording, in the labels, in the re-filter and in the inverse filter's upper poles (`tracks.whole_tracks`). Afterwards, the 6.5–8 kHz excess was gone (the worst case went from +12.8 to +0.6 dB), and click counts matched the originals.
+  - *Lip trills sound gargled.* With the lips vibrating, there is no vowel-like tract to track or resynthesise. VocalSet's `lip_trill` recordings are skipped by `va resynth` (`vocalset.resynth_ok`) and stay in the manifest.
+  - *α = 1.22 sounds increasingly like a tenor.* Intended: a 22 % longer tract with soprano f0 is deliberately unphysiological (D-012).
+  - *α = 0.85 sounds like "an intact singer's formant on a chipmunk".* **Open.** It suggests the original singer's-formant cluster (F3–F5 near 3 kHz) survives inverse filtering. At this f0 that inverse filtering uses the tracked F1–F4 plus uniform-tube poles, which can't describe a bunched cluster, and the QC fit stops at 4 kHz. Candidates: a QC term for 2.5–5 kHz, upper poles fitted to the recording rather than a uniform tube, and QCP at high f0.
 - **Shards** hold the recordings of `files_per_shard` files and a varying number of clips. `index.json` lists `shard_clips`, and `ShardReader` uses it. An interrupted run resumes; changed settings are refused.
 - **Cost:** about 0.3 s CPU per second of audio for the source stage. Each variant is nearly free.
 

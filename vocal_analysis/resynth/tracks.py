@@ -33,6 +33,15 @@ def enforce_order(f: np.ndarray, min_spacing_hz: float = tract.MIN_SPACING_HZ, f
     return out
 
 
+def whole_tracks(f: np.ndarray) -> np.ndarray:
+    """Drop (NaN everywhere) any pole track that is absent on some frames. A recursive section switched
+    on or off mid-signal restarts from the wrong state and clicks, so a recording keeps a fixed set of
+    poles: one that ever leaves the band (above F_MAX_HZ) is left out for the whole recording."""
+    out = np.array(f, float)
+    out[:, ~np.all(np.isfinite(out), axis=0)] = np.nan
+    return out
+
+
 def smooth_tracks(formants: np.ndarray, sonorant: np.ndarray, window: int = 7, polyorder: int = 2) -> np.ndarray:
     """Savitzky-Golay in log frequency within each sonorant run; across other frames, linear in log
     frequency between the neighbouring runs (held before the first and after the last). Every frame
@@ -93,7 +102,7 @@ def perturb(formants: np.ndarray, f0: np.ndarray, voiced: np.ndarray, rng: np.ra
     spacing = C_CM_S / (2 * length)
     m = np.arange(1, N_LABEL_FORMANTS - n + 1)
     high = low[:, -1:] + m * spacing * np.exp(rng.normal(0.0, cfg.upper_sd, len(m)))
-    new = enforce_order(np.concatenate([low, high], 1))
+    new = whole_tracks(enforce_order(np.concatenate([low, high], 1)))
     f0v = np.asarray(f0, float)
     f0_ref = float(np.nanmedian(f0v[son])) if son.any() and np.isfinite(f0v[son]).any() else 132.0
     f0_bw = np.where(son & np.isfinite(f0v), f0v, f0_ref)[:, None]

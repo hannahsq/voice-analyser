@@ -150,7 +150,8 @@ def cmd_resynth(cfg: Config, args: argparse.Namespace) -> int:
         print(f"{args.corpus!r} is not a training pool; known: {', '.join(sorted(pools()))}", file=sys.stderr)
         return 2
     manifest = Path(cfg.data.manifests) / f"{args.corpus}.csv"
-    rows = [r for r in read_manifest(manifest) if r.split == args.split]
+    ok = getattr(pools()[args.corpus], "resynth_ok", lambda r: True)  # e.g. VocalSet's lip trills
+    rows = [r for r in read_manifest(manifest) if r.split == args.split and ok(r)]
     if args.limit:  # evenly spaced through the sorted manifest, so a trial spans singers and techniques
         rows = sorted(rows, key=lambda r: r.path)
         rows = [rows[int(i)] for i in np.unique(np.linspace(0, len(rows) - 1, min(args.limit, len(rows))).round())]

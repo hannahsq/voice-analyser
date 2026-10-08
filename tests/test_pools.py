@@ -37,3 +37,10 @@ def test_vocalset_scan_rejects_unknown_test_singer(tmp_path):
 
 def test_pool_registry():
     assert "vocalset" in registry()
+
+
+def test_vocalset_resynth_skips_lip_trills():
+    from vocal_analysis.data.manifest import ManifestRow
+
+    row = lambda tech: ManifestRow(f"FULL/female1/arpeggios/{tech}/x.wav", "vocalset", "vocalset:female1", "train", 44100, 1.0, "CC-BY-4.0")  # noqa: E731
+    assert not vocalset.resynth_ok(row("lip_trill")) and vocalset.resynth_ok(row("trill")) and vocalset.resynth_ok(row("belt"))
