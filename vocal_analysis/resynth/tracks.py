@@ -11,7 +11,6 @@ from dataclasses import dataclass
 
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
-from scipy.signal import savgol_filter
 
 from ..backend.vtl import C_CM_S, apparent_vtl
 from ..synth import tract
@@ -42,16 +41,24 @@ def whole_tracks(f: np.ndarray) -> np.ndarray:
     return out
 
 
-def smooth_tracks(formants: np.ndarray, sonorant: np.ndarray, window: int = 7, polyorder: int = 2) -> np.ndarray:
-    """Savitzky-Golay in log frequency within each sonorant run; across other frames, linear in log
-    frequency between the neighbouring runs (held before the first and after the last). Every frame
-    gets a value, since the re-filtering runs everywhere."""
+def smooth_tracks(formants: np.ndarray, sonorant: np.ndarray, median_frames: int = 9, sigma_frames: float = 6.0) -> np.ndarray:
+    """Smoothed tracks in log frequency. Within each sonorant run: a median filter removes jumps between
+    candidate peaks, then Gaussian smoothing removes wobble faster than real formant movement. With the
+    defaults, 5-6 Hz vibrato wobble, where a tracker follows the harmonics, keeps under a fifth of its
+    size. Across other frames: linear in log frequency between the neighbouring runs (held before the
+    first and after the last). Every frame gets a value, since the re-filtering runs everywhere.
+
+    Tracker wobble matters even though the same tracks drive the inverse filter: the wobble is removed
+    at the old positions and added back at the perturbed ones, and those differ unless alpha is 1. The
+    first listening check heard it as vowel shifts at note transitions and level wobble with vibrato."""
+    from scipy.ndimage import median_filter
+
     logf = np.log(np.asarray(formants, float))
     out = np.full_like(logf, np.nan)
     son = np.asarray(sonorant, bool) & np.all(np.isfinite(logf), axis=1)
     for a, b in _runs(son):
-        seg = logf[a:b]
-        out[a:b] = savgol_filter(seg, window, polyorder, axis=0, mode="interp") if b - a >= window else seg
+        seg = median_filter(logf[a:b], size=(min(median_frames, b - a), 1), mode="nearest")
+        out[a:b] = gaussian_filter1d(seg, sigma_frames, axis=0, mode="nearest") if sigma_frames > 0 else seg
     if not son.any():
         return np.full_like(logf, np.nan)
     t = np.arange(len(logf))

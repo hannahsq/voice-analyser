@@ -330,3 +330,18 @@ def test_poles_never_switch_on_or_off_within_a_recording():
     assert np.array_equal(np.isfinite(p["bandwidths"]), present)
     up = tracks.whole_tracks(np.array([[5000.0, 7000.0], [5200.0, np.nan]]))
     assert np.isfinite(up[:, 0]).all() and np.isnan(up[:, 1]).all()
+
+
+def test_auto_method_is_chosen_per_phrase():
+    """Vibrato dipping under the IAIF threshold must not switch methods within a phrase (heard as level jumps)."""
+    t = np.arange(300)
+    f0 = 270 + 30 * np.sin(2 * np.pi * 5.5 * t / 100)  # 240-300 Hz vibrato, median above 250
+    voiced = np.ones(300, bool)
+    voiced[195:200] = False  # short breath: still the same phrase...
+    voiced[100:130] = False  # ...but a 300 ms gap starts a new one
+    low = render._iaif_phrases(f0, voiced, render.ResynthConfig())
+    assert not low[:100].any() and not low[130:].any() and low[100:130].all()
+    f0b = f0.copy()
+    f0b[130:] = 150.0
+    low = render._iaif_phrases(f0b, voiced, render.ResynthConfig())
+    assert not low[:100].any() and low[130:].all()

@@ -33,7 +33,9 @@ class ResynthConfig:
     method: str = "auto"
     iaif_max_f0_hz: float = 250.0
     order_vt: int | None = None  # IAIF tract order; default fs / 1000 + 2
-    smooth_window: int = 7  # Savitzky-Golay frames
+    smooth_median_frames: int = 9  # track smoothing (`tracks.smooth_tracks`): jumps...
+    smooth_sigma_frames: float = 6.0  # ...and wobble (Gaussian SD); singing settings, speech may want less
+    phrase_gap_frames: int = 10  # "auto": voiced runs closer than this form one phrase, with one method
     voiced_threshold: float = 0.5
     sonorant_threshold: float = 0.5
     perturb: PerturbConfig = field(default_factory=PerturbConfig)
@@ -98,6 +100,24 @@ def source_qc(source: np.ndarray, f0: np.ndarray, voiced: np.ndarray, formants: 
     return {"tract_left": beta, "ripple_db": rms, "h_db": h}
 
 
+def _iaif_phrases(f0: np.ndarray, voiced: np.ndarray, cfg: ResynthConfig) -> np.ndarray:
+    """Frames inverse-filtered by IAIF under method "auto": all but the phrases (voiced runs merged across
+    gaps under phrase_gap_frames) whose median f0 exceeds iaif_max_f0_hz. Choosing per frame switched
+    methods with every vibrato cycle near the threshold, and the two sources differ in level by up to 10 dB."""
+    from .tracks import _runs
+
+    phrase = np.asarray(voiced, bool).copy()
+    for a, b in _runs(~phrase):
+        if 0 < a and b < len(phrase) and b - a < cfg.phrase_gap_frames:
+            phrase[a:b] = True
+    low = np.ones(len(f0), bool)
+    for a, b in _runs(phrase):
+        v = voiced[a:b]
+        if v.any() and np.median(f0[a:b][v]) > cfg.iaif_max_f0_hz:
+            low[a:b] = False
+    return low
+
+
 def source_from_audio(audio: np.ndarray, analysis: dict, cfg: ResynthConfig) -> dict:
     """Everything that does not depend on the perturbation. analysis: the tracker's per-frame
     f0, voiced_p, sonorant_p, formants (T, >=3), bandwidths (frame i at i * 10 ms)."""
@@ -107,16 +127,15 @@ def source_from_audio(audio: np.ndarray, analysis: dict, cfg: ResynthConfig) -> 
         raise ValueError(f"analysis has {len(a['f0'])} frames, audio needs {n_frames}")
     voiced = a["voiced_p"] > cfg.voiced_threshold
     sonorant = (a["sonorant_p"] > cfg.sonorant_threshold) | voiced
-    tracks = smooth_tracks(a["formants"], sonorant, cfg.smooth_window)
+    tracks = smooth_tracks(a["formants"], sonorant, cfg.smooth_median_frames, cfg.smooth_sigma_frames)
     if cfg.method not in ("iaif", "tracks", "auto"):
         raise ValueError(cfg.method)
     if cfg.method in ("iaif", "auto"):
         s_iaif, _ = inverse.iaif(audio, FS, cfg.order_vt)
     if cfg.method in ("tracks", "auto"):
         s_tracks = inverse.track_inverse(audio, tracks, a["bandwidths"])
-    if cfg.method == "auto":  # IAIF where f0 is low enough for LPC, tracks above (cross-faded per sample)
-        low = ~(voiced & (a["f0"] > cfg.iaif_max_f0_hz))
-        w = _ramp_mask(low, len(audio), int(cfg.ramp_s * FS))
+    if cfg.method == "auto":  # IAIF where f0 is low enough for LPC, tracks above; one method per phrase
+        w = _ramp_mask(_iaif_phrases(a["f0"], voiced, cfg), len(audio), int(cfg.ramp_s * FS))
         source = w * s_iaif + (1 - w) * s_tracks
     else:
         source = s_iaif if cfg.method == "iaif" else s_tracks
