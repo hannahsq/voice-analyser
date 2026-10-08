@@ -82,3 +82,30 @@ def test_teacher_forward_shapes_and_comb():
     near = np.abs(f / 200.0 - np.round(f / 200.0)) * 200.0 / f * 1200 / np.log(2)  # cents to nearest harmonic (approx.)
     assert comb.max() <= 1.0 and np.all(comb[near < 3] > 0.95) and np.all(comb[near > 60] < 0.02)
     assert float(m.comb(torch.full((1, 3), 200.0), torch.zeros(1, 3)).abs().max()) == 0.0  # unvoiced: no comb
+
+
+def test_wsd_schedule_and_branch_config(tmp_path):
+    import json
+    import math
+    from dataclasses import asdict
+
+    from vocal_analysis.train.teacher import TrainConfig, _lr, _p_comb_truth, branch_config
+
+    cfg = TrainConfig()  # wsd, constant phase
+    assert _lr(0, cfg) == pytest.approx(cfg.lr / cfg.warmup) and _lr(cfg.warmup - 1, cfg) == pytest.approx(cfg.lr)
+    assert _lr(5000, cfg) == _lr(39999, cfg) == cfg.lr
+    assert _p_comb_truth(0, cfg) == 1.0 and _p_comb_truth(2000, cfg) == 0.5 and _p_comb_truth(4000, cfg) == 0.0
+
+    (tmp_path / "config.json").write_text(json.dumps({"train": asdict(cfg)}))
+    b = branch_config(tmp_path, 16000, "runs/x")
+    assert (b.decay_start, b.steps, b.out, b.data) == (16000, 20000, "runs/x", cfg.data)
+    assert _lr(15999, b) == cfg.lr and _lr(16000, b) == cfg.lr and _lr(20000, b) == 0.0
+    assert _lr(17000, b) == pytest.approx(cfg.lr * (1 - math.sqrt(0.25)))
+    assert branch_config(tmp_path, 6000, "o", decay_steps=2000).steps == 8000
+
+    v1 = TrainConfig(schedule="cosine", steps=20000, comb_truth_steps=None)  # teacher v1's schedule, unchanged
+    assert _lr(10500, v1) == pytest.approx(cfg.lr * 0.5) and _lr(20000, v1) == pytest.approx(0.0, abs=1e-12)
+    assert _p_comb_truth(3000, v1) == pytest.approx(0.5)
+    (tmp_path / "config.json").write_text(json.dumps({"train": asdict(v1)}))
+    with pytest.raises(ValueError, match="cosine"):
+        branch_config(tmp_path, 6000, "o")

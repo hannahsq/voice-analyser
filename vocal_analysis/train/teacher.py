@@ -24,9 +24,9 @@ from .losses import teacher_loss
 
 @dataclass
 class TrainConfig:
-    data: str = "data/synth/train_v1"
-    out: str = "runs/teacher_v1"
-    steps: int = 30000
+    data: str = "data/synth/train_v2"
+    out: str = "runs/teacher_v2"
+    steps: int = 40000  # wsd: end of the run (the constant phase, or decay_start + decay_steps for a branch)
     batch: int = 32
     n_frames: int = 200
     lr: float = 1e-3
@@ -34,7 +34,14 @@ class TrainConfig:
     weight_decay: float = 0.01
     grad_clip: float = 1.0
     workers: int = 12
-    comb_truth_until: float = 0.3  # P(comb from true f0) decays 1 -> 0 over this fraction of training
+    # Learning rate: linear warmup, then "wsd" (constant; a branch decays as 1 - sqrt over decay_steps from
+    # decay_start, Hagele et al. 2024) or "cosine" to 0 at `steps` (teacher v1).
+    schedule: str = "wsd"
+    decay_start: int | None = None
+    decay_steps: int = 4000
+    branch_from: str | None = None  # checkpoint a decay branch starts from (recorded, not read)
+    comb_truth_until: float = 0.3  # P(comb from true f0) decays 1 -> 0 over this fraction of `steps` (v1)...
+    comb_truth_steps: int | None = 4000  # ...or over this many steps (wsd runs have no fixed length)
     log_every: int = 50
     eval_every: int = 1000
     ckpt_every: int = 1000
@@ -59,8 +66,33 @@ def _saved_channel(out: Path) -> ChannelConfig:
 def _lr(step: int, cfg: TrainConfig) -> float:
     if step < cfg.warmup:
         return cfg.lr * (step + 1) / cfg.warmup
-    p = (step - cfg.warmup) / max(1, cfg.steps - cfg.warmup)
-    return cfg.lr * 0.5 * (1 + math.cos(math.pi * min(p, 1.0)))
+    if cfg.schedule == "wsd":
+        if cfg.decay_start is None or step < cfg.decay_start:
+            return cfg.lr
+        return cfg.lr * (1.0 - math.sqrt(min((step - cfg.decay_start) / cfg.decay_steps, 1.0)))
+    if cfg.schedule == "cosine":
+        p = (step - cfg.warmup) / max(1, cfg.steps - cfg.warmup)
+        return cfg.lr * 0.5 * (1 + math.cos(math.pi * min(p, 1.0)))
+    raise ValueError(f"unknown schedule {cfg.schedule!r}")
+
+
+def _p_comb_truth(step: int, cfg: TrainConfig) -> float:
+    span = cfg.comb_truth_steps if cfg.comb_truth_steps is not None else cfg.comb_truth_until * cfg.steps
+    return max(0.0, 1.0 - step / max(1.0, span))
+
+
+def branch_config(parent_run: Path, ckpt_step: int, out: str, decay_steps: int | None = None) -> TrainConfig:
+    """A decay branch: the parent run's recorded training config, decaying from ckpt_step to the end."""
+    saved = json.loads((parent_run / "config.json").read_text())["train"]
+    fields = {k: (tuple(v) if isinstance(v, list) else v) for k, v in saved.items() if k in TrainConfig.__dataclass_fields__}
+    cfg = TrainConfig(**fields)
+    if cfg.schedule != "wsd":
+        raise ValueError(f"{parent_run} uses the {cfg.schedule!r} schedule; only wsd runs can branch")
+    cfg.decay_steps = decay_steps or cfg.decay_steps
+    cfg.decay_start = ckpt_step
+    cfg.steps = ckpt_step + cfg.decay_steps
+    cfg.out = out
+    return cfg
 
 
 def _to(lab: dict, device) -> dict:
@@ -130,20 +162,29 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     train_ids, val_ids = split_ids(n_clips)
     val_ids = val_ids[: cfg.val_clips]
 
+    last = out / "ckpt_last.pt"
+    if last.exists():  # resume this run
+        start, channel = last, _saved_channel(out)
+    elif cfg.branch_from:  # new decay branch: the parent's weights, optimiser state, step and channel
+        start, channel = Path(cfg.branch_from), _saved_channel(Path(cfg.branch_from).parent)
+    else:
+        start, channel = None, ChannelConfig()
+    ck = torch.load(start, map_location="cpu", weights_only=False) if start else None
+    if ck is not None:
+        model_cfg = TeacherConfig(**ck["teacher_config"])  # the checkpoint's architecture, whatever was passed
     model_cfg = model_cfg or TeacherConfig()
     model = Teacher(model_cfg).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
     step = 0
-    last = out / "ckpt_last.pt"
-    channel = ChannelConfig()
-    if last.exists():
-        channel = _saved_channel(out)
-        ck = torch.load(last, map_location="cpu", weights_only=False)
+    if ck is not None:
         model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
         step = ck["step"]
-        log(f"resumed at step {step}")
-    else:
+        torch.manual_seed(cfg.seed + 7919 * step)  # a resumed run or branch must not replay the data from step 0
+        log(f"{'resumed' if start == last else f'branched from {start}'} at step {step}")
+    if start != last:
+        if cfg.branch_from and cfg.decay_start != step:
+            raise ValueError(f"branch decay_start {cfg.decay_start} != checkpoint step {step}")
         index = json.loads((Path(cfg.data) / "index.json").read_text())
         (out / "config.json").write_text(json.dumps({"train": asdict(cfg), "model": asdict(model_cfg), "git": _git(),
                                                      "data_index": index, "n_params": n_params(model),
@@ -180,7 +221,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             for g in opt.param_groups:
                 g["lr"] = _lr(step, cfg)
             audio, lab = audio.to(device, non_blocking=True), _to(lab, device)
-            p_truth = max(0.0, 1.0 - step / max(1.0, cfg.comb_truth_until * cfg.steps))
+            p_truth = _p_comb_truth(step, cfg)
             truth = rng.random() < p_truth
             with torch.autocast(device.type, dtype=torch.bfloat16):
                 lp = vq.log_power_with_context(audio, cfg.n_frames)

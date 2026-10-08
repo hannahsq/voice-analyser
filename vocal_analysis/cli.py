@@ -135,14 +135,39 @@ def cmd_synth(cfg: Config, args: argparse.Namespace) -> int:
     return 0
 
 
+def _parse_value(v: str):
+    """int, float, None or str, for --train-set fields whose default is None."""
+    if v.lower() == "none":
+        return None
+    for t in (int, float):
+        try:
+            return t(v)
+        except ValueError:
+            pass
+    return v
+
+
 def cmd_train(cfg: Config, args: argparse.Namespace) -> int:
     from .models.teacher import TeacherConfig
     from .train.teacher import TrainConfig, train
 
-    tc = TrainConfig(data=args.data, out=args.out, steps=args.steps, batch=args.batch, workers=args.workers)
+    if args.branch_from:  # decay branch of a wsd run: everything else comes from the parent run's config
+        import torch
+
+        from .train.teacher import branch_config
+
+        ck = Path(args.branch_from)
+        step = torch.load(ck, map_location="cpu", weights_only=False)["step"]
+        tc = branch_config(ck.parent, step, args.out or f"{ck.parent}_d{step // 1000:02d}k", args.decay_steps)
+        tc.branch_from = str(ck)
+        tc.workers = args.workers
+    else:
+        tc = TrainConfig(data=args.data, out=args.out or "runs/teacher_v2", steps=args.steps, batch=args.batch,
+                         workers=args.workers)
     for kv in args.train_set:
         k, v = kv.split("=", 1)
-        setattr(tc, k, type(getattr(tc, k))(v))
+        cur = getattr(tc, k)
+        setattr(tc, k, _parse_value(v) if cur is None else type(cur)(v))
     train(tc, TeacherConfig(comb=not args.no_comb), log=lambda m: print(m, flush=True))
     return 0
 
@@ -185,9 +210,12 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(fn=cmd_synth)
     t = sub.add_parser("train", parents=[common], help="train a model on synthetic data")
     t.add_argument("model", choices=["teacher"])
-    t.add_argument("--data", default="data/synth/train_v1")
-    t.add_argument("--out", default="runs/teacher_v1")
-    t.add_argument("--steps", type=int, default=30000)
+    t.add_argument("--data", default="data/synth/train_v2")
+    t.add_argument("--out", default=None, help="default: runs/teacher_v2, or <parent run>_dNNk for a branch")
+    t.add_argument("--steps", type=int, default=40000)
+    t.add_argument("--branch-from", default=None, metavar="CKPT",
+                   help="start a decay branch of a wsd run from this checkpoint (other options come from that run)")
+    t.add_argument("--decay-steps", type=int, default=None, help="branch decay length (default: the run's, 4000)")
     t.add_argument("--batch", type=int, default=32)
     t.add_argument("--workers", type=int, default=12)
     t.add_argument("--no-comb", action="store_true", help="ablation: no harmonic-comb input channel")
