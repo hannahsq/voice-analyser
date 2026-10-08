@@ -11,7 +11,7 @@ This project is for personal and research use. Anyone wanting a commercial versi
 | VocalSet v1.1 | training (resynthesis) | CC BY 4.0 | Wilkins, Seetharaman, Wahl & Pardo (2018). VocalSet: a singing voice dataset. ISMIR. |
 | M4Singer | training (resynthesis), planned | CC BY-NC-SA 4.0 (`dataset_license.md` in the M4Singer repository) | Zhang et al. (2022). M4Singer: a multi-style, multi-singer and musical score provided Mandarin singing corpus. NeurIPS Datasets and Benchmarks. |
 | Common Voice 27.0, Korean | training, planned | CC0; downloading it means agreeing not to try to identify its speakers | Ardila et al. (2020). Common Voice: a massively-multilingual speech corpus. LREC. |
-| Zeroth-Korean | training, planned | to be recorded from the archive | (to be recorded) |
+| Zeroth-Korean | training, planned | CC BY 4.0 (OpenSLR 40) | Zeroth project: Lucas Jo (Atlas Guide) and Wonkyum Lee (Gridspace), Zeroth-Korean, OpenSLR SLR40, https://www.openslr.org/40/ |
 | Hillenbrand et al. (1995) | evaluation only (gold) | free for research, distributed by J. Hillenbrand | Hillenbrand, Getty, Clark & Wheeler (1995). Acoustic characteristics of American English vowels. JASA 97(5). |
 | PTDB-TUG | evaluation only (gold) | ODbL 1.0 (to verify) | Pirker, Wohlmayr, Petrik & Pernkopf (2011). A pitch tracking corpus with evaluation on multipitch tracking scenario. Interspeech. |
 | MIR-1K | evaluation only (gold) | research use; no explicit licence found | Hsu & Jang (2010). On the improvement of singing voice separation for monaural recordings using the MIR-1K dataset. IEEE TASLP. |
@@ -22,7 +22,7 @@ Evaluation-only corpora are never trained on (plan §6.4, enforced by `va leakag
 ## Model weights
 
 Whether trained weights are an adaptation of their training data is legally unsettled. This project takes the conservative reading: **weights carry the most restrictive licence among the corpora they were trained on**, plus attribution to all of them.
-- Synthetic data, VocalSet, Common Voice (and other CC0/CC BY pools): **CC BY 4.0**, attributing those corpora.
+- Synthetic data, VocalSet, Zeroth-Korean, Common Voice (and other CC0/CC BY pools): **CC BY 4.0**, attributing those corpora.
 - Anything that includes M4Singer: **CC BY-NC-SA 4.0**.
 
 If permissively licensed weights are wanted later, train a build without the NC-SA pools; the code makes that a configuration change.

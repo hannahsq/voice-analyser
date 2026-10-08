@@ -279,7 +279,11 @@ Plan §5.2, in `vocal_analysis/resynth/` (`va resynth <pool> --teacher CKPT`). P
 - **M4Singer** (Zhang et al. 2022), `m4singer.zip`: Mandarin pop singing by 20 singers (Soprano/Alto/Tenor/Bass 1–7), 419 songs, 20,861 utterances, each with a MIDI and TextGrid.
   - *Licence:* CC BY-NC-SA 4.0, per `dataset_license.md` in the M4Singer repository. The archive carries no licence file.
   - *Value:* the largest singing pool, about three times VocalSet.
-- **Zeroth-Korean**, `zeroth_korean.tar.gz` (10.3 GB): read Korean speech, the first speech pool. Its licence will be recorded from the archive.
+- **Zeroth-Korean**, `zeroth_korean.tar.gz` (10.3 GB): read Korean speech, the first speech pool.
+  - *Licence:* CC BY 4.0, from OpenSLR 40. The archive carries no licence file.
+  - *Size:* 52.8 h from 115 speakers. The train split is 105 speakers and 51.6 h; the test split is 10 speakers and 1.2 h.
+  - *Splits:* speaker-disjoint, and the manifest keeps them (test → `val`).
+  - *Privacy:* `AUDIO_INFO` lists each speaker's real name next to the numeric id. Manifests and everything else in the repository use only the numeric id (`zeroth:<id>`) and the recorded sex; names are never copied.
 - **Common Voice 27.0 Korean**, `cv-corpus-27.0-2026-09-11-ko.tar.gz`: 7185 MP3 clips, 10.39 h (2.56 h validated), 213 speakers on their own microphones.
   - *Licence:* CC0. The download terms add an agreement not to try to identify the speakers. Nothing here tries to; speaker ids stay opaque `client_id` hashes.
   - *Value:* small, and already lossy-coded. It is most useful for channel diversity and as unlabelled audio for M4's self-supervision.
