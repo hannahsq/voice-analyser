@@ -163,10 +163,13 @@ def test_original_suite_cases_are_pinned():
     cases = suite_cases()
     assert list(cases)[:10] == ["reference", "high_f0", "f1_near_h1", "f1_near_h2", "f2_f3_close", "nasal", "breathy",
                                 "wide_vibrato", "low_snr", "phone"]
+    from vocal_analysis.synth.sampler import V1_SETTINGS
+
     for name in list(cases)[:10]:
         synth, ch = cases[name]
-        assert synth.p_tube == 0.0 and ch.p_codec == 0.0, name
+        assert all(getattr(synth, k) == v for k, v in V1_SETTINGS.items()) and ch.p_codec == 0.0, name
     assert cases["tube"][0].p_tube == 1.0 and cases["codec"][1].p_codec == 1.0
+    assert cases["whisper"][0].p_whisper_clip == 1.0 and cases["whisper"][0].sonorant_includes_whisper
 
 
 def test_write_set_refuses_different_settings(tmp_path):
@@ -182,19 +185,116 @@ def test_write_set_refuses_different_settings(tmp_path):
 
 
 def test_write_set_reads_old_indexes_with_legacy_defaults(tmp_path):
-    """An index written before p_tube existed means p_tube = 0: same settings at 0, different at 0.6."""
+    """An index written before the post-v1 fields existed means V1_SETTINGS: same settings under them,
+    different settings otherwise."""
     import json
-    from dataclasses import asdict, replace
+    from dataclasses import replace
+
+    from vocal_analysis.synth.sampler import V1_SETTINGS
+    from vocal_analysis.synth.shards import write_set
+
+    cfg = replace(STEADY, duration_s=(0.3, 0.3), **V1_SETTINGS)
+    write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)
+    idx = json.loads((tmp_path / "index.json").read_text())
+    for k in V1_SETTINGS:
+        idx["synth_config"].pop(k)
+    (tmp_path / "index.json").write_text(json.dumps(idx))
+    write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)  # same settings: no error
+    assert "p_tube" not in json.loads((tmp_path / "index.json").read_text())["synth_config"]  # and left as written
+    with pytest.raises(ValueError):
+        write_set(tmp_path, 2, replace(cfg, p_tube=0.6), seed=0, shard_size=2, workers=1, log=lambda m: None)
+
+
+# --------------------------------------------------------------------------- f0-length coupling, F1 band, whisper (D-012)
+
+
+def test_v1_coupled_length_is_the_old_formula():
+    from dataclasses import replace
+
+    from vocal_analysis.synth.sampler import V1_SETTINGS, _coupled_length
+
+    cfg = replace(SynthConfig(), **V1_SETTINGS)
+    for centre in (60.0, 110.0, 230.0, 900.0):
+        a = _coupled_length(np.random.default_rng(1), cfg, centre)
+        b = float(np.clip(17.5 - 4.0 * np.log2(centre / 110.0) + np.random.default_rng(1).normal(0, 1.0), 10.0, 20.0))
+        assert a == b
+
+
+def test_coupled_length_redraws_instead_of_piling_up():
+    from vocal_analysis.synth.sampler import _coupled_length
+
+    cfg = SynthConfig()
+    rng = np.random.default_rng(0)
+    hi = np.array([_coupled_length(rng, cfg, 1200.0) for _ in range(2000)])
+    assert hi.min() >= 10.0 and hi.max() <= 20.0
+    assert np.mean(hi < 10.2) < 0.03  # v1 put ~45 % of these at exactly 10 cm
+    assert 12.5 < np.median(hi) < 14.0  # capped at 350 Hz: adult-singer-sized tracts stay common
+    women = np.array([_coupled_length(rng, cfg, 220.0) for _ in range(2000)])
+    assert 14.5 < np.median(women) < 15.5
+
+
+def test_f1_band_constraint():
+    from vocal_analysis.synth.sampler import _constrain
+
+    rng = np.random.default_rng(0)
+    for _ in range(200):
+        f0 = rng.uniform(150, 350)
+        f = _constrain(rng, tract.sample_formants(rng, 15.0), f0, "f1_band", (1.5, 4.5))
+        assert 1.5 * f0 <= f[0] <= 4.5 * f0
+        assert np.all(np.diff(f[np.isfinite(f)]) > 0)
+
+
+def test_whispered_spectrum_is_the_labelled_tract():
+    """Noise-only excitation: the time-averaged spectrum equals |H(f)|^2 x the radiation first difference
+    (white noise source), so the pole labels describe whispered audio as well as voiced."""
+    from scipy.signal import welch
+
+    c = 4001
+    pf, pb = np.array([600.0, 1700, 2600, 3500, 4500]), np.array([80.0, 100, 140, 180, 250])
+    tr = Trajectories(f0=np.full(c, 120.0), rd=np.full(c, 1.0), voice_amp=np.zeros(c), whisper_amp=np.ones(c),
+                      fric_amp=np.zeros(c), poles_f=np.tile(pf, (c, 1)), poles_b=np.tile(pb, (c, 1)),
+                      zeros_f=np.zeros((c, 0)), zeros_b=np.zeros((c, 0)))
+    y = synthesize(tr, np.random.default_rng(0))["total"]
+    f, pxx = welch(y, FS, nperseg=1024)
+    band = (f > 150) & (f < 6000)
+    model = np.abs(F.response(f, pf, pb, FS)) ** 2 * np.abs(1 - np.exp(-2j * np.pi * f / FS)) ** 2
+    d = 10 * np.log10(pxx[band] / model[band])
+    assert np.max(np.abs(d - np.median(d))) < 1.5
+
+
+def test_whisper_clip_and_h_onsets_label_formants():
+    from dataclasses import replace
+
+    w = generate(3, replace(SynthConfig(), p_whisper_clip=1.0, p_register_step=0), seed=2)
+    lab = w.labels
+    assert not lab["voiced"].any() and lab["whisper"].any()
+    assert np.array_equal(lab["sonorant"], lab["whisper"])
+    assert np.isfinite(lab["formants"][lab["sonorant"], :4]).all()
+    assert all(s["kind"] != "voiced" for s in w.meta["segments"])
+
+    h = generate(4, replace(SynthConfig(), p_h_onset=1.0, p_whisper_clip=0.0, p_register_step=0), seed=2)
+    onsets = [s for s in h.meta["segments"] if s["kind"] == "h_onset"]
+    assert onsets
+    t = h.labels["t"]
+    for s in onsets:
+        m = (t >= s["start_s"] + 0.02) & (t < s["end_s"] - 0.005)  # after the 20 ms rise
+        if m.any():
+            assert h.labels["sonorant"][m].all() and not h.labels["voiced"][m].any()
+
+    v1 = generate(4, replace(SynthConfig(), sonorant_includes_whisper=False))
+    assert np.array_equal(v1.labels["sonorant"], v1.labels["voiced"])
+
+
+def test_write_set_keeps_provenance_when_nothing_is_written(tmp_path):
+    import json
+    from dataclasses import replace
 
     from vocal_analysis.synth.shards import write_set
 
-    cfg = replace(STEADY, duration_s=(0.3, 0.3), p_tube=0.0)
+    cfg = replace(STEADY, duration_s=(0.3, 0.3))
     write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)
     idx = json.loads((tmp_path / "index.json").read_text())
-    for k in ("p_tube", "p_tube_constrict"):
-        idx["synth_config"].pop(k)
-    (tmp_path / "index.json").write_text(json.dumps(idx))
+    assert "complete" not in idx
+    (tmp_path / "index.json").write_text(json.dumps(idx | {"git_commit": "original"}))
     write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)
-    assert json.loads((tmp_path / "index.json").read_text())["synth_config"] == json.loads(json.dumps(asdict(cfg)))
-    with pytest.raises(ValueError):
-        write_set(tmp_path, 2, replace(cfg, p_tube=0.6), seed=0, shard_size=2, workers=1, log=lambda m: None)
+    assert json.loads((tmp_path / "index.json").read_text())["git_commit"] == "original"

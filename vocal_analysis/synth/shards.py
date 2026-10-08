@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 
 from .channel import ChannelConfig, augment
-from .sampler import SynthConfig, generate
+from .sampler import V1_SETTINGS, SynthConfig, generate
 
 FORMAT_VERSION = 1
 INT16_SCALE = 32767.0
@@ -63,7 +63,7 @@ def _make_shard(args) -> str:
 
 
 # Values that config fields had before they existed, for comparing against older index.json files.
-LEGACY_DEFAULTS = {"synth_config": {"p_tube": 0.0, "p_tube_constrict": 0.15},
+LEGACY_DEFAULTS = {"synth_config": json.loads(json.dumps(V1_SETTINGS)),
                    "channel_config": {"p_codec": 0.0, "codecs": ["opus", "aac", "mp3", "amr_wb", "amr_nb"]}}
 
 
@@ -98,7 +98,8 @@ def write_set(out_dir: str | Path, n_clips: int, cfg: SynthConfig, seed: int, sh
         for k, _ in enumerate(ex.map(_make_shard, jobs), 1):
             if k % 10 == 0 or k == len(jobs):
                 log(f"  {k}/{len(jobs)} shards")
-    index_path.write_text(json.dumps(index | {"git_commit": _git_commit()}, indent=1), encoding="utf-8")
+    if jobs or "complete" in json.loads(index_path.read_text(encoding="utf-8")):  # nothing new: keep its provenance
+        index_path.write_text(json.dumps(index | {"git_commit": _git_commit()}, indent=1), encoding="utf-8")
     return out
 
 
@@ -142,7 +143,7 @@ SUITE_CHANNEL_SEED = 1
 _CLEAN = ChannelConfig(p_clean=1.0, p_codec=0.0)
 # The original ten cases are pinned to the settings suite_v1 was written with, so their audio stays
 # bit-identical as the training defaults move on; later cases are appended (each case's seed is its position).
-_V1_SYNTH = {"p_tube": 0.0}
+_V1_SYNTH = V1_SETTINGS
 _V1_CHANNEL = {"p_codec": 0.0}
 
 
@@ -167,6 +168,10 @@ def suite_cases() -> dict[str, tuple[SynthConfig, ChannelConfig]]:
         "tube": (replace(base, p_tube=1.0), _CLEAN),
         "codec": (base, ChannelConfig(p_clean=0.0, p_rir=0.0, p_noise=0.0, p_highpass=0.0, p_lowpass=0.0, p_eq=0.0,
                                       p_phone=0.0, gain_db=(0.0, 0.0), p_clip=0.0, p_codec=1.0)),
+        # added with the f0-length and whisper changes (D-012): exact labels where Hillenbrand's are LPC-based
+        "adult_high_f0": (replace(base, p_high_f0=0.0, low_f0_hz=(180.0, 260.0), p_length_from_f0=0.0, length_cm=(14.0, 16.5)),
+                          _CLEAN),
+        "whisper": (replace(base, p_whisper_clip=1.0, sonorant_includes_whisper=True), _CLEAN),
     }
 
 

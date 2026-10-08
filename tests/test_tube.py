@@ -157,3 +157,26 @@ def test_tube_cascade_response_tracks_tube_below_4khz():
     keep = f < 7600
     d = 20 * np.log10(np.abs(T.transfer(grid, shape)) / np.abs(F.response(grid, f[keep], b[keep], 16000)))
     assert np.max(np.abs(d)) < 4.0
+
+
+# A shape found in sampling where a heavily damped root passes a sharp one in frequency as the losses ramp up
+# (the old "frequencies stay ascending" check rejected it as a lost root).
+CROSSING = dict(q1=1.689, q2=1.35, length_cm=19.837, pharynx_ratio=1.101, area_scale=1.037, pg=0.456, pm=0.0,
+                perimeter_factor=1.076, constrict={"lc": 29.22, "rc": 7.494, "sc": 1.736, "ac": 0.159},
+                omega_warp=np.array([
+                    1.169, 1.164, 1.154, 1.139, 1.121, 1.101, 1.078, 1.054, 1.03, 1.007, 0.986, 0.966, 0.95, 0.937, 0.927,
+                    0.92, 0.918, 0.918, 0.923, 0.93, 0.94, 0.952, 0.965, 0.979, 0.994, 1.008, 1.02, 1.03, 1.038, 1.042,
+                    1.043, 1.04, 1.035, 1.026, 1.015, 1.003, 0.989, 0.975, 0.961, 0.949, 0.938, 0.93, 0.924, 0.921]))
+
+
+def test_poles_survive_a_frequency_crossing():
+    k = dict(CROSSING)
+    shape = T.build_shape(k.pop("q1"), k.pop("q2"), k.pop("length_cm"), **k)
+    f, b = T.poles(shape, f_max_hz=20000.0)  # keep every root, so none is cut at the band edge
+    s = -np.pi * b + 2j * np.pi * f
+    assert np.all(np.abs(T._denominator(s, shape)) < 1e-9)
+    assert np.all(np.diff(f) >= 0) and np.all(b > 0)
+    grid = np.arange(T.GRID_HZ, 20000.0 + 400.0, T.GRID_HZ)  # the seed grid poles() searches for this f_max
+    d0 = T._denominator(2j * np.pi * grid, shape, 0.0).real
+    assert len(f) == np.count_nonzero(np.sign(d0[:-1]) * np.sign(d0[1:]) < 0)  # one root per lossless root
+    assert b.max() > 200  # the damped root is there

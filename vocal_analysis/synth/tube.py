@@ -164,8 +164,9 @@ def poles(shape: TubeShape, f_max_hz: float = F_SEARCH_MAX_HZ, n_loss_steps: int
 
     Lossless roots (real zero crossings of D(j w) with an open lip end) seed Newton's method, which follows
     each root as the losses and radiation load are ramped up to their full values. Intermediate steps only
-    need to stay on their root (0.5 Hz); the last is solved to tol_hz. If a root is lost (heavily damped
-    roots move far), the continuation is retried with twice as many steps, up to 64.
+    need to stay on their root (0.5 Hz); the last is solved to tol_hz. If a root is lost (two converge on
+    the same root; heavily damped roots move far), the continuation is retried with twice as many steps, up
+    to 64. Roots are returned sorted by frequency.
     """
     f = np.arange(GRID_HZ, f_max_hz + 400.0, GRID_HZ)
     d0 = _denominator(2j * np.pi * f, shape, 0.0).real
@@ -198,9 +199,13 @@ def _continue_roots(shape: TubeShape, s: np.ndarray, n_loss_steps: int, tol_hz: 
         else:
             raise RuntimeError(f"tube pole search did not converge at loss={loss:.2f}")
     F, Bw = s.imag / (2 * np.pi), -s.real / np.pi
-    if np.any(np.diff(F) <= 0) or np.any(Bw <= 0):
+    # A heavily damped root can pass a sharp one in frequency while staying far from it in the complex
+    # plane, so frequency order is not preserved; losing track means two roots converged to the same one.
+    gap = np.abs(s[:, None] - s[None, :]) + np.diag(np.full(n, np.inf))
+    if np.any(Bw <= 0) or (n > 1 and gap.min() < 2 * np.pi * 1.0):
         raise RuntimeError("tube pole continuation lost track of a root")
-    return F, Bw
+    order = np.argsort(F)
+    return F[order], Bw[order]
 
 
 # ----------------------------------------------------------------------------- shape construction
