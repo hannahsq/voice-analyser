@@ -216,3 +216,40 @@ The first real training corpus (plan §5.6) is **VocalSet v1.1** (Wilkins et al.
 - *Splits:* speaker-disjoint. `val` is the authors' test singers (`test_singers_technique.txt`), so it matches their published division; everything else is `train`. No VocalSet audio is gold.
 - *Cross-corpus speakers:* the leakage test compares corpus-prefixed ids, so it can't detect the same person in two corpora. By hand: VocalSet's singers are professionals recorded at Northwestern University about 2017. The gold sets are Hillenbrand (Western Michigan University, 1990s, adults and children), PTDB-TUG (TU Graz speakers), MIR-1K (amateur singers in Taiwan) and MDB-stem-synth (MedleyDB commercial multitracks). No overlap is known or plausible.
 - *Code:* training-pool scanners live in `vocal_analysis/data/pools/` (same `scan()` interface as the gold loaders, with train/val splits). `va manifest` covers both registries.
+
+## D-016 (2026-10-08): resynthesis labeller design (M3)
+
+Plan §5.2, in `vocal_analysis/resynth/` (`va resynth <pool> --teacher CKPT`). Per recording: a trained teacher gives f0, voicing, the sonorant mask and F1–F4 tracks. The tracks are smoothed, the source is recovered by inverse filtering, and then `variants` perturbations (default 2) re-filter that source. The results are cut into 3–6 s clips at quiet frames, QC'd and written as shards that `train.data` reads like the synthetic sets.
+- **Tracker: the teacher, not PESTO.** The teacher's f0 head was trained only on synthetic data. The bundled PESTO weights were trained on MIR-1K, a gold set (§13 #13), and using them here would carry gold-set information into training labels. The analysis cache is keyed by the checkpoint's hash, and the set's index records the checkpoint's path, hash and step.
+- **Inverse filtering: IAIF up to 250 Hz, formant tracks above it (`method = "auto"`, cross-faded per sample).** On synthetic vowels with known source and tract, IAIF recovers H1–H2 within 0.3–1.3 dB at f0 110–220 Hz. At 330–500 Hz it gives about 25 dB against a true 3.8 dB, because the LPC latches onto harmonics. Track-based inverse filtering uses anti-resonators at the tracked F1–F4 plus uniform-tube poles above them, the exact inverses of the synthesiser's resonators, and is right at every f0 given correct tracks. Both inverse filters have unity gain at DC, like the resonators. QCP is still to do.
+- **QC: `tract_left` (β).** The source's harmonic amplitudes below 4 kHz are fitted as LF(Rd) + gain + tilt + β × the tracked tract's dB response. β is the fraction of the tract still in the source. On synthetic vowels:
+
+  | Case | β |
+  |---|---|
+  | Untouched speech | 0.97–1.23 |
+  | Exact inverse filtering | about 0 |
+  | IAIF below 250 Hz | −0.19 to 0.06 |
+  | IAIF above 300 Hz | −0.3 to −1.2 |
+
+  Aspiration noise (HNR 6–13 dB) and jitter leave β near 0 but raise the fit's RMS. A clip is rejected when its median voiced-frame |β| exceeds 0.25. **That threshold is provisional, to be calibrated on VocalSet.**
+
+  Two failures β can't see:
+  - Tracks 10 % off with track-based inverse filtering keep β small but give RMS 4–6 dB. Clean but noisy sources reach 3–4 dB RMS, though, so the RMS is logged per frame (`ripple_db`) and not gated.
+  - The fit needs five harmonics below 4 kHz, so f0 above 800 Hz goes unmeasured. Those clips are kept (`accept_unmeasured`) and counted.
+- **Perturbation (§5.2 step 4):**
+  - α log-uniform(0.8, 1.25) on F1–F4;
+  - slow per-formant offsets with SD 3–5 % on a 0.3 s time scale;
+  - F5 and up continue from F4 at uniform-tube spacing for the new apparent length;
+  - Hawks & Miller bandwidths × log-uniform(0.6, 1.6) per formant;
+  - a nasal pole–zero pair with p = 0.15, constant over the recording;
+  - ordering at ≥ 150 Hz spacing, and poles above 7.6 kHz dropped, as in the generator.
+
+  Clip RNG is seeded by (seed, recording, variant).
+- **Labels.**
+  - *Exact:* formants and bandwidths (all eight, as in the synthetic sets).
+  - *Tracker estimates:* f0, voicing and sonorant. Re-filtering leaves the original voice's f0 alone, so these are as good as the teacher, and `meta["labels"]` says so. **Open for teacher v3:** whether the f0 and voicing losses on resynthesised clips are down-weighted or masked, since otherwise they distil the teacher into itself. The plan's parametric-source variant (LF fitted per period) would make f0 exact.
+  - *Measured:* source_h_db, on the recovered source and on its own scale, so only differences such as H1–H2 mean anything.
+  - *Not available:* rd and length_cm are NaN.
+- **Non-sonorant stretches keep the original audio**, cross-faded over 20 ms, so consonants stay real. Frames inside a cross-fade get no formant labels. The re-filtered signal is level-matched to the original over sonorant samples.
+- **Shards** hold the recordings of `files_per_shard` files and a varying number of clips. `index.json` lists `shard_clips`, and `ShardReader` uses it. An interrupted run resumes; changed settings are refused.
+- **Cost:** about 0.3 s CPU per second of audio for the source stage. Each variant is nearly free.

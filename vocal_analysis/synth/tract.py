@@ -77,13 +77,17 @@ def sample_formants(rng: np.random.Generator, length_cm: float, p_uniform: float
     return _enforce_order(f)
 
 
-def sample_bandwidths(rng: np.random.Generator, freqs: np.ndarray, f0: float) -> np.ndarray:
-    """Hawks & Miller x log-uniform(0.6, 1.6) (plan §5.1). Above 5 kHz the H&M polynomial is out of
-    its fitted range, so bandwidth grows linearly from its 5 kHz value."""
+def bandwidth_prior(freqs: np.ndarray, f0: np.ndarray | float) -> np.ndarray:
+    """Hawks & Miller bandwidth, at least 20 Hz; NaN where freqs is NaN. Above 5 kHz the H&M
+    polynomial is out of its fitted range, so bandwidth grows linearly from its 5 kHz value."""
     f = np.where(np.isfinite(freqs), freqs, 1000.0)
     hm = np.where(f <= 5000, hawks_miller_bandwidth(np.minimum(f, 5000), f0), hawks_miller_bandwidth(5000.0, f0) * f / 5000)
-    b = np.maximum(hm, 20.0) * np.exp(rng.uniform(np.log(0.6), np.log(1.6), len(f)))
-    return np.where(np.isfinite(freqs), b, np.nan)
+    return np.where(np.isfinite(freqs), np.maximum(hm, 20.0), np.nan)
+
+
+def sample_bandwidths(rng: np.random.Generator, freqs: np.ndarray, f0: float) -> np.ndarray:
+    """Hawks & Miller x log-uniform(0.6, 1.6) (plan §5.1)."""
+    return bandwidth_prior(freqs, f0) * np.exp(rng.uniform(np.log(0.6), np.log(1.6), len(freqs)))
 
 
 def sample_extras(rng: np.random.Generator, length_cm: float, p_nasal: float = 0.15, p_subglottal: float = 0.2) -> dict:

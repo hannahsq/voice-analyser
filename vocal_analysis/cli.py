@@ -5,6 +5,7 @@
     va manifest <corpus>|all       scan a corpus under data.root and write its manifest
     va leakage                     run the leakage rules over data/manifests/
     va baselines [--only NAME...]  run/score baselines -> reports/baselines.md (cached in runs/)
+    va resynth <pool> --teacher CKPT   analysis-resynthesis training set from a training pool (plan §5.2)
     va config                      print the resolved config
 
 Every command takes --config FILE and repeated --set key.sub=value overrides.
@@ -136,6 +137,44 @@ def cmd_synth(cfg: Config, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_resynth(cfg: Config, args: argparse.Namespace) -> int:
+    import torch
+
+    from .data.manifest import manifest_hash, read_manifest
+    from .data.pools import registry as pools
+    from .resynth import corpus
+    from .resynth.render import ResynthConfig
+
+    if args.corpus not in pools():
+        print(f"{args.corpus!r} is not a training pool; known: {', '.join(sorted(pools()))}", file=sys.stderr)
+        return 2
+    manifest = Path(cfg.data.manifests) / f"{args.corpus}.csv"
+    rows = [r for r in read_manifest(manifest) if r.split == args.split]
+    if args.limit:
+        rows = sorted(rows, key=lambda r: r.path)[: args.limit]
+    rc = ResynthConfig(variants=args.variants)
+    for kv in args.resynth_set:
+        k, v = kv.split("=", 1)
+        cur = getattr(rc, k)
+        setattr(rc, k, v.lower() in ("1", "true", "yes") if isinstance(cur, bool) else _parse_value(v) if cur is None else type(cur)(v))
+    log = lambda m: print(m, flush=True)  # noqa: E731
+    teacher_sha = corpus.file_sha256(args.teacher)
+    root = Path(cfg.data.root) / args.corpus
+    adir = Path(cfg.data.root) / "resynth" / "analysis" / args.corpus / teacher_sha
+    from dataclasses import replace
+
+    from .device import setup_device
+
+    device = setup_device(replace(cfg.device, device=args.device) if args.device else cfg.device)
+    corpus.analyse(rows, root, args.teacher, adir, device=device, log=log)
+    step = torch.load(args.teacher, map_location="cpu", weights_only=False).get("step")
+    out = Path(args.out or Path(cfg.data.root) / "resynth" / f"{args.corpus}_{args.split}")
+    corpus.render(rows, root, adir, out, rc, seed=args.seed, workers=args.workers, log=log,
+                  extra_index={"corpus": args.corpus, "split": args.split, "manifest_hash": manifest_hash(manifest),
+                               "teacher": {"path": Path(args.teacher).as_posix(), "sha256": teacher_sha, "step": step}})
+    return 0
+
+
 def _parse_value(v: str):
     """int, float, None or str, for --train-set fields whose default is None."""
     if v.lower() == "none":
@@ -222,6 +261,18 @@ def build_parser() -> argparse.ArgumentParser:
     t.add_argument("--no-comb", action="store_true", help="ablation: no harmonic-comb input channel")
     t.add_argument("--train-set", action="append", default=[], metavar="KEY=VALUE", help="other TrainConfig fields")
     t.set_defaults(fn=cmd_train)
+    r = sub.add_parser("resynth", parents=[common], help="analysis-resynthesis training set from a training pool")
+    r.add_argument("corpus")
+    r.add_argument("--teacher", required=True, metavar="CKPT", help="tracker for f0, voicing and formant tracks")
+    r.add_argument("--split", default="train", choices=["train", "val"])
+    r.add_argument("--out", default=None, help="default: <data.root>/resynth/<corpus>_<split>")
+    r.add_argument("--variants", type=int, default=2, help="perturbations per recording")
+    r.add_argument("--seed", type=int, default=0)
+    r.add_argument("--workers", type=int, default=None)
+    r.add_argument("--device", default=None, help="teacher device (default: auto)")
+    r.add_argument("--limit", type=int, default=None, help="first N recordings only (trial runs)")
+    r.add_argument("--resynth-set", action="append", default=[], metavar="KEY=VALUE", help="other ResynthConfig fields")
+    r.set_defaults(fn=cmd_resynth)
     e = sub.add_parser("eval", parents=[common], help="evaluate a trained teacher against the gold sets and the suite")
     e.add_argument("ckpt")
     e.add_argument("--out", default="reports/teacher_v1.md")
