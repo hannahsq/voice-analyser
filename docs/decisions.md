@@ -231,11 +231,23 @@ Plan §5.2, in `vocal_analysis/resynth/` (`va resynth <pool> --teacher CKPT`). P
   | IAIF below 250 Hz | −0.19 to 0.06 |
   | IAIF above 300 Hz | −0.3 to −1.2 |
 
-  Aspiration noise (HNR 6–13 dB) and jitter leave β near 0 but raise the fit's RMS. A clip is rejected when its median voiced-frame |β| exceeds 0.25. **That threshold is provisional, to be calibrated on VocalSet.**
+  Aspiration noise (HNR 6–13 dB) and jitter leave β near 0 but raise the fit's RMS. A clip is rejected when its median voiced-frame |β| exceeds 0.5. Below that, training weights the clip (next item).
 
   Two failures β can't see:
   - Tracks 10 % off with track-based inverse filtering keep β small but give RMS 4–6 dB. Clean but noisy sources reach 3–4 dB RMS, though, so the RMS is logged per frame (`ripple_db`) and not gated.
   - The fit needs five harmonics below 4 kHz, so f0 above 800 Hz goes unmeasured. Those clips are kept (`accept_unmeasured`) and counted.
+- **VocalSet trial, and why QC weights rather than rejects.** On 100 training recordings spread across all 15 training singers and 16 techniques (teacher v1 as tracker), clip-median β had 5/25/50/75/95th percentiles of −0.35 / −0.09 / 0.03 / 0.12 / 0.25. A hard cut at 0.25 kept 84 % of clips, but not at random: 50–60 % for two singers (female3 median −0.22, female5) and for breathy, messa di voce, trill and trillo, against 94–100 % for slow piano/forte, belt and vocal fry. Accepted clips centred near 0 in every f0 band (+0.06 below 250 Hz, +0.02 at 250–500, −0.07 above 500), so there was no seam between IAIF and track-based inverse filtering.
+
+  Is the tracker to blame? Teacher v1's own uncertainty didn't separate rejected from accepted clips. The median F1 spread was 48.8 vs 48.0 cents, and every rank correlation with |β| was within ±0.13. Either v1 is confidently wrong there (its uncertainties are uncalibrated until M6), or the cause is one no tracker fixes: sources that aren't LF-like, extra resonances, or measurement noise.
+
+  A hard cut would drop the hardest voice qualities: a mild form of the selection bias §5.4 warns about. So only clearly broken clips are dropped at generation (|β| > 0.5). In training, each resynthesised clip's formant and bandwidth losses are weighted 1 up to |β| = 0.15, falling linearly to 0 at 0.5 (`TRACT_LEFT_WEIGHT`). The weight comes from each clip's stored β, so the curve can change without regenerating.
+
+  Regenerating with each new tracker is the plan's M4 loop, so rejected clips need no separate retry. Comparing per-clip β from teacher v1 and v2 on the same recordings will show how much is the tracker.
+- **Training (`va train teacher --resynth DIR --resynth-frac 0.3 --resynth-val DIR`).** `resynth_frac` of training items come from the resynthesised sets, split between them by clip count. On those clips:
+  - the f0, voicing and sonorant losses are masked: those frames leave the average, so the terms aren't diluted;
+  - formant and bandwidth losses are scaled by the clip weight and still averaged over all labelled frames, so a low-quality clip pulls less.
+
+  During the comb's true-f0 phase, resynthesised clips get their comb from the tracker's f0 label, so their f0 label is defined on every frame, as in the synthetic sets. Held-out resynthesised sets (VocalSet's `val` singers) are scored as `eval_resynth:<name>`, where only the formant metrics are exact. Sets consolidated before this change carry no β and train exactly as before.
 - **Perturbation (§5.2 step 4):**
   - α log-uniform(0.8, 1.25) on F1–F4;
   - slow per-formant offsets with SD 3–5 % on a 0.3 s time scale;

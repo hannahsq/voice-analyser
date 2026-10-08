@@ -41,8 +41,10 @@ class ResynthConfig:
     ramp_s: float = 0.02
     qc_f_max_hz: float = 4000.0  # the F1-F3 region; above it, upper-pole errors dominate
     # QC: reject a clip whose median voiced-frame |tract_left| exceeds this. On synthetic vowels: untouched speech
-    # 0.97-1.23, exact inverse filtering ~0, IAIF below 250 Hz -0.19..0.06, IAIF above 300 Hz -0.3..-1.2
-    max_tract_left: float = 0.25
+    # 0.97-1.23, exact inverse filtering ~0, IAIF below 250 Hz -0.19..0.06, IAIF above 300 Hz -0.3..-1.2. Only
+    # clearly broken clips are dropped here; below it, training weights the formant loss by |tract_left|
+    # (`train.data.TRACT_LEFT_WEIGHT`), so the weighting can change without regenerating.
+    max_tract_left: float = 0.5
     accept_unmeasured: bool = True  # QC: keep clips where it can't be measured (f0 above 800 Hz)
     min_voiced_frac: float = 0.2  # QC: reject a clip with fewer voiced frames
     clip_s: tuple[float, float] = (3.0, 6.0)  # clips are cut at quiet frames within this range
@@ -179,7 +181,7 @@ def render_variant(audio: np.ndarray, src: dict, rng: np.random.Generator, cfg: 
     voiced = src["voiced"] & son if cfg.keep_original_outside else src["voiced"]
     labels = {
         "t": np.arange(n_frames) * HOP / FS,
-        "f0": np.where(src["voiced"], src["f0"], np.nan).astype(np.float32),
+        "f0": src["f0"].astype(np.float32),  # defined on every frame, like the synthetic sets (the comb reads it)
         "voiced": src["voiced"].copy(),
         "sonorant": son,
         "whisper": np.zeros(n_frames, bool),

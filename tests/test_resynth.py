@@ -215,3 +215,104 @@ def test_render_variants_differ_and_regenerate(tmp_path):
     b, _ = render.render_variant(audio, src, np.random.default_rng([1, 0, 0]), cfg)
     c, _ = render.render_variant(audio, src, np.random.default_rng([1, 0, 1]), cfg)
     assert np.array_equal(a[0][0], b[0][0]) and not np.allclose(a[0][1]["formants"][:, 0], c[0][1]["formants"][:, 0])
+
+
+# ----------------------------------------------------------------------------- training on resynthesised sets
+
+
+def test_formant_weight_ramp():
+    from vocal_analysis.train.data import formant_weight
+
+    w = formant_weight(np.array([0.0, -0.15, 0.325, -0.5, 0.9, np.nan]))
+    assert np.allclose(w, [1.0, 1.0, 0.5, 0.0, 0.0, 1.0])
+
+
+def _resynth_set(tmp_path):
+    root, adir, rows = _fake_corpus(tmp_path, n_files=2)
+    out = tmp_path / "out" / "set"
+    corpus.render(rows, root, adir, out, render.ResynthConfig(), seed=3, workers=1, log=lambda *a: None)
+    return out
+
+
+def test_crops_carry_loss_weights(tmp_path):
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import ShardReader, write_set
+    from vocal_analysis.train.data import MixedCrops, SynthCrops, consolidate, formant_weight
+
+    rset = _resynth_set(tmp_path)
+    rflat = consolidate(rset, log=lambda *a: None)
+    tl = np.load(rflat / "clip_tract_left.npy")
+    reader = ShardReader(rset)
+    assert np.allclose(tl, [reader[i][2]["qc"]["tract_left_median"] for i in range(len(reader))])
+    rc = SynthCrops(rflat, np.arange(len(tl)), n_frames=50, channel=None, tract_left_weight=(0.0, 0.01))
+    for i in range(len(tl)):
+        _, lab = rc[i]
+        assert np.all(lab["w_f0"] == 0) and np.allclose(lab["w_formant"], formant_weight(tl[i], (0.0, 0.01)))
+    sflat = consolidate(write_set(tmp_path / "s", 2, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=2, workers=1,
+                                  log=lambda m: None), log=lambda *a: None)
+    sc = SynthCrops(sflat, np.arange(2), n_frames=50, channel=None)
+    _, lab = sc[0]
+    assert np.all(lab["w_f0"] == 1) and np.all(lab["w_formant"] == 1)
+    sc_f = SynthCrops(sflat, np.arange(2), n_frames=50, channel=None, fixed=True)
+    rc_f = SynthCrops(rflat, np.arange(len(tl)), n_frames=50, channel=None, fixed=True)
+    mix = MixedCrops([sc_f, rc_f], [0.7, 0.3], epoch_size=400, seed=1, fixed=True)
+    kinds = np.array([mix[i][1]["w_f0"][0] == 0 for i in range(400)])
+    assert 0.22 < kinds.mean() < 0.38
+    assert all(np.array_equal(mix[i][0], mix[i][0]) for i in range(5))  # fixed: same item every time
+
+
+def test_loss_weights():
+    torch = pytest.importorskip("torch")
+    from vocal_analysis.train.losses import teacher_loss
+
+    g = torch.Generator().manual_seed(0)
+    b, t = 4, 20
+    out = {"f0_logits": torch.randn(b, t, 360, generator=g), "voicing_logit": torch.randn(b, t, generator=g),
+           "sonorant_logit": torch.randn(b, t, generator=g), "formant_logits": torch.randn(b, t, 4, 400, generator=g),
+           "logb_mean": torch.randn(b, t, 4, generator=g) + 4, "logb_logvar": torch.randn(b, t, 4, generator=g)}
+    from vocal_analysis.models.bins import F0_AXIS, FORMANT_AXIS
+
+    out["f0_logits"] = torch.randn(b, t, F0_AXIS.n_bins, generator=g)
+    out["formant_logits"] = torch.randn(b, t, 4, FORMANT_AXIS.n_bins, generator=g)
+    lab = {"f0": torch.full((b, t), 200.0), "voiced": torch.rand(b, t, generator=g) > 0.3,
+           "sonorant": torch.rand(b, t, generator=g) > 0.2, "formants": torch.tensor([600.0, 1500, 2500, 3500]).expand(b, t, 4),
+           "bandwidths": torch.tensor([80.0, 100, 150, 200]).expand(b, t, 4)}
+    _, base = teacher_loss(out, lab)
+    ones = {**lab, "w_f0": torch.ones(b, t), "w_formant": torch.ones(b, t)}
+    _, same = teacher_loss(out, ones)
+    assert all(same[k] == pytest.approx(base[k], rel=1e-5) for k in base)
+    # f0 masked on items 2-3: the f0/voicing/sonorant terms equal those of items 0-1 alone
+    masked = {**ones, "w_f0": torch.tensor([1.0, 1, 0, 0])[:, None].expand(b, t)}
+    _, m = teacher_loss(out, masked)
+    _, half = teacher_loss({k: v[:2] for k, v in out.items()}, {k: v[:2] for k, v in lab.items()})
+    assert all(m[k] == pytest.approx(half[k], rel=1e-5) for k in ("f0", "voicing", "sonorant"))
+    assert m["formants"] == pytest.approx(base["formants"], rel=1e-5)
+    # formant weight 0.5 everywhere halves the formant and bandwidth terms
+    _, w = teacher_loss(out, {**ones, "w_formant": torch.full((b, t), 0.5)})
+    assert w["formants"] == pytest.approx(base["formants"] / 2, rel=1e-5) and w["bandwidth"] == pytest.approx(base["bandwidth"] / 2, rel=1e-5)
+
+
+def test_training_mixes_in_resynthesised_sets(tmp_path):
+    import json
+
+    from vocal_analysis.models.teacher import TeacherConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.teacher import TrainConfig, train
+
+    rset = _resynth_set(tmp_path)
+    synth = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    cfg = TrainConfig(data=str(synth), out=str(tmp_path / "run"), steps=4, batch=4, n_frames=50, workers=1, log_every=2,
+                      eval_every=2, ckpt_every=2, val_clips=4, resynth=(str(rset),), resynth_frac=0.5, resynth_val=(str(rset),))
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16)
+    out = train(cfg, small, log=lambda *a: None)
+    recs = [json.loads(line) for line in (out / "log.jsonl").read_text().splitlines()]
+    assert any("eval_resynth:set" in r for r in recs) and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
+    assert str(rset) in json.loads((out / "config.json").read_text())["resynth_indexes"]
+
+
+def test_resynth_f0_label_is_defined_everywhere(tmp_path):
+    from vocal_analysis.synth.shards import ShardReader
+
+    reader = ShardReader(_resynth_set(tmp_path))
+    assert all(np.all(np.isfinite(reader[i][1]["f0"])) for i in range(len(reader)))

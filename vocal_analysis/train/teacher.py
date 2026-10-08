@@ -1,4 +1,5 @@
-"""Train the teacher on synthetic data (plan M1, M2). `va train teacher` drives this.
+"""Train the teacher on synthetic data (plan M1, M2), optionally mixed with resynthesised sets (M3).
+`va train teacher` drives this.
 
 Every run directory holds config.json (train + model config, git commit, data index),
 log.jsonl (one line per log/eval step) and checkpoints; a run resumes from ckpt_last.pt.
@@ -18,7 +19,7 @@ import numpy as np
 from ..models.bins import F0_AXIS, FORMANT_AXIS, decode
 from ..models.teacher import Teacher, TeacherConfig, n_params
 from ..synth.channel import ChannelConfig
-from .data import SynthCrops, collate, consolidate, split_ids
+from .data import TRACT_LEFT_WEIGHT, MixedCrops, SynthCrops, collate, consolidate, split_ids
 from .losses import teacher_loss
 
 
@@ -48,6 +49,13 @@ class TrainConfig:
     val_clips: int = 512
     seed: int = 0
     loss_weights: dict = field(default_factory=dict)
+    # Resynthesised sets (plan §5.2, D-016): `resynth_frac` of training items come from these, split between
+    # them by clip count. Their f0/voicing/sonorant losses are masked and formant losses weighted by QC.
+    # During the comb's true-f0 phase their comb comes from the tracker's f0 label.
+    resynth: tuple[str, ...] = ()
+    resynth_frac: float = 0.3
+    resynth_val: tuple[str, ...] = ()  # held-out resynthesised sets, scored on their (exact) formants
+    tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT
 
 
 def _git() -> dict:
@@ -186,9 +194,10 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         if cfg.branch_from and cfg.decay_start != step:
             raise ValueError(f"branch decay_start {cfg.decay_start} != checkpoint step {step}")
         index = json.loads((Path(cfg.data) / "index.json").read_text())
+        resynth_idx = {d: json.loads((Path(d) / "index.json").read_text()) for d in (*cfg.resynth, *cfg.resynth_val)}
         (out / "config.json").write_text(json.dumps({"train": asdict(cfg), "model": asdict(model_cfg), "git": _git(),
-                                                     "data_index": index, "n_params": n_params(model),
-                                                     "channel": asdict(channel)}, indent=1))
+                                                     "data_index": index, "resynth_indexes": resynth_idx,
+                                                     "n_params": n_params(model), "channel": asdict(channel)}, indent=1))
     if channel.p_codec > 0:
         from ..synth import codecs
 
@@ -196,11 +205,30 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             raise FileNotFoundError("channel.p_codec > 0 needs ffmpeg (winget install ffmpeg, or set VA_FFMPEG)")
     log(f"teacher: {n_params(model):,} parameters; {len(train_ids):,} train / {len(val_ids)} val clips")
 
-    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=cfg.batch * 1000)
+    epoch = cfg.batch * 1000
+    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch)
+    if cfg.resynth:
+        parts, sizes = [], []
+        for d in cfg.resynth:
+            rflat = consolidate(d, log=log)
+            n = json.loads((rflat / "done").read_text())["n_clips"]
+            parts.append(SynthCrops(rflat, np.arange(n), cfg.n_frames, channel, seed=cfg.seed + 1 + len(parts),
+                                    epoch_size=epoch, tract_left_weight=cfg.tract_left_weight))
+            sizes.append(n)
+        weights = [1.0 - cfg.resynth_frac] + [cfg.resynth_frac * n / sum(sizes) for n in sizes]
+        ds = MixedCrops([ds, *parts], weights, epoch, seed=cfg.seed)
+        log(f"resynthesised: {sum(sizes):,} clips in {len(sizes)} sets, {cfg.resynth_frac:.0%} of items")
     loader = DataLoader(ds, cfg.batch, num_workers=cfg.workers, collate_fn=collate, persistent_workers=True,
                         pin_memory=False, prefetch_factor=4, drop_last=True)
     val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True)
     val_loader = DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate)
+    resynth_val = {}
+    for d in cfg.resynth_val:
+        rflat = consolidate(d, log=log)
+        n = json.loads((rflat / "done").read_text())["n_clips"]
+        ids = np.random.default_rng(0).permutation(n)[: cfg.val_clips]  # spread over recordings, fixed
+        rv = SynthCrops(rflat, np.sort(ids), cfg.n_frames, channel, seed=12345, fixed=True, tract_left_weight=cfg.tract_left_weight)
+        resynth_val[Path(d).name] = DataLoader(rv, cfg.batch, num_workers=4, collate_fn=collate)
     vq = TorchVQT(device)
     rng = np.random.default_rng(cfg.seed + step)
 
@@ -225,7 +253,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             truth = rng.random() < p_truth
             with torch.autocast(device.type, dtype=torch.bfloat16):
                 lp = vq.log_power_with_context(audio, cfg.n_frames)
-                out_ = model(lp, comb_f0=lab["f0"] if truth else None, comb_voiced=lab["voiced"].float() if truth else None)
+                comb_f0 = torch.nan_to_num(lab["f0"], nan=100.0)  # padded frames; they are unvoiced, so no comb there
+                out_ = model(lp, comb_f0=comb_f0 if truth else None, comb_voiced=lab["voiced"].float() if truth else None)
             loss, parts = teacher_loss(out_, lab, cfg.loss_weights)
             opt.zero_grad(set_to_none=True)
             loss.backward()
@@ -252,6 +281,11 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 logf.write(json.dumps({"step": step, "eval": ev, "time": time.time()}) + "\n")
                 logf.flush()
                 log("eval " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if not k.startswith("F1_dr_f0")))
+                for name, rl in resynth_val.items():  # f0 and voicing here score agreement with the tracker
+                    ev = evaluate(model, rl, vq, device)
+                    logf.write(json.dumps({"step": step, f"eval_resynth:{name}": ev, "time": time.time()}) + "\n")
+                    logf.flush()
+                    log(f"eval {name} " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if k[:2] in ("F1", "F2", "F3") and "f0" not in k))
                 save(out / f"ckpt_{step:06d}.pt")
     logf.close()
     return out
