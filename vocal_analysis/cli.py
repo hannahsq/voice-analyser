@@ -138,6 +138,7 @@ def cmd_synth(cfg: Config, args: argparse.Namespace) -> int:
 
 
 def cmd_resynth(cfg: Config, args: argparse.Namespace) -> int:
+    import numpy as np
     import torch
 
     from .data.manifest import manifest_hash, read_manifest
@@ -150,8 +151,9 @@ def cmd_resynth(cfg: Config, args: argparse.Namespace) -> int:
         return 2
     manifest = Path(cfg.data.manifests) / f"{args.corpus}.csv"
     rows = [r for r in read_manifest(manifest) if r.split == args.split]
-    if args.limit:
-        rows = sorted(rows, key=lambda r: r.path)[: args.limit]
+    if args.limit:  # evenly spaced through the sorted manifest, so a trial spans singers and techniques
+        rows = sorted(rows, key=lambda r: r.path)
+        rows = [rows[int(i)] for i in np.unique(np.linspace(0, len(rows) - 1, min(args.limit, len(rows))).round())]
     rc = ResynthConfig(variants=args.variants)
     for kv in args.resynth_set:
         k, v = kv.split("=", 1)
@@ -270,7 +272,7 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--seed", type=int, default=0)
     r.add_argument("--workers", type=int, default=None)
     r.add_argument("--device", default=None, help="teacher device (default: auto)")
-    r.add_argument("--limit", type=int, default=None, help="first N recordings only (trial runs)")
+    r.add_argument("--limit", type=int, default=None, help="N recordings spread through the manifest (trial runs)")
     r.add_argument("--resynth-set", action="append", default=[], metavar="KEY=VALUE", help="other ResynthConfig fields")
     r.set_defaults(fn=cmd_resynth)
     e = sub.add_parser("eval", parents=[common], help="evaluate a trained teacher against the gold sets and the suite")
