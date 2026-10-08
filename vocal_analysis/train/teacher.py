@@ -212,7 +212,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
 
     logf = (out / "log.jsonl").open("a", encoding="utf-8")
     t0, seen = time.time(), 0
-    acc: dict[str, float] = {}
+    acc: dict = {}  # name -> running sum (tensor until the log step)
     model.train()
     while step < cfg.steps:
         for audio, lab in loader:
@@ -233,9 +233,11 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             opt.step()
             step += 1
             seen += audio.shape[0]
-            for k, v in {**parts, "loss": float(loss), "grad_norm": float(gn)}.items():
-                acc[k] = acc.get(k, 0.0) + v
+            # summed on the GPU and read once per log interval: a float() here would make every step wait for it
+            for k, v in {**parts, "loss": loss.detach(), "grad_norm": gn.detach()}.items():
+                acc[k] = acc[k] + v if k in acc else v.float()
             if step % cfg.log_every == 0:
+                acc = {k: float(v) for k, v in acc.items()}
                 dt = time.time() - t0
                 rec = {"step": step, "lr": _lr(step, cfg), "p_comb_truth": p_truth,
                        **{k: v / cfg.log_every for k, v in acc.items()},

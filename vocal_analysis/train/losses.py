@@ -1,4 +1,8 @@
-"""Supervised losses (plan §7.5): heat-map CE with blurred targets, bandwidth NLL, voicing/sonorant BCE."""
+"""Supervised losses (plan §7.5): heat-map CE with blurred targets, bandwidth NLL, voicing/sonorant BCE.
+
+The parts come back as detached tensors: converting them to floats every step would make the host wait for
+the GPU (the trainer converts once per log interval).
+"""
 
 from __future__ import annotations
 
@@ -37,4 +41,4 @@ def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[tor
     nll = 0.5 * (logvar + (torch.nan_to_num(logb) - mean) ** 2 / logvar.exp())
     parts["bandwidth"] = _masked_mean(nll, bmask)
     total = sum(w[k] * v for k, v in parts.items())
-    return total, {k: float(v.detach()) for k, v in parts.items()}
+    return total, {k: v.detach() for k, v in parts.items()}
