@@ -54,6 +54,45 @@ STORY_VOWELS = {
 Q1_RANGE = (min(q[0] for q in STORY_VOWELS.values()), max(q[0] for q in STORY_VOWELS.values()))
 Q2_RANGE = (min(q[1] for q in STORY_VOWELS.values()), max(q[1] for q in STORY_VOWELS.values()))
 
+# D-022: Story's targets re-fitted to Peterson & Barney's (1952) male F1/F2 through this lossy tube at Story's length
+# (grid over the box extended by 20 %, then Nelder-Mead on the squared log-frequency error; open shapes only). Story's
+# speaker has higher F1 than PB's population means (/I/ 507 vs 390 Hz), mostly from the shapes, not the losses. All fit
+# exactly except /i/ (F1 281 vs 270) and /u/ (F2 949 vs 870), the model's limits. "N" (schwa) is fitted to the
+# log-centroid of the nine PB monophthongs (478 / 1340 Hz); Story's /o/ has no PB counterpart and keeps its target.
+PB_FIT_VOWELS = {
+    "i": (-5.469, 0.408), "I": (-4.026, 0.174), "E": (-2.128, 0.630), "ae": (-0.246, 1.296), "A": (4.293, -0.015),
+    "O": (4.505, -1.740), "U": (-0.624, -2.224), "u": (-3.896, -2.273), "V": (1.929, -0.889), "N": (-1.806, -1.209),
+    "o": STORY_VOWELS["o"],
+}
+# Vowel shares in casual conversational American English: Mines, Hanson & Shoup (1978), Language and Speech 21(3),
+# Table 4a (% of all phonemes, 26 adults, 103,887 phonemes). Diphthongs are split equally between their end points
+# (aI -> A + I, aU -> A + U), /e/ between I and E, the alternate /ɨ~ɪ/ goes to I. R-coloured vowels are not modelled.
+CONVERSATIONAL_VOWELS = {
+    "N": 7.30, "I": 5.15 + 0.64 + 2.97 / 2 + 1.57 / 2, "i": 3.69, "E": 3.21 + 1.57 / 2, "A": 1.43 + 2.97 / 2 + 0.64 / 2,
+    "ae": 2.25, "o": 1.85, "V": 1.46, "u": 1.13, "U": 0.76 + 0.64 / 2, "O": 0.77,
+}
+
+
+def vowel_q_sampler(weights: dict, centres: dict, p_cover: float = 0.3, jitter: float = 0.15):
+    """(q1, q2) draws: with p_cover uniform over a box the size of Story's, centred on the weighted mean of the vowel
+    centres (coverage around the population's centre, not the box's); otherwise a vowel by weight, jittered by
+    `jitter` of the box's width in each coordinate."""
+    keys = list(weights)
+    w = np.array([weights[k] for k in keys], float)
+    w /= w.sum()
+    c = np.array([centres[k] for k in keys], float)
+    width = np.array([Q1_RANGE[1] - Q1_RANGE[0], Q2_RANGE[1] - Q2_RANGE[0]])
+    mean = w @ c
+
+    def draw(rng: np.random.Generator) -> tuple[float, float]:
+        if rng.random() < p_cover:
+            q = mean + (rng.random(2) - 0.5) * width
+        else:
+            q = c[rng.choice(len(keys), p=w)] + rng.normal(0.0, jitter, 2) * width
+        return float(q[0]), float(q[1])
+
+    return draw
+
 # Physical constants, CGS (Flanagan 1972, Table 3.1; body-temperature moist air).
 RHO = 1.14e-3  # g/cm^3
 C_CM_S = 35000.0  # same as tract.C_CM_S
@@ -261,10 +300,12 @@ def sample_speaker(rng: np.random.Generator, length_cm: float) -> TubeSpeaker:
 
 
 def sample_target(rng: np.random.Generator, spk: TubeSpeaker, n_poles: int, f_max_hz: float, p_constrict: float = 0.15,
-                  p_larynx: float = 0.3, p_lips: float = 0.3, min_area_cm2: float = 0.1) -> tuple[np.ndarray, np.ndarray, dict]:
+                  p_larynx: float = 0.3, p_lips: float = 0.3, min_area_cm2: float = 0.1, q_draw=None
+                  ) -> tuple[np.ndarray, np.ndarray, dict]:
     """One articulatory target: F1..F_n_poles and bandwidths (NaN above f_max_hz) plus the parameters drawn.
 
-    q1, q2 are uniform over the Table IV box (Story's Fig. 10); shapes whose substrate narrows below min_area_cm2 (at Story's
+    q1, q2 are uniform over the Table IV box (Story's Fig. 10), or drawn by q_draw(rng) (`vowel_q_sampler`);
+    shapes whose substrate narrows below min_area_cm2 (at Story's
     size) are redrawn, so the tract stays open (sonorant). Optional tier II constriction (approximant-like,
     0.15-0.8 cm^2 at Story's size) and tier III larynx / lip length changes. A shape whose poles can't be
     found is redrawn and listed under info["rejected"]; the first shape's draws are unchanged by this.
@@ -273,7 +314,7 @@ def sample_target(rng: np.random.Generator, spk: TubeSpeaker, n_poles: int, f_ma
     rejected: list[dict] = []
     for _attempt in range(20):
         for _ in range(100):
-            q1, q2 = rng.uniform(*Q1_RANGE), rng.uniform(*Q2_RANGE)
+            q1, q2 = q_draw(rng) if q_draw else (rng.uniform(*Q1_RANGE), rng.uniform(*Q2_RANGE))
             if vowel_areas(q1, q2, OMEGA * spk.omega_warp).min() >= min_area_cm2:
                 break
         else:

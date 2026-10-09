@@ -30,6 +30,12 @@ PB_MALE = {
     "V": (640, 1190, 2390), "3r": (490, 1350, 1690),
 }
 _PB = np.array(list(PB_MALE.values()), float)
+# D-022: the same table with schwa (the log-centroid of the nine monophthongs), and vowel weights from conversational
+# speech (tube.CONVERSATIONAL_VOWELS; Story's /o/ has no PB entry and is split between /U/ and /O/; /3r/ gets none).
+_PB_N = np.vstack([_PB[:9], np.exp(np.log(_PB[:9]).mean(0))[None]])
+PB_CONVERSATIONAL_WEIGHTS = np.array([3.69, 5.15 + 0.64 + 2.97 / 2 + 1.57 / 2, 3.21 + 1.57 / 2, 2.25, 1.43 + 2.97 / 2 + 0.64 / 2,
+                                      0.77 + 1.85 / 2, 0.76 + 0.64 / 2 + 1.85 / 2, 1.13, 1.46, 7.30])  # i I E ae A O U u V N
+PB_CONVERSATIONAL_WEIGHTS = PB_CONVERSATIONAL_WEIGHTS / PB_CONVERSATIONAL_WEIGHTS.sum()
 
 
 @dataclass
@@ -55,8 +61,10 @@ def _enforce_order(f: np.ndarray) -> np.ndarray:
     return out
 
 
-def sample_formants(rng: np.random.Generator, length_cm: float, p_uniform: float = 0.3, p_cluster: float = 0.1) -> np.ndarray:
-    """F1..F8 for one articulatory target."""
+def sample_formants(rng: np.random.Generator, length_cm: float, p_uniform: float = 0.3, p_cluster: float = 0.1,
+                    conversational: bool = False) -> np.ndarray:
+    """F1..F8 for one articulatory target. conversational: the two PB vowels interpolated between are drawn with
+    conversational-speech weights from a table that includes schwa (D-022), instead of uniformly."""
     s = REF_L_CM / length_cm
     tube = tube_resonances(length_cm)
     if rng.random() < p_uniform:
@@ -65,9 +73,10 @@ def sample_formants(rng: np.random.Generator, length_cm: float, p_uniform: float
         f3 = np.exp(rng.uniform(np.log(max(f2 + 200, 1600 * s)), np.log(max(f2 + 400, 3600 * s))))
         f13 = np.array([f1, f2, f3])
     else:
-        i, j = rng.choice(len(_PB), 2, replace=False)
+        table = _PB_N if conversational else _PB
+        i, j = rng.choice(len(table), 2, replace=False, p=PB_CONVERSATIONAL_WEIGHTS if conversational else None)
         w = rng.random()
-        f13 = np.exp((1 - w) * np.log(_PB[i]) + w * np.log(_PB[j])) * s * np.exp(rng.normal(0, 0.08, 3))
+        f13 = np.exp((1 - w) * np.log(table[i]) + w * np.log(table[j])) * s * np.exp(rng.normal(0, 0.08, 3))
     upper = tube[3:] * np.exp(rng.normal(0, 0.05, N_POLES - 3))
     f = np.concatenate([np.sort(f13), upper])
     if rng.random() < p_cluster:  # singer's formant cluster: F3-F5 bunched near 2.5-3.2 kHz (scaled)
