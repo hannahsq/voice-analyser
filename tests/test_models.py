@@ -15,7 +15,19 @@ def test_targets_decode_back_to_value(hz):
     assert bool(valid[0]) and float(t.sum()) == pytest.approx(1.0)
     got, sigma = decode(t.numpy(), FORMANT_AXIS)
     assert 1200 * abs(np.log2(got[0] / hz)) < 2.0  # local mean recovers the value to within 2 cents
-    assert 25 < sigma[0] < 40  # target blur is 35 cents, truncated to +-80 cents
+    assert sigma[0] < 8.0  # a target-shaped prediction is certain: the 35-cent blur is removed
+
+
+def test_sigma_reports_broad_and_multimodal_distributions():
+    centres = FORMANT_AXIS.centres_hz
+    b = np.arange(FORMANT_AXIS.n_bins)
+    wide = np.exp(-0.5 * ((b - 150) * 20 / 150.0) ** 2)  # 150 cents
+    _, s = decode(wide, FORMANT_AXIS)
+    assert s == pytest.approx(np.sqrt(150**2 - 35**2), rel=0.03)
+    two = np.exp(-0.5 * ((b - 100) * 20 / 35.0) ** 2) + 0.9 * np.exp(-0.5 * ((b - 140) * 20 / 35.0) ** 2)
+    hz, s = decode(two, FORMANT_AXIS)
+    assert hz == pytest.approx(centres[100], rel=0.01)  # the larger mode
+    assert 500 < s < 650  # but 47 % of the mass is 800 cents away
 
 
 def test_targets_mask_out_of_range_and_missing():
@@ -36,11 +48,13 @@ def test_crops_align_audio_and_labels(tmp_path):
     for i in range(4):
         audio, lab = ds[i]
         clip_audio, clip_lab, _ = reader[i]
-        # find the crop start by matching f0 labels, then check the audio at frame centres
-        start = next(s for s in range(len(clip_lab["f0"]) - 49) if np.allclose(clip_lab["f0"][s : s + 50], lab["f0"]))
-        for j in (0, 17, 49):
-            assert audio[vqt.N_MAX // 2 + j * vqt.HOP] == pytest.approx(clip_audio[(start + j) * vqt.HOP], abs=1e-6)
-        assert np.array_equal(lab["voiced"], clip_lab["voiced"][start : start + 50])
+        # some crop start must align both the labels and the audio at frame centres (f0 alone can be constant over a
+        # stretch and match several starts, so the label match only narrows the candidates)
+        def aligned(s):
+            return (np.allclose(clip_lab["f0"][s : s + 50], lab["f0"]) and np.array_equal(lab["voiced"], clip_lab["voiced"][s : s + 50])
+                    and all(abs(audio[vqt.N_MAX // 2 + j * vqt.HOP] - clip_audio[(s + j) * vqt.HOP]) <= 1e-6 for j in (0, 17, 49)))
+
+        assert any(aligned(s) for s in range(len(clip_lab["f0"]) - 49))
 
 
 def test_fixed_crops_ignore_worker_seed(tmp_path):
