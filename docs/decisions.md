@@ -366,7 +366,21 @@ D-013 deferred Schedule-Free AdamW (Defazio et al. 2024) until the data was sett
 - v2 is better than v1 at high f0 on both sets.
 - **Tracker circularity is large.** Each set favours the model family that tracked it, most at high f0 (d16k: 22.3 % gross on v1-tracked clips, 11.8 % on its own). Resynthesised sets used for evaluation must therefore be tracked by a model that is not being compared, or be reported under both trackers. The gross errors do not sit at the original (pre-perturbation) tracks (9–12 % of them, against a base rate of about 5 %).
 
+**Closed-phase reference (CMU ARCTIC with EGG).** VTR-TIMIT needs TIMIT's audio (LDC licence), which we don't have and won't obtain informally, so the separating test uses EGG instead: closed-phase covariance LPC (`eval/closed_phase.py`, order 12 at 10 kHz, cycles within ±20 ms, closed phases GCI + 0.3 ms to GOI − 0.3 ms, shifted by the measured speech lag of 0.8–1.1 ms) on every monophthong frame of the three ARCTIC voices that have EGG. 26,663 frames have a closed-phase fit and every estimate. Median signed difference from closed-phase F1 (Hz):
+
+| Voice (f0, closed quotient) | Whole-cycle LPC | Praat Burg (5000/5500 Hz) | v1 | d06k | d16k |
+|---|---|---|---|---|---|
+| bdl, male (121 Hz, 0.59) | +2 | −6 | +1 | +4 | +5 |
+| jmk, male (111 Hz, 0.34) | +3 | −45 | +16 | +26 | +31 |
+| slt, female (174 Hz, 0.42) | −10 | −10 | −6 | −7 | −4 |
+
+- *Open-phase coupling is not the cause.* The same estimator over whole cycles is within a few Hz of the closed-phase fit.
+- *LPC-based references read F1 low:* Praat Burg by 6–10 Hz for bdl and slt and by 45 Hz for jmk (a breathier voice). Measured against Praat (the Hillenbrand view) the teachers are +6 to +11 Hz for bdl and slt, comparable to their offset on Hillenbrand men, though against the closed phase they are within ±7 Hz. So part of the Hillenbrand F1 "bias" is the reference's.
+- *Part is the teacher's.* jmk's bias grows with training (+16 → +26 → +31 Hz; close vowels, closed-phase F1 < 450 Hz: +23 → +40), and at slt's higher f0 the teacher compresses F1 towards the middle (closed-phase F1 < 450 Hz read +48 to +55 Hz high, > 650 Hz read −30 Hz low), matching the Hillenbrand finding that low-F1 vowels read up to 17 % high in women and children. That pattern is regression towards the training prior where harmonics leave F1 ambiguous.
+- Caveats: three speakers; closed-phase LPC has its own scatter (9–25 Hz median against whole-cycle), largest for jmk's short closed phases. Evidence about mechanisms, not a new gold standard.
+
 **Consequences.**
-- M2 will very likely fail on women's and children's F1 at 20k (the paired comparison against v1 runs then).
-- Training on resynthesised data (M3) addresses source mismatch, which is not the main cause here. It remains useful for the low-f0 singing weakness, provided the tracker is not the model under evaluation.
-- Next: a second formant reference (VTR-TIMIT) to separate tract-side from reference-side causes; a low-f0 ablation of the tract-length sampling; and, depending on those, calibrating the synthesiser's distributions against real data (option 1 of the three discussed: "learning to simulate").
+- M2's Hillenbrand F1 criterion partly measures LPC's own low reading; a teacher a few Hz above LPC can be closer to the truth. The drift between models is real nonetheless, since it shows against the closed phase too.
+- The cause to work on is the training prior, not missing physics: the synthetic F1 distribution conditional on f0 (and tract length, D-012's decoupling), where the teacher falls back on it. Calibrating the synthesiser's distributions against real data (option 1: "learning to simulate") now has a concrete target, with closed-phase F1 on EGG voices as one check.
+- Training on resynthesised data (M3) addresses source mismatch, which is not the main cause. It remains useful for the low-f0 singing weakness, provided the tracker is not the model under evaluation.
+- Next: a low-f0 ablation of the tract-length sampling; the F1-given-f0 prior of train_v2 against real distributions (Hillenbrand's vowel space by group, closed-phase F1 on ARCTIC).
