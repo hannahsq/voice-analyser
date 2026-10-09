@@ -29,6 +29,26 @@ So train in bf16 with native kernels. `tests/test_device.py` is the regression c
 
 To re-enable MIOpen later: hipRTC needs C++ standard headers, and none are on this machine (no Visual Studio / Build Tools, and the ROCm wheels don't bundle libc++). The most likely fix is VS 2022 Build Tools with "Desktop development with C++". That's not worth doing now: it only speeds up fp32, and it wouldn't explain the convolution crash. Revisit after a ROCm upgrade.
 
+**Revisited 2026-10-09 (VS Build Tools 18 with the C++ workload, MSVC 14.51, Windows SDK 10.0.26100).** hipRTC reads `INCLUDE`. With it set to the MSVC `include` folder plus the SDK's `ucrt`, MIOpen's GRU and batch norm compile, and GRU, batch norm and plain and dilated Conv2d all match the native kernels (fp32 ≤ 6e-7 relative; bf16 4e-3 for convolutions and 1e-2 for a 50-step GRU). Speed is another matter. On the full teacher training step (bf16, real batch):
+
+| MIOpen used for | ms/step |
+|---|---|
+| nothing (native, current) | **1055** |
+| convolutions | 1572 |
+| everything | 1562 |
+| convolutions, benchmark mode | 1406 |
+| everything, benchmark mode | 1399 |
+
+MIOpen's GRU on its own is 2–3× faster: 27 vs 76 ms (f0 GRU) and 77 vs 159 ms (main GRU), fwd + bwd, batch 32 × 200 frames. So the best policy would be native convolutions with MIOpen around the GRUs, the reverse of the old `rnn` setting, for about 12 % (≈ 68 audio-s/s). Teacher v2 keeps `all` so its runs stay comparable; the GRU-only policy, with `setup_device` finding the headers via `vswhere`, is for teacher v3.
+
+Other measurements from the same session, for the record:
+- The data loader is not a bottleneck: 7–10 batches/s against 0.93 needed, and the trainer waits about 1 ms per step for data.
+- Evaluation plus checkpointing every 1000 steps costs 0.9 % of wall time.
+- The host takes the whole step to queue its kernels (1072 of 1081 ms): the native GRUs step through time, and the native dilated convolutions loop over samples, so a step is tens of thousands of small kernels. The native GRUs are about 26 % of the step.
+- HIP graph capture (which would remove the launch overhead without changing kernels) aborts the process with hipBLASLt ("operation not permitted when stream is capturing"). With `TORCH_BLAS_PREFER_HIPBLASLT=0` it works, but rocBLAS makes the whole step 2.5× slower (24 against 60 audio-s/s).
+- The per-step `float()` calls in the training loop forced a host-GPU sync each step. Removing them gave +8 % (55.3 → 59.7 audio-s/s, two repeats); pinned memory added nothing.
+- Windows Smart App Control switched itself to enforcement on 2026-10-09 and blocked ffmpeg (codec augmentation), crashing a training run; it is now off. If codec calls fail with WinError 4551, check it first.
+
 ## D-003 (2026-10-07): speaker ids are corpus-prefixed; TIMIT-derived sets share corpus `timit`
 
 `speaker_id = "<corpus>:<local id>"`, so the same local id in different corpora can't collide by accident. Sets derived from another corpus (VTR-TIMIT → TIMIT) register under the parent corpus's name, so the leakage test sees shared speakers. Speakers who appear in two different corpora under different ids can't be detected automatically; list them as explicit exclusions if that turns up.
@@ -319,3 +339,34 @@ D-013 deferred Schedule-Free AdamW (Defazio et al. 2024) until the data was sett
 - **Reading the result.** If schedule-free is within noise of d06k or better, later teachers (v3 onward) use it and drop decay branches: any checkpoint is meant to be usable as is, which removes the 4k-step cost of each branch. If it is clearly worse, the result is inconclusive rather than negative, since schedule-free often prefers a higher learning rate than AdamW and only one was tried; WSD stays.
 - **Cost.** About 3.3 h of GPU time. The main constant-phase run pauses at its 10k checkpoint, so the two don't share the GPU, and resumes afterwards (resumed runs reseed the data stream, D-013).
 - **Implementation.** `TrainConfig.optimizer`. Checkpoints hold schedule-free's averaged (evaluation) weights, so `va eval` and the analysis code load them unchanged. Its learning-rate warmup runs inside the optimiser. The `schedulefree` package (1.4.1, PyPI) is in the `train` extras.
+- **Result at 10k (synthetic validation only).** Schedule-free 23.8 / 45.2 / 62.5 / 98.4 Hz F1–F4 MAE, f0 RPA 99.3, voicing 99.0; d06k 24.3 / 45.3 / 64.1 / 101.4, 99.4, 99.2. So formants slightly better, f0 and voicing 0.1–0.2 points behind: a match, without a decay branch. Both runs then continue to 40k (WSD with branches at 16k/26k/36k), compared at equal steps; the suite and gold-set comparisons are made at 20k (d16k vs schedule-free 20k).
+- **Running both at once doesn't pay here.** Three processes (two runs plus a branch) exhausted the commit limit (each run ~9 GB plus 12 workers at ~1.9 GB) and reached about 29 audio-s/s in total, against 50–60 for one run alone. Runs, branches and evaluations now go one at a time (orchestrator in the session scratchpad), which also stops on any failed step.
+
+## D-019 (2026-10-09): teacher v2's F1 regression on Hillenbrand: what it is and isn't
+
+**Finding.** d16k (20k steps) reads Hillenbrand F1 worse than d06k and v1 although its synthetic F1 keeps improving: MAE 41 vs 37 Hz, DR 95.1 vs 97.3 %, with the drop in every group (DR men 99.5 → 98.0, women 96.9 → 95.2, boys 94.9 → 92.2, girls 96.4 → 92.3). The sim-to-real F1 gap at f0 150–300 Hz grew from +3.3 (d06k) to +5.5 points.
+
+**Diagnosis** (scripts in the session scratchpad: `f1_drift.py`, `f1_bias.py`, `f1_prior.py`, `resynth_gross.py`):
+- *It is an upward bias that grows with training.* Median signed F1 error against Hillenbrand, v1 → d06k → d16k: men +11 → +14 → +17 Hz, women +26 → +21 → +30, boys +29 → +28 → +38, girls +30 → +28 → +41 (Praat FastTrack: +8 to +10). About 5–7 % for women and children, up to 17 % for low-F1 vowels. Frames that moved by more than 20 Hz from d06k to d16k moved up (median +29 Hz), and only 35 % of them towards the reference.
+- *Not the references' harmonic snapping.* At f0 ≥ 150 Hz, 44 % of Hillenbrand's F1 references lie within 0.1 harmonic spacing of a harmonic (FastTrack 41 %, uniform 20 %, teacher 22–27 %), so the LPC references do snap. But the teacher's errors are smallest on those frames (39 Hz, against 52–58 elsewhere), and the bias grows for men too, where harmonics are dense and LPC's F1 is reliable.
+- *Not the label definition.* On synthetic validation the signed bias is −3 to +1 Hz in every f0 band for all three models, and within ±10 Hz in every (f0, true F1) cell up to f0 260 Hz, so there is no pull towards the training prior on in-distribution data either.
+- *Mostly not the glottal source.* On resynthesised held-out VocalSet clips (real sources, exact synthetic-tract labels; 5 val singers, 100 recordings, 500 clips) the median bias is +6 / +9 / +6 Hz (ratio 1.011 / 1.017 / 1.012) and does not grow with training.
+- *Remaining candidates:* properties of real vocal tracts the synthesiser lacks (F1 raised and broadened in the open phase through subglottal coupling, wall vibration in the 40 % cascade clips, real F1 bandwidths), or a systematic offset in Hillenbrand's LPC references. These experiments cannot separate the two; a second formant reference made by a different method (VTR-TIMIT) would.
+
+**A second finding: v2 is weaker than v1 on low-pitched singing.** On the resynthesised clips, gross F1 errors (> 20 % off the exact label) at f0 < 150 Hz are 3.7 % for v1 against 10.1 % (d06k) and 7.9 % (d16k). The clips were made by inverse filtering with v1's tracks, so the set was rendered again with d16k as tracker:
+
+| Gross F1 errors (%) | v1-tracked: v1 / d06k / d16k | d16k-tracked: v1 / d06k / d16k |
+|---|---|---|
+| f0 < 150 | 3.7 / 10.1 / 7.9 | 6.2 / 13.0 / 9.2 |
+| f0 150–250 | 8.9 / 12.6 / 11.8 | 7.1 / 12.0 / 10.2 |
+| f0 250–400 | 20.2 / 23.5 / 22.2 | 20.1 / 20.4 / 15.9 |
+| f0 ≥ 400 | 26.1 / 23.8 / 22.3 | 22.3 / 13.0 / 11.8 |
+
+- The low-f0 weakness survives the swap, so it is real; train_v2's f0 distribution is unchanged from train_v1 (16.6 / 11.1 / 8.2 / 7.1 % of voiced frames below 100 / 100–150 / 150–200 / 200–250 Hz), so coverage is not the cause. D-012's tract-length decoupling (half the clips draw 10–20 cm whatever the f0) is the leading suspect. d16k's low-f0 gross errors include 13–16 % at about twice the label.
+- v2 is better than v1 at high f0 on both sets.
+- **Tracker circularity is large.** Each set favours the model family that tracked it, most at high f0 (d16k: 22.3 % gross on v1-tracked clips, 11.8 % on its own). Resynthesised sets used for evaluation must therefore be tracked by a model that is not being compared, or be reported under both trackers. The gross errors do not sit at the original (pre-perturbation) tracks (9–12 % of them, against a base rate of about 5 %).
+
+**Consequences.**
+- M2 will very likely fail on women's and children's F1 at 20k (the paired comparison against v1 runs then).
+- Training on resynthesised data (M3) addresses source mismatch, which is not the main cause here. It remains useful for the low-f0 singing weakness, provided the tracker is not the model under evaluation.
+- Next: a second formant reference (VTR-TIMIT) to separate tract-side from reference-side causes; a low-f0 ablation of the tract-length sampling; and, depending on those, calibrating the synthesiser's distributions against real data (option 1 of the three discussed: "learning to simulate").
