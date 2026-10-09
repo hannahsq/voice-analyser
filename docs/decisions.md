@@ -421,6 +421,16 @@ D-012's partial decoupling cut the dependence about fourfold; the remainder has 
 
 Adopt full decoupling for teacher v3 if the probe's median |slope| falls clearly (by a third or more) and closed-phase F1 agreement is not worse beyond its bootstrap interval; the guard-rails must not regress beyond noise.
 
+**Result (2026-10-09): the rule fails; full decoupling is not adopted as it stands.** `teacher_v3a_d06k` (10k steps) against d06k:
+1. *Probe:* median |slope| 18.7 against 13.7 Hz/octave (median slope +6.4 vs +1.8); no fall. Both models have the same F1 error by f0 (+22 / +25 Hz at 318 / 400 Hz), and the remaining slope is mostly o and u, whose F1 approaches or falls below f0 at the top of the sweep. The probe as built mixes prior coupling with that resolution limit; it will report f0 ≤ 250 Hz separately from now on.
+2. *Closed phase* (`cp_v3a.py`; PTDB-TUG speaker bootstrap of v3a − d06k): F1 bias women +8.0 [+5.5, +9.7], men +4.2 [+3.2, +5.5] Hz; median |error| women +1.1 [−0.8, +1.9], men +2.9 [+2.0, +3.6]. The shift is upward everywhere. Women's compression is slightly smaller (low-F1 / high-F1 bias +53 / −17 against +44 / −35), but through the high end moving up, not the low end moving down. ARCTIC: bdl +5 vs +4, jmk +33 vs +26, slt +2 vs −7 Hz.
+3. *Hillenbrand* (`runs/m2_paired_v3a.txt`): every difference within noise (F1 MAE all +0.9 [−0.1, +1.9]).
+4. *Guard-rails:* PTDB-TUG f0 RPA +0.2 (better, all and modal), within noise below 85 Hz. Swapped validation (`runs/cross_val_v3a.txt`): on train_v2's clips F1 MAE +0.9 [+0.4, +1.6] Hz (beyond noise, about 4 %), F2–F3 and f0 within noise; on train_v3a's clips d06k is no worse than v3a, so d06k did not depend on the coupling on synthetic data. The suite is mostly within noise (f1_near_h2 F1 DR 54.5 → 49.0).
+
+**Why: the coupling was acting as a correction to the F1 prior's centre.** The synthetic F1 marginal is the same in both sets (median about 600 Hz), but train_v2's conditional median rose with f0 (553 / 592 / 630 / 635 Hz for f0 < 150 / 150–250 / 250–350 / > 350), while train_v3a's is flat at about 600. Real F1 sits lower (closed-phase medians: men 456, women 548 Hz on PTDB-TUG). Where evidence is weak the teacher falls back towards the prior's centre, and v2's lower centre at low f0 happened to be nearer real speech. Removing the coupling moved the centre up for the f0 range of real speech, so every estimate moved up. This fits D-019's mechanism (pull towards the prior) and locates it: what matters is where the pull points, and, as the longer-term fix, how strongly the model is pulled.
+
+**Consequence.** The principle stands; this ablation removed the coupling without replacing the useful part of what it did. Next, if pursued: a tract-only F1 prior whose centre and spread are set from real speech (independent of f0 and of everything on the source side), with the same measures; and, separately, less dependence on the prior: longer context (D-021) and slow formant sweeps in synthesis.
+
 ## D-021 (2026-10-09, planned): temporal module, crop length, and vocal-tract-length outputs
 
 Planned work, in this order, each step on the winner of the previous one and after the D-020 decision. Each comparison changes one thing.
