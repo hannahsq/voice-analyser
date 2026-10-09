@@ -420,3 +420,18 @@ D-012's partial decoupling cut the dependence about fourfold; the remainder has 
 4. Guard-rails: PTDB-TUG f0 RPA, the suite, synthetic validation.
 
 Adopt full decoupling for teacher v3 if the probe's median |slope| falls clearly (by a third or more) and closed-phase F1 agreement is not worse beyond its bootstrap interval; the guard-rails must not regress beyond noise.
+
+## D-021 (2026-10-09, planned): temporal module, crop length, and vocal-tract-length outputs
+
+Planned work, in this order, each step on the winner of the previous one and after the D-020 decision. Each comparison changes one thing.
+
+**1. Conformer instead of the BiGRUs.** The convolutional front end stays; only the temporal modules change. The main encoder's 2-layer BiGRU becomes a small Conformer (about 4 blocks, width 192–256, 4 heads, a time-convolution kernel of 15–31 frames, relative position encoding), with the same parameter count. The f0 branch's BiGRU becomes a dilated 1-D convolution stack. Recipe: d06k's (6000 constant + 4000 decay steps) on the D-020 winner's data. Compared on synthetic validation, the D-020 measures (the f0-invariance probe included, since attention could find a new path from pitch to tract) and step time. Expected: accuracy about equal; training 15–20 % faster per step (the GRUs are about 22 % of a step, and the dilated 2-D convolutions remain the main cost); CPU inference 1.5–1.8× faster (the GRUs are about 45 % of it at 4 threads, and are sequential); and streaming becomes possible with chunked attention, which a BiGRU cannot do. Mamba and RWKV are deferred: they have no fused kernels on Windows ROCm.
+
+**2. Longer and mixed crop lengths.** Training uses 2 s crops (from 2–4 s clips), while evaluation and the intended uses run whole files of tens of seconds with many vowels. Crops of 2, 4 and 8 s (later 16 s), grouped by length with the batch size scaled to keep steps about equal in cost; clips at least as long as the longest crop (`duration_s` up to about (2, 16)). Purpose: remove the train/use length mismatch, and let the model pool tract evidence across many vowels from one speaker. That pooling is tract-to-tract evidence and consistent with D-020. A model that learns "one speaker, one tract" will smooth over a real change within a file, so before/after material is analysed as separate files.
+
+**3. Vocal-tract-length outputs.** The synthesiser knows three related quantities exactly; they are kept distinct:
+- *Anatomical VTL* (`length_cm`): constant per speaker. A new head outputs a running per-frame estimate with uncertainty, trained on the clip's label. Its estimate should converge and stay flat as evidence accumulates.
+- *Instantaneous acoustic length*: anatomical length with the current larynx height and lip protrusion (per target in `meta["tube"]`). It genuinely varies from vowel to vowel and is the legitimate reason apparent VTL moves.
+- *Apparent VTL*: derived from the formants afterwards, not predicted by the model. The formants-to-length mapping is fitted on tube clips, where formants and true lengths are both known, instead of assuming a uniform tube; that also measures the uniform tube's error.
+
+The running anatomical estimate doubles as a diagnostic of the model's beliefs. Drift that follows f0 is the coupling D-020 removes, and the invariance probe is extended to this output; drift that follows the vowel means instantaneous length is being confused with anatomical length. The label must stay a pure tract quantity, sampled independently of the source.
