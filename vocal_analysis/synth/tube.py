@@ -64,6 +64,33 @@ PB_FIT_VOWELS = {
     "O": (4.505, -1.740), "U": (-0.624, -2.224), "u": (-3.896, -2.273), "V": (1.929, -0.889), "N": (-1.806, -1.209),
     "o": STORY_VOWELS["o"],
 }
+# Women's and children's vowel spaces are not length-scaled men's (non-uniform scaling, Fant 1966): fitted to PB's
+# women and children (Table II) at the groups' mean lengths (15.6 cm, D-022 population; 12.95 cm, children 11.4-14.5)
+# with the typical sampled speaker (pharynx ratio rel^0.3, areas rel^2), starting from the men's fit and penalising
+# distance from it (0.02 per box-width squared), so shapes change smoothly and can be interpolated by length. All
+# within about 2 % except the open front corner the two-mode model can't reach (women /ae/ F1 810 vs 860; children /ae/,
+# /A/ 2-4 % low). Schwa: each group's PB log-centroid. /o/ keeps Story's target.
+PB_FIT_VOWELS_BY_LENGTH = {
+    12.95: {"i": (-5.347, 0.868), "I": (-3.849, 0.558), "E": (-2.287, 1.148), "ae": (1.292, 2.212), "A": (5.197, 0.615),
+            "O": (4.571, -2.078), "U": (-1.335, -2.042), "u": (-2.831, -2.424), "V": (2.217, -0.812),
+            "N": (-1.665, -1.041), "o": STORY_VOWELS["o"]},
+    15.6: {"i": (-5.441, 1.019), "I": (-4.127, 0.912), "E": (-2.052, 2.002), "ae": (0.867, 2.386), "A": (4.746, 0.546),
+           "O": (4.329, -2.022), "U": (-1.235, -2.143), "u": (-2.670, -2.447), "V": (2.198, -0.375),
+           "N": (-1.733, -0.926), "o": STORY_VOWELS["o"]},
+    STORY_LENGTH_CM: PB_FIT_VOWELS,
+}
+
+
+def vowel_centres(length_cm: float) -> dict:
+    """PB-fitted (q1, q2) targets for a tract of this length: linear in length between the children's, women's and
+    men's fits, held constant beyond them (the tube's length scaling does the rest)."""
+    ls = sorted(PB_FIT_VOWELS_BY_LENGTH)
+    x = float(np.clip(length_cm, ls[0], ls[-1]))
+    j = min(int(np.searchsorted(ls, x)), len(ls) - 1)
+    i = max(j - 1, 0)
+    a = 0.0 if j == i else (x - ls[i]) / (ls[j] - ls[i])
+    lo, hi = PB_FIT_VOWELS_BY_LENGTH[ls[i]], PB_FIT_VOWELS_BY_LENGTH[ls[j]]
+    return {k: tuple((1 - a) * np.array(lo[k]) + a * np.array(hi[k])) for k in lo}
 # Vowel shares in casual conversational American English: Mines, Hanson & Shoup (1978), Language and Speech 21(3),
 # Table 4a (% of all phonemes, 26 adults, 103,887 phonemes). Diphthongs are split equally between their end points
 # (aI -> A + I, aU -> A + U), /e/ between I and E, the alternate /ɨ~ɪ/ goes to I. R-coloured vowels are not modelled.

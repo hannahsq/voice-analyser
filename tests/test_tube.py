@@ -220,3 +220,21 @@ def test_population_lengths_and_fixed_bandwidth_f0():
                       length_dist="population")
     clip = generate(3, cfg, seed=5)
     assert clip.meta["length_group"] in ("women", "men", "children", "cover")
+
+
+def test_group_vowel_targets_match_pb_and_interpolate_smoothly():
+    """D-022: women's and children's targets give PB Table II through the tube at their mean lengths (the open front
+    corner within 7 %), and interpolation between groups stays between their formants."""
+    from vocal_analysis.synth.tract import PB_CHILDREN, PB_WOMEN, pb_table_for_length
+
+    keys = ["i", "I", "E", "ae", "A", "O", "U", "u", "V"]
+    for L, table in ((15.6, PB_WOMEN), (12.95, PB_CHILDREN)):
+        rel = L / T.STORY_LENGTH_CM
+        for k, ref in zip(keys, table):
+            f, _ = T.poles(T.build_shape(*T.PB_FIT_VOWELS_BY_LENGTH[L][k], L, pharynx_ratio=rel ** 0.3, area_scale=rel ** 2))
+            tol = 0.07 if k in ("ae", "A", "u") else 0.03
+            assert f[0] == pytest.approx(ref[0], rel=tol) and f[1] == pytest.approx(ref[1], rel=max(tol, 0.08 if k == "u" else 0)), (L, k)
+    mid = T.vowel_centres(16.5)
+    assert all(min(a, b) - 1e-9 <= m <= max(a, b) + 1e-9 for k in mid
+               for m, a, b in zip(mid[k], T.PB_FIT_VOWELS_BY_LENGTH[15.6][k], T.PB_FIT_VOWELS[k]))
+    assert np.allclose(pb_table_for_length(15.6)[:9], PB_WOMEN) and np.allclose(pb_table_for_length(8.0)[0], PB_CHILDREN[0] * 12.95 / 8.0)

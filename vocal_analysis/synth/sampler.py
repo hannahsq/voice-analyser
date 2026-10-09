@@ -58,8 +58,9 @@ class SynthConfig:
     p_tube: float = 0.6  # per clip: Story area function + lossy tube (plan §5.1 preferred), else the resonator-cascade prior
     p_tube_constrict: float = 0.15  # per tube target: approximant-like tier II constriction
     # Vowel targets: "box" (tube q1, q2 uniform over Story's box; cascade PB vowels equally likely) or "conversational"
-    # (D-022: by conversational vowel frequency around PB-fitted tube targets, 30 % uniform coverage around their
-    # weighted centre; cascade PB vowels, with schwa, weighted the same way)
+    # (D-022: by conversational vowel frequency around tube targets fitted to PB's men, women and children and
+    # interpolated by length, 30 % uniform coverage around their weighted centre; cascade: PB's per-group tables
+    # interpolated by length, with schwa, weighted the same way)
     vowel_dist: str = "box"
     p_uniform_formants: float = 0.3
     # Cascade bandwidths: Hawks & Miller's f0 scaling uses the clip's centre f0 (None), or this fixed f0, which keeps
@@ -319,7 +320,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     tube_info = None
     if use_tube:
         spk = tube.sample_speaker(rng, length)
-        q_draw = tube.vowel_q_sampler(tube.CONVERSATIONAL_VOWELS, tube.PB_FIT_VOWELS) if cfg.vowel_dist == "conversational" else None
+        q_draw = tube.vowel_q_sampler(tube.CONVERSATIONAL_VOWELS, tube.vowel_centres(length)) if cfg.vowel_dist == "conversational" else None
         drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw) for _ in tt]
         targets = np.array([d[0] for d in drawn])
         tube_bws = np.array([d[1] for d in drawn])
