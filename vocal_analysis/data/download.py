@@ -2,6 +2,7 @@
 
     va download hillenbrand ptdb_tug mir1k mdb_stem_synth   # gold sets
     va download vocalset                                    # training pools
+    va download cmu_arctic                                  # EGG analysis set (bdl, jmk, slt)
 
 Archives go to <data.root>/downloads/, and each corpus is extracted into its
 own <data.root>/<corpus>/ directory. Nothing inside an archive is ever
@@ -18,6 +19,7 @@ import subprocess
 import tarfile
 import time
 import urllib.request
+from fnmatch import fnmatch
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -30,10 +32,24 @@ class Source:
     checksum: str | None  # "md5:<hex>" or "sha256:<hex>"; None = record on first download
     size: int | None = None
     inner_archives: tuple[str, ...] = ()  # archives inside the archive to extract too
+    include: tuple[str, ...] = ()  # extract only members matching these patterns (fnmatch); () = all
     note: str = ""
 
 
-SOURCES: dict[str, Source] = {
+def _arctic(voice: str, kind: str, sha256: str, size: int) -> Source:
+    """CMU ARCTIC 0.95 (Kominek & Black 2003): the original stereo speech + EGG at 32 kHz ("WAVEGG"), or the
+    release, of which only the phone labels and prompts are kept."""
+    if kind == "WAVEGG":
+        url = f"http://festvox.org/cmu_arctic/cmu_arctic/orig/cmu_us_{voice}_arctic-WAVEGG.tar.bz2"
+        include = (f"cmu_us_{voice}_arctic/orig/*.wav", f"cmu_us_{voice}_arctic/COPYING", f"cmu_us_{voice}_arctic/README")
+    else:
+        url = f"http://festvox.org/cmu_arctic/cmu_arctic/packed/cmu_us_{voice}_arctic-0.95-release.tar.bz2"
+        include = (f"cmu_us_{voice}_arctic/lab/*.lab", f"cmu_us_{voice}_arctic/etc/txt.done.data")
+    return Source(url=url, filename=f"cmu_arctic/{url.rsplit('/', 1)[1]}", checksum=f"sha256:{sha256}", size=size,
+                  include=include)
+
+
+SOURCES: dict[str, Source | tuple[Source, ...]] = {
     "hillenbrand": Source(
         url="https://github.com/santiagobarreda/hillenbrand_et_al_1995/raw/6dd44decc8ef5b537cbb54732a3b00c8fa652e65/h95-alldata.zip",
         filename="h95-alldata.zip",
@@ -69,6 +85,18 @@ SOURCES: dict[str, Source] = {
         note="VocalSet v1.1 (Wilkins et al. 2018), CC BY 4.0, from Zenodo record 1442513 (v1.2). v1.2's own zip "
         "holds the same audio three times (by singer, technique, vowel); v1.1 has it once, by singer.",
     ),
+    # ---- analysis sets
+    # CMU ARCTIC: only bdl, jmk and slt have EGG (the other voices' lar/ directories are empty). Free for any
+    # purpose with the copyright notice kept (COPYING). festvox.org serves these over plain HTTP only; the
+    # checksums are pinned.
+    "cmu_arctic": (
+        _arctic("bdl", "WAVEGG", "bdae8de8689752caa5ef8ad2cb9b94fb0d9c2a3ee6dee6907d51dbba51c3b653", 402399651),
+        _arctic("jmk", "WAVEGG", "8089374059b2706e1c7add9fee758d4052db7167edfbaea81358a7057e1be5b1", 414794292),
+        _arctic("slt", "WAVEGG", "91e9c76429f2b5d8aa65f490af22af6b180be232811e5a133132d4e98cf8ed48", 362378154),
+        _arctic("bdl", "release", "3c9ec89942056cb4609ea788a6a455d507f5fa3729fc5d0ffcb6ba7ae1d594c9", 94333107),
+        _arctic("jmk", "release", "9f418da3db9dc037056990dbbb2ce6ad91b84e853ab7f9839c6db50c8ad6b411", 91729965),
+        _arctic("slt", "release", "9fddec16fbfbfb7d4989dff0fe77ccbe31f80b07b57be49d09994aa7a67d6dba", 119914432),
+    ),
 }
 
 
@@ -82,8 +110,8 @@ def _hash(path: Path, algo: str) -> str:
 
 def fetch(src: Source, dest_dir: Path, log=print, retries: int = 8) -> Path:
     """Download with resume into dest_dir (retrying dropped connections); verify the checksum."""
-    dest_dir.mkdir(parents=True, exist_ok=True)
     out = dest_dir / src.filename
+    out.parent.mkdir(parents=True, exist_ok=True)
     for attempt in range(retries + 1):
         try:
             _fetch_once(src, out, log)
@@ -140,18 +168,21 @@ def _is_mac_junk(name: str) -> bool:
     return "__MACOSX" in parts or (bool(parts) and (parts[-1].startswith("._") or parts[-1] == ".DS_Store"))
 
 
-def extract(archive: Path, dest: Path) -> None:
+def extract(archive: Path, dest: Path, include: tuple[str, ...] = ()) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     name = archive.name.lower()
+    keep = (lambda n: any(fnmatch(n, pat) for pat in include)) if include else (lambda n: True)  # noqa: E731
+    if include and name.endswith(".rar"):
+        raise ValueError(f"{archive}: member filtering is not supported for RAR")
     if name.endswith(".zip"):
         with zipfile.ZipFile(archive) as z:
             bad = [n for n in z.namelist() if not _safe_member(n)]
             if bad:
                 raise ValueError(f"{archive}: unsafe paths {bad[:3]}")
-            z.extractall(dest, members=[n for n in z.namelist() if not _is_mac_junk(n)])
-    elif name.endswith((".tar.gz", ".tgz", ".tar")):
+            z.extractall(dest, members=[n for n in z.namelist() if not _is_mac_junk(n) and keep(n)])
+    elif name.endswith((".tar.gz", ".tgz", ".tar", ".tar.bz2", ".tbz2")):
         with tarfile.open(archive) as t:
-            members = [m for m in t.getmembers() if not _is_mac_junk(m.name)]
+            members = [m for m in t.getmembers() if not _is_mac_junk(m.name) and keep(m.name)]
             t.extractall(dest, members=members, filter="data")
     elif name.endswith(".rar"):
         # Windows' bundled bsdtar (libarchive) reads RAR; list first to vet paths.
@@ -177,24 +208,29 @@ def _flatten_single_dir(dest: Path) -> None:
 
 
 def download(corpus: str, data_root: Path, log=print) -> Path:
-    src = SOURCES[corpus]
+    """Fetch and extract a corpus. A corpus of several archives is extracted into one directory, unflattened."""
+    srcs = SOURCES[corpus]
+    srcs = (srcs,) if isinstance(srcs, Source) else srcs
     dest = data_root / corpus
     marker = dest / ".extracted"
     if marker.exists():
         log(f"[{corpus}] already present at {dest}")
         return dest
-    log(f"[{corpus}] downloading {src.url}")
-    archive = fetch(src, data_root / "downloads", log)
-    log(f"[{corpus}] extracting to {dest}")
-    extract(archive, dest)
-    _flatten_single_dir(dest)
-    for inner in src.inner_archives:
-        hits = list(dest.rglob(inner))
-        if not hits:
-            raise FileNotFoundError(f"{corpus}: expected inner archive {inner}")
-        for h in hits:
-            extract(h, h.parent)
-            h.unlink()
-    marker.write_text(src.url + "\n", encoding="utf-8")
+    for src in srcs:
+        log(f"[{corpus}] downloading {src.url}")
+        archive = fetch(src, data_root / "downloads", log)
+        log(f"[{corpus}] extracting {archive.name} to {dest}")
+        extract(archive, dest, src.include)
+    if len(srcs) == 1:
+        _flatten_single_dir(dest)
+    for src in srcs:
+        for inner in src.inner_archives:
+            hits = list(dest.rglob(inner))
+            if not hits:
+                raise FileNotFoundError(f"{corpus}: expected inner archive {inner}")
+            for h in hits:
+                extract(h, h.parent)
+                h.unlink()
+    marker.write_text("".join(s.url + "\n" for s in srcs), encoding="utf-8")
     log(f"[{corpus}] done")
     return dest
