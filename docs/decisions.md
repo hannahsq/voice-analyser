@@ -417,7 +417,7 @@ D-012's partial decoupling cut the dependence about fourfold; the remainder has 
 1. f0-invariance probe: median |slope| and the vowel pattern.
 2. Closed-phase F1 agreement on CMU ARCTIC and PTDB-TUG (laryngograph): bias by sex, compression (estimate against closed-phase F1 by range).
 3. Hillenbrand F1–F4 by group, paired speaker bootstrap against d06k (informative, not decisive: LPC references reward prior pull).
-4. Guard-rails: PTDB-TUG f0 RPA, the suite, synthetic validation.
+4. Guard-rails: PTDB-TUG f0 RPA, the suite, synthetic validation. *Clarified before the results (2026-10-09):* "synthetic validation" means a swap, with each model on both sets' held-out clips (all 2000 per set, fixed crops and channel) and clip-bootstrap intervals on the paired differences. Each run's own validation loss is not comparable across runs: train_v3a is harder by construction, because f0 no longer predicts the tract. The guard-rail is v3a not being worse than d06k on train_v2's clips; on train_v3a's clips d06k is expected to lose more.
 
 Adopt full decoupling for teacher v3 if the probe's median |slope| falls clearly (by a third or more) and closed-phase F1 agreement is not worse beyond its bootstrap interval; the guard-rails must not regress beyond noise.
 
