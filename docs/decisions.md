@@ -377,7 +377,15 @@ D-013 deferred Schedule-Free AdamW (Defazio et al. 2024) until the data was sett
 - *Open-phase coupling is not the cause.* The same estimator over whole cycles is within a few Hz of the closed-phase fit.
 - *LPC-based references read F1 low:* Praat Burg by 6–10 Hz for bdl and slt and by 45 Hz for jmk (a breathier voice). Measured against Praat (the Hillenbrand view) the teachers are +6 to +11 Hz for bdl and slt, comparable to their offset on Hillenbrand men, though against the closed phase they are within ±7 Hz. So part of the Hillenbrand F1 "bias" is the reference's.
 - *Part is the teacher's.* jmk's bias grows with training (+16 → +26 → +31 Hz; close vowels, closed-phase F1 < 450 Hz: +23 → +40), and at slt's higher f0 the teacher compresses F1 towards the middle (closed-phase F1 < 450 Hz read +48 to +55 Hz high, > 650 Hz read −30 Hz low), matching the Hillenbrand finding that low-F1 vowels read up to 17 % high in women and children. That pattern is regression towards the training prior where harmonics leave F1 ambiguous.
-- Caveats: three speakers; closed-phase LPC has its own scatter (9–25 Hz median against whole-cycle), largest for jmk's short closed phases. Evidence about mechanisms, not a new gold standard.
+- *Replicated on PTDB-TUG's laryngograph* (`ptdb_egg.py`, `ptdb_summary.py`; 20 speakers, 10 women; no phone labels, so frames are the energy peak ±20 ms of voiced runs ≥ 80 ms, every second utterance; 39,835 frames; speech lag 0.5–0.7 ms). F1 bias against the closed phase, speaker-level median [95 % speaker bootstrap], Hz:
+
+  | | Praat | v1 | d06k | d16k | sf20k |
+  |---|---|---|---|---|---|
+  | men (114 Hz) | +3 [+1, +8] | +8 [−0, +13] | +17 [+8, +24] | +16 [+8, +20] | +10 [+4, +19] |
+  | women (203 Hz) | +5 [−4, +7] | +6 [+3, +10] | +13 [+9, +22] | +18 [+13, +29] | +11 [+9, +23] |
+
+  Median |F1 error| change from v1: d16k +4.8 [+3.1, +6.9] (men), +9.3 [+5.2, +10.9] (women); schedule-free +2.0 / +3.9. Compression in women, by closed-phase F1 < 450 / 450–650 / > 650 Hz: v1 +30 / +7 / −23, d16k +49 / +22 / −32 (Praat +13 / +1 / −12; whole-cycle LPC +13 / −2 / −23). Whole-cycle LPC is within ±7 Hz of the closed phase overall, so open-phase coupling is again ruled out; here Praat does not read low. d16k reads F1 high for all 20 speakers (+4 to +44 Hz). F2 and F3 are within ±18 Hz for every estimator.
+- Caveats: ARCTIC has three speakers; closed-phase LPC has its own scatter (9–25 Hz median against whole-cycle), largest for jmk's short closed phases. Evidence about mechanisms, not a new gold standard.
 
 **Consequences.**
 - M2's Hillenbrand F1 criterion partly measures LPC's own low reading; a teacher a few Hz above LPC can be closer to the truth. The drift between models is real nonetheless, since it shows against the closed phase too.
