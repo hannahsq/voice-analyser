@@ -384,3 +384,31 @@ D-013 deferred Schedule-Free AdamW (Defazio et al. 2024) until the data was sett
 - The cause to work on is the training prior, not missing physics: the synthetic F1 distribution conditional on f0 (and tract length, D-012's decoupling), where the teacher falls back on it. Calibrating the synthesiser's distributions against real data (option 1: "learning to simulate") now has a concrete target, with closed-phase F1 on EGG voices as one check.
 - Training on resynthesised data (M3) addresses source mismatch, which is not the main cause. It remains useful for the low-f0 singing weakness, provided the tracker is not the model under evaluation.
 - Next: a low-f0 ablation of the tract-length sampling; the F1-given-f0 prior of train_v2 against real distributions (Hillenbrand's vowel space by group, closed-phase F1 on ARCTIC).
+
+## D-020 (2026-10-09): tract independent of the source; teacher v2 stops at 20k; decoupling ablation
+
+**Principle.** The long-term use (before/after comparisons where f0 changes and the tract may not, and vice versa) needs formant estimates that do not infer the tract from the pitch. So synthetic tract parameters (length, formant targets, bandwidth scaling) are sampled independently of everything on the source side. Source parameters may covary with each other (low f0 with less tilt, higher closed quotient, less noise): that is realistic and cannot teach the model to read the tract from the source, because in training the tract never covaries with it. A more "realistic" coupled prior would score better on typical voices and on LPC-based references (D-019) and is rejected for that reason. Ambiguity is to be handled by honest uncertainty instead: the heads already output distributions trained with a proper scoring rule; what is missing is checking their calibration on real voices (coverage against closed-phase F1) and reporting it.
+
+**train_v2 is only half decoupled.** `p_length_from_f0 = 0.5` (half the clips draw L from f0) and `p_f1_band = 0.3` (cascade clips at f0 150–350 Hz set F1 = f0 × 1.5–4.5).
+
+**Teacher v2 stops here.** WSD stopped at 17k; d16k (20k steps) and schedule-free at 20k are the candidates. M2 fails on F1 (`runs/m2_paired_20k.txt`): v1 → d16k F1 MAE women +2.3 [+0.3, +4.6], children +6.6 [+4.9, +8.2], men +3.8 [+2.5, +5.1] Hz; F2 −7.4 and F3 −33 Hz MAE better; PTDB-TUG RPA +0.2 (all frames), −0.7 below 85 Hz. Schedule-free at 20k against d16k: F1 MAE women −5.1, children −2.3, F4 −26 Hz (better), but PTDB-TUG RPA −0.6 (all) and −0.9 (modal), beyond noise: D-018 stays undecided (one learning rate tried).
+
+**f0-invariance probe (`eval/invariance.py`).** Story's vowels i, E, ae, A, o, u through the lossy tube at 13, 15.5 and 18 cm (fixed, physical bandwidths), LF source at eight f0 from 80 to 400 Hz; slope of the median F1 estimate against log2 f0 (truth: 0). Before the ablation:
+
+| Estimator | median slope (Hz/octave) | median \|slope\| |
+|---|---|---|
+| Praat Burg default | +15 | 19 |
+| v1 (fully coupled L) | +23 | 51 (u: up to +370, o: up to +162) |
+| d06k | +2 | 14 |
+| d16k | +8 | 12 |
+| schedule-free 20k | +7 | 16 |
+
+D-012's partial decoupling cut the dependence about fourfold; the remainder has the compression shape (close vowels drift up with f0, open vowels down). At the top of the sweep f0 exceeds the F1 of i and u, where some slope is unavoidable.
+
+**Ablation, set before its results.** `train_v3a` = train_v2's settings with `p_length_from_f0 = 0` and `p_f1_band = 0`, 100k clips, seed 2 (`va synth train --synth-set …`). Teacher `runs/teacher_v3a`: d06k's recipe (WSD, 6000 constant + 4000 decay steps, everything else as teacher v2), so d06k is the baseline at equal budget. Measures:
+1. f0-invariance probe: median |slope| and the vowel pattern.
+2. Closed-phase F1 agreement on CMU ARCTIC and PTDB-TUG (laryngograph): bias by sex, compression (estimate against closed-phase F1 by range).
+3. Hillenbrand F1–F4 by group, paired speaker bootstrap against d06k (informative, not decisive: LPC references reward prior pull).
+4. Guard-rails: PTDB-TUG f0 RPA, the suite, synthetic validation.
+
+Adopt full decoupling for teacher v3 if the probe's median |slope| falls clearly (by a third or more) and closed-phase F1 agreement is not worse beyond its bootstrap interval; the guard-rails must not regress beyond noise.

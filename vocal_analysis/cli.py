@@ -132,7 +132,15 @@ def cmd_synth(cfg: Config, args: argparse.Namespace) -> int:
     if args.what == "suite":
         write_suite(Path(args.out or root / "suite_v1"), args.n or 64, args.workers, log=log)
     else:
-        write_set(Path(args.out or root / "train_v2"), args.n or 100_000, SynthConfig(), seed=args.seed,
+        import dataclasses
+
+        sc = SynthConfig()
+        over = {}
+        for kv in args.synth_set:  # scalar fields only
+            k, v = kv.split("=", 1)
+            cur = getattr(sc, k)
+            over[k] = v.lower() in ("1", "true", "yes") if isinstance(cur, bool) else _parse_value(v) if cur is None else type(cur)(v)
+        write_set(Path(args.out or root / "train_v2"), args.n or 100_000, dataclasses.replace(sc, **over), seed=args.seed,
                   workers=args.workers, log=log)
     return 0
 
@@ -251,6 +259,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--seed", type=int, default=1)
     s.add_argument("--workers", type=int, default=None)
     s.add_argument("--out", default=None, help="default: <data.root>/synth/{train_v2,suite_v1}")
+    s.add_argument("--synth-set", action="append", default=[], metavar="KEY=VALUE",
+                   help="other SynthConfig fields (train only, scalar fields)")
     s.set_defaults(fn=cmd_synth)
     t = sub.add_parser("train", parents=[common], help="train a model on synthetic data")
     t.add_argument("model", choices=["teacher"])

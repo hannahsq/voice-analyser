@@ -116,3 +116,18 @@ def test_extract_include_filter_on_tar_bz2(tmp_path):
     extract(arc, tmp_path / "out", include=("v/orig/*.wav",))
     assert (tmp_path / "out" / "v" / "orig" / "a.wav").exists()
     assert not (tmp_path / "out" / "v" / "festival").exists()
+
+
+def test_invariance_probe_with_an_oracle():
+    """A predictor returning the true F1 has zero slope and zero error; one that adds 20 Hz per octave of f0
+    shows that slope."""
+    from vocal_analysis.eval import invariance as inv
+
+    clips = inv.probe_clips(vowels=("A",), lengths=(15.5,), f0s=(100.0, 200.0, 400.0), seconds=0.8)
+    truth = {id(c.audio): c for c in clips}
+    oracle = lambda x, sr, t, m: np.tile(truth[id(x)].formants, (len(t), 1))  # noqa: E731
+    r = inv.run(oracle, clips)
+    assert abs(r["median_slope"]) < 1e-6 and np.nanmax(np.abs(r["f1_error"])) < 1e-6
+    leaky = lambda x, sr, t, m: oracle(x, sr, t, m) + 20 * np.log2(truth[id(x)].f0 / 100)  # noqa: E731
+    assert abs(inv.run(leaky, clips)["median_slope"] - 20) < 1e-6
+    assert len(clips) == 3 and all(np.all(np.isfinite(c.audio)) for c in clips)
