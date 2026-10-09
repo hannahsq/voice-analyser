@@ -23,6 +23,7 @@ VOWELS = ("i", "E", "ae", "A", "o", "u")
 LENGTHS_CM = (13.0, 15.5, 18.0)
 F0S_HZ = tuple(float(f) for f in np.round(np.geomspace(80.0, 400.0, 8), 1))
 MAX_POLES = 8
+LOW_F0_MAX_HZ = 250.0
 
 
 @dataclass
@@ -81,6 +82,16 @@ def run(predict, clips: list[ProbeClip] | None = None) -> dict:
         for j in idx:
             err[i, f0s.index(clips[j].f0)] = est[j] - truth
     s = np.array(list(slopes.values()))
+    # f0 <= 250 Hz separately (D-020 result): above it F1 of close vowels nears or falls below f0, where some slope
+    # comes from the resolution limit rather than from the training prior
+    x_low = np.log2([f for f in f0s if f <= LOW_F0_MAX_HZ])
+    s_low = []
+    for i in range(len(keys)):
+        y = err[i, : len(x_low)]
+        ok = np.isfinite(y)
+        s_low.append(float(np.polyfit(x_low[ok], y[ok], 1)[0]) if ok.sum() >= 3 else np.nan)
+    s_low = np.array(s_low)
     return {"slopes": slopes, "f0s": f0s, "keys": keys, "f1_error": err,
             "median_slope": float(np.nanmedian(s)), "median_abs_slope": float(np.nanmedian(np.abs(s))),
+            "median_slope_low_f0": float(np.nanmedian(s_low)), "median_abs_slope_low_f0": float(np.nanmedian(np.abs(s_low))),
             "median_error_by_f0": np.nanmedian(err, axis=0)}
