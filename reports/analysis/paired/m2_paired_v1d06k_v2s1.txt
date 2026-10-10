@@ -1,0 +1,17 @@
+
+Hillenbrand, v1d06k vs v2s1 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    40.7    39.0  diff   -1.7 [-3.6, +0.5]  within noise
+  F1 MAE children:    45.4    46.1  diff   +0.8 [-1.0, +2.4]  within noise
+  F1 MAE men     :    21.9    23.5  diff   +1.6 [+0.2, +3.2]  WORSE
+  F1 MAE all     :    36.1    36.3  diff   +0.2 [-0.9, +1.3]  within noise
+  F2 MAE all     :    59.1    48.3  diff  -10.8 [-16.2, -4.7]  better
+  F2 DR  all     :    97.2    98.0  diff   +0.8 [+0.4, +1.4]  better
+  F3 MAE all     :   113.3    79.6  diff  -33.7 [-54.8, -15.1]  better
+  F3 DR  all     :    93.7    95.7  diff   +2.0 [+0.7, +3.3]  better
+  F4 MAE all     :   136.3   141.0  diff   +4.7 [-16.6, +25.6]  within noise
+  F4 DR  all     :    88.4    88.8  diff   +0.5 [-1.5, +2.3]  within noise
+
+PTDB-TUG f0 RPA, v1d06k vs v2s1
+  all frames    :  86.5  85.9  diff  -0.6 [-0.8, -0.2]  WORSE  (n 807780)
+  modal         :  93.1  92.8  diff  -0.3 [-0.5, +0.0]  within noise  (n 670251)
+  modal < 85 Hz :  84.5  84.2  diff  -0.2 [-0.8, +0.8]  within noise  (n 44796)

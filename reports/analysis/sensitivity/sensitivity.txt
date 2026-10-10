@@ -1,0 +1,21 @@
+median over vowels of teacher F1 - closed-phase F1 (Hz); men f0 120 Hz, women f0 210 Hz
+factor                               d06k men     d06k women       v3b men      v3b women
+baseline                             -3 (  +0)      +3 (  +0)      -7 (  +0)     +13 (  +0)
+B1 x0.5                              -4 (  -1)      +0 (  -3)      -5 (  +2)     +14 (  +2)
+B1 x2                                +0 (  +4)      +8 (  +4)      -0 (  +7)     +17 (  +4)
+B1 x3                                +5 (  +8)     +19 ( +15)      +3 ( +10)     +23 ( +10)
+Rd 0.5 (pressed)                     -7 (  -4)      +4 (  +0)      -2 (  +5)     +18 (  +5)
+Rd 1.7 (breathy-ish)                -12 (  -9)     +12 (  +8)     -10 (  -3)     +15 (  +2)
+Rd 2.5 (breathy)                    -10 (  -7)     +18 ( +15)      -9 (  -1)     +16 (  +3)
+open phase: B1 x2                    +3 (  +6)     +13 (  +9)      +2 (  +9)     +15 (  +2)
+open phase: B1 x4                   +15 ( +18)     +36 ( +33)      +4 ( +11)     +33 ( +21)
+open phase: F1 +5 %                 +18 ( +22)     +29 ( +25)     +19 ( +26)     +29 ( +16)
+open phase: F1 +10 %                +37 ( +40)     +47 ( +44)     +35 ( +42)     +47 ( +35)
+open phase: F1 +10 %, B1 x3         +36 ( +39)     +44 ( +41)     +28 ( +36)     +60 ( +47)
+aspiration HNR 20 dB                 -6 (  -3)      +6 (  +3)     -11 (  -4)     +10 (  -2)
+aspiration HNR 10 dB                 -3 (  +0)     +10 (  +6)      -7 (  -0)      +9 (  -3)
+jitter 2 %                           +3 (  +6)     +10 (  +7)      -3 (  +4)      +8 (  -4)
+subglottal pair (open phase)        -11 (  -8)     -21 ( -25)     -19 ( -12)      +7 (  -6)
+subglottal pair (always)             +1 (  +4)      +9 (  +6)      -4 (  +4)     +13 (  -0)
+
+(in brackets: change from the baseline row)

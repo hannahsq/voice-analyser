@@ -1,0 +1,66 @@
+
+===== v3b: synthetic suite, F1-F3 on sonorant frames (cents; Gaussian: 68 / 95 %)
+  adult_high_f0
+    F1             sigma med    44  p90    98   within 1/2 sigma 83.6 / 98.3 %   median |err| by sigma quintile:   12   15   22   32   49
+    F2             sigma med    24  p90    49   within 1/2 sigma 84.7 / 97.3 %   median |err| by sigma quintile:    8    9   11   13   19
+    F3             sigma med    24  p90    44   within 1/2 sigma 83.9 / 97.2 %   median |err| by sigma quintile:    6    9    9   11   17
+  breathy
+    F1             sigma med    58  p90   165   within 1/2 sigma 79.6 / 97.0 %   median |err| by sigma quintile:   14   19   27   42  115
+    F2             sigma med    33  p90   103   within 1/2 sigma 83.3 / 97.2 %   median |err| by sigma quintile:    8   11   15   20   35
+    F3             sigma med    38  p90   136   within 1/2 sigma 82.8 / 96.2 %   median |err| by sigma quintile:    8   10   16   21   59
+  codec
+    F1             sigma med    58  p90   219   within 1/2 sigma 77.4 / 96.2 %   median |err| by sigma quintile:   15   18   27   48  138
+    F2             sigma med    37  p90   147   within 1/2 sigma 77.9 / 95.4 %   median |err| by sigma quintile:   10   13   17   24   63
+    F3             sigma med    43  p90   177   within 1/2 sigma 72.6 / 90.3 %   median |err| by sigma quintile:    8   14   21   46  111
+  f1_near_h1
+    F1             sigma med   272  p90   540   within 1/2 sigma 30.6 / 48.8 %   median |err| by sigma quintile:   65  280  837 1260 1422
+    F2             sigma med    34  p90   156   within 1/2 sigma 77.5 / 94.0 %   median |err| by sigma quintile:    8   13   16   26   80
+    F3             sigma med    40  p90   208   within 1/2 sigma 77.2 / 94.0 %   median |err| by sigma quintile:    7   11   17   35  115
+  f1_near_h2
+    F1             sigma med   211  p90   567   within 1/2 sigma 42.2 / 55.8 %   median |err| by sigma quintile:   23   60  454 2120 1965
+    F2             sigma med    36  p90   168   within 1/2 sigma 62.8 / 77.8 %   median |err| by sigma quintile:    8   12   20   49  249
+    F3             sigma med    36  p90   155   within 1/2 sigma 65.2 / 77.6 %   median |err| by sigma quintile:    8   10   19   44  395
+  f2_f3_close
+    F1             sigma med    62  p90   221   within 1/2 sigma 80.6 / 96.7 %   median |err| by sigma quintile:   13   19   31   52  117
+    F2             sigma med    48  p90   119   within 1/2 sigma 69.3 / 89.7 %   median |err| by sigma quintile:   18   25   27   41   65
+    F3             sigma med   242  p90   677   within 1/2 sigma 55.8 / 68.7 %   median |err| by sigma quintile:   24   51  344  755  404
+  high_f0
+    F1             sigma med    86  p90   249   within 1/2 sigma 73.0 / 94.4 %   median |err| by sigma quintile:   24   37   50   77  131
+    F2             sigma med    49  p90   171   within 1/2 sigma 79.0 / 96.1 %   median |err| by sigma quintile:   13   19   24   32   66
+    F3             sigma med    67  p90   206   within 1/2 sigma 76.2 / 93.4 %   median |err| by sigma quintile:   15   22   38   42   96
+  low_snr
+    F1             sigma med   129  p90   428   within 1/2 sigma 72.6 / 94.0 %   median |err| by sigma quintile:   17   35   77  143  371
+    F2             sigma med   135  p90   613   within 1/2 sigma 72.3 / 92.4 %   median |err| by sigma quintile:   10   23   51  237  536
+    F3             sigma med   178  p90   374   within 1/2 sigma 63.4 / 87.6 %   median |err| by sigma quintile:   12   45  134  255  292
+  nasal
+    F1             sigma med    72  p90   239   within 1/2 sigma 68.3 / 90.3 %   median |err| by sigma quintile:   18   29   49   77  153
+    F2             sigma med    42  p90   165   within 1/2 sigma 79.2 / 94.5 %   median |err| by sigma quintile:    9   11   18   30   89
+    F3             sigma med    47  p90   169   within 1/2 sigma 74.5 / 91.9 %   median |err| by sigma quintile:    9   12   21   43  107
+  phone
+    F1             sigma med    69  p90   239   within 1/2 sigma 76.5 / 95.8 %   median |err| by sigma quintile:   13   23   35   70  138
+    F2             sigma med    43  p90   187   within 1/2 sigma 78.4 / 94.2 %   median |err| by sigma quintile:    9   13   20   32  108
+    F3             sigma med    94  p90   265   within 1/2 sigma 65.8 / 85.2 %   median |err| by sigma quintile:   10   21   63  121  213
+  reference
+    F1             sigma med    52  p90   180   within 1/2 sigma 80.6 / 96.3 %   median |err| by sigma quintile:   11   17   24   50  109
+    F2             sigma med    34  p90   116   within 1/2 sigma 84.2 / 97.5 %   median |err| by sigma quintile:    8   11   14   20   39
+    F3             sigma med    34  p90   154   within 1/2 sigma 83.0 / 97.6 %   median |err| by sigma quintile:    6   10   14   22   67
+  tube
+    F1             sigma med    59  p90   164   within 1/2 sigma 79.1 / 96.6 %   median |err| by sigma quintile:   15   22   30   47  100
+    F2             sigma med    30  p90    82   within 1/2 sigma 88.0 / 99.0 %   median |err| by sigma quintile:    8    9   11   14   24
+    F3             sigma med    18  p90    42   within 1/2 sigma 78.4 / 93.0 %   median |err| by sigma quintile:    6    7    8   11   12
+  whisper
+    F1             sigma med    45  p90   100   within 1/2 sigma 78.7 / 97.0 %   median |err| by sigma quintile:   11   18   23   27   60
+    F2             sigma med    28  p90    75   within 1/2 sigma 84.8 / 97.7 %   median |err| by sigma quintile:    7    8   11   17   25
+    F3             sigma med    29  p90    96   within 1/2 sigma 81.3 / 96.1 %   median |err| by sigma quintile:    6    9   11   19   45
+  wide_vibrato
+    F1             sigma med    59  p90   189   within 1/2 sigma 79.4 / 96.9 %   median |err| by sigma quintile:   14   20   28   43  102
+    F2             sigma med    37  p90   128   within 1/2 sigma 84.0 / 97.2 %   median |err| by sigma quintile:    8   12   14   21   42
+    F3             sigma med    46  p90   171   within 1/2 sigma 81.3 / 95.4 %   median |err| by sigma quintile:   10   11   18   30   65
+
+===== v3b: PTDB-TUG closed-phase frames (fusion_test subset), F1-F3
+    M F1           sigma med   116  p90   261   within 1/2 sigma 61.1 / 86.7 %   median |err| by sigma quintile:   54   71  102  108  166
+    M F2           sigma med    53  p90   142   within 1/2 sigma 71.9 / 91.7 %   median |err| by sigma quintile:   21   27   31   42   57
+    M F3           sigma med    45  p90   145   within 1/2 sigma 67.6 / 88.2 %   median |err| by sigma quintile:   16   22   25   39   69
+    F F1           sigma med   129  p90   266   within 1/2 sigma 45.1 / 75.5 %   median |err| by sigma quintile:   85  104  151  181  282
+    F F2           sigma med    51  p90   132   within 1/2 sigma 61.0 / 81.6 %   median |err| by sigma quintile:   25   32   38   49   82
+    F F3           sigma med    38  p90   108   within 1/2 sigma 58.9 / 79.3 %   median |err| by sigma quintile:   18   22   28   45   62

@@ -1,0 +1,30 @@
+train_v2's f0-scaled B1 against 132 Hz (Hawks & Miller), F1 300 / 500 / 800 Hz:
+  f0 120: x0.97 / x0.97 / x0.97
+  f0 210: x1.22 / x1.22 / x1.22
+  f0 300: x1.48 / x1.48 / x1.48
+
+F1 error vs closed phase (Hz), median over 8 PB vowels; change from baseline in brackets
+
+men f0 120
+factor                                  d06k          v2s1           v3a           v3b
+baseline                           -3 (  +0)     +6 (  +0)     +5 (  +0)     -7 (  +0)
+static B1 x2                       +0 (  +4)    +10 (  +5)    +10 (  +5)     -0 (  +7)
+static B1 x3                       +5 (  +8)    +16 ( +10)    +14 (  +9)     +3 ( +10)
+open phase: B1 x3                  +9 ( +12)    +21 ( +16)    +16 ( +11)     +4 ( +11)
+open phase: F1 +5 %, B1 x3        +22 ( +25)    +30 ( +25)    +30 ( +25)    +17 ( +24)
+
+women f0 210
+factor                                  d06k          v2s1           v3a           v3b
+baseline                           +3 (  +0)     +4 (  +0)    +23 (  +0)    +13 (  +0)
+static B1 x2                       +8 (  +4)     +8 (  +4)    +28 (  +5)    +16 (  +3)
+static B1 x3                      +19 ( +15)     +5 (  +2)    +37 ( +14)    +22 ( +10)
+open phase: B1 x3                 +23 ( +20)    +13 (  +9)    +38 ( +15)    +23 ( +10)
+open phase: F1 +5 %, B1 x3        +34 ( +31)    +24 ( +20)    +49 ( +26)    +37 ( +24)
+
+women f0 300
+factor                                  d06k          v2s1           v3a           v3b
+baseline                          +52 (  +0)    +76 (  +0)    +66 (  +0)    +35 (  +0)
+static B1 x2                      +54 (  +2)    +91 ( +15)    +66 (  +0)    +34 (  -2)
+static B1 x3                      +56 (  +5)    +30 ( -46)    +61 (  -6)    +36 (  +1)
+open phase: B1 x3                 +62 ( +10)    +92 ( +16)    +66 (  -0)    +39 (  +4)
+open phase: F1 +5 %, B1 x3        +71 ( +19)    +82 (  +7)    +66 (  -1)    +45 ( +10)

@@ -1,0 +1,22 @@
+  v2 val / d06k done
+  v2 val / v3b done
+  v3b val / d06k done
+  v3b val / v3b done
+
+per-clip means over all 2000 validation clips of each set; [new - d06k] with 95 % clip-bootstrap interval
+
+v2 val
+  Hz MAE             d06k   24.3   new   26.8   diff  +2.5 [+1.8, +3.2]
+  Hz MAE             d06k   42.9   new   47.1   diff  +4.2 [+2.4, +6.0]
+  Hz MAE             d06k   66.2   new   76.2   diff +10.0 [+7.2, +13.2]
+  % F1 DR            d06k   96.9   new   96.3   diff  -0.6 [-0.9, -0.4]
+  % f0 RPA           d06k   99.3   new   99.2   diff  -0.0 [-0.1, +0.0]
+  % f0 RPA < 150 Hz  d06k   98.8   new   98.7   diff  -0.1 [-0.4, +0.1]
+
+v3b val
+  Hz MAE             d06k   25.5   new   23.0   diff  -2.5 [-3.1, -1.9]
+  Hz MAE             d06k   44.7   new   40.7   diff  -4.0 [-5.6, -2.4]
+  Hz MAE             d06k   52.7   new   47.8   diff  -4.9 [-7.5, -2.6]
+  % F1 DR            d06k   95.6   new   96.6   diff  +0.9 [+0.7, +1.2]
+  % f0 RPA           d06k   99.1   new   99.2   diff  +0.0 [+0.0, +0.1]
+  % f0 RPA < 150 Hz  d06k   99.1   new   99.1   diff  -0.0 [-0.1, +0.1]
