@@ -1,0 +1,27 @@
+  [v1_s0_ema/hillenbrand] 400/1668
+  [v1_s0_ema/hillenbrand] 800/1668
+  [v1_s0_ema/hillenbrand] 1200/1668
+  [v1_s0_ema/hillenbrand] 1600/1668
+  [v1_s0_ema/ptdb_tug] 250/1579  (RTF 0.038)
+  [v1_s0_ema/ptdb_tug] 500/1579  (RTF 0.038)
+  [v1_s0_ema/ptdb_tug] 750/1579  (RTF 0.038)
+  [v1_s0_ema/ptdb_tug] 1000/1579  (RTF 0.038)
+  [v1_s0_ema/ptdb_tug] 1250/1579  (RTF 0.038)
+  [v1_s0_ema/ptdb_tug] 1500/1579  (RTF 0.038)
+
+Hillenbrand, v1_s0 vs v1_s0_ema (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    42.2    41.7  diff   -0.6 [-1.1, -0.0]  better
+  F1 MAE children:    42.4    41.8  diff   -0.6 [-1.0, -0.3]  better
+  F1 MAE men     :    23.7    23.0  diff   -0.7 [-1.1, -0.3]  better
+  F1 MAE all     :    36.3    35.7  diff   -0.6 [-0.9, -0.4]  better
+  F2 MAE all     :    58.3    56.6  diff   -1.7 [-3.0, -0.4]  better
+  F2 DR  all     :    98.0    98.0  diff   +0.1 [-0.1, +0.3]  within noise
+  F3 MAE all     :   120.7   123.4  diff   +2.7 [-1.9, +8.6]  within noise
+  F3 DR  all     :    91.6    91.4  diff   -0.3 [-0.6, +0.1]  within noise
+  F4 MAE all     :   179.4   191.2  diff  +11.8 [+3.6, +20.0]  WORSE
+  F4 DR  all     :    80.0    78.0  diff   -2.0 [-3.1, -0.9]  WORSE
+
+PTDB-TUG f0 RPA, v1_s0 vs v1_s0_ema
+  all frames    :  87.8  88.3  diff  +0.4 [+0.3, +0.5]  better  (n 270559)
+  modal         :  94.0  94.3  diff  +0.3 [+0.1, +0.3]  better  (n 224068)
+  modal < 85 Hz :  85.4  85.5  diff  +0.2 [-0.1, +0.9]  within noise  (n 14811)

@@ -570,3 +570,18 @@ Against the pre-registered directions:
 At this size and budget, seed-to-seed movement is about as large as the effects to be detected. The F3 spread (21 Hz) is two-thirds of the full-size v1 → v2 effect; the women's closed-phase bias spread (18 Hz) is larger than any data effect seen so far. Detecting 3–5 Hz effects would need on the order of 10 seeds per arm, which costs more than full-size runs. Only invariance-sized effects (tens of Hz per octave) can be read from three S2 seeds. So the Conformer goes in as a bench run (one S2 seed: throughput and synthetic validation), not a three-seed comparison. A real-voice architecture comparison falls back to full size, as pre-registered.
 
 Fix found on the way: the EMA chain failed at its first comparison because the evaluation's checkpoint hash did not accept the `#ema` suffix (`teacher_eval._ckpt_id`). The averaged weights now get their own cache id (`<sha>-ema`); the EMA comparisons were restarted at 01:18. EMA verdict: pending.
+
+**Result: EMA rejected (2026-10-11).** Seven paired raw-against-averaged comparisons (`paired/ema_*.txt`, `invariance/small_ema.txt`). The averaged weights are worse beyond the paired intervals on at least one main measure in five of the seven runs: women's F1 MAE +0.6 to +2.2 Hz (four runs), F4 +4 to +12 Hz (two), v3b_s0 F3 +4.7 Hz. f0 RPA is a little better in six of seven (+0.1 to +0.5), and invariance |slope| is lower in all seven (by 1–10 Hz/octave). The three-seed f0 RPA spread does not narrow (v3b 1.1 → 1.0, v1 2.5 → 2.5 points), so both conditions fail. As expected after a decay to zero, which already averages late weights. EMA stays in the checkpoints (it costs nothing) but is not used for evaluation.
+
+**Conformer bench (2026-10-11; `runs/small/conf_v2_s0`).** One seed, on S2 v2's recipe, against the three GRU v2 seeds. Synthetic validation at 3.5k steps (where the three GRU seeds agree to within about 1 Hz on F1 and 3 Hz on F3, so this measure is far less noisy than the real-voice ones):
+
+| Measure | GRU v2 (3 seeds) | Conformer |
+|---|---|---|
+| F1 MAE | 40.3–41.2 | 35.8 |
+| F2 MAE | 71.6–73.6 | 71.6 |
+| F3 MAE | 95.4–98.4 | 91.8 |
+| F4 MAE | 149.5–154.7 | 141.5 |
+| f0 RPA | 98.8–98.9 | 98.7 |
+| Throughput (mean of logged s/s) | 94–107 | 92 |
+
+F1 4.5 Hz and F4 8 Hz better than every GRU seed; F3 better; f0 a hair worse. Throughput slightly lower, not 13 % higher as the short GPU check suggested. Wall time 47 min against about 37 min, though some of that was the EMA closed-phase step's CPU load at the start. Synthetic gains have not always carried to real voices (D-020), and real-voice comparisons at S2 size are too noisy (above). The next step is a full-size Conformer run against the full-size v2 seeds.
