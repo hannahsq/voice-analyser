@@ -39,11 +39,13 @@ MAX_LAG = 4000  # samples searched when calibrating
 
 @functools.lru_cache(maxsize=1)
 def ffmpeg_path() -> str | None:
-    """$VA_FFMPEG, then PATH, then winget's links folder (PATH changes only reach new shells)."""
+    """$VA_FFMPEG, then PATH, then winget's links folder (PATH changes only reach new shells). Symlinks are resolved:
+    on Windows, launching through winget's link costs about 120 ms more per process."""
     cands = [os.environ.get("VA_FFMPEG"), shutil.which("ffmpeg")]
     if os.name == "nt" and os.environ.get("LOCALAPPDATA"):
         cands.append(str(Path(os.environ["LOCALAPPDATA"]) / "Microsoft" / "WinGet" / "Links" / "ffmpeg.exe"))
-    return next((c for c in cands if c and Path(c).exists()), None)
+    found = next((c for c in cands if c and Path(c).exists()), None)
+    return str(Path(found).resolve()) if found else None
 
 
 def available() -> bool:
@@ -55,8 +57,14 @@ def _run(args: list[str], data: bytes) -> bytes:
     if exe is None:
         raise FileNotFoundError("ffmpeg not found: install it (winget install ffmpeg) or set VA_FFMPEG")
     flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-    res = subprocess.run([exe, "-hide_banner", "-loglevel", "error", *args], input=data, capture_output=True,
-                         creationflags=flags, check=False)
+    for attempt in range(3):  # a launch occasionally hangs on Windows under many concurrent launches: retry
+        try:
+            res = subprocess.run([exe, "-hide_banner", "-loglevel", "error", *args], input=data, capture_output=True,
+                                 creationflags=flags, check=False, timeout=60)
+            break
+        except subprocess.TimeoutExpired:
+            if attempt == 2:
+                raise
     if res.returncode != 0:
         raise RuntimeError(f"ffmpeg failed ({' '.join(args)}): {res.stderr.decode(errors='replace').strip()}")
     return res.stdout

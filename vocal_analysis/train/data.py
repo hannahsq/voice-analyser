@@ -7,6 +7,7 @@ so DataLoader workers share the OS page cache instead of each holding copies of 
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -101,10 +102,11 @@ class SynthCrops:
         return self.epoch_size
 
     def __getitem__(self, item):
-        """item: an index, or (index, n_frames) from LengthBatches (a crop length per batch)."""
+        """item: an index, or (index, n_frames, n_crops) from LengthBatches: a crop length per batch, and for short
+        crops several crops from one augmented clip (a list), so a batch augments about as many clips as a fixed one."""
         import torch
 
-        item, t = item if isinstance(item, tuple) else (item, self.n_frames)
+        item, t, n_crops = item if isinstance(item, tuple) else (item, self.n_frames, None)
         arr = self._open()
         # torch's per-worker RNG is reseeded every epoch by the DataLoader, so crops and channels differ per epoch,
         # unless the set is fixed (validation: every eval must see the same crops, or checkpoints can't be compared).
@@ -118,6 +120,11 @@ class SynthCrops:
         if self.channel is not None:
             mask = np.repeat(lab["voiced"], HOP)[: len(x)]
             x, _ = augment(x, rng, self.channel, np.pad(mask, (0, len(x) - len(mask))))
+        if n_crops is not None:
+            return [self._crop(x, lab, n_clip_frames, t, rng) for _ in range(n_crops)]
+        return self._crop(x, lab, n_clip_frames, t, rng)
+
+    def _crop(self, x, lab, n_clip_frames, t, rng):
         start = int(rng.integers(0, max(n_clip_frames - t, 0) + 1))
         lab = {k: v[start : start + t] for k, v in lab.items()}
         if len(lab["f0"]) < t:  # crop runs past the clip's end: pad labels as unvoiced/absent
@@ -138,11 +145,13 @@ class LengthBatches:
     """Batch sampler with one crop length per batch, drawn uniformly from n_lengths values spaced geometrically over
     [lo, hi] frames (log-uniform, discretised: every new tensor shape costs kernel selection and compilation on ROCm,
     so the shapes are kept few). The batch size scales so every batch holds about frames_per_batch frames: the same
-    audio per step, and the same weight per frame in the loss. Yields lists of (index, n_frames) for SynthCrops."""
+    audio per step, and the same weight per frame in the loss. A batch of short crops takes several from each clip
+    (about crop_span frames' worth), so it augments about as many clips as a batch of fixed crops: augmenting costs per
+    clip (AMR launches ffmpeg), not per frame. Yields lists of (index, n_frames, n_crops) for SynthCrops."""
 
     def __init__(self, n_batches: int, epoch_size: int, frames: tuple[int, int], frames_per_batch: int, seed: int = 0,
-                 n_lengths: int = 8):
-        self.n_batches, self.epoch_size, self.fpb = n_batches, epoch_size, frames_per_batch
+                 n_lengths: int = 8, crop_span: int = 200):
+        self.n_batches, self.epoch_size, self.fpb, self.crop_span = n_batches, epoch_size, frames_per_batch, crop_span
         self.lengths = np.unique(np.round(np.geomspace(frames[0], frames[1], n_lengths)).astype(int))
         self.rng = np.random.default_rng(seed)  # main process; carries on across epochs, so each epoch differs
 
@@ -152,13 +161,15 @@ class LengthBatches:
     def __iter__(self):
         for _ in range(self.n_batches):
             t = int(self.rng.choice(self.lengths))
-            b = max(1, round(self.fpb / t))
-            yield [(int(i), t) for i in self.rng.integers(self.epoch_size, size=b)]
+            k = max(1, math.ceil(self.crop_span / t - 0.1))  # crops per clip: at most about crop_span frames per clip
+            b = max(1, round(self.fpb / (t * k)))
+            yield [(int(i), t, k) for i in self.rng.integers(self.epoch_size, size=b)]
 
 
 def collate(batch):
     import torch
 
+    batch = [c for b in batch for c in (b if isinstance(b, list) else [b])]  # several crops per clip (LengthBatches)
     audio = torch.from_numpy(np.stack([b[0] for b in batch]))
     labels = {k: torch.from_numpy(np.stack([b[1][k] for b in batch])) for k in batch[0][1]}
     return audio, labels
