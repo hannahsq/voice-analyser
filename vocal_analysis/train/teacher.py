@@ -48,6 +48,9 @@ class TrainConfig:
     val_clips: int = 512
     seed: int = 0
     loss_weights: dict = field(default_factory=dict)
+    # Exponential moving average of the weights, kept alongside (training itself is unchanged) and saved as "ema";
+    # 0.998 averages over roughly the last 500 steps. Load with "<ckpt>#ema" (models.infer.load_teacher). 0 = off.
+    ema_decay: float = 0.998
 
 
 def _git() -> dict:
@@ -181,12 +184,20 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     model = Teacher(model_cfg).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
     step = 0
+    ema = None
     if ck is not None:
         model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
         step = ck["step"]
         torch.manual_seed(cfg.seed + 7919 * step)  # a resumed run or branch must not replay the data from step 0
         log(f"{'resumed' if start == last else f'branched from {start}'} at step {step}")
+    if cfg.ema_decay > 0:  # from the checkpoint's average if it has one, else from the current weights
+        import copy
+
+        ema = copy.deepcopy(model).requires_grad_(False)
+        if ck is not None and ck.get("ema") is not None:
+            ema.load_state_dict(ck["ema"])
+        ema_params, model_params = list(ema.parameters()), list(model.parameters())
     if start != last:
         if cfg.branch_from and cfg.decay_start != step:
             raise ValueError(f"branch decay_start {cfg.decay_start} != checkpoint step {step}")
@@ -211,7 +222,11 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
 
     def save(path):
         tmp = path.with_suffix(".tmp")
-        torch.save({"model": model.state_dict(), "opt": opt.state_dict(), "step": step,
+        if ema is not None:
+            for b_ema, b in zip(ema.buffers(), model.buffers()):
+                b_ema.copy_(b)
+        torch.save({"model": model.state_dict(), "ema": ema.state_dict() if ema is not None else None,
+                    "opt": opt.state_dict(), "step": step,
                     "teacher_config": asdict(model_cfg), "train_config": asdict(cfg), "git": _git()}, tmp)
         tmp.replace(path)
 
@@ -236,6 +251,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             loss.backward()
             gn = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
             opt.step()
+            if ema is not None:
+                torch._foreach_lerp_(ema_params, model_params, 1.0 - cfg.ema_decay)
             step += 1
             seen += audio.shape[0]
             # summed on the GPU and read once per log interval: a float() here would make every step wait for it
@@ -259,6 +276,11 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 logf.write(json.dumps({"step": step, "eval": ev, "time": time.time()}) + "\n")
                 logf.flush()
                 log("eval " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if not k.startswith("F1_dr_f0")))
+                if ema is not None:
+                    ev = evaluate(ema, val_loader, vq, device)
+                    logf.write(json.dumps({"step": step, "eval_ema": ev, "time": time.time()}) + "\n")
+                    logf.flush()
+                    log("eval (ema) " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if not k.startswith("F1_dr_f0")))
                 save(out / f"ckpt_{step:06d}.pt")
     logf.close()
     return out
