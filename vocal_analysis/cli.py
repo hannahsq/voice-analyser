@@ -169,7 +169,15 @@ def cmd_train(cfg: Config, args: argparse.Namespace) -> int:
         k, v = kv.split("=", 1)
         cur = getattr(tc, k)
         setattr(tc, k, _parse_value(v) if cur is None else type(cur)(v))
-    train(tc, TeacherConfig(comb=not args.no_comb), log=lambda m: print(m, flush=True))
+    mc = TeacherConfig(comb=not args.no_comb)
+    for kv in args.model_set:  # new runs only: a resumed run or branch keeps its checkpoint's architecture
+        k, v = kv.split("=", 1)
+        cur = getattr(mc, k)
+        if isinstance(cur, tuple):
+            setattr(mc, k, tuple(int(x) for x in v.split(",")))
+        else:
+            setattr(mc, k, v.lower() in ("1", "true") if isinstance(cur, bool) else type(cur)(v))
+    train(tc, mc, log=lambda m: print(m, flush=True))
     return 0
 
 
@@ -221,6 +229,8 @@ def build_parser() -> argparse.ArgumentParser:
     t.add_argument("--workers", type=int, default=12)
     t.add_argument("--no-comb", action="store_true", help="ablation: no harmonic-comb input channel")
     t.add_argument("--train-set", action="append", default=[], metavar="KEY=VALUE", help="other TrainConfig fields")
+    t.add_argument("--model-set", action="append", default=[], metavar="KEY=VALUE",
+                   help="TeacherConfig fields for a new run, e.g. channels=16,32,48 gru_hidden=128")
     t.set_defaults(fn=cmd_train)
     e = sub.add_parser("eval", parents=[common], help="evaluate a trained teacher against the gold sets and the suite")
     e.add_argument("ckpt")
