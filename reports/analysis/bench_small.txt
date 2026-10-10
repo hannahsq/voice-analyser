@@ -1,0 +1,18 @@
+Training throughput (train_v2, batch 32, 2 s crops), 2026-10-10. runs/bench/.
+
+Model on the GPU, codecs off so the loader is not the limit (median audio s/s, steps 300-600):
+  full  6,484,842 params   60 s/s
+  S1    3,207,018 params   79 s/s  (x1.32)   channels 16,32,48, embed 256, GRU 128, f0 GRU 96
+  S2    1,753,842 params  114 s/s  (x1.90)   channels 8,16,32, f0 channels 8, embed 192, GRU 96, f0 GRU 64
+
+Data loader alone (no model, train_v2's channel):
+  ffmpeg executable for every codec, 12 workers:        74 s/s  (67 with the antivirus exclusion: no effect)
+  in-process opus/AAC/MP3 (PyAV), AMR executable, 12:   134 s/s
+  same, 16 workers:                                     155 s/s
+  codecs off, 12 workers:                               2800-4300 s/s
+
+Inference real-time factor on 30 s (from the first, CPU-contended benchmark): full GPU 0.048, CPU 4 threads 0.117;
+S1 GPU 0.053, CPU 0.064.
+
+Pick: S2 (>= 1.25x S1 and >= 1.2x full). Full-size training was GPU-bound at about 60 s/s, with the old loader
+(about 70 s/s) only just ahead; S2 needs the in-process codecs, and 16 workers for margin.
