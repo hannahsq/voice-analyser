@@ -107,5 +107,9 @@ def test_wsd_schedule_and_branch_config(tmp_path):
     assert _lr(10500, v1) == pytest.approx(cfg.lr * 0.5) and _lr(20000, v1) == pytest.approx(0.0, abs=1e-12)
     assert _p_comb_truth(3000, v1) == pytest.approx(0.5)
     (tmp_path / "config.json").write_text(json.dumps({"train": asdict(v1)}))
-    with pytest.raises(ValueError, match="cosine"):
-        branch_config(tmp_path, 6000, "o")
+    b1 = branch_config(tmp_path, 6000, "o")  # decays from v1's own rate at 6000, as d06k does from its own
+    assert b1.lr == pytest.approx(_lr(6000, v1)) and (b1.decay_start, b1.steps) == (6000, 10000)
+    assert _lr(6000, b1) == pytest.approx(_lr(6000, v1)) and _lr(10000, b1) == 0.0
+    old = {k: v for k, v in asdict(v1).items() if k not in ("schedule", "comb_truth_steps")}  # v1's saved config
+    (tmp_path / "config.json").write_text(json.dumps({"train": old}))
+    assert branch_config(tmp_path, 6000, "o").lr == pytest.approx(_lr(6000, v1))

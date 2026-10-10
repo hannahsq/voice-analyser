@@ -82,12 +82,17 @@ def _p_comb_truth(step: int, cfg: TrainConfig) -> float:
 
 
 def branch_config(parent_run: Path, ckpt_step: int, out: str, decay_steps: int | None = None) -> TrainConfig:
-    """A decay branch: the parent run's recorded training config, decaying from ckpt_step to the end."""
+    """A decay branch: the parent run's recorded training config, decaying from ckpt_step to the end. A cosine
+    parent (teacher v1) decays from its learning rate at ckpt_step, so the rate is continuous at the branch."""
     saved = json.loads((parent_run / "config.json").read_text())["train"]
     fields = {k: (tuple(v) if isinstance(v, list) else v) for k, v in saved.items() if k in TrainConfig.__dataclass_fields__}
     cfg = TrainConfig(**fields)
-    if cfg.schedule != "wsd":
-        raise ValueError(f"{parent_run} uses the {cfg.schedule!r} schedule; only wsd runs can branch")
+    if "schedule" not in saved:  # runs from before schedules were recorded (teacher v1) are cosine
+        cfg.schedule, cfg.comb_truth_steps = "cosine", None
+    if cfg.schedule == "cosine":
+        cfg.lr, cfg.schedule = _lr(ckpt_step, cfg), "wsd"
+    elif cfg.schedule != "wsd":
+        raise ValueError(f"{parent_run} uses the {cfg.schedule!r} schedule; only wsd and cosine runs can branch")
     cfg.decay_steps = decay_steps or cfg.decay_steps
     cfg.decay_start = ckpt_step
     cfg.steps = ckpt_step + cfg.decay_steps
