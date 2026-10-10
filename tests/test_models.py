@@ -81,7 +81,7 @@ def test_length_batches_keep_frames_per_batch(tmp_path):
 
     batches = list(LengthBatches(200, 1000, (32, 400), 32 * 200, seed=1))
     lengths = np.array([b[0][1] for b in batches])
-    assert lengths.min() >= 32 and lengths.max() <= 400 and np.median(lengths) < 150  # log-uniform: median ~113
+    assert set(lengths) == {32, 46, 66, 94, 136, 194, 279, 400}  # 8 shapes, log-uniform over 32-400
     frames = np.array([len(b) * b[0][1] for b in batches])
     assert np.all(np.abs(frames / 6400 - 1) < 0.05)  # same audio per step, to rounding
     assert all(len({t for _, t in b}) == 1 for b in batches)  # one length per batch

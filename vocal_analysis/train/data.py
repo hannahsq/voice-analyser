@@ -135,21 +135,23 @@ class SynthCrops:
 
 
 class LengthBatches:
-    """Batch sampler with one crop length per batch, log-uniform in [lo, hi] frames. The batch size scales so every
-    batch holds about frames_per_batch frames: the same audio per step, and the same weight per frame in the loss.
-    Yields lists of (index, n_frames) for SynthCrops."""
+    """Batch sampler with one crop length per batch, drawn uniformly from n_lengths values spaced geometrically over
+    [lo, hi] frames (log-uniform, discretised: every new tensor shape costs kernel selection and compilation on ROCm,
+    so the shapes are kept few). The batch size scales so every batch holds about frames_per_batch frames: the same
+    audio per step, and the same weight per frame in the loss. Yields lists of (index, n_frames) for SynthCrops."""
 
-    def __init__(self, n_batches: int, epoch_size: int, frames: tuple[int, int], frames_per_batch: int, seed: int = 0):
-        self.n_batches, self.epoch_size, self.frames, self.fpb = n_batches, epoch_size, frames, frames_per_batch
+    def __init__(self, n_batches: int, epoch_size: int, frames: tuple[int, int], frames_per_batch: int, seed: int = 0,
+                 n_lengths: int = 8):
+        self.n_batches, self.epoch_size, self.fpb = n_batches, epoch_size, frames_per_batch
+        self.lengths = np.unique(np.round(np.geomspace(frames[0], frames[1], n_lengths)).astype(int))
         self.rng = np.random.default_rng(seed)  # main process; carries on across epochs, so each epoch differs
 
     def __len__(self) -> int:
         return self.n_batches
 
     def __iter__(self):
-        lo, hi = self.frames
         for _ in range(self.n_batches):
-            t = int(round(np.exp(self.rng.uniform(np.log(lo), np.log(hi)))))
+            t = int(self.rng.choice(self.lengths))
             b = max(1, round(self.fpb / t))
             yield [(int(i), t) for i in self.rng.integers(self.epoch_size, size=b)]
 

@@ -29,7 +29,7 @@ class TrainConfig:
     steps: int = 40000  # wsd: end of the run (the constant phase, or decay_start + decay_steps for a branch)
     batch: int = 32
     n_frames: int = 200
-    # Mixed crop lengths: (lo, hi) frames, log-uniform per batch, batch scaled to batch * n_frames frames (same audio
+    # Mixed crop lengths: (lo, hi) frames, 8 lengths spaced geometrically, one per batch, batch scaled to batch * n_frames frames (same audio
     # per step). None = every crop n_frames long. Validation also runs on fixed val_short_frames crops ("eval_short").
     crop_frames: tuple[int, int] | None = None
     val_short_frames: int = 50
