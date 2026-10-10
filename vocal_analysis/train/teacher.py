@@ -18,7 +18,7 @@ import numpy as np
 from ..models.bins import F0_AXIS, FORMANT_AXIS, decode
 from ..models.teacher import Teacher, TeacherConfig, n_params
 from ..synth.channel import ChannelConfig
-from .data import SynthCrops, collate, consolidate, split_ids
+from .data import LengthBatches, SynthCrops, collate, consolidate, split_ids
 from .losses import teacher_loss
 
 
@@ -29,6 +29,10 @@ class TrainConfig:
     steps: int = 40000  # wsd: end of the run (the constant phase, or decay_start + decay_steps for a branch)
     batch: int = 32
     n_frames: int = 200
+    # Mixed crop lengths: (lo, hi) frames, log-uniform per batch, batch scaled to batch * n_frames frames (same audio
+    # per step). None = every crop n_frames long. Validation also runs on fixed val_short_frames crops ("eval_short").
+    crop_frames: tuple[int, int] | None = None
+    val_short_frames: int = 50
     lr: float = 1e-3
     warmup: int = 1000
     weight_decay: float = 0.01
@@ -213,10 +217,16 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     log(f"teacher: {n_params(model):,} parameters; {len(train_ids):,} train / {len(val_ids)} val clips")
 
     ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=cfg.batch * 1000)
-    loader = DataLoader(ds, cfg.batch, num_workers=cfg.workers, collate_fn=collate, persistent_workers=True,
-                        pin_memory=False, prefetch_factor=4, drop_last=True)
+    common = dict(num_workers=cfg.workers, collate_fn=collate, persistent_workers=True, pin_memory=False, prefetch_factor=4)
+    if cfg.crop_frames:
+        batches = LengthBatches(1000, ds.epoch_size, tuple(cfg.crop_frames), cfg.batch * cfg.n_frames, seed=cfg.seed + step)
+        loader = DataLoader(ds, batch_sampler=batches, **common)
+    else:
+        loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True)
     val_loader = DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate)
+    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True)
+    short_loader = DataLoader(short_ds, cfg.batch * cfg.n_frames // cfg.val_short_frames, num_workers=4, collate_fn=collate)
     vq = TorchVQT(device)
     rng = np.random.default_rng(cfg.seed + step)
 
@@ -244,7 +254,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             p_truth = _p_comb_truth(step, cfg)
             truth = rng.random() < p_truth
             with torch.autocast(device.type, dtype=torch.bfloat16):
-                lp = vq.log_power_with_context(audio, cfg.n_frames)
+                lp = vq.log_power_with_context(audio, lab["f0"].shape[1])
                 out_ = model(lp, comb_f0=lab["f0"] if truth else None, comb_voiced=lab["voiced"].float() if truth else None)
             loss, parts = teacher_loss(out_, lab, cfg.loss_weights)
             opt.zero_grad(set_to_none=True)
@@ -254,7 +264,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             if ema is not None:
                 torch._foreach_lerp_(ema_params, model_params, 1.0 - cfg.ema_decay)
             step += 1
-            seen += audio.shape[0]
+            seen += lab["f0"].numel()  # frames
             # summed on the GPU and read once per log interval: a float() here would make every step wait for it
             for k, v in {**parts, "loss": loss.detach(), "grad_norm": gn.detach()}.items():
                 acc[k] = acc[k] + v if k in acc else v.float()
@@ -263,7 +273,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 dt = time.time() - t0
                 rec = {"step": step, "lr": _lr(step, cfg), "p_comb_truth": p_truth,
                        **{k: v / cfg.log_every for k, v in acc.items()},
-                       "audio_s_per_s": seen * cfg.n_frames / 100 / dt, "time": time.time()}
+                       "audio_s_per_s": seen / 100 / dt, "time": time.time()}
                 logf.write(json.dumps(rec) + "\n")
                 logf.flush()
                 log(f"step {step} loss {rec['loss']:.3f} (f0 {rec['f0']:.2f} F {rec['formants']:.2f} bw {rec['bandwidth']:.2f}) "
@@ -272,15 +282,15 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             if step % cfg.ckpt_every == 0 or step == cfg.steps:
                 save(last)
             if step % cfg.eval_every == 0 or step == cfg.steps:
-                ev = evaluate(model, val_loader, vq, device)
-                logf.write(json.dumps({"step": step, "eval": ev, "time": time.time()}) + "\n")
-                logf.flush()
-                log("eval " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if not k.startswith("F1_dr_f0")))
-                if ema is not None:
-                    ev = evaluate(ema, val_loader, vq, device)
-                    logf.write(json.dumps({"step": step, "eval_ema": ev, "time": time.time()}) + "\n")
-                    logf.flush()
-                    log("eval (ema) " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if not k.startswith("F1_dr_f0")))
+                for key, net in (("", model), ("_ema", ema)):
+                    if net is None:
+                        continue
+                    for vkey, vl in (("eval", val_loader), ("eval_short", short_loader)):
+                        ev = evaluate(net, vl, vq, device)
+                        logf.write(json.dumps({"step": step, vkey + key: ev, "time": time.time()}) + "\n")
+                        logf.flush()
+                        label = vkey + (f" ({cfg.val_short_frames} frames)" if vkey == "eval_short" else "") + (" (ema)" if key else "")
+                        log(label + " " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if not k.startswith("F1_dr_f0")))
                 save(out / f"ckpt_{step:06d}.pt")
     logf.close()
     return out

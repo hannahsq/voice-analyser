@@ -74,6 +74,26 @@ def test_fixed_crops_ignore_worker_seed(tmp_path):
     assert not np.array_equal(a, b)
 
 
+def test_length_batches_keep_frames_per_batch(tmp_path):
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.data import LengthBatches, SynthCrops, collate, consolidate
+
+    batches = list(LengthBatches(200, 1000, (32, 400), 32 * 200, seed=1))
+    lengths = np.array([b[0][1] for b in batches])
+    assert lengths.min() >= 32 and lengths.max() <= 400 and np.median(lengths) < 150  # log-uniform: median ~113
+    frames = np.array([len(b) * b[0][1] for b in batches])
+    assert np.all(np.abs(frames / 6400 - 1) < 0.05)  # same audio per step, to rounding
+    assert all(len({t for _, t in b}) == 1 for b in batches)  # one length per batch
+
+    root = write_set(tmp_path / "s", 2, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=2, workers=1, log=lambda m: None)
+    ds = SynthCrops(consolidate(root, log=lambda m: None), np.arange(2), n_frames=200, channel=None)
+    audio, lab = collate([ds[(0, 37)], ds[(1, 37)]])
+    assert lab["f0"].shape == (2, 37) and audio.shape[1] == 36 * vqt.HOP + vqt.N_MAX
+    _, lab = ds[(0, 400)]  # past the end of a 2.5 s clip: flags off, f0 finite (the comb reads it), formants absent
+    assert np.isfinite(lab["f0"]).all() and not lab["voiced"][300:].any() and np.isnan(lab["formants"][300:]).all()
+
+
 def test_teacher_forward_shapes_and_comb():
     from vocal_analysis.models.teacher import Teacher, TeacherConfig
 

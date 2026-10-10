@@ -137,9 +137,11 @@ def cmd_synth(cfg: Config, args: argparse.Namespace) -> int:
 
 
 def _parse_value(v: str):
-    """int, float, None or str, for --train-set fields whose default is None."""
+    """int, float, None, a tuple (comma list) or str, for --train-set fields whose default is None."""
     if v.lower() == "none":
         return None
+    if "," in v:
+        return tuple(_parse_value(x) for x in v.split(","))
     for t in (int, float):
         try:
             return t(v)

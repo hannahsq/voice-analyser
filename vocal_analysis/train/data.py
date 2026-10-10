@@ -60,6 +60,16 @@ def consolidate(root: str | Path, log=print) -> Path:
     return out
 
 
+def _pad_labels(key: str, v: np.ndarray, n: int) -> np.ndarray:
+    """Flags pad False; formants and bandwidths NaN (masked in the loss); f0, rd and source_h_db, which the data
+    keep finite on every frame (f0 carries its contour through unvoiced frames; the comb reads it), repeat the last."""
+    if v.dtype == bool:
+        return np.zeros((n,) + v.shape[1:], bool)
+    if key in ("formants", "bandwidths"):
+        return np.full((n,) + v.shape[1:], np.nan, v.dtype)
+    return np.repeat(v[-1:], n, axis=0)
+
+
 class SynthCrops:
     """torch-style dataset of fixed-length crops. Item = (audio with VQT context, labels dict).
 
@@ -90,9 +100,11 @@ class SynthCrops:
     def __len__(self) -> int:
         return self.epoch_size
 
-    def __getitem__(self, item: int):
+    def __getitem__(self, item):
+        """item: an index, or (index, n_frames) from LengthBatches (a crop length per batch)."""
         import torch
 
+        item, t = item if isinstance(item, tuple) else (item, self.n_frames)
         arr = self._open()
         # torch's per-worker RNG is reseeded every epoch by the DataLoader, so crops and channels differ per epoch,
         # unless the set is fixed (validation: every eval must see the same crops, or checkpoints can't be compared).
@@ -106,12 +118,11 @@ class SynthCrops:
         if self.channel is not None:
             mask = np.repeat(lab["voiced"], HOP)[: len(x)]
             x, _ = augment(x, rng, self.channel, np.pad(mask, (0, len(x) - len(mask))))
-        t = self.n_frames
         start = int(rng.integers(0, max(n_clip_frames - t, 0) + 1))
         lab = {k: v[start : start + t] for k, v in lab.items()}
-        if len(lab["f0"]) < t:  # short clip: pad labels as unvoiced/absent
+        if len(lab["f0"]) < t:  # crop runs past the clip's end: pad labels as unvoiced/absent
             pad = t - len(lab["f0"])
-            lab = {k: np.concatenate([v, np.zeros((pad,) + v.shape[1:], v.dtype) if v.dtype == bool else np.full((pad,) + v.shape[1:], np.nan, v.dtype)]) for k, v in lab.items()}
+            lab = {k: np.concatenate([v, _pad_labels(k, v, pad)]) for k, v in lab.items()}
         lab["formants"] = lab["formants"][:, :N_TRAIN_FORMANTS]
         lab["bandwidths"] = lab["bandwidths"][:, :N_TRAIN_FORMANTS]
         c0 = start * HOP - N_MAX // 2
@@ -121,6 +132,26 @@ class SynthCrops:
         if hi > lo:
             seg[lo - c0 : hi - c0] = x[lo:hi]
         return seg, {k: v.astype(np.float32) if v.dtype != bool else v for k, v in lab.items()}
+
+
+class LengthBatches:
+    """Batch sampler with one crop length per batch, log-uniform in [lo, hi] frames. The batch size scales so every
+    batch holds about frames_per_batch frames: the same audio per step, and the same weight per frame in the loss.
+    Yields lists of (index, n_frames) for SynthCrops."""
+
+    def __init__(self, n_batches: int, epoch_size: int, frames: tuple[int, int], frames_per_batch: int, seed: int = 0):
+        self.n_batches, self.epoch_size, self.frames, self.fpb = n_batches, epoch_size, frames, frames_per_batch
+        self.rng = np.random.default_rng(seed)  # main process; carries on across epochs, so each epoch differs
+
+    def __len__(self) -> int:
+        return self.n_batches
+
+    def __iter__(self):
+        lo, hi = self.frames
+        for _ in range(self.n_batches):
+            t = int(round(np.exp(self.rng.uniform(np.log(lo), np.log(hi)))))
+            b = max(1, round(self.fpb / t))
+            yield [(int(i), t) for i in self.rng.integers(self.epoch_size, size=b)]
 
 
 def collate(batch):
