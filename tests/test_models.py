@@ -36,11 +36,16 @@ def test_crops_align_audio_and_labels(tmp_path):
     for i in range(4):
         audio, lab = ds[i]
         clip_audio, clip_lab, _ = reader[i]
-        # find the crop start by matching f0 labels, then check the audio at frame centres
-        start = next(s for s in range(len(clip_lab["f0"]) - 49) if np.allclose(clip_lab["f0"][s : s + 50], lab["f0"]))
-        for j in (0, 17, 49):
-            assert audio[vqt.N_MAX // 2 + j * vqt.HOP] == pytest.approx(clip_audio[(start + j) * vqt.HOP], abs=1e-6)
+        # the crop start is random: find it from the audio (unique; labels can repeat over a steady stretch), then
+        # check that the labels at that start are the crop's
+        centres = vqt.N_MAX // 2 + np.arange(50) * vqt.HOP
+        starts = [s for s in range(len(clip_lab["f0"]) - 49)
+                  if np.allclose(audio[centres], clip_audio[(s + np.arange(50)) * vqt.HOP], atol=1e-6)]
+        assert len(starts) == 1
+        start = starts[0]
         assert np.array_equal(lab["voiced"], clip_lab["voiced"][start : start + 50])
+        assert np.allclose(lab["f0"], clip_lab["f0"][start : start + 50], equal_nan=True)
+        assert np.allclose(lab["formants"], clip_lab["formants"][start : start + 50, : lab["formants"].shape[1]], equal_nan=True)
 
 
 def test_fixed_crops_ignore_worker_seed(tmp_path):
