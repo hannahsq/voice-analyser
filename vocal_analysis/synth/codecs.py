@@ -1,6 +1,10 @@
 """Lossy codecs through ffmpeg for channel augmentation (plan §5.1).
 
-Each call encodes and decodes in memory (two ffmpeg processes, raw float32 over pipes). Codecs add
+Each call encodes and decodes in memory. Opus, AAC and MP3 go through ffmpeg's libraries in-process (PyAV):
+about 20 ms per clip, where starting two ffmpeg processes costs about 330 ms and serialises across data-loader
+workers on Windows (training was loader-bound at about 60 s of audio per second). PyAV's wheels have no AMR
+encoders, so AMR still runs through the ffmpeg executable (raw float32 over pipes). AAC and MP3 are bit-identical
+either way; Opus voip mode differs between the two builds' libopus versions (same codec and settings). Codecs add
 delay (encoder priming, filter banks), so each (codec, bitrate) is calibrated once per process by
 cross-correlating a fixed probe signal, and the decoded audio is shifted back by that many samples and
 trimmed to the input length. Frame labels therefore stay aligned (tests/test_codecs.py checks to 1 sample).
@@ -27,6 +31,9 @@ CODECS: dict[str, tuple[tuple[str, ...], str, tuple[float, ...], int]] = {
     "amr_nb": (("-c:a", "libopencore_amrnb"), "amr", (4.75, 7.95, 12.2), 8000),
 }
 DEMUXER = {"adts": "aac"}  # where the demuxer name differs from the muxer
+# in-process (PyAV) encoder name and options, for the codecs its wheels include
+IN_PROCESS: dict[str, tuple[str, dict[str, str]]] = {
+    "opus": ("libopus", {"application": "voip"}), "aac": ("aac", {}), "mp3": ("libmp3lame", {})}
 MAX_LAG = 4000  # samples searched when calibrating
 
 
@@ -55,7 +62,45 @@ def _run(args: list[str], data: bytes) -> bytes:
     return res.stdout
 
 
-def _roundtrip(x: np.ndarray, codec: str, kbps: float) -> np.ndarray:
+@functools.lru_cache(maxsize=1)
+def _av():
+    try:
+        import av
+    except ImportError:
+        return None
+    return av
+
+
+def _roundtrip_in_process(x: np.ndarray, codec: str, kbps: float) -> np.ndarray:
+    import io
+
+    av = _av()
+    enc, opts = IN_PROCESS[codec]
+    fmt = CODECS[codec][1]
+    buf = io.BytesIO()
+    with av.open(buf, "w", format=fmt) as out:
+        st = out.add_stream(enc, rate=FS, options=opts)
+        st.bit_rate, st.layout = int(round(kbps * 1000)), "mono"
+        frame = av.AudioFrame.from_ndarray(np.ascontiguousarray(x, np.float32)[None, :], format="flt", layout="mono")
+        frame.sample_rate = FS
+        for packet in (*st.encode(frame), *st.encode(None)):
+            out.mux(packet)
+    buf.seek(0)
+    ys = []
+    with av.open(buf, "r", format=DEMUXER.get(fmt, fmt)) as inp:
+        rs = av.AudioResampler(format="flt", layout="mono", rate=FS)
+        for f in inp.decode(audio=0):
+            ys.extend(g.to_ndarray().ravel() for g in rs.resample(f))
+        ys.extend(g.to_ndarray().ravel() for g in rs.resample(None))
+    return np.concatenate(ys) if ys else np.zeros(0, np.float32)
+
+
+def _roundtrip(x: np.ndarray, codec: str, kbps: float, in_process: bool | None = None) -> np.ndarray:
+    """in_process: None = PyAV where it has the codec (unless $VA_CODECS_IN_PROCESS=0), else the ffmpeg executable."""
+    if in_process is None:
+        in_process = codec in IN_PROCESS and _av() is not None and os.environ.get("VA_CODECS_IN_PROCESS", "1") != "0"
+    if in_process:
+        return _roundtrip_in_process(x, codec, kbps)
     enc, fmt, _, rate = CODECS[codec]
     raw = ["-f", "f32le", "-ar", str(FS), "-ac", "1"]
     coded = _run([*raw, "-i", "pipe:0", "-ar", str(rate), *enc, "-b:a", f"{int(round(kbps * 1000))}", "-f", fmt, "pipe:1"],

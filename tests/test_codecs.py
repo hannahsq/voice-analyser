@@ -66,3 +66,25 @@ def test_augment_always_codes_when_asked():
     cfg = replace(ChannelConfig(), p_clean=0.0, p_codec=1.0, codecs=("opus",))
     y, p = augment(_vowel_burst(8000, 2000), np.random.default_rng(0), cfg)
     assert p["codec"] == "opus" and p["codec_kbps"] in codecs.CODECS["opus"][2] and len(y) == 8000
+
+
+
+@pytest.mark.parametrize("codec", list(codecs.IN_PROCESS))
+def test_in_process_codecs_match_the_executable(codec):
+    """PyAV and the ffmpeg executable code the same way, once each path's own delay is removed: AAC and MP3
+    bit-identical; Opus voip differs between the two builds' libopus versions, so its distortion is compared."""
+    pytest.importorskip("av")
+    x = codecs._probe()
+    kbps = codecs.CODECS[codec][2][1]
+
+    def aligned(in_process):
+        y = codecs._roundtrip(x, codec, kbps, in_process=in_process)
+        d = int(np.argmax([np.dot(y[k : k + len(x) - 2000], x[: len(x) - 2000]) for k in range(1200)]))
+        return y[d : d + len(x) - 2000]
+
+    a, b, ref = aligned(True), aligned(False), x[: len(x) - 2000]
+    if codec == "opus":
+        snr = lambda y: 10 * np.log10(np.sum(ref**2) / np.sum((y - ref) ** 2))  # noqa: E731
+        assert abs(snr(a) - snr(b)) < 3.0
+    else:
+        assert np.allclose(a, b, atol=1e-6)

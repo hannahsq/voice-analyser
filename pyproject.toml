@@ -15,6 +15,7 @@ dependencies = [
     "scipy>=1.11",
     "pyyaml>=6",
     "soundfile>=0.12",
+    "av>=14",  # in-process codecs for channel augmentation (synth/codecs.py)
 ]
 
 [project.optional-dependencies]
