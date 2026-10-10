@@ -585,3 +585,16 @@ Fix found on the way: the EMA chain failed at its first comparison because the e
 | Throughput (mean of logged s/s) | 94–107 | 92 |
 
 F1 4.5 Hz and F4 8 Hz better than every GRU seed; F3 better; f0 a hair worse. Throughput slightly lower, not 13 % higher as the short GPU check suggested. Wall time 47 min against about 37 min, though some of that was the EMA closed-phase step's CPU load at the start. Synthetic gains have not always carried to real voices (D-020), and real-voice comparisons at S2 size are too noisy (above). The next step is a full-size Conformer run against the full-size v2 seeds.
+
+**Conformer, real voices (2026-10-11; `paired/small_conf_v2_s0.txt`, `invariance/small_conformer.txt`, `closed_phase/cp_small_conformer.txt`).** Against v2_s0, the same seed's GRU:
+- *Hillenbrand much worse*, far outside any seed spread: F1 MAE +26.7 [+23.7, +30.0] Hz (women +37, children +26, men +17), F3 +48, F4 +94 Hz. PTDB-TUG f0 RPA −2.3 points. Invariance |slope| 28.8 against 21–25 (at f0 ≤ 250 Hz: 24.3 against 10–12).
+- *Closed-phase F1 as good as or better than the best GRU seed* (PTDB-TUG women's bias +23.9, men's +16.7, against v2_s0's +21.4 / +16.9; ARCTIC bdl and jmk |error| the lowest of the four).
+
+The split follows clip length. The models train on 2 s crops (200 frames) and `analyse()` runs whole files. Hillenbrand words are 0.55 s (median; 0.43–0.68 s), while PTDB-TUG and ARCTIC utterances run for several seconds. On synthetic clips cut to different lengths (`scripts/analysis/len_test.py`; 150 clips, F1 MAE in Hz):
+
+| Input length (frames) | 30 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| GRU v2_s0 | 52.4 | 40.8 | 31.3 | 29.5 | 27.4 |
+| Conformer | 74.0 | 44.6 | 31.8 | 26.5 | 24.6 |
+
+Both models degrade on short inputs; the Conformer much faster. The Conformer is better from 200 frames up and worse below about 100. So the Hillenbrand result is a length-generalisation failure, not a worse model. The fix is training on mixed crop lengths (D-021's open item), which the GRU also needs. The synthetic validation set uses 200-frame crops only, which hid this; it needs short-crop cases.
