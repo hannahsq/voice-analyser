@@ -545,3 +545,28 @@ Closed-phase F1 bias follows how strongly the training data tie the tract to f0.
 - *Adopt S2 as the proxy* if it reproduces, beyond its own three-seed spread, the directions known at full size: v1 → v2 F2 and F3 better, invariance much better, closed-phase F1 worse; and v3b's Hillenbrand F1 and women's |error| regressions. Otherwise, fall back to full size at a short budget.
 
 **Weights EMA (pre-registered; main `21558f6`).** Training now keeps a moving average of the weights (decay 0.998, about the last 500 steps), saved as `ema` in each checkpoint and loadable with `<ckpt>#ema`; training itself is unchanged. Seven of the nine S2 runs carry it (all but v2 seeds 0 and 1, which started before it), so each run gives a paired raw-against-averaged comparison with no extra training (`ema_*` reports). *Adopt* if the averaged weights are not worse than the raw ones beyond the paired intervals on any main measure, and narrow the three-seed spread of the v3b and v1 arms on f0 RPA or closed-phase F1 bias. Other optimiser and schedule changes are deferred (`docs/roadmap.md`).
+
+**Result: S2 fails as a proxy (2026-10-11).** Nine S2 runs (`paired/small_*.txt`, all against v2_s0; `invariance/small.txt`; `closed_phase/cp_small.txt`). Arm means across the three seeds, with the range in brackets:
+
+| Measure | v2 | v3b | v1 |
+|---|---|---|---|
+| Hillenbrand F1 MAE, all | 36.5 (34.2–37.9) | 37.5 (36.1–39.7) | 34.1 (31.1–36.3) |
+| F1 MAE, women | 38.9 (35.7–41.3) | 41.8 (39.8–44.4) | 38.9 (34.6–42.2) |
+| F1 MAE, children | 43.3 (41.3–44.7) | 46.6 (43.3–50.2) | 40.4 (37.8–42.4) |
+| F2 MAE | 56.4 (52.8–62.7) | 53.8 (53.0–55.0) | 54.4 (49.1–58.3) |
+| F3 MAE | 96.8 (87.2–108.4) | 94.9 (82.7–104.1) | 102.4 (88.3–120.7) |
+| PTDB-TUG f0 RPA, all frames | 87.0 (86.6–87.3) | 86.6 (85.9–87.0) | 86.3 (85.3–87.8) |
+| Invariance median \|slope\| | 22.9 (20.7–24.6) | 21.2 (16.4–25.1) | 56.6 (52.0–63.1) |
+| Closed-phase F1 bias, women | +30.9 (+21.4 to +39.3) | +36.6 (+29.5 to +40.5) | +27.4 (+21.5 to +32.0) |
+| Closed-phase \|error\|, women | 45.1 (40.7–49.7) | 49.0 (44.8–52.6) | 41.8 (37.7–44.6) |
+| Closed-phase F1 bias, men | +28.6 (+16.9 to +39.0) | +28.7 (+26.6 to +29.8) | +25.4 (+18.6 to +31.4) |
+
+Against the pre-registered directions:
+- *v1 → v2 invariance much better*: reproduced, far beyond the spread (no overlap; the same size as at full scale).
+- *v1 → v2 F2 and F3 better*: not reproduced. F3 is 5.6 Hz better on the means, inside a seed range of 21–32 Hz; F2 is 2 Hz worse.
+- *v1 → v2 closed-phase F1 worse*: right direction on every measure (women's bias +3.5, |error| +3.3, men's bias +3.2 Hz on the means), but inside the spread.
+- *v3b's Hillenbrand F1 and women's closed-phase |error| regressions*: right direction (women +2.9, children +3.3, |error| +3.9 Hz on the means), but inside the spread; only v3b_s0 shows them clearly.
+
+At this size and budget, seed-to-seed movement is about as large as the effects to be detected. The F3 spread (21 Hz) is two-thirds of the full-size v1 → v2 effect; the women's closed-phase bias spread (18 Hz) is larger than any data effect seen so far. Detecting 3–5 Hz effects would need on the order of 10 seeds per arm, which costs more than full-size runs. Only invariance-sized effects (tens of Hz per octave) can be read from three S2 seeds. So the Conformer goes in as a bench run (one S2 seed: throughput and synthetic validation), not a three-seed comparison. A real-voice architecture comparison falls back to full size, as pre-registered.
+
+Fix found on the way: the EMA chain failed at its first comparison because the evaluation's checkpoint hash did not accept the `#ema` suffix (`teacher_eval._ckpt_id`). The averaged weights now get their own cache id (`<sha>-ema`); the EMA comparisons were restarted at 01:18. EMA verdict: pending.
