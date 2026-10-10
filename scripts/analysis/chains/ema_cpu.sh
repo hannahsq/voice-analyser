@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Closed-phase F1 (subset) for each small model as it finishes, one at a time (they share the npz files).
+# Closed-phase F1 (subset) for each EMA model as its paired measures finish, one at a time (they share the npz files).
 set -u
 S="$1"
 cd /c/github/voice-analyser
 LOG=runs/orchestrator.log
 say() { echo "$(date '+%F %T') $*" >> "$LOG"; }
 Q="$S/small_cpu_queue_ema.txt"
+# the small study's closed-phase queue writes the same files: wait for it
+until grep -q "small: closed phase done" "$LOG"; do sleep 60; done
 n=0
 while true; do
   line=$(sed -n "$((n + 1))p" $Q 2>/dev/null)
