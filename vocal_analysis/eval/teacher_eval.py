@@ -21,12 +21,13 @@ from .metrics import f0_band_labels
 TOL = (0.20, 200.0)
 
 
-def _ckpt_id(path: Path) -> str:
+def _ckpt_id(path: str) -> str:
+    """Content hash of the checkpoint; "<ckpt>#ema" (its averaged weights) gets its own id."""
     h = hashlib.sha256()
-    with open(path, "rb") as f:
+    with open(path.removesuffix("#ema"), "rb") as f:
         for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
-    return h.hexdigest()[:12]
+    return h.hexdigest()[:12] + ("-ema" if path.endswith("#ema") else "")
 
 
 @functools.lru_cache(maxsize=2)
@@ -48,7 +49,7 @@ def _analyse(path: str, x: np.ndarray, sr: int) -> dict:
 
 def teacher_baselines(ckpt: str | Path, name: str = "teacher") -> tuple[FormantBaseline, F0Baseline]:
     ckpt = str(ckpt)
-    version = _ckpt_id(Path(ckpt))
+    version = _ckpt_id(ckpt)
     step = _model(ckpt)[2].get("step", "?")
 
     def formants(x, sr, times, meta):
@@ -62,7 +63,7 @@ def teacher_baselines(ckpt: str | Path, name: str = "teacher") -> tuple[FormantB
         res = _analyse(ckpt, x, sr)
         return res["t"], res["f0"], res["voiced_p"]
 
-    desc = f"teacher {Path(ckpt).parent.name} step {step} (sha {version}), trained on synthetic data only"
+    desc = f"teacher {Path(ckpt.removesuffix('#ema')).parent.name}{' (EMA)' if ckpt.endswith('#ema') else ''} step {step} (sha {version}), trained on synthetic data only"
     return (FormantBaseline(name, desc, formants, version=version),
             F0Baseline(name, desc + "; voiced if voicing p >= 0.5", f0, voicing_threshold=0.5, version=version))
 
