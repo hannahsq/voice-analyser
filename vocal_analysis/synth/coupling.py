@@ -30,31 +30,48 @@ N_COUPLED = 5  # poles moved (F1-F5); higher ones are left as they are
 MAX_REL_SHIFT = 0.6  # a continuation that moves a pole further than this has switched branch: no shift for that pole
 
 
+# Residual opening during the 'closed' phase (fraction of the peak) against the open quotient, from Holmberg, Hillman &
+# Perkell (1988, Tables AI-AVI; minimum / peak flow, 25 men and 20 women in loud, normal and soft voice; men 0.22 /
+# 0.32 / 0.45 at OQ 0.57 / 0.60 / 0.73, women 0.33 / 0.41 / 0.52 at 0.71 / 0.76 / 0.82): within each sex it rises 1.4x
+# as fast as the open quotient; at equal OQ, men's line is 0.28 at OQ 0.60 and women's 0.10 lower (their higher OQ
+# gives them similar or larger gaps). Flow minima include leakage that high-speed video doesn't show as area (Patel et
+# al. 2026: minimum / maximum area 0.01 men, 0.07 women), so each clip's offset spans from about the video values to
+# the flow values.
+GAP_AT_REF, OQ_REF, GAP_PER_OQ, GAP_MAX = 0.28, 0.60, 1.4, 0.6
+
+
+def gap_from_open_quotient(oq: np.ndarray, offset: float) -> np.ndarray:
+    """Residual opening per sample from the rendered open quotient (the LF te, set by Rd) and the clip's offset."""
+    return np.clip(GAP_AT_REF + offset + GAP_PER_OQ * (np.asarray(oq) - OQ_REF), 0.0, GAP_MAX)
+
+
 @dataclass
 class Glottis:
-    """Per-clip glottis and subglottal system. peak_area_cm2: largest opening in a cycle; gap: residual opening
-    during the 'closed' phase, as a fraction of the peak (a posterior chink; Patel et al. 2026: women 0.07 +/- 0.07,
-    men 0.01 of the maximum area)."""
+    """Per-clip glottis and subglottal system. peak_area_cm2: largest opening in a cycle; gap_offset: shifts the
+    residual opening during the 'closed' phase (`gap_from_open_quotient`)."""
 
     peak_area_cm2: float
-    gap: float
+    gap_offset: float
     length_cm: float  # glottal (membranous) length
     depth_cm: float  # vocal-fold thickness along the flow
     pressure: float  # transglottal pressure, dyn/cm^2
     sub_scale: float  # subglottal resonance frequencies multiplied by this
 
 
-def sample_glottis(rng: np.random.Generator, tract_length_cm: float, peak_area_cm2: tuple[float, float] = (0.03, 0.25),
-                   p_gap: float = 0.5, gap: tuple[float, float] = (0.0, 0.15)) -> Glottis:
-    """Provisional ranges (D-023: to be set from published glottal-flow and glottal-area data). Sizes scale with the
-    tract: area with length^2, glottal length and depth with length."""
+def sample_glottis(rng: np.random.Generator, tract_length_cm: float, peak_area_cm2: tuple[float, float] = (0.05, 0.22),
+                   gap_offset: tuple[float, float] = (-0.3, 0.1)) -> Glottis:
+    """Peak area log-uniform at 17.5 cm, scaled by (length / 17.5)^2: Holmberg et al.'s (1988) peak flows through
+    Bernoulli at each group's pressure give men 0.06-0.24 cm^2 (mean 0.12) and women 0.04-0.12 (0.07; 0.05-0.15 at
+    17.5 cm), about the same in soft, normal and loud voice, so the opening is not tied to Rd; only the closed-phase gap
+    is. Transglottal pressure 3.6-12 cm H2O (theirs: 3.2-16, normal 4.3-9.7). Glottal length and depth scale with
+    the tract."""
     s = tract_length_cm / REF_L_CM
     return Glottis(
         peak_area_cm2=float(np.exp(rng.uniform(*np.log(peak_area_cm2))) * s * s),
-        gap=float(rng.uniform(*gap)) if rng.random() < p_gap else 0.0,
+        gap_offset=float(rng.uniform(*gap_offset)),
         length_cm=float(1.4 * s * np.exp(rng.normal(0, 0.1))),
         depth_cm=float(0.3 * s * np.exp(rng.normal(0, 0.1))),
-        pressure=float(rng.uniform(4000.0, 10000.0)),
+        pressure=float(rng.uniform(3500.0, 12000.0)),
         sub_scale=float(np.exp(rng.normal(0, 0.07)) / s),
     )
 

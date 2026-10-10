@@ -81,11 +81,10 @@ class SynthConfig:
     formant_constraint: str | None = None
     # Glottal coupling within the cycle (D-023), per tube clip: F1-F5 and their bandwidths move towards their
     # open-glottis values as the glottis opens (time-domain voiced path); labels stay the closed-glottis poles.
-    # Ranges are provisional until set from published glottal-flow and glottal-area data.
+    # Glottal sizes and the closed-phase gap from Holmberg et al. (1988) and Patel et al. (2026) (`coupling.sample_glottis`).
     p_coupling: float = 0.0
-    glottal_peak_area_cm2: tuple[float, float] = (0.03, 0.25)  # at 17.5 cm; scaled by (length / 17.5)^2
-    p_glottal_gap: float = 0.5
-    glottal_gap: tuple[float, float] = (0.0, 0.15)  # fraction of the peak opening left during the closed phase
+    glottal_peak_area_cm2: tuple[float, float] = (0.05, 0.22)  # at 17.5 cm; scaled by (length / 17.5)^2
+    glottal_gap_offset: tuple[float, float] = (-0.3, 0.1)  # closed-phase gap: follows the open quotient, shifted per clip
     # per clip, every shift is multiplied by this: the model's open-glottis shifts are uncertain (D-023: its F2-F3
     # shifts exceed what LPC studies find), and the labels don't depend on them, so the teacher sees the whole range
     coupling_scale: tuple[float, float] = (0.0, 1.0)
@@ -332,7 +331,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         spk = tube.sample_speaker(rng, length)
         # no draw at p_coupling = 0, so earlier sets reproduce
         if cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
-            glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.p_glottal_gap, cfg.glottal_gap)
+            glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
             c_scale = float(rng.uniform(*cfg.coupling_scale))
         q_draw = tube.vowel_q_sampler(tube.CONVERSATIONAL_VOWELS, tube.vowel_centres(length)) if cfg.vowel_dist == "conversational" else None
         drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw, glottis=glottis)
@@ -380,7 +379,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     if glottis is not None:  # per-target open-glottis shifts, with the same transitions as the formants
         steps = lambda key: np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.array([d[2][key][j] for d in drawn]), widths)  # noqa: E731
                                       for j in range(coupling.N_COUPLED)], 1)
-        coupled = {"df": steps("open_df") * c_scale, "bm": 1.0 + (steps("open_bm") - 1.0) * c_scale, "gap": glottis.gap}
+        coupled = {"df": steps("open_df") * c_scale, "bm": 1.0 + (steps("open_bm") - 1.0) * c_scale, "gap_offset": glottis.gap_offset}
     jitter, shimmer = rng.uniform(*cfg.jitter), rng.uniform(*cfg.shimmer_db)
     hnr = None if cfg.hnr_db is None else rng.uniform(*cfg.hnr_db)
     comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled)

@@ -26,6 +26,14 @@ def test_open_glottis_raises_f1_and_b1_most_for_close_vowels():
     assert min(shifts["i"], shifts["u"]) > shifts["A"]  # Birkholz et al. (2019): fR1 < 350 Hz most affected
 
 
+def test_closed_phase_gap_follows_open_quotient_like_holmberg_et_al():
+    # men's loud / normal / soft (Holmberg, Hillman & Perkell 1988): minimum / peak flow 0.22 / 0.32 / 0.45
+    gap = coupling.gap_from_open_quotient(np.array([0.57, 0.60, 0.73]), 0.0)
+    assert np.allclose(gap, [0.22, 0.32, 0.45], atol=0.06)
+    assert np.all(np.diff(gap) > 0)
+    assert coupling.gap_from_open_quotient(0.3, -0.3) == 0.0  # never negative
+
+
 def test_coupled_path_without_coupling_matches_harmonic_path():
     c = 501
     pf, pb = np.full((c, 8), np.nan), np.full((c, 8), np.nan)

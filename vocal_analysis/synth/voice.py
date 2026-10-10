@@ -126,9 +126,9 @@ def tract_filter(x: np.ndarray, traj: Trajectories, fs: float = FS) -> np.ndarra
     return filters.filter_tv(x, freqs, bws, fs, is_zero)
 
 
-def glottal_opening(cycles: np.ndarray, te_s: np.ndarray, gap: float = 0.0) -> np.ndarray:
+def glottal_opening(cycles: np.ndarray, te_s: np.ndarray, gap: float | np.ndarray = 0.0) -> np.ndarray:
     """Opening per sample as a fraction of the peak: sin^2 over the open phase (as the aspiration modulation), and
-    the residual gap during the closed phase."""
+    the residual gap (scalar or per sample) during the closed phase."""
     frac = cycles % 1.0
     return gap + (1.0 - gap) * np.where(frac < te_s, np.sin(np.pi * frac / te_s) ** 2, 0.0)
 
@@ -142,14 +142,23 @@ def _open_phase_te(traj: Trajectories) -> np.ndarray:
 def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_max: int, fs: float) -> np.ndarray:
     """The LF source alone (band-limited, as the harmonic path) through the tract in the time domain, poles moving
     with the glottal opening: F(t) = F (1 + df a(t)), B(t) = B (1 + (bm - 1) a(t)). coupling: "df", "bm" (C, P) at
-    control points, P = the oral poles they cover (extra poles and zeros don't move); "gap" (fraction of the peak)."""
+    control points, P = the oral poles they cover (extra poles and zeros don't move); the closed-phase opening as a
+    fraction of the peak: "gap_offset" (follows the open quotient, `coupling.gap_from_open_quotient`) or a fixed
+    "gap" (default 0)."""
     k = np.arange(1, k_max + 1)
     fk = traj.f0[:, None] * k[None, :]
     taper = np.clip((NYQ_TAPER_HZ[1] - fk) / (NYQ_TAPER_HZ[1] - NYQ_TAPER_HZ[0]), 0.0, 1.0)
     amp = source_coefficients(traj.rd, k_max) * taper
     kmax = np.minimum(np.ceil(NYQ_TAPER_HZ[1] / traj.f0).astype(np.int64), k_max)
     src = _additive(cycles, np.abs(amp) * traj.voice_amp[:, None], np.unwrap(np.angle(amp), axis=0), kmax, CTRL)
-    a = glottal_opening(cycles, _open_phase_te(traj), coupling.get("gap", 0.0))
+    te_s = _open_phase_te(traj)
+    if "gap_offset" in coupling:
+        from .coupling import gap_from_open_quotient
+
+        gap = gap_from_open_quotient(te_s, coupling["gap_offset"])
+    else:
+        gap = coupling.get("gap", 0.0)
+    a = glottal_opening(cycles, te_s, gap)
     pf, pb = _sections_per_sample(traj.poles_f, traj.poles_b)
     n_c = coupling["df"].shape[1]
     df = np.stack([_per_sample(coupling["df"][:, j]) for j in range(n_c)])
