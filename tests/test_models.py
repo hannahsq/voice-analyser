@@ -113,3 +113,21 @@ def test_wsd_schedule_and_branch_config(tmp_path):
     old = {k: v for k, v in asdict(v1).items() if k not in ("schedule", "comb_truth_steps")}  # v1's saved config
     (tmp_path / "config.json").write_text(json.dumps({"train": old}))
     assert branch_config(tmp_path, 6000, "o").lr == pytest.approx(_lr(6000, v1))
+
+
+def test_conformer_variant_matches_the_gru_teacher_outputs():
+    """D-021 item 1: the conformer variant swaps only the temporal modules; outputs and their shapes are unchanged,
+    and any crop length works (rotary positions)."""
+    import torch
+
+    from vocal_analysis.features import vqt
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+
+    s2 = dict(channels=(8, 16, 32), f0_channels=8, embed=192, gru_hidden=96, f0_gru_hidden=64)
+    gru, conf = Teacher(TeacherConfig(**s2)), Teacher(TeacherConfig(**s2, temporal="conformer"))
+    for t in (57, 230):
+        x = torch.randn(2, vqt.N_BINS, t)
+        a, b = gru(x), conf(x)
+        assert a.keys() == b.keys() and all(a[k].shape == b[k].shape for k in a)
+    n = lambda m: sum(p.numel() for p in m.parameters())  # noqa: E731
+    assert abs(n(conf) / n(gru) - 1) < 0.1
