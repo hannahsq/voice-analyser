@@ -13,11 +13,16 @@ from .teacher import Teacher, TeacherConfig
 
 
 def load_teacher(path: str | Path, device):
+    """path "<ckpt>#ema" loads the checkpoint's moving average of the weights instead of the weights."""
     import torch
 
-    ck = torch.load(path, map_location="cpu", weights_only=False)
+    path = str(path)
+    use_ema = path.endswith("#ema")
+    ck = torch.load(path.removesuffix("#ema"), map_location="cpu", weights_only=False)
+    if use_ema and ck.get("ema") is None:
+        raise ValueError(f"{path}: the checkpoint has no moving average")
     model = Teacher(TeacherConfig(**ck["teacher_config"]))
-    model.load_state_dict(ck["model"])
+    model.load_state_dict(ck["ema"] if use_ema else ck["model"])
     return model.to(device).eval(), ck
 
 
