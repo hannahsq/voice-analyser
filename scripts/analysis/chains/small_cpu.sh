@@ -9,7 +9,6 @@ Q="$S/small_cpu_queue.txt"
 # CPU work during training costs GPU clock (shared power budget): wait until the study's training is done
 until grep -q "small: GPU work done" "$LOG"; do sleep 60; done  # add_model.py skips models already added
 n=0
-n=0
 while true; do
   line=$(sed -n "$((n + 1))p" $Q 2>/dev/null)
   [ -z "$line" ] && { sleep 60; continue; }
