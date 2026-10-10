@@ -1,5 +1,7 @@
-"""F1 MAE vs input length on synthetic clips, GRU v2_s0 vs Conformer (whole-input inference as in analyse())."""
-import sys, numpy as np
+"""Formant error against input length on synthetic clips (whole-input inference, as analyse() runs real files).
+Args: name=checkpoint pairs. Run from the main checkout (data/synth/train_v2). 150 clips cut to 30-400 frames."""
+import sys
+import numpy as np
 from vocal_analysis.synth.shards import ShardReader
 from vocal_analysis.models.infer import analyse, load_teacher
 from vocal_analysis.device import setup_device
@@ -8,19 +10,19 @@ dev = setup_device()
 rd = ShardReader("data/synth/train_v2")
 ids = np.random.default_rng(0).choice(len(rd), 150, replace=False)
 clips = [rd[int(i)] for i in ids]
-print("clip lengths (frames): median", np.median([len(c[1]["f0"]) for c in clips]))
-for name in ("v2_s0", "conf_v2_s0"):
-    m = load_teacher(f"runs/small/{name}_k35/ckpt_last.pt", dev)[0]
-    row = []
-    for L in (30, 50, 100, 200, 400, 0):
-        e = []
-        for audio, lab, _ in clips:
-            n = len(lab["f0"]) if L == 0 else min(L, len(lab["f0"]))
-            a = audio[: (n - 1) * HOP + 1] if L else audio
-            res = analyse(m, a, dev)
-            k = min(len(res["formants"]), len(lab["formants"]), n)
-            d = np.abs(res["formants"][:k, 0] - lab["formants"][:k, 0])
-            ok = np.isfinite(d) & (lab["voiced"][:k] > 0)
-            e.append(d[ok])
-        row.append(f"{'full' if L == 0 else L}: {np.mean(np.concatenate(e)):.1f}")
-    print(name, "F1 MAE by input length  " + "  ".join(row), flush=True)
+LENGTHS = (30, 50, 100, 200, 400)
+print(f"{len(clips)} clips, median {np.median([len(c[1]['f0']) for c in clips]):.0f} frames; MAE on sonorant frames by input length (frames)")
+print(f"{'model':16s} " + "".join(f"{'F1@' + str(L):>9s}" for L in LENGTHS) + "".join(f"{'F3@' + str(L):>9s}" for L in LENGTHS), flush=True)
+for name, ck in (a.split("=", 1) for a in sys.argv[1:]):
+    m = load_teacher(ck, dev)[0]
+    err = {L: ([], []) for L in LENGTHS}
+    for audio, lab, _ in clips:
+        for L in LENGTHS:
+            n = min(L, len(lab["f0"]))
+            res = analyse(m, audio[: (n - 1) * HOP + 1], dev)
+            k = min(len(res["formants"]), n)
+            for j, e in ((0, err[L][0]), (2, err[L][1])):
+                d = np.abs(res["formants"][:k, j] - lab["formants"][:k, j])
+                e.append(d[np.isfinite(d) & lab["sonorant"][:k]])
+    print(f"{name:16s} " + "".join(f"{np.mean(np.concatenate(err[L][0])):9.1f}" for L in LENGTHS)
+          + "".join(f"{np.mean(np.concatenate(err[L][1])):9.1f}" for L in LENGTHS), flush=True)
