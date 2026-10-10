@@ -6,8 +6,12 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
 
 1. **S2 proxy check and the weights-EMA test** (D-024; running). S2 is the 1.75M-parameter model: three seeds each of train_v2, train_v3b and train_v1 at 3.5k steps, scored with the subset measures. Each run that kept a moving average of its weights (EMA) is also scored with those averaged weights. Results by about midnight on 2026-10-10.
 2. **Time the coupled synthesis path** (D-023) on a quiet machine, against the harmonic path. Then speed up the open-glottis pole search (fewer continuation steps, or a cached table), so coupled rendering costs about the same as uncoupled.
-3. **Conformer swap** (D-021 item 1) on S2, if S2 passes as a proxy.
-4. **v3c, glottal coupling** (D-023), with a decision on whether to bundle the back-rounded-vowel coverage fix: more lip rounding and protrusion in the tube, and a lower cascade F2 floor of about 500 Hz × size.
+3. **Less CPU load during training.** CPU and GPU share one power budget on this machine; while a CPU measure ran, the GPU clock fell from about 2.6 to 2.1 GHz and S2 slowed from about 100 to 86 s/s. In order:
+   - CPU boost off or a lower CPU power limit in GHelper during training (one run, compare `audio_s_per_s`);
+   - AMR through one persistent ffmpeg process per loader worker (no process launches per clip);
+   - batched inference in the measures (about 20 min per S2 run, against 34 min of training).
+4. **Conformer swap** (D-021 item 1) on S2, if S2 passes as a proxy.
+5. **v3c, glottal coupling** (D-023), with a decision on whether to bundle the back-rounded-vowel coverage fix: more lip rounding and protrusion in the tube, and a lower cascade F2 floor of about 500 Hz × size.
 
 ## Training recipe experiments (deferred)
 
@@ -31,7 +35,6 @@ Each would run on S2 and train_v2 against the three v2 seeds. The cheap screen i
 - A mixture-of-hypotheses formant head for assignment swaps (D-021, gap (a)).
 - `external/tcn-formants` in the architecture bake-off.
 - Bayesian vocal-tract-length estimation for the labeller (`voice-dataset-labeler`, branch `feat_bayesian_vtl`).
-- AMR through one long-running ffmpeg process per data-loader worker. Needed only if a model trains faster than the loader's 134–155 s/s.
 - Rented GPUs, if iteration time becomes the limit. Only code and synthetic data would leave this machine; the evaluation sets stay local, with checkpoints measured here. First check the loader under Linux (WSL, or a one-hour rental): process start-up there takes milliseconds, not about 120 ms as on Windows, so AMR may not be a bottleneck there. Then run one machine's worth of known runs (the three S2 v2 seeds) to check that results agree across platforms (CUDA there, ROCm here).
 
 ## Housekeeping
