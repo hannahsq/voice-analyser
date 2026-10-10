@@ -15,6 +15,8 @@ A=reports/analysis
 SA=../voice-analyser-m3/scripts/analysis
 ARCH="--model-set channels=8,16,32 --model-set f0_channels=8 --model-set embed=192 --model-set gru_hidden=96 --model-set f0_gru_hidden=64 --model-set temporal=conformer"
 case "$MODE" in train) SEEDS="0 1 2";; bench) SEEDS="0";; *) fail "conformer: unknown mode $MODE";; esac
+say "conformer ($MODE): waiting for the EMA chain's GPU work"
+until grep -q "ema: GPU work done" "$LOG"; do sleep 60; done
 say "conformer ($MODE): start"
 for SEED in $SEEDS; do
   R=runs/small/conf_v2_s$SEED
@@ -36,6 +38,7 @@ if [ "$MODE" = train ]; then
   ARGS=$(for SEED in 0 1 2; do echo -n "v2_s$SEED=small/v2_s${SEED}_k35/ckpt_last.pt conf_v2_s$SEED=small/conf_v2_s${SEED}_k35/ckpt_last.pt "; done)
   (cd ../voice-analyser-m3 && PYTHONPATH=. ../voice-analyser/.venv/Scripts/python.exe -u scripts/analysis/invariance_run.py $ARGS > ../voice-analyser/$A/invariance/small_conformer.txt 2>&1) || fail "conformer probe"
   # closed phase after training, one model at a time (CPU load during training lowers the GPU clock)
+  until grep -q "ema: closed phase done" "$LOG"; do sleep 60; done  # same npz files
   n=0
   while line=$(sed -n "$((n + 1))p" "$S/conf_cpu_queue.txt"); [ "$line" != DONE ]; do
     set -- $line
