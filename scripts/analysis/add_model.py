@@ -1,6 +1,7 @@
 """Add one teacher's F1-F3 to the saved closed-phase frames (arctic_egg.npz, ptdb_egg.npz), on the CPU, without
 redoing the closed-phase analysis. Same audio path and resampling as arctic_egg.py / ptdb_egg.py.
 Args: scratch dir, name, checkpoint. Run from the voice-analyser-m3 worktree."""
+import os
 import sys
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from vocal_analysis.models.infer import analyse, load_teacher
 
 S, NAME, CK = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
 SUF = sys.argv[4] if len(sys.argv) > 4 else ""  # "_sub": every 3rd utterance per speaker
-torch.set_num_threads(8)
+torch.set_num_threads(int(os.environ.get("VA_THREADS", "8")))  # fewer alongside training
 dev = torch.device("cpu")
 model = load_teacher(CK, dev)[0]
 D = Path("../voice-analyser/data")

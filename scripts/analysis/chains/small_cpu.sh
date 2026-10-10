@@ -12,7 +12,7 @@ while true; do
   [ -z "$line" ] && { sleep 60; continue; }
   [ "$line" = DONE ] && break
   set -- $line
-  (cd ../voice-analyser-m3 && PYTHONPATH=. ../voice-analyser/.venv/Scripts/python.exe -u "$S/add_model.py" "$S" "$1" "../voice-analyser/$2" _sub > "$S/add_sub_$1.log" 2>&1) \
+  (cd ../voice-analyser-m3 && VA_THREADS=4 PYTHONPATH=. ../voice-analyser/.venv/Scripts/python.exe -u scripts/analysis/add_model.py "$S" "$1" "../voice-analyser/$2" _sub > "$S/add_sub_$1.log" 2>&1) \
     || say "FAILED: small closed phase $1 (continuing)"
   n=$((n + 1))
 done
