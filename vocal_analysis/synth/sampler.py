@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field
 
 import numpy as np
 
-from . import tract, tube
+from . import coupling, tract, tube
 from .glottal import RD_MAX, RD_MIN, source_h_db
 from .voice import CTRL, FS, Trajectories, synthesize
 
@@ -79,6 +79,16 @@ class SynthConfig:
     p_vibrato: float = 0.8  # in singing contours
     # Hard-case hooks: None, "f1_near_h1", "f1_near_h2" (F1 within 10 % of f0 / 2 f0) or "f2_f3_close" (|F3 - F2| < 300 Hz)
     formant_constraint: str | None = None
+    # Glottal coupling within the cycle (D-023), per tube clip: F1-F5 and their bandwidths move towards their
+    # open-glottis values as the glottis opens (time-domain voiced path); labels stay the closed-glottis poles.
+    # Ranges are provisional until set from published glottal-flow and glottal-area data.
+    p_coupling: float = 0.0
+    glottal_peak_area_cm2: tuple[float, float] = (0.03, 0.25)  # at 17.5 cm; scaled by (length / 17.5)^2
+    p_glottal_gap: float = 0.5
+    glottal_gap: tuple[float, float] = (0.0, 0.15)  # fraction of the peak opening left during the closed phase
+    # per clip, every shift is multiplied by this: the model's open-glottis shifts are uncertain (D-023: its F2-F3
+    # shifts exceed what LPC studies find), and the labels don't depend on them, so the teacher sees the whole range
+    coupling_scale: tuple[float, float] = (0.0, 1.0)
 
 
 # How train_v1 and suite_v1 were generated, for fields added since (D-011, D-012). Pinning these
@@ -317,15 +327,21 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         pos += rng.uniform(*cfg.target_every_s) * 1000
         tt.append(pos)
     use_tube = cfg.p_tube > 0 and rng.random() < cfg.p_tube  # no draw at p_tube = 0, so cascade-only seeds reproduce
-    tube_info = None
+    tube_info, glottis, c_scale = None, None, None
     if use_tube:
         spk = tube.sample_speaker(rng, length)
+        # no draw at p_coupling = 0, so earlier sets reproduce
+        if cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
+            glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.p_glottal_gap, cfg.glottal_gap)
+            c_scale = float(rng.uniform(*cfg.coupling_scale))
         q_draw = tube.vowel_q_sampler(tube.CONVERSATIONAL_VOWELS, tube.vowel_centres(length)) if cfg.vowel_dist == "conversational" else None
-        drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw) for _ in tt]
+        drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw, glottis=glottis)
+                 for _ in tt]
         targets = np.array([d[0] for d in drawn])
         tube_bws = np.array([d[1] for d in drawn])
         tube_info = {"speaker": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in asdict(spk).items()},
-                     "targets": [d[2] for d in drawn]}
+                     "targets": [d[2] for d in drawn], "glottis": asdict(glottis) if glottis else None,
+                     "coupling_scale": c_scale}
     else:
         targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster,
                                                   conversational=cfg.vowel_dist == "conversational") for _ in tt])
@@ -360,9 +376,14 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         zeros_f=np.tile(extras["extra_zero_f"], (n, 1)).reshape(n, n_ez),
         zeros_b=np.tile(extras["extra_zero_b"], (n, 1)).reshape(n, n_ez),
     )
+    coupled = None
+    if glottis is not None:  # per-target open-glottis shifts, with the same transitions as the formants
+        steps = lambda key: np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.array([d[2][key][j] for d in drawn]), widths)  # noqa: E731
+                                      for j in range(coupling.N_COUPLED)], 1)
+        coupled = {"df": steps("open_df") * c_scale, "bm": 1.0 + (steps("open_bm") - 1.0) * c_scale, "gap": glottis.gap}
     jitter, shimmer = rng.uniform(*cfg.jitter), rng.uniform(*cfg.shimmer_db)
     hnr = None if cfg.hnr_db is None else rng.uniform(*cfg.hnr_db)
-    comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr)
+    comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled)
     audio = comps["total"]
     peak = np.max(np.abs(audio)) + 1e-12
     gain = 0.5 / peak

@@ -327,9 +327,12 @@ def sample_speaker(rng: np.random.Generator, length_cm: float) -> TubeSpeaker:
 
 
 def sample_target(rng: np.random.Generator, spk: TubeSpeaker, n_poles: int, f_max_hz: float, p_constrict: float = 0.15,
-                  p_larynx: float = 0.3, p_lips: float = 0.3, min_area_cm2: float = 0.1, q_draw=None
+                  p_larynx: float = 0.3, p_lips: float = 0.3, min_area_cm2: float = 0.1, q_draw=None, glottis=None
                   ) -> tuple[np.ndarray, np.ndarray, dict]:
     """One articulatory target: F1..F_n_poles and bandwidths (NaN above f_max_hz) plus the parameters drawn.
+
+    glottis (`coupling.Glottis`, D-023): also find how far the first poles move with the glottis open at its peak
+    area; info["open_df"] (relative frequency shift) and info["open_bm"] (bandwidth ratio), per pole.
 
     q1, q2 are uniform over the Table IV box (Story's Fig. 10), or drawn by q_draw(rng) (`vowel_q_sampler`);
     shapes whose substrate narrows below min_area_cm2 (at Story's
@@ -371,4 +374,11 @@ def sample_target(rng: np.random.Generator, spk: TubeSpeaker, n_poles: int, f_ma
     freqs, bws = np.full(n_poles, np.nan), np.full(n_poles, np.nan)
     k = min(len(f), n_poles)
     freqs[:k], bws[:k] = f[:k], b[:k] * spk.bw_scale
+    if glottis is not None:
+        from .coupling import N_COUPLED, open_shifts
+
+        df, bm = open_shifts(shape, f, b, glottis)
+        m = min(N_COUPLED, k)
+        info["open_df"] = [float(x) for x in df[:m]] + [0.0] * (N_COUPLED - m)
+        info["open_bm"] = [float(x) for x in bm[:m]] + [1.0] * (N_COUPLED - m)
     return freqs, bws, info
