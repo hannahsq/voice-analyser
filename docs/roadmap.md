@@ -32,6 +32,7 @@ Each would run on S2 and train_v2 against the three v2 seeds. The cheap screen i
 - `external/tcn-formants` in the architecture bake-off.
 - Bayesian vocal-tract-length estimation for the labeller (`voice-dataset-labeler`, branch `feat_bayesian_vtl`).
 - AMR through one long-running ffmpeg process per data-loader worker. Needed only if a model trains faster than the loader's 134–155 s/s.
+- Rented GPUs, if iteration time becomes the limit. Only code and synthetic data would leave this machine; the evaluation sets stay local, with checkpoints measured here. First check the loader under Linux (WSL, or a one-hour rental): process start-up there takes milliseconds, not about 120 ms as on Windows, so AMR may not be a bottleneck there. Then run one machine's worth of known runs (the three S2 v2 seeds) to check that results agree across platforms (CUDA there, ROCm here).
 
 ## Housekeeping
 
