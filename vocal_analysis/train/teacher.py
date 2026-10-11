@@ -1,4 +1,5 @@
-"""Train the teacher on synthetic data (plan M1, M2). `va train teacher` drives this.
+"""Train the teacher on synthetic data (plan M1, M2), optionally mixed with resynthesised sets (M3).
+`va train teacher` drives this.
 
 Every run directory holds config.json (train + model config, git commit, data index),
 log.jsonl (one line per log/eval step) and checkpoints; a run resumes from ckpt_last.pt.
@@ -19,7 +20,7 @@ import numpy as np
 from ..models.bins import F0_AXIS, FORMANT_AXIS, decode
 from ..models.teacher import Teacher, TeacherConfig, n_params
 from ..synth.channel import ChannelConfig
-from .data import LengthBatches, SynthCrops, collate, consolidate, split_ids
+from .data import TRACT_LEFT_WEIGHT, LengthBatches, MixedCrops, SynthCrops, collate, consolidate, split_ids
 from .losses import teacher_loss
 
 
@@ -42,6 +43,10 @@ class TrainConfig:
     workers: int = 12
     # Learning rate: linear warmup, then "wsd" (constant; a branch decays as 1 - sqrt over decay_steps from
     # decay_start, Hagele et al. 2024) or "cosine" to 0 at `steps` (teacher v1).
+    # "adamw" with `schedule`, or "schedulefree": AdamW-ScheduleFree (Defazio et al. 2024), which needs no decay
+    # (any checkpoint is meant to be final-quality); `schedule` and the decay fields are then unused, and lr
+    # warms up over `warmup` steps inside the optimiser.
+    optimizer: str = "adamw"
     schedule: str = "wsd"
     decay_start: int | None = None
     decay_steps: int = 4000
@@ -58,6 +63,13 @@ class TrainConfig:
     # 0.998 averages over roughly the last 500 steps. Load with "<ckpt>#ema" (models.infer.load_teacher). 0 = off:
     # the default since D-024 (no gain where the rate decays to zero); kept for runs whose rate doesn't.
     ema_decay: float = 0.0
+    # Resynthesised sets (plan §5.2, D-016): `resynth_frac` of training items come from these, split between
+    # them by clip count. Their f0/voicing/sonorant losses are masked and formant losses weighted by QC.
+    # During the comb's true-f0 phase their comb comes from the tracker's f0 label.
+    resynth: tuple[str, ...] = ()
+    resynth_frac: float = 0.3
+    resynth_val: tuple[str, ...] = ()  # held-out resynthesised sets, scored on their (exact) formants
+    tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT
 
 
 def _git() -> dict:
@@ -219,7 +231,18 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         model_cfg = TeacherConfig(**ck["teacher_config"])  # the checkpoint's architecture, whatever was passed
     model_cfg = model_cfg or TeacherConfig()
     model = Teacher(model_cfg).to(device)
-    opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+    sf = cfg.optimizer == "schedulefree"
+    if sf:
+        import schedulefree
+
+        opt = schedulefree.AdamWScheduleFree(model.parameters(), lr=cfg.lr, warmup_steps=cfg.warmup, weight_decay=cfg.weight_decay)
+    elif cfg.optimizer == "adamw":
+        opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+    else:
+        raise ValueError(f"unknown optimizer {cfg.optimizer!r}")
+    # Schedule-free keeps the evaluation weights (an average) apart from the training point: checkpoints and
+    # evaluations use the former, so they are saved in eval mode, and training resumes in train mode.
+    sf_mode = lambda mode: getattr(opt, mode)() if sf else None  # noqa: E731
     step = 0
     ema = None
     if ck is not None:
@@ -239,9 +262,10 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         if cfg.branch_from and cfg.decay_start != step:
             raise ValueError(f"branch decay_start {cfg.decay_start} != checkpoint step {step}")
         index = json.loads((Path(cfg.data) / "index.json").read_text())
+        resynth_idx = {d: json.loads((Path(d) / "index.json").read_text()) for d in (*cfg.resynth, *cfg.resynth_val)}
         (out / "config.json").write_text(json.dumps({"train": asdict(cfg), "model": asdict(model_cfg), "git": _git(),
-                                                     "data_index": index, "n_params": n_params(model),
-                                                     "channel": asdict(channel)}, indent=1))
+                                                     "data_index": index, "resynth_indexes": resynth_idx,
+                                                     "n_params": n_params(model), "channel": asdict(channel)}, indent=1))
     if channel.p_codec > 0:
         from ..synth import codecs
 
@@ -249,23 +273,45 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             raise FileNotFoundError("channel.p_codec > 0 needs ffmpeg (winget install ffmpeg, or set VA_FFMPEG)")
     log(f"teacher: {n_params(model):,} parameters; {len(train_ids):,} train / {len(val_ids)} val clips")
 
-    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=cfg.batch * 1000)
+    epoch = cfg.batch * 1000
+    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch)
+    if cfg.resynth:
+        parts, sizes = [], []
+        for d in cfg.resynth:
+            rflat = consolidate(d, log=log)
+            n = json.loads((rflat / "done").read_text())["n_clips"]
+            parts.append(SynthCrops(rflat, np.arange(n), cfg.n_frames, channel, seed=cfg.seed + 1 + len(parts),
+                                    epoch_size=epoch, tract_left_weight=cfg.tract_left_weight))
+            sizes.append(n)
+        weights = [1.0 - cfg.resynth_frac] + [cfg.resynth_frac * n / sum(sizes) for n in sizes]
+        ds = MixedCrops([ds, *parts], weights, epoch, seed=cfg.seed)
+        log(f"resynthesised: {sum(sizes):,} clips in {len(sizes)} sets, {cfg.resynth_frac:.0%} of items")
     common = dict(num_workers=cfg.workers, collate_fn=collate, persistent_workers=True, pin_memory=False, prefetch_factor=4)
     if cfg.crop_frames:
-        batches = LengthBatches(1000, ds.epoch_size, tuple(cfg.crop_frames), cfg.batch * cfg.n_frames, seed=cfg.seed + step,
+        batches = LengthBatches(1000, epoch, tuple(cfg.crop_frames), cfg.batch * cfg.n_frames, seed=cfg.seed + step,
                                 crop_span=cfg.n_frames, long_frac=cfg.crop_long_frac)
         loader = DataLoader(ds, batch_sampler=batches, **common)
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True)
     short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True)
+    resynth_val = {}
+    for d in cfg.resynth_val:
+        rflat = consolidate(d, log=log)
+        n = json.loads((rflat / "done").read_text())["n_clips"]
+        ids = np.random.default_rng(0).permutation(n)[: cfg.val_clips]  # spread over recordings, fixed
+        resynth_val[f"eval_resynth:{Path(d).name}"] = SynthCrops(rflat, np.sort(ids), cfg.n_frames, channel, seed=12345, fixed=True,
+                                                                  tract_left_weight=cfg.tract_left_weight)
     vq = TorchVQT(device)
     val_sets = {"eval": cache_batches(DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate), vq, device),
                 "eval_short": cache_batches(DataLoader(short_ds, cfg.batch * cfg.n_frames // cfg.val_short_frames,
                                                        num_workers=4, collate_fn=collate), vq, device)}
+    for name, rv in resynth_val.items():
+        val_sets[name] = cache_batches(DataLoader(rv, cfg.batch, num_workers=4, collate_fn=collate), vq, device)
     rng = np.random.default_rng(cfg.seed + step)
 
     def save(path):
+        sf_mode("eval")
         tmp = path.with_suffix(".tmp")
         if ema is not None:
             for b_ema, b in zip(ema.buffers(), model.buffers()):
@@ -274,23 +320,27 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                     "opt": opt.state_dict(), "step": step,
                     "teacher_config": asdict(model_cfg), "train_config": asdict(cfg), "git": _git()}, tmp)
         tmp.replace(path)
+        sf_mode("train")
 
     logf = (out / "log.jsonl").open("a", encoding="utf-8")
     t0, seen = time.time(), 0
     acc: dict = {}  # name -> running sum (tensor until the log step)
     model.train()
+    sf_mode("train")
     while step < cfg.steps:
         for audio, lab in loader:
             if step >= cfg.steps:
                 break
-            for g in opt.param_groups:
-                g["lr"] = _lr(step, cfg)
+            if not sf:
+                for g in opt.param_groups:
+                    g["lr"] = _lr(step, cfg)
             audio, lab = audio.to(device, non_blocking=True), _to(lab, device)
             p_truth = _p_comb_truth(step, cfg)
             truth = rng.random() < p_truth
             with torch.autocast(device.type, dtype=torch.bfloat16):
                 lp = vq.log_power_with_context(audio, lab["f0"].shape[1])
-                out_ = model(lp, comb_f0=lab["f0"] if truth else None, comb_voiced=lab["voiced"].float() if truth else None)
+                comb_f0 = torch.nan_to_num(lab["f0"], nan=100.0)  # resynthesised f0 labels can be NaN; unvoiced there, so no comb
+                out_ = model(lp, comb_f0=comb_f0 if truth else None, comb_voiced=lab["voiced"].float() if truth else None)
             loss, parts = teacher_loss(out_, lab, cfg.loss_weights)
             opt.zero_grad(set_to_none=True)
             loss.backward()
@@ -306,7 +356,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             if step % cfg.log_every == 0:
                 acc = {k: float(v) for k, v in acc.items()}
                 dt = time.time() - t0
-                rec = {"step": step, "lr": _lr(step, cfg), "p_comb_truth": p_truth,
+                rec = {"step": step, "lr": opt.param_groups[0].get("scheduled_lr", cfg.lr) if sf else _lr(step, cfg), "p_comb_truth": p_truth,
                        **{k: v / cfg.log_every for k, v in acc.items()},
                        "audio_s_per_s": seen / 100 / dt, "time": time.time()}
                 logf.write(json.dumps(rec) + "\n")
@@ -317,6 +367,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             if step % cfg.ckpt_every == 0 or step == cfg.steps:
                 save(last)
             if step % cfg.eval_every == 0 or step == cfg.steps:
+                sf_mode("eval")
                 for key, net in (("", model), ("_ema", ema)):
                     if net is None:
                         continue
@@ -325,7 +376,10 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                         logf.write(json.dumps({"step": step, vkey + key: ev, "time": time.time()}) + "\n")
                         logf.flush()
                         label = vkey + (f" ({cfg.val_short_frames} frames)" if vkey == "eval_short" else "") + (" (ema)" if key else "")
-                        log(label + " " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if not k.startswith("F1_dr_f0")))
-                save(out / f"ckpt_{step:06d}.pt")
+                        if vkey.startswith("eval_resynth:"):  # f0 and voicing there score agreement with the tracker
+                            log(label + " " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if k[:2] in ("F1", "F2", "F3") and "f0" not in k))
+                        else:
+                            log(label + " " + " ".join(f"{k} {v:.3f}" for k, v in ev.items() if not k.startswith("F1_dr_f0")))
+                save(out / f"ckpt_{step:06d}.pt")  # leaves schedule-free in train mode
     logf.close()
     return out

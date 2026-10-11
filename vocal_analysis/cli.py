@@ -6,6 +6,7 @@
     va leakage                     run the leakage rules over data/manifests/
     va tiers [--dev-copy IN OUT]   assign gold speakers to dev / semi / lockbox (eval/tiers.json); copy IN's dev rows to OUT
     va baselines [--only NAME...]  run/score baselines -> reports/baselines.md (cached in runs/)
+    va resynth <pool> --teacher CKPT   analysis-resynthesis training set from a training pool (plan §5.2)
     va config                      print the resolved config
 
 Every command takes --config FILE and repeated --set key.sub=value overrides.
@@ -153,8 +154,57 @@ def cmd_synth(cfg: Config, args: argparse.Namespace) -> int:
     if args.what == "suite":
         write_suite(Path(args.out or root / "suite_v1"), args.n or 64, args.workers, log=log)
     else:
-        write_set(Path(args.out or root / "train_v2"), args.n or 100_000, SynthConfig(), seed=args.seed,
+        import dataclasses
+
+        sc = SynthConfig()
+        over = {}
+        for kv in args.synth_set:  # scalar fields only
+            k, v = kv.split("=", 1)
+            cur = getattr(sc, k)
+            over[k] = v.lower() in ("1", "true", "yes") if isinstance(cur, bool) else _parse_value(v) if cur is None else type(cur)(v)
+        write_set(Path(args.out or root / "train_v2"), args.n or 100_000, dataclasses.replace(sc, **over), seed=args.seed,
                   workers=args.workers, log=log)
+    return 0
+
+
+def cmd_resynth(cfg: Config, args: argparse.Namespace) -> int:
+    import numpy as np
+    import torch
+
+    from .data.manifest import manifest_hash, read_manifest
+    from .data.pools import registry as pools
+    from .resynth import corpus
+    from .resynth.render import ResynthConfig
+
+    if args.corpus not in pools():
+        print(f"{args.corpus!r} is not a training pool; known: {', '.join(sorted(pools()))}", file=sys.stderr)
+        return 2
+    manifest = Path(cfg.data.manifests) / f"{args.corpus}.csv"
+    ok = getattr(pools()[args.corpus], "resynth_ok", lambda r: True)  # e.g. VocalSet's lip trills
+    rows = [r for r in read_manifest(manifest) if r.split == args.split and ok(r)]
+    if args.limit:  # evenly spaced through the sorted manifest, so a trial spans singers and techniques
+        rows = sorted(rows, key=lambda r: r.path)
+        rows = [rows[int(i)] for i in np.unique(np.linspace(0, len(rows) - 1, min(args.limit, len(rows))).round())]
+    rc = ResynthConfig(variants=args.variants)
+    for kv in args.resynth_set:
+        k, v = kv.split("=", 1)
+        cur = getattr(rc, k)
+        setattr(rc, k, v.lower() in ("1", "true", "yes") if isinstance(cur, bool) else _parse_value(v) if cur is None else type(cur)(v))
+    log = lambda m: print(m, flush=True)  # noqa: E731
+    teacher_sha = corpus.file_sha256(args.teacher)
+    root = Path(cfg.data.root) / args.corpus
+    adir = Path(cfg.data.root) / "resynth" / "analysis" / args.corpus / teacher_sha
+    from dataclasses import replace
+
+    from .device import setup_device
+
+    device = setup_device(replace(cfg.device, device=args.device) if args.device else cfg.device)
+    corpus.analyse(rows, root, args.teacher, adir, device=device, log=log)
+    step = torch.load(args.teacher, map_location="cpu", weights_only=False).get("step")
+    out = Path(args.out or Path(cfg.data.root) / "resynth" / f"{args.corpus}_{args.split}")
+    corpus.render(rows, root, adir, out, rc, seed=args.seed, workers=args.workers, log=log,
+                  extra_index={"corpus": args.corpus, "split": args.split, "manifest_hash": manifest_hash(manifest),
+                               "teacher": {"path": Path(args.teacher).as_posix(), "sha256": teacher_sha, "step": step}})
     return 0
 
 
@@ -188,7 +238,8 @@ def cmd_train(cfg: Config, args: argparse.Namespace) -> int:
         tc.workers = args.workers
     else:
         tc = TrainConfig(data=args.data, out=args.out or "runs/teacher_v2", steps=args.steps, batch=args.batch,
-                         workers=args.workers)
+                         workers=args.workers, resynth=tuple(args.resynth), resynth_frac=args.resynth_frac,
+                         resynth_val=tuple(args.resynth_val), optimizer=args.optimizer)
     for kv in args.train_set:
         k, v = kv.split("=", 1)
         cur = getattr(tc, k)
@@ -244,6 +295,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--seed", type=int, default=1)
     s.add_argument("--workers", type=int, default=None)
     s.add_argument("--out", default=None, help="default: <data.root>/synth/{train_v2,suite_v1}")
+    s.add_argument("--synth-set", action="append", default=[], metavar="KEY=VALUE",
+                   help="other SynthConfig fields (train only, scalar fields)")
     s.set_defaults(fn=cmd_synth)
     t = sub.add_parser("train", parents=[common], help="train a model on synthetic data")
     t.add_argument("model", choices=["teacher"])
@@ -254,12 +307,29 @@ def build_parser() -> argparse.ArgumentParser:
                    help="start a decay branch of a wsd run from this checkpoint (other options come from that run)")
     t.add_argument("--decay-steps", type=int, default=None, help="branch decay length (default: the run's, 4000)")
     t.add_argument("--batch", type=int, default=32)
+    t.add_argument("--optimizer", choices=["adamw", "schedulefree"], default="adamw",
+                   help="schedulefree: AdamW-ScheduleFree, no decay schedule or branches (D-018)")
     t.add_argument("--workers", type=int, default=12)
     t.add_argument("--no-comb", action="store_true", help="ablation: no harmonic-comb input channel")
+    t.add_argument("--resynth", action="append", default=[], metavar="DIR", help="resynthesised training set (repeatable)")
+    t.add_argument("--resynth-frac", type=float, default=0.3, help="fraction of training items from --resynth sets")
+    t.add_argument("--resynth-val", action="append", default=[], metavar="DIR", help="held-out resynthesised set to score")
     t.add_argument("--train-set", action="append", default=[], metavar="KEY=VALUE", help="other TrainConfig fields")
     t.add_argument("--model-set", action="append", default=[], metavar="KEY=VALUE",
                    help="TeacherConfig fields for a new run, e.g. channels=16,32,48 gru_hidden=128")
     t.set_defaults(fn=cmd_train)
+    r = sub.add_parser("resynth", parents=[common], help="analysis-resynthesis training set from a training pool")
+    r.add_argument("corpus")
+    r.add_argument("--teacher", required=True, metavar="CKPT", help="tracker for f0, voicing and formant tracks")
+    r.add_argument("--split", default="train", choices=["train", "val"])
+    r.add_argument("--out", default=None, help="default: <data.root>/resynth/<corpus>_<split>")
+    r.add_argument("--variants", type=int, default=2, help="perturbations per recording")
+    r.add_argument("--seed", type=int, default=0)
+    r.add_argument("--workers", type=int, default=None)
+    r.add_argument("--device", default=None, help="teacher device (default: auto)")
+    r.add_argument("--limit", type=int, default=None, help="N recordings spread through the manifest (trial runs)")
+    r.add_argument("--resynth-set", action="append", default=[], metavar="KEY=VALUE", help="other ResynthConfig fields")
+    r.set_defaults(fn=cmd_resynth)
     e = sub.add_parser("eval", parents=[common], help="evaluate a trained teacher against the gold sets and the suite")
     e.add_argument("ckpt")
     e.add_argument("--out", default="reports/teacher_v1.md")

@@ -44,6 +44,6 @@ def load_audio(item: GoldItem, sr: int = 16000) -> np.ndarray:
 
 
 def registry() -> dict[str, ModuleType]:
-    from . import hillenbrand, mdb_stem_synth, mir1k, ptdb_tug, vtr_timit
+    from . import cmu_arctic, hillenbrand, mdb_stem_synth, mir1k, ptdb_tug, vtr_timit
 
-    return {m.CORPUS: m for m in (hillenbrand, ptdb_tug, mir1k, mdb_stem_synth, vtr_timit)}
+    return {m.CORPUS: m for m in (hillenbrand, ptdb_tug, mir1k, mdb_stem_synth, vtr_timit, cmu_arctic)}

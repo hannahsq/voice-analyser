@@ -30,6 +30,34 @@ PB_MALE = {
     "V": (640, 1190, 2390), "3r": (490, 1350, 1690),
 }
 _PB = np.array(list(PB_MALE.values()), float)
+# Peterson & Barney (1952) Table II, women and children: F1, F2, F3 (Hz), order i I E ae A O U u V (3r omitted).
+PB_WOMEN = np.array([(310, 2790, 3310), (430, 2480, 3070), (610, 2330, 2990), (860, 2050, 2850), (850, 1220, 2810),
+                     (590, 920, 2710), (470, 1160, 2680), (370, 950, 2670), (760, 1400, 2780)], float)
+PB_CHILDREN = np.array([(370, 3200, 3730), (530, 2730, 3600), (690, 2610, 3570), (1010, 2320, 3320), (1030, 1370, 3170),
+                        (680, 1060, 3180), (560, 1410, 3310), (430, 1170, 3260), (850, 1590, 3360)], float)
+# Per-group tables with schwa (each group's log-centroid of the nine monophthongs), anchored at the groups' mean lengths (D-022): interpolated in log frequency by length.
+_PB_BY_LENGTH = {L: np.vstack([t, np.exp(np.log(t).mean(0))[None]])
+                 for L, t in ((12.95, PB_CHILDREN), (15.6, PB_WOMEN), (REF_L_CM, _PB[:9]))}
+
+
+def pb_table_for_length(length_cm: float) -> np.ndarray:
+    """(10, 3) PB vowel formants (i I E ae A O U u V N) for a tract of this length: log-interpolated between the
+    children's, women's and men's tables, and length-scaled beyond them (non-uniform scaling between groups)."""
+    ls = sorted(_PB_BY_LENGTH)
+    if length_cm <= ls[0]:
+        return _PB_BY_LENGTH[ls[0]] * ls[0] / length_cm
+    if length_cm >= ls[-1]:
+        return _PB_BY_LENGTH[ls[-1]] * ls[-1] / length_cm
+    j = int(np.searchsorted(ls, length_cm))
+    a = (length_cm - ls[j - 1]) / (ls[j] - ls[j - 1])
+    return np.exp((1 - a) * np.log(_PB_BY_LENGTH[ls[j - 1]]) + a * np.log(_PB_BY_LENGTH[ls[j]]))
+
+
+# Vowel weights from conversational speech (tube.CONVERSATIONAL_VOWELS; Story's /o/ has no PB entry and is split
+# between /U/ and /O/; /3r/ gets none).
+PB_CONVERSATIONAL_WEIGHTS = np.array([3.69, 5.15 + 0.64 + 2.97 / 2 + 1.57 / 2, 3.21 + 1.57 / 2, 2.25, 1.43 + 2.97 / 2 + 0.64 / 2,
+                                      0.77 + 1.85 / 2, 0.76 + 0.64 / 2 + 1.85 / 2, 1.13, 1.46, 7.30])  # i I E ae A O U u V N
+PB_CONVERSATIONAL_WEIGHTS = PB_CONVERSATIONAL_WEIGHTS / PB_CONVERSATIONAL_WEIGHTS.sum()
 
 
 @dataclass
@@ -55,8 +83,11 @@ def _enforce_order(f: np.ndarray) -> np.ndarray:
     return out
 
 
-def sample_formants(rng: np.random.Generator, length_cm: float, p_uniform: float = 0.3, p_cluster: float = 0.1) -> np.ndarray:
-    """F1..F8 for one articulatory target."""
+def sample_formants(rng: np.random.Generator, length_cm: float, p_uniform: float = 0.3, p_cluster: float = 0.1,
+                    conversational: bool = False) -> np.ndarray:
+    """F1..F8 for one articulatory target. conversational (D-022): the two PB vowels interpolated between are drawn with
+    conversational-speech weights from the table for this length (per-group, with schwa), instead of uniformly from
+    the male table scaled by length."""
     s = REF_L_CM / length_cm
     tube = tube_resonances(length_cm)
     if rng.random() < p_uniform:
@@ -65,9 +96,11 @@ def sample_formants(rng: np.random.Generator, length_cm: float, p_uniform: float
         f3 = np.exp(rng.uniform(np.log(max(f2 + 200, 1600 * s)), np.log(max(f2 + 400, 3600 * s))))
         f13 = np.array([f1, f2, f3])
     else:
-        i, j = rng.choice(len(_PB), 2, replace=False)
+        # conversational: per-group tables by length (already scaled); otherwise the male table scaled uniformly by s
+        table, scale = (pb_table_for_length(length_cm), 1.0) if conversational else (_PB, s)
+        i, j = rng.choice(len(table), 2, replace=False, p=PB_CONVERSATIONAL_WEIGHTS if conversational else None)
         w = rng.random()
-        f13 = np.exp((1 - w) * np.log(_PB[i]) + w * np.log(_PB[j])) * s * np.exp(rng.normal(0, 0.08, 3))
+        f13 = np.exp((1 - w) * np.log(table[i]) + w * np.log(table[j])) * scale * np.exp(rng.normal(0, 0.08, 3))
     upper = tube[3:] * np.exp(rng.normal(0, 0.05, N_POLES - 3))
     f = np.concatenate([np.sort(f13), upper])
     if rng.random() < p_cluster:  # singer's formant cluster: F3-F5 bunched near 2.5-3.2 kHz (scaled)
@@ -77,13 +110,17 @@ def sample_formants(rng: np.random.Generator, length_cm: float, p_uniform: float
     return _enforce_order(f)
 
 
-def sample_bandwidths(rng: np.random.Generator, freqs: np.ndarray, f0: float) -> np.ndarray:
-    """Hawks & Miller x log-uniform(0.6, 1.6) (plan §5.1). Above 5 kHz the H&M polynomial is out of
-    its fitted range, so bandwidth grows linearly from its 5 kHz value."""
+def bandwidth_prior(freqs: np.ndarray, f0: np.ndarray | float) -> np.ndarray:
+    """Hawks & Miller bandwidth, at least 20 Hz; NaN where freqs is NaN. Above 5 kHz the H&M
+    polynomial is out of its fitted range, so bandwidth grows linearly from its 5 kHz value."""
     f = np.where(np.isfinite(freqs), freqs, 1000.0)
     hm = np.where(f <= 5000, hawks_miller_bandwidth(np.minimum(f, 5000), f0), hawks_miller_bandwidth(5000.0, f0) * f / 5000)
-    b = np.maximum(hm, 20.0) * np.exp(rng.uniform(np.log(0.6), np.log(1.6), len(f)))
-    return np.where(np.isfinite(freqs), b, np.nan)
+    return np.where(np.isfinite(freqs), np.maximum(hm, 20.0), np.nan)
+
+
+def sample_bandwidths(rng: np.random.Generator, freqs: np.ndarray, f0: float) -> np.ndarray:
+    """Hawks & Miller x log-uniform(0.6, 1.6) (plan §5.1)."""
+    return bandwidth_prior(freqs, f0) * np.exp(rng.uniform(np.log(0.6), np.log(1.6), len(freqs)))
 
 
 def sample_extras(rng: np.random.Generator, length_cm: float, p_nasal: float = 0.15, p_subglottal: float = 0.2) -> dict:

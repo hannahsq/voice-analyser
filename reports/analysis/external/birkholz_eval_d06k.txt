@@ -1,0 +1,45 @@
+d06k and Praat (Burg defaults) on Birkholz et al. 2019 supplementary audio; 16 kHz; peak glottal area by pressure: 11, 23, 36, 48, 60 mm^2
+
+physical-models: F1 per pressure (Hz)
+vowel         11 mm2        23 mm2        36 mm2        48 mm2        60 mm2   rise 11->60 (teacher / Praat)
+i                        386/198       386/226       443/247       315/245       328/251                       -58 / +53
+y                        270/255      1632/205      1611/237      1624/269       503/223                      +233 / -32
+u                        590/340       632/360       601/553       601/550       613/530                      +22 / +190
+e                        443/307       372/315       377/360       375/363       378/366                       -65 / +59
+ø                        307/300       580/382       790/776       593/824       593/920                     +286 / +619
+o                        470/394       434/483       620/485       553/505       565/504                      +95 / +110
+ɛ                        497/488       514/506       505/503       511/519       522/521                       +26 / +33
+ə                        415/399       416/418       435/435       410/430       413/421                        -2 / +22
+a                        573/589       572/591       572/608       572/612       584/618                       +12 / +29
+cyl                      505/492       506/521       516/527       515/529       522/527                       +17 / +35
+  close (fR1 < 350)  F1 rise 11->60 mm2, median: d06k   +59  Praat   +84 Hz
+  close (fR1 < 350)  F2 rise 11->60 mm2, median: d06k    +4  Praat   +41 Hz
+  close (fR1 < 350)  F3 rise 11->60 mm2, median: d06k    -1  Praat   +18 Hz
+  open, cylinder     F1 rise 11->60 mm2, median: d06k   +14  Praat   +31 Hz
+  open, cylinder     F2 rise 11->60 mm2, median: d06k   -16  Praat   -39 Hz
+  open, cylinder     F3 rise 11->60 mm2, median: d06k   -17  Praat   -48 Hz
+
+simulations: F1 per pressure (Hz); LF = closed-glottis render
+vowel           LF        11 mm2        23 mm2        36 mm2        48 mm2        60 mm2   rise 11->60 (teacher / Praat)
+i       235/197          460/235       592/332       598/383       599/403       600/405                     +140 / +170
+y       194/189          476/226       505/265       528/350       552/856      553/1167                      +77 / +941
+u       606/212          515/324       621/604       633/624       636/630       637/634                     +122 / +309
+e       300/286          364/339       365/388       365/428       365/454       366/474                       +1 / +135
+ø       267/250          465/253       627/749       620/824       619/912       621/879                     +156 / +627
+o       573/290          597/341       629/352       649/453       648/533       642/549                      +45 / +209
+ɛ       532/522          534/543       545/578       664/585       664/586       664/586                      +130 / +43
+ə       428/405          433/434       458/479       481/508       636/527       636/540                     +202 / +106
+a       680/654          708/709       754/741       755/747       745/756       729/764                       +21 / +55
+cyl     520/505          516/533       522/576       515/598       514/613       510/623                        -6 / +90
+  close (fR1 < 350)  F1 rise 11->60 mm2, median: d06k  +100  Praat  +259 Hz
+  close (fR1 < 350)  F2 rise 11->60 mm2, median: d06k   +19  Praat  +241 Hz
+  close (fR1 < 350)  F3 rise 11->60 mm2, median: d06k    -5  Praat  +356 Hz
+  open, cylinder     F1 rise 11->60 mm2, median: d06k   +75  Praat   +73 Hz
+  open, cylinder     F2 rise 11->60 mm2, median: d06k   +18  Praat   +60 Hz
+  open, cylinder     F3 rise 11->60 mm2, median: d06k    +6  Praat   +92 Hz
+  F1 vs own closed-glottis LF render at 11 mm2, median: d06k   +26  Praat   +37 Hz
+  F1 vs own closed-glottis LF render at 60 mm2, median: d06k  +101  Praat  +198 Hz
+  F2 vs own closed-glottis LF render at 11 mm2, median: d06k    +6  Praat    -6 Hz
+  F2 vs own closed-glottis LF render at 60 mm2, median: d06k   +15  Praat   +70 Hz
+  F3 vs own closed-glottis LF render at 11 mm2, median: d06k    +5  Praat   -11 Hz
+  F3 vs own closed-glottis LF render at 60 mm2, median: d06k    +6  Praat   +74 Hz

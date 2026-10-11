@@ -1,0 +1,10 @@
+F1 error vs closed phase (Hz), median over vowels; change from baseline in brackets
+factor                                d06k men       Praat men      d06k women     Praat women
+baseline                             -3 (  +0)      -10 (  +0)       +3 (  +0)      -15 (  +0)
+static B1 x2                         +0 (  +4)       -8 (  +3)       +8 (  +4)       -8 (  +7)
+static B1 x3                         +5 (  +8)       -7 (  +3)      +19 ( +15)       -7 (  +8)
+open phase: B1 x2                    +3 (  +6)       -4 (  +7)      +13 (  +9)      -11 (  +4)
+open phase: B1 x3                    +9 ( +12)       -1 (  +9)      +23 ( +20)       -8 (  +7)
+open phase: B1 x4                   +15 ( +18)       +2 ( +12)      +36 ( +33)       -3 ( +12)
+open phase: F1 +5 %                 +18 ( +22)      +18 ( +28)      +29 ( +25)       +2 ( +17)
+open phase: F1 +5 %, B1 x3          +22 ( +25)      +10 ( +20)      +34 ( +31)       +8 ( +23)

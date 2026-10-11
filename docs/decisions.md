@@ -29,6 +29,26 @@ So train in bf16 with native kernels. `tests/test_device.py` is the regression c
 
 To re-enable MIOpen later: hipRTC needs C++ standard headers, and none are on this machine (no Visual Studio / Build Tools, and the ROCm wheels don't bundle libc++). The most likely fix is VS 2022 Build Tools with "Desktop development with C++". That's not worth doing now: it only speeds up fp32, and it wouldn't explain the convolution crash. Revisit after a ROCm upgrade.
 
+**Revisited 2026-10-09 (VS Build Tools 18 with the C++ workload, MSVC 14.51, Windows SDK 10.0.26100).** hipRTC reads `INCLUDE`. With it set to the MSVC `include` folder plus the SDK's `ucrt`, MIOpen's GRU and batch norm compile, and GRU, batch norm and plain and dilated Conv2d all match the native kernels (fp32 ≤ 6e-7 relative; bf16 4e-3 for convolutions and 1e-2 for a 50-step GRU). Speed is another matter. On the full teacher training step (bf16, real batch):
+
+| MIOpen used for | ms/step |
+|---|---|
+| nothing (native, current) | **1055** |
+| convolutions | 1572 |
+| everything | 1562 |
+| convolutions, benchmark mode | 1406 |
+| everything, benchmark mode | 1399 |
+
+MIOpen's GRU on its own is 2–3× faster: 27 vs 76 ms (f0 GRU) and 77 vs 159 ms (main GRU), fwd + bwd, batch 32 × 200 frames. So the best policy would be native convolutions with MIOpen around the GRUs, the reverse of the old `rnn` setting, for about 12 % (≈ 68 audio-s/s). Teacher v2 keeps `all` so its runs stay comparable; the GRU-only policy, with `setup_device` finding the headers via `vswhere`, is for teacher v3.
+
+Other measurements from the same session, for the record:
+- The data loader is not a bottleneck: 7–10 batches/s against 0.93 needed, and the trainer waits about 1 ms per step for data.
+- Evaluation plus checkpointing every 1000 steps costs 0.9 % of wall time.
+- The host takes the whole step to queue its kernels (1072 of 1081 ms): the native GRUs step through time, and the native dilated convolutions loop over samples, so a step is tens of thousands of small kernels. The native GRUs are about 26 % of the step.
+- HIP graph capture (which would remove the launch overhead without changing kernels) aborts the process with hipBLASLt ("operation not permitted when stream is capturing"). With `TORCH_BLAS_PREFER_HIPBLASLT=0` it works, but rocBLAS makes the whole step 2.5× slower (24 against 60 audio-s/s).
+- The per-step `float()` calls in the training loop forced a host-GPU sync each step. Removing them gave +8 % (55.3 → 59.7 audio-s/s, two repeats); pinned memory added nothing.
+- Windows Smart App Control switched itself to enforcement on 2026-10-09 and blocked ffmpeg (codec augmentation), crashing a training run; it is now off. If codec calls fail with WinError 4551, check it first.
+
 ## D-003 (2026-10-07): speaker ids are corpus-prefixed; TIMIT-derived sets share corpus `timit`
 
 `speaker_id = "<corpus>:<local id>"`, so the same local id in different corpora can't collide by accident. Sets derived from another corpus (VTR-TIMIT → TIMIT) register under the parent corpus's name, so the leakage test sees shared speakers. Speakers who appear in two different corpora under different ids can't be detected automatically; list them as explicit exclusions if that turns up.
@@ -216,3 +236,422 @@ The first real training corpus (plan §5.6) is **VocalSet v1.1** (Wilkins et al.
 - *Splits:* speaker-disjoint. `val` is the authors' test singers (`test_singers_technique.txt`), so it matches their published division; everything else is `train`. The list holds female2, female8, male3, male5 and male10: `val` is 914 files (2.37 h), `train` 2699 files (6.42 h, 15 singers). No VocalSet audio is gold.
 - *Cross-corpus speakers:* the leakage test compares corpus-prefixed ids, so it can't detect the same person in two corpora. By hand: VocalSet's singers are professionals recorded at Northwestern University about 2017. The gold sets are Hillenbrand (Western Michigan University, 1990s, adults and children), PTDB-TUG (TU Graz speakers), MIR-1K (amateur singers in Taiwan) and MDB-stem-synth (MedleyDB commercial multitracks). No overlap is known or plausible.
 - *Code:* training-pool scanners live in `vocal_analysis/data/pools/` (same `scan()` interface as the gold loaders, with train/val splits). `va manifest` covers both registries.
+
+## D-016 (2026-10-08): resynthesis labeller design (M3)
+
+Plan §5.2, in `vocal_analysis/resynth/` (`va resynth <pool> --teacher CKPT`). Per recording: a trained teacher gives f0, voicing, the sonorant mask and F1–F4 tracks. The tracks are smoothed, the source is recovered by inverse filtering, and then `variants` perturbations (default 2) re-filter that source. The results are cut into 3–6 s clips at quiet frames, QC'd and written as shards that `train.data` reads like the synthetic sets.
+- **Tracker: the teacher, not PESTO.** The teacher's f0 head was trained only on synthetic data. The bundled PESTO weights were trained on MIR-1K, a gold set (§13 #13), and using them here would carry gold-set information into training labels. The analysis cache is keyed by the checkpoint's hash, and the set's index records the checkpoint's path, hash and step.
+- **Inverse filtering: IAIF up to 250 Hz, formant tracks above it (`method = "auto"`, cross-faded per sample).** On synthetic vowels with known source and tract, IAIF recovers H1–H2 within 0.3–1.3 dB at f0 110–220 Hz. At 330–500 Hz it gives about 25 dB against a true 3.8 dB, because the LPC latches onto harmonics. Track-based inverse filtering uses anti-resonators at the tracked F1–F4 plus uniform-tube poles above them, the exact inverses of the synthesiser's resonators, and is right at every f0 given correct tracks. Both inverse filters have unity gain at DC, like the resonators. QCP is still to do.
+- **QC: `tract_left` (β).** The source's harmonic amplitudes below 4 kHz are fitted as LF(Rd) + gain + tilt + β × the tracked tract's dB response. β is the fraction of the tract still in the source. On synthetic vowels:
+
+  | Case | β |
+  |---|---|
+  | Untouched speech | 0.97–1.23 |
+  | Exact inverse filtering | about 0 |
+  | IAIF below 250 Hz | −0.19 to 0.06 |
+  | IAIF above 300 Hz | −0.3 to −1.2 |
+
+  Aspiration noise (HNR 6–13 dB) and jitter leave β near 0 but raise the fit's RMS. A clip is rejected when its median voiced-frame |β| exceeds 0.5. Below that, training weights the clip (next item).
+
+  Two failures β can't see:
+  - Tracks 10 % off with track-based inverse filtering keep β small but give RMS 4–6 dB. Clean but noisy sources reach 3–4 dB RMS, though, so the RMS is logged per frame (`ripple_db`) and not gated.
+  - The fit needs five harmonics below 4 kHz, so f0 above 800 Hz goes unmeasured. Those clips are kept (`accept_unmeasured`) and counted.
+- **VocalSet trial, and why QC weights rather than rejects.** On 100 training recordings spread across all 15 training singers and 16 techniques (teacher v1 as tracker), clip-median β had 5/25/50/75/95th percentiles of −0.35 / −0.09 / 0.03 / 0.12 / 0.25. A hard cut at 0.25 kept 84 % of clips, but not at random: 50–60 % for two singers (female3 median −0.22, female5) and for breathy, messa di voce, trill and trillo, against 94–100 % for slow piano/forte, belt and vocal fry. Accepted clips centred near 0 in every f0 band (+0.06 below 250 Hz, +0.02 at 250–500, −0.07 above 500), so there was no seam between IAIF and track-based inverse filtering.
+
+  Is the tracker to blame? Teacher v1's own uncertainty didn't separate rejected from accepted clips. The median F1 spread was 48.8 vs 48.0 cents, and every rank correlation with |β| was within ±0.13. Either v1 is confidently wrong there (its uncertainties are uncalibrated until M6), or the cause is one no tracker fixes: sources that aren't LF-like, extra resonances, or measurement noise.
+
+  A hard cut would drop the hardest voice qualities: a mild form of the selection bias §5.4 warns about. So only clearly broken clips are dropped at generation (|β| > 0.5). In training, each resynthesised clip's formant and bandwidth losses are weighted 1 up to |β| = 0.15, falling linearly to 0 at 0.5 (`TRACT_LEFT_WEIGHT`). The weight comes from each clip's stored β, so the curve can change without regenerating.
+
+  Regenerating with each new tracker is the plan's M4 loop, so rejected clips need no separate retry. Comparing per-clip β from teacher v1 and v2 on the same recordings will show how much is the tracker.
+- **Training (`va train teacher --resynth DIR --resynth-frac 0.3 --resynth-val DIR`).** `resynth_frac` of training items come from the resynthesised sets, split between them by clip count. On those clips:
+  - the f0, voicing and sonorant losses are masked: those frames leave the average, so the terms aren't diluted;
+  - formant and bandwidth losses are scaled by the clip weight and still averaged over all labelled frames, so a low-quality clip pulls less.
+
+  During the comb's true-f0 phase, resynthesised clips get their comb from the tracker's f0 label, so their f0 label is defined on every frame, as in the synthetic sets. Held-out resynthesised sets (VocalSet's `val` singers) are scored as `eval_resynth:<name>`, where only the formant metrics are exact. Sets consolidated before this change carry no β and train exactly as before.
+- **Perturbation (§5.2 step 4):**
+  - α log-uniform(0.8, 1.25) on F1–F4;
+  - slow per-formant offsets with SD 3–5 % on a 0.3 s time scale;
+  - F5 and up continue from F4 at uniform-tube spacing for the new apparent length;
+  - Hawks & Miller bandwidths × log-uniform(0.6, 1.6) per formant;
+  - a nasal pole–zero pair with p = 0.15, constant over the recording;
+  - ordering at ≥ 150 Hz spacing, and poles above 7.6 kHz dropped, as in the generator.
+
+  Clip RNG is seeded by (seed, recording, variant).
+- **Labels.**
+  - *Exact:* formants and bandwidths (all eight, as in the synthetic sets).
+  - *Tracker estimates:* f0, voicing and sonorant. Re-filtering leaves the original voice's f0 alone, so these are as good as the teacher, and `meta["labels"]` says so. **Decided for teacher v3: the f0 and voicing losses are masked on resynthesised clips**, and only the formant and bandwidth losses apply. Training on the teacher's own f0 and voicing would distil its errors into itself, and they are worst where VocalSet sits: singing, where MIR-1K is v1's weakest f0 set, and voicing, where v1's precision is low. With no ground truth and no self-supervision yet, the f0 heads keep learning from exact synthetic labels only, and v3's gold-set f0 stays a clean measure of synthetic-to-real transfer. Down-weighting or confidence weighting was rejected: there is no clean set to tune the weight on, and confident octave errors pass through. **Later:** the plan's parametric-source variant, an LF source fitted per period along the teacher's f0 track, makes f0 and voicing exact by construction, at the cost of the real source's detail. Mix it in as a separate data source and ablate it.
+  - *Measured:* source_h_db, on the recovered source and on its own scale, so only differences such as H1–H2 mean anything.
+  - *Not available:* rd and length_cm are NaN.
+- **Non-sonorant stretches keep the original audio**, cross-faded over 20 ms, so consonants stay real. Frames inside a cross-fade get no formant labels. The re-filtered signal is level-matched to the original over sonorant samples.
+- **Listening check on the first trial, and fixes.** Six excerpts (female1 arpeggios), each heard as the original and two variants.
+  - *High-frequency artifacts and clicks, worst at α = 0.85.* Every affected clip had pole tracks crossing 7.6 kHz, so recursive sections switched on and off mid-signal and restarted from the wrong state. They also had 5–13 dB too much energy at 6.5–8 kHz. The clip judged perfect had no such crossings.
+
+    Fix: each recording keeps a fixed set of poles. A track that leaves the band on any frame is left out for the whole recording, in the labels, in the re-filter and in the inverse filter's upper poles (`tracks.whole_tracks`). Afterwards, the 6.5–8 kHz excess was gone (the worst case went from +12.8 to +0.6 dB), and click counts matched the originals.
+  - *Lip trills sound gargled.* With the lips vibrating, there is no vowel-like tract to track or resynthesise. VocalSet's `lip_trill` recordings are skipped by `va resynth` (`vocalset.resynth_ok`) and stay in the manifest.
+  - *α = 1.22 sounds increasingly like a tenor.* Intended: a 22 % longer tract with soprano f0 is deliberately unphysiological (D-012).
+  - *Second round, after those fixes.* Spectrograms with tracks, f0 and level overlaid explained the remaining complaints:
+    - **Vowel shifts at note transitions (α = 0.85).** Teacher v1's F2 bumped at transitions and wobbled with vibrato, following the harmonics. Track-based inverse filtering removes the wobble at the old positions and the re-filter adds it back at the new ones, which differ unless α = 1. Fix: track smoothing is now a 9-frame median filter (removes jumps), then a Gaussian with SD 6 frames, which leaves 5–6 Hz wobble at under a fifth of its size. This replaces a 7-frame Savitzky–Golay filter.
+    - **A "bird whistle".** Teacher F3 jumped between about 3.0 and 3.9 kHz, so a narrow resonance swept back and forth. The median filter removes it.
+    - **Level jumps where vibrato dipped under 250 Hz.** With method `auto`, the inverse filter switched between IAIF and tracks every vibrato cycle, and the two sources differ in level. Fix: one method per phrase, chosen by the phrase's median f0. A phrase is voiced runs merged across gaps under 100 ms.
+    - **Not artifacts.** A note that grew louder and changed colour had the perturbed F2 (narrowed from 92 to 71 Hz) landing on its 4th harmonic at f0 ≈ 400 Hz, about 5 dB of real gain from the new tract. In another clip, level differences with the vibrato's rhythm come from the new formants sitting elsewhere among the sweeping harmonics. Both are the new tract's physics, and the labels stay exact.
+  - *α = 0.85 sounds like "an intact singer's formant on a chipmunk".* **Open.** It suggests the original singer's-formant cluster (F3–F5 near 3 kHz) survives inverse filtering. At this f0 that inverse filtering uses the tracked F1–F4 plus uniform-tube poles, which can't describe a bunched cluster, and the QC fit stops at 4 kHz. Candidates: a QC term for 2.5–5 kHz, upper poles fitted to the recording rather than a uniform tube, and QCP at high f0.
+- **Shards** hold the recordings of `files_per_shard` files and a varying number of clips. `index.json` lists `shard_clips`, and `ShardReader` uses it. An interrupted run resumes; changed settings are refused.
+- **Cost:** about 0.3 s CPU per second of audio for the source stage. Each variant is nearly free.
+
+## D-017 (2026-10-08): licences; M4Singer, Common Voice and Zeroth as training pools; M4Singer songs shared with MIR-1K
+
+**Licensing.** The project is personal and research use; it was never meant to be commercial.
+- *Code:* MIT (`LICENSE`).
+- *Model weights:* carry the most restrictive licence among the corpora they were trained on, with attribution to all of them. The question of whether weights adapt their training data is unsettled, and this is the conservative reading. Weights from synthetic data plus CC BY or CC0 pools are CC BY 4.0, the least restrictive licence those pools allow. Anything trained on M4Singer is CC BY-NC-SA 4.0.
+- *Commercial use:* anyone who wants it can retrain on suitably licensed data, since the code is MIT.
+
+`ATTRIBUTION.md` lists every corpus, with its role, licence and citation. Literature stays cited in the plan (§16) and this log. Evaluation-only corpora don't bear on weights.
+
+**New training pools.** Their archives are already on the NAS (`Z:\datasets`), downloaded for another project. Resynthesis needs audio and speaker ids only, so their transcriptions are not needed.
+- **M4Singer** (Zhang et al. 2022), `m4singer.zip`: Mandarin pop singing by 20 singers (Soprano/Alto/Tenor/Bass 1–7), 419 songs, 20,861 utterances, each with a MIDI and TextGrid.
+  - *Licence:* CC BY-NC-SA 4.0, per `dataset_license.md` in the M4Singer repository. The archive carries no licence file.
+  - *Value:* the largest singing pool, about three times VocalSet.
+- **Zeroth-Korean**, `zeroth_korean.tar.gz` (10.3 GB): read Korean speech, the first speech pool.
+  - *Licence:* CC BY 4.0, from OpenSLR 40. The archive carries no licence file.
+  - *Size:* 52.8 h from 115 speakers. The train split is 105 speakers and 51.6 h; the test split is 10 speakers and 1.2 h.
+  - *Splits:* speaker-disjoint, and the manifest keeps them (test → `val`).
+  - *Privacy:* `AUDIO_INFO` lists each speaker's real name next to the numeric id. Manifests and everything else in the repository use only the numeric id (`zeroth:<id>`) and the recorded sex; names are never copied.
+- **Common Voice 27.0 Korean**, `cv-corpus-27.0-2026-09-11-ko.tar.gz`: 7185 MP3 clips, 10.39 h (2.56 h validated), 213 speakers on their own microphones.
+  - *Licence:* CC0. The download terms add an agreement not to try to identify the speakers. Nothing here tries to; speaker ids stay opaque `client_id` hashes.
+  - *Value:* small, and already lossy-coded. It is most useful for channel diversity and as unlabelled audio for M4's self-supervision.
+
+**Where they live.** Corpora shared with other projects are kept once, in `C:\github\datasets\`, and each repository links to them with directory junctions:
+- `data/zeroth_korean` → `datasets\zeroth_korean`;
+- `data/cv_ko` → `datasets\cv-corpus-27.0-2026-09-11\ko`;
+- `data/m4singer` → `datasets\m4singer`.
+
+The two Korean corpora were moved there from `minimal-pairs/data`, which links back to them under their old names, so that project's paths are unchanged. Manifests store paths relative to the corpus root, so they don't depend on the layout. The archives on `Z:\datasets` remain the backup. The gold sets and VocalSet stay in `data/` as before.
+
+**M4Singer songs that are also in MIR-1K are excluded from training.** The singers are different people, so this is not speaker leakage. But the same songs mean the same melodies, and MIR-1K is an f0 gold set. f0 losses are masked on resynthesised clips, but the shared trunk would still hear those melodies.
+- *Method:* matching each MIR-1K singer-song's lyrics (Big5, traditional characters) against each M4Singer song's (`meta.json`, simplified) by character trigrams. A song's best match is about 0.02 for 90 % of MIR-1K singer-songs. Matches of 0.25–0.42 identify 8 shared songs despite the script difference: 成全, 听海, 童话, 当你, 一个像夏天一个像秋天, 水手, 千里之外, 今天你要嫁给我. 情歌王 (0.12–0.17) and 一首简单的歌 (0.18) are weaker matches. 情歌王 is a medley quoting other songs, and both are excluded to be safe.
+- *Enforcement:* the M4Singer scanner will mark these 10 songs as excluded, so they never enter a training manifest.
+
+## D-018 (2026-10-08): schedule-free AdamW against the 6k WSD branch, at equal budget
+
+D-013 deferred Schedule-Free AdamW (Defazio et al. 2024) until the data was settled. The data is now settled (train_v2), and the 6k decay branch gives a matched baseline: `runs/teacher_v2_d06k` is AdamW with WSD, 6000 constant steps plus 4000 decay steps.
+- **Experiment.** A new run, `runs/teacher_v2_sf`. Data, model, seed, channel, batch, 1000 warmup steps and peak learning rate (1e-3) are all as in teacher v2; only the optimiser differs (`--optimizer schedulefree`). It trains for 10k steps.
+- **Comparison with d06k, set before either result exists:** the fixed synthetic validation sets of v1 and v2, the suite (including `whisper` and `adult_high_f0`), and the M2 gold-set measures (Hillenbrand F1–F4 by group, PTDB-TUG f0 RPA), all with bootstrap intervals.
+- **Reading the result.** If schedule-free is within noise of d06k or better, later teachers (v3 onward) use it and drop decay branches: any checkpoint is meant to be usable as is, which removes the 4k-step cost of each branch. If it is clearly worse, the result is inconclusive rather than negative, since schedule-free often prefers a higher learning rate than AdamW and only one was tried; WSD stays.
+- **Cost.** About 3.3 h of GPU time. The main constant-phase run pauses at its 10k checkpoint, so the two don't share the GPU, and resumes afterwards (resumed runs reseed the data stream, D-013).
+- **Implementation.** `TrainConfig.optimizer`. Checkpoints hold schedule-free's averaged (evaluation) weights, so `va eval` and the analysis code load them unchanged. Its learning-rate warmup runs inside the optimiser. The `schedulefree` package (1.4.1, PyPI) is in the `train` extras.
+- **Result at 10k (synthetic validation only).** Schedule-free 23.8 / 45.2 / 62.5 / 98.4 Hz F1–F4 MAE, f0 RPA 99.3, voicing 99.0; d06k 24.3 / 45.3 / 64.1 / 101.4, 99.4, 99.2. So formants slightly better, f0 and voicing 0.1–0.2 points behind: a match, without a decay branch. Both runs then continue to 40k (WSD with branches at 16k/26k/36k), compared at equal steps; the suite and gold-set comparisons are made at 20k (d16k vs schedule-free 20k).
+- **Running both at once doesn't pay here.** Three processes (two runs plus a branch) exhausted the commit limit (each run ~9 GB plus 12 workers at ~1.9 GB) and reached about 29 audio-s/s in total, against 50–60 for one run alone. Runs, branches and evaluations now go one at a time (orchestrator in the session scratchpad), which also stops on any failed step.
+
+## D-019 (2026-10-09): teacher v2's F1 regression on Hillenbrand: what it is and isn't
+
+**Finding.** d16k (20k steps) reads Hillenbrand F1 worse than d06k and v1 although its synthetic F1 keeps improving: MAE 41 vs 37 Hz, DR 95.1 vs 97.3 %, with the drop in every group (DR men 99.5 → 98.0, women 96.9 → 95.2, boys 94.9 → 92.2, girls 96.4 → 92.3). The sim-to-real F1 gap at f0 150–300 Hz grew from +3.3 (d06k) to +5.5 points.
+
+**Diagnosis** (scripts in the session scratchpad: `f1_drift.py`, `f1_bias.py`, `f1_prior.py`, `resynth_gross.py`):
+- *It is an upward bias that grows with training.* Median signed F1 error against Hillenbrand, v1 → d06k → d16k: men +11 → +14 → +17 Hz, women +26 → +21 → +30, boys +29 → +28 → +38, girls +30 → +28 → +41 (Praat FastTrack: +8 to +10). About 5–7 % for women and children, up to 17 % for low-F1 vowels. Frames that moved by more than 20 Hz from d06k to d16k moved up (median +29 Hz), and only 35 % of them towards the reference.
+- *Not the references' harmonic snapping.* At f0 ≥ 150 Hz, 44 % of Hillenbrand's F1 references lie within 0.1 harmonic spacing of a harmonic (FastTrack 41 %, uniform 20 %, teacher 22–27 %), so the LPC references do snap. But the teacher's errors are smallest on those frames (39 Hz, against 52–58 elsewhere), and the bias grows for men too, where harmonics are dense and LPC's F1 is reliable.
+- *Not the label definition.* On synthetic validation the signed bias is −3 to +1 Hz in every f0 band for all three models, and within ±10 Hz in every (f0, true F1) cell up to f0 260 Hz, so there is no pull towards the training prior on in-distribution data either.
+- *Mostly not the glottal source.* On resynthesised held-out VocalSet clips (real sources, exact synthetic-tract labels; 5 val singers, 100 recordings, 500 clips) the median bias is +6 / +9 / +6 Hz (ratio 1.011 / 1.017 / 1.012) and does not grow with training.
+- *Remaining candidates:* properties of real vocal tracts the synthesiser lacks (F1 raised and broadened in the open phase through subglottal coupling, wall vibration in the 40 % cascade clips, real F1 bandwidths), or a systematic offset in Hillenbrand's LPC references. These experiments cannot separate the two; a second formant reference made by a different method (VTR-TIMIT) would.
+
+**A second finding: v2 is weaker than v1 on low-pitched singing.** On the resynthesised clips, gross F1 errors (> 20 % off the exact label) at f0 < 150 Hz are 3.7 % for v1 against 10.1 % (d06k) and 7.9 % (d16k). The clips were made by inverse filtering with v1's tracks, so the set was rendered again with d16k as tracker:
+
+| Gross F1 errors (%) | v1-tracked: v1 / d06k / d16k | d16k-tracked: v1 / d06k / d16k |
+|---|---|---|
+| f0 < 150 | 3.7 / 10.1 / 7.9 | 6.2 / 13.0 / 9.2 |
+| f0 150–250 | 8.9 / 12.6 / 11.8 | 7.1 / 12.0 / 10.2 |
+| f0 250–400 | 20.2 / 23.5 / 22.2 | 20.1 / 20.4 / 15.9 |
+| f0 ≥ 400 | 26.1 / 23.8 / 22.3 | 22.3 / 13.0 / 11.8 |
+
+- The low-f0 weakness survives the swap, so it is real; train_v2's f0 distribution is unchanged from train_v1 (16.6 / 11.1 / 8.2 / 7.1 % of voiced frames below 100 / 100–150 / 150–200 / 200–250 Hz), so coverage is not the cause. D-012's tract-length decoupling (half the clips draw 10–20 cm whatever the f0) is the leading suspect. d16k's low-f0 gross errors include 13–16 % at about twice the label.
+- v2 is better than v1 at high f0 on both sets.
+- **Tracker circularity is large.** Each set favours the model family that tracked it, most at high f0 (d16k: 22.3 % gross on v1-tracked clips, 11.8 % on its own). Resynthesised sets used for evaluation must therefore be tracked by a model that is not being compared, or be reported under both trackers. The gross errors do not sit at the original (pre-perturbation) tracks (9–12 % of them, against a base rate of about 5 %).
+
+**Closed-phase reference (CMU ARCTIC with EGG).** VTR-TIMIT needs TIMIT's audio (LDC licence), which we don't have and won't obtain informally, so the separating test uses EGG instead: closed-phase covariance LPC (`eval/closed_phase.py`, order 12 at 10 kHz, cycles within ±20 ms, closed phases GCI + 0.3 ms to GOI − 0.3 ms, shifted by the measured speech lag of 0.8–1.1 ms) on every monophthong frame of the three ARCTIC voices that have EGG. 26,663 frames have a closed-phase fit and every estimate. Median signed difference from closed-phase F1 (Hz):
+
+| Voice (f0, closed quotient) | Whole-cycle LPC | Praat Burg (5000/5500 Hz) | v1 | d06k | d16k |
+|---|---|---|---|---|---|
+| bdl, male (121 Hz, 0.59) | +2 | −6 | +1 | +4 | +5 |
+| jmk, male (111 Hz, 0.34) | +3 | −45 | +16 | +26 | +31 |
+| slt, female (174 Hz, 0.42) | −10 | −10 | −6 | −7 | −4 |
+
+- *Open-phase coupling is not the cause.* The same estimator over whole cycles is within a few Hz of the closed-phase fit.
+- *LPC-based references read F1 low:* Praat Burg by 6–10 Hz for bdl and slt and by 45 Hz for jmk (a breathier voice). Measured against Praat (the Hillenbrand view) the teachers are +6 to +11 Hz for bdl and slt, comparable to their offset on Hillenbrand men, though against the closed phase they are within ±7 Hz. So part of the Hillenbrand F1 "bias" is the reference's.
+- *Part is the teacher's.* jmk's bias grows with training (+16 → +26 → +31 Hz; close vowels, closed-phase F1 < 450 Hz: +23 → +40), and at slt's higher f0 the teacher compresses F1 towards the middle (closed-phase F1 < 450 Hz read +48 to +55 Hz high, > 650 Hz read −30 Hz low), matching the Hillenbrand finding that low-F1 vowels read up to 17 % high in women and children. That pattern is regression towards the training prior where harmonics leave F1 ambiguous.
+- *Replicated on PTDB-TUG's laryngograph* (`ptdb_egg.py`, `ptdb_summary.py`; 20 speakers, 10 women; no phone labels, so frames are the energy peak ±20 ms of voiced runs ≥ 80 ms, every second utterance; 39,835 frames; speech lag 0.5–0.7 ms). F1 bias against the closed phase, speaker-level median [95 % speaker bootstrap], Hz:
+
+  | | Praat | v1 | d06k | d16k | sf20k |
+  |---|---|---|---|---|---|
+  | men (114 Hz) | +3 [+1, +8] | +8 [−0, +13] | +17 [+8, +24] | +16 [+8, +20] | +10 [+4, +19] |
+  | women (203 Hz) | +5 [−4, +7] | +6 [+3, +10] | +13 [+9, +22] | +18 [+13, +29] | +11 [+9, +23] |
+
+  Median |F1 error| change from v1: d16k +4.8 [+3.1, +6.9] (men), +9.3 [+5.2, +10.9] (women); schedule-free +2.0 / +3.9. Compression in women, by closed-phase F1 < 450 / 450–650 / > 650 Hz: v1 +30 / +7 / −23, d16k +49 / +22 / −32 (Praat +13 / +1 / −12; whole-cycle LPC +13 / −2 / −23). Whole-cycle LPC is within ±7 Hz of the closed phase overall, so open-phase coupling is again ruled out; here Praat does not read low. d16k reads F1 high for all 20 speakers (+4 to +44 Hz). F2 and F3 are within ±18 Hz for every estimator.
+- Caveats: ARCTIC has three speakers; closed-phase LPC has its own scatter (9–25 Hz median against whole-cycle), largest for jmk's short closed phases. Evidence about mechanisms, not a new gold standard.
+
+**Consequences.**
+- M2's Hillenbrand F1 criterion partly measures LPC's own low reading; a teacher a few Hz above LPC can be closer to the truth. The drift between models is real nonetheless, since it shows against the closed phase too.
+- The cause to work on is the training prior, not missing physics: the synthetic F1 distribution conditional on f0 (and tract length, D-012's decoupling), where the teacher falls back on it. Calibrating the synthesiser's distributions against real data (option 1: "learning to simulate") now has a concrete target, with closed-phase F1 on EGG voices as one check.
+- Training on resynthesised data (M3) addresses source mismatch, which is not the main cause. It remains useful for the low-f0 singing weakness, provided the tracker is not the model under evaluation.
+- Next: a low-f0 ablation of the tract-length sampling; the F1-given-f0 prior of train_v2 against real distributions (Hillenbrand's vowel space by group, closed-phase F1 on ARCTIC).
+
+## D-020 (2026-10-09): tract independent of the source; teacher v2 stops at 20k; decoupling ablation
+
+**Principle.** The long-term use (before/after comparisons where f0 changes and the tract may not, and vice versa) needs formant estimates that do not infer the tract from the pitch. So synthetic tract parameters (length, formant targets, bandwidth scaling) are sampled independently of everything on the source side. Source parameters may covary with each other (low f0 with less tilt, higher closed quotient, less noise): that is realistic and cannot teach the model to read the tract from the source, because in training the tract never covaries with it. A more "realistic" coupled prior would score better on typical voices and on LPC-based references (D-019) and is rejected for that reason. Ambiguity is to be handled by honest uncertainty instead: the heads already output distributions trained with a proper scoring rule; what is missing is checking their calibration on real voices (coverage against closed-phase F1) and reporting it.
+
+**train_v2 is only half decoupled.** `p_length_from_f0 = 0.5` (half the clips draw L from f0) and `p_f1_band = 0.3` (cascade clips at f0 150–350 Hz set F1 = f0 × 1.5–4.5).
+
+**Teacher v2 stops here.** WSD stopped at 17k; d16k (20k steps) and schedule-free at 20k are the candidates. M2 fails on F1 (`reports/analysis/paired/m2_paired_20k.txt`): v1 → d16k F1 MAE women +2.3 [+0.3, +4.6], children +6.6 [+4.9, +8.2], men +3.8 [+2.5, +5.1] Hz; F2 −7.4 and F3 −33 Hz MAE better; PTDB-TUG RPA +0.2 (all frames), −0.7 below 85 Hz. Schedule-free at 20k against d16k: F1 MAE women −5.1, children −2.3, F4 −26 Hz (better), but PTDB-TUG RPA −0.6 (all) and −0.9 (modal), beyond noise: D-018 stays undecided (one learning rate tried).
+
+**f0-invariance probe (`eval/invariance.py`).** Story's vowels i, E, ae, A, o, u through the lossy tube at 13, 15.5 and 18 cm (fixed, physical bandwidths), LF source at eight f0 from 80 to 400 Hz; slope of the median F1 estimate against log2 f0 (truth: 0). Before the ablation:
+
+| Estimator | median slope (Hz/octave) | median \|slope\| |
+|---|---|---|
+| Praat Burg default | +15 | 19 |
+| v1 (fully coupled L) | +23 | 51 (u: up to +370, o: up to +162) |
+| d06k | +2 | 14 |
+| d16k | +8 | 12 |
+| schedule-free 20k | +7 | 16 |
+
+D-012's partial decoupling cut the dependence about fourfold; the remainder has the compression shape (close vowels drift up with f0, open vowels down). At the top of the sweep f0 exceeds the F1 of i and u, where some slope is unavoidable.
+
+**Ablation, set before its results.** `train_v3a` = train_v2's settings with `p_length_from_f0 = 0` and `p_f1_band = 0`, 100k clips, seed 2 (`va synth train --synth-set …`). Teacher `runs/teacher_v3a`: d06k's recipe (WSD, 6000 constant + 4000 decay steps, everything else as teacher v2), so d06k is the baseline at equal budget. Measures:
+1. f0-invariance probe: median |slope| and the vowel pattern.
+2. Closed-phase F1 agreement on CMU ARCTIC and PTDB-TUG (laryngograph): bias by sex, compression (estimate against closed-phase F1 by range).
+3. Hillenbrand F1–F4 by group, paired speaker bootstrap against d06k (informative, not decisive: LPC references reward prior pull).
+4. Guard-rails: PTDB-TUG f0 RPA, the suite, synthetic validation. *Clarified before the results (2026-10-09):* "synthetic validation" means a swap, with each model on both sets' held-out clips (all 2000 per set, fixed crops and channel) and clip-bootstrap intervals on the paired differences. Each run's own validation loss is not comparable across runs: train_v3a is harder by construction, because f0 no longer predicts the tract. The guard-rail is v3a not being worse than d06k on train_v2's clips; on train_v3a's clips d06k is expected to lose more.
+
+Adopt full decoupling for teacher v3 if the probe's median |slope| falls clearly (by a third or more) and closed-phase F1 agreement is not worse beyond its bootstrap interval; the guard-rails must not regress beyond noise.
+
+**Result (2026-10-09): the rule fails; full decoupling is not adopted as it stands.** `teacher_v3a_d06k` (10k steps) against d06k:
+1. *Probe:* median |slope| 18.7 against 13.7 Hz/octave (median slope +6.4 vs +1.8); no fall. Both models have the same F1 error by f0 (+22 / +25 Hz at 318 / 400 Hz), and the remaining slope is mostly o and u, whose F1 approaches or falls below f0 at the top of the sweep. The probe as built mixes prior coupling with that resolution limit; it will report f0 ≤ 250 Hz separately from now on.
+2. *Closed phase* (`cp_v3a.py`; PTDB-TUG speaker bootstrap of v3a − d06k): F1 bias women +8.0 [+5.5, +9.7], men +4.2 [+3.2, +5.5] Hz; median |error| women +1.1 [−0.8, +1.9], men +2.9 [+2.0, +3.6]. The shift is upward everywhere. Women's compression is slightly smaller (low-F1 / high-F1 bias +53 / −17 against +44 / −35), but through the high end moving up, not the low end moving down. ARCTIC: bdl +5 vs +4, jmk +33 vs +26, slt +2 vs −7 Hz.
+3. *Hillenbrand* (`reports/analysis/paired/m2_paired_v3a.txt`): every difference within noise (F1 MAE all +0.9 [−0.1, +1.9]).
+4. *Guard-rails:* PTDB-TUG f0 RPA +0.2 (better, all and modal), within noise below 85 Hz. Swapped validation (`reports/analysis/cross_val/cross_val_v3a.txt`): on train_v2's clips F1 MAE +0.9 [+0.4, +1.6] Hz (beyond noise, about 4 %), F2–F3 and f0 within noise; on train_v3a's clips d06k is no worse than v3a, so d06k did not depend on the coupling on synthetic data. The suite is mostly within noise (f1_near_h2 F1 DR 54.5 → 49.0).
+
+**Why: the coupling was acting as a correction to the F1 prior's centre.** The synthetic F1 marginal is the same in both sets (median about 600 Hz), but train_v2's conditional median rose with f0 (553 / 592 / 630 / 635 Hz for f0 < 150 / 150–250 / 250–350 / > 350), while train_v3a's is flat at about 600. Real F1 sits lower (closed-phase medians: men 456, women 548 Hz on PTDB-TUG). Where evidence is weak the teacher falls back towards the prior's centre, and v2's lower centre at low f0 happened to be nearer real speech. Removing the coupling moved the centre up for the f0 range of real speech, so every estimate moved up. This fits D-019's mechanism (pull towards the prior) and locates it: what matters is where the pull points, and, as the longer-term fix, how strongly the model is pulled.
+
+**Consequence.** The principle stands; this ablation removed the coupling without replacing the useful part of what it did. Next, if pursued: a tract-only F1 prior whose centre and spread are set from real speech (independent of f0 and of everything on the source side), with the same measures; and, separately, less dependence on the prior: longer context (D-021) and slow formant sweeps in synthesis.
+
+## D-021 (2026-10-09, planned): temporal module, crop length, and vocal-tract-length outputs
+
+Planned work, in this order, each step on the winner of the previous one and after the D-020 decision. Each comparison changes one thing.
+
+**1. Conformer instead of the BiGRUs.** The convolutional front end stays; only the temporal modules change. The main encoder's 2-layer BiGRU becomes a small Conformer (about 4 blocks, width 192–256, 4 heads, a time-convolution kernel of 15–31 frames, relative position encoding), with the same parameter count. The f0 branch's BiGRU becomes a dilated 1-D convolution stack. Recipe: d06k's (6000 constant + 4000 decay steps) on the D-020 winner's data. Compared on synthetic validation, the D-020 measures (the f0-invariance probe included, since attention could find a new path from pitch to tract) and step time. Expected: accuracy about equal; training 15–20 % faster per step (the GRUs are about 22 % of a step, and the dilated 2-D convolutions remain the main cost); CPU inference 1.5–1.8× faster (the GRUs are about 45 % of it at 4 threads, and are sequential); and streaming becomes possible with chunked attention, which a BiGRU cannot do. Mamba and RWKV are deferred: they have no fused kernels on Windows ROCm.
+
+**2. Longer and mixed crop lengths.** Training uses 2 s crops (from 2–4 s clips), while evaluation and the intended uses run whole files of tens of seconds with many vowels. Crops of 2, 4 and 8 s (later 16 s), grouped by length with the batch size scaled to keep steps about equal in cost; clips at least as long as the longest crop (`duration_s` up to about (2, 16)). Purpose: remove the train/use length mismatch, and let the model pool tract evidence across many vowels from one speaker. That pooling is tract-to-tract evidence and consistent with D-020. A model that learns "one speaker, one tract" will smooth over a real change within a file, so before/after material is analysed as separate files.
+
+**3. Formant observability (before the VTL outputs: smaller).** Channel augmentation (low-pass at 4–7.5 kHz on 30 % of clips, the 300–3400 Hz telephone band, a 40–300 Hz high-pass on half of them, noise) changes the audio but not the labels. *Correction (same day):* this does not by itself train the model to be confident. The heat-map loss is a proper scoring rule, so across clips whose evidence is gone it learns a broad posterior. The confidence came from decoding: the mode of a broad distribution lands near the prior's centre (the D-019 pull), and σ was measured within ±80 cents of the mode, which capped it near 52 cents. `decode` now measures σ over the whole distribution, with the target blur removed (`208c67f`). Two kinds of "missing" are still kept apart: *absent* (silence, unvoiced; the sonorant head covers it) and *present but unobservable* (above the channel's cut-off, under the noise floor, cancelled by a nasal zero, F1 near or below a high f0). With an honest σ the second kind shows up as width. A per-formant observability label computed by the synthesiser (channel response and noise at the formant, harmonic spacing around it) is still worth adding as an explicit output, so users see "F4 not observable on this channel" rather than reading it off σ. It becomes urgent only if σ fails to widen in those cases (the check in `reports/analysis/sigma/sigma_check.txt`). *Check (d06k and v3a, `sigma_check.py`):* σ now carries information. Error rises steadily with σ quintile in every suite case (reference F1: median 12 → 86 cents from the lowest to the highest fifth), and σ widens where evidence is missing (median F1 σ: reference 55, high_f0 85, low_snr 121, f1_near_h1 306 cents; F3: reference 33, phone 105, f2_f3_close 179, low_snr 189). On in-distribution synthetic data it is slightly conservative (80–87 % of errors within 1σ, 96–99 % within 2σ). Two gaps remain. (a) *Formant assignment swaps* (f1_near_h1/h2 F1, f2_f3_close F3): errors of one to two octaves, with only 30–50 % within 1σ. The cascaded heads pick the wrong peak with a unimodal distribution, so σ cannot show the alternative; this is the remaining confidently-wrong case. (b) *Real voices* (PTDB-TUG closed phase): σ is about twice as wide as on synthetic data (F1 115–122 cents), and error still rises with it, but coverage is short (F1 45–59 % within 1σ). That is partly the reference's own scatter and partly the systematic D-019 offset, which no per-frame σ can show. The observability label is therefore not urgent; assignment swaps are the next target. Slow, continuous formant sweeps are added to synthesis at the same time: a formant drifting past the harmonics traces out the resonance through their changing amplitudes, which is the evidence a model with long context can use at high f0.
+
+**4. Vocal-tract-length outputs.** The synthesiser knows three related quantities exactly; they are kept distinct:
+- *Anatomical VTL* (`length_cm`): constant per speaker. A new head outputs a running per-frame estimate with uncertainty, trained on the clip's label. Its estimate should converge and stay flat as evidence accumulates.
+- *Instantaneous acoustic length*: anatomical length with the current larynx height and lip protrusion (per target in `meta["tube"]`). It genuinely varies from vowel to vowel and is the legitimate reason apparent VTL moves.
+- *Apparent VTL*: derived from the formants afterwards, not predicted by the model. The formants-to-length mapping is fitted on tube clips, where formants and true lengths are both known, instead of assuming a uniform tube; that also measures the uniform tube's error.
+
+The running anatomical estimate doubles as a diagnostic of the model's beliefs. Drift that follows f0 is the coupling D-020 removes, and the invariance probe is extended to this output; drift that follows the vowel means instantaneous length is being confused with anatomical length. The label must stay a pure tract quantity, sampled independently of the source.
+
+## D-022 (2026-10-09): train_v3b: tract distributions from population data (pre-registered)
+
+**Why.** D-020's ablation showed that the f0 coupling had been recentring the F1 prior. With the coupling removed, the prior's centre (median F1 about 600 Hz) sits well above real speech (closed-phase medians: men 456, women 548 Hz), and estimates are pulled towards it where evidence is weak. Three tract-side causes, all independent of the source:
+1. *Tract length* uniform over 10–20 cm (median 15 cm, shorter than most adults): about +15 % on every formant against an adult male tract.
+2. *Story's vowel targets* are one speaker's, with higher F1 than population means (/ɪ/ 507 vs Peterson & Barney 390 Hz at 17.46 cm, 472 even without losses), and the uniform (q1, q2) box rarely reaches the close-vowel corners (tube F1 10th percentile 388 Hz at male length).
+3. *Uniform scaling*: women's and children's vowel spaces are not length-scaled men's (Fant 1966). Scaling men's shapes down compresses them (women: front-vowel F2 −10 %, /æ/ F1 −15 %).
+
+**train_v3b** (`va synth train --seed 3 --synth-set p_length_from_f0=0 --synth-set p_f1_band=0 --synth-set length_dist=population --synth-set vowel_dist=conversational --synth-set bandwidth_f0_hz=132`, 100k clips; everything else as train_v3a):
+- *Tract length* (`LENGTH_POPULATION`): 80 % from groups women N(15.6, 1.14), men N(17.6, 0.89), children uniform 11.4–14.5 cm, weighted 45 : 45 : 10; 20 % uniform over 10.3–22.3 cm (12 cm centred on the groups' weighted mean, 16.3 cm). Adults: Story, Vorperian et al. 2018 (CT, ages 18–25); children: their growth curve (ages 4–12). Balanced by sex on purpose: in before/after comparisons of a voice whose presentation changes, a prior favouring either sex would pull ambiguous frames towards that sex's formants. The group is recorded in clip meta.
+- *Vowel targets*: chosen by their share in casual conversational American English (Mines, Hanson & Shoup 1978, Table 4a; schwa 21 %, /ɪ/ 23 %, /i/ 11 %, …; diphthongs split between end points; r-coloured vowels not modelled). Tube: (q1, q2) targets fitted through the lossy tube to Peterson & Barney (1952, Table II) men, women and children at the groups' mean lengths (women and children with a penalty towards the men's shapes so they interpolate smoothly), linear in length between the groups, jittered by 15 % of the box; 30 % of targets uniform over a box of Story's size centred on the targets' weighted mean. Cascade: PB's per-group tables, log-interpolated by length, same vowel weights, with schwa as each group's log-centroid.
+- *Cascade bandwidths*: Hawks & Miller with a fixed 132 Hz instead of the clip's f0 (their f0 scaling widened bandwidths up to 3.5× at high f0, a source-to-tract link D-020 should have removed).
+
+Check before generating (targets sampled as generated, 500 per group; F1 / F2 medians against PB's conversational-weighted means): men 483 / 1565 vs 462 / 1517; women 551 / 1734 vs 528 / 1808; children 634 / 2056 vs 625 / 2055 Hz. Assmann & Katz (2000, Table I; 3 talkers per group, Texas, CVC context, children aged 3–7) read higher than PB for adult lax vowels (men /ɪ/ F1 445 vs 390 Hz), so PB, measured from spectrograms 70 years ago, may sit somewhat low for modern speech; with 3 talkers per group it is a caution, not a basis for fitting.
+
+**Teacher and measures, set before the results.** `runs/teacher_v3b`: d06k's recipe (6000 constant + 4000 decay steps). Compared with d06k and v3a on: the f0-invariance probe (now also reported for f0 ≤ 250 Hz); closed-phase F1 on ARCTIC (by voice and vowel group) and PTDB-TUG (by sex, speaker bootstrap; bias, median |error|, the low / mid / high F1 ranges); Hillenbrand by group (paired, informative); σ coverage against the closed phase; guard-rails: PTDB-TUG f0 RPA, the suite, swapped synthetic validation on train_v2's and train_v3b's clips.
+
+**Decision rule.** Adopt train_v3b's distributions for teacher v3 if the closed-phase F1 bias (PTDB-TUG, both sexes) is smaller than d06k's beyond the speaker-bootstrap interval, the low-F1 compression (closed-phase F1 < 450 Hz) shrinks, the probe's |slope| at f0 ≤ 250 Hz is not worse than d06k's by more than a third, and the guard-rails do not regress beyond noise.
+
+**Result (2026-10-10): the rule fails; train_v3b's distributions are not adopted.** `teacher_v3b_d06k` against d06k (and v3a):
+- *Closed phase, PTDB-TUG* (`cp_v3b.py`; speaker bootstrap): women's F1 bias +26.3 against +14.6 (v3b − d06k +10.9 [+7.8, +15.5]; v3a +22.6), median |error| +5.4 [+3.3, +8.5], low-F1 bias +14.2 [+11.5, +18.1]; men unchanged (bias −0.4 [−1.6, +0.7]). ARCTIC: bdl +7 (d06k +4), jmk +36 (+26), slt +6 (−7) Hz; equal or higher in every vowel group.
+- *Probe*: f0 ≤ 250 Hz |slope| 7.6 (d06k 8.2, v3a 7.8); over the whole sweep 20.8 (13.7, 18.7).
+- *Hillenbrand* (`reports/analysis/paired/m2_paired_v3b.txt`): F1 MAE worse in every group (all +2.5 [+1.6, +3.4] Hz); F2–F4 within noise.
+- *Guard-rails*: PTDB-TUG f0 RPA worse (all −0.7 [−1.2, −0.3], modal −1.0 [−1.3, −0.7]); swapped validation (`reports/analysis/cross_val/cross_val_v3b.txt`) worse on train_v2's clips (F1 +2.5, F3 +10 Hz MAE), better on its own.
+
+**What this refutes.** D-020's explanation, that removing the coupling raised the F1 prior's centre and the teacher was pulled towards it, predicted that lowering the centre would lower the bias. Across d06k → v3a → v3b the synthetic F1 centre stayed high and then fell to realistic values, while women's closed-phase bias rose +15 → +23 → +26 Hz. Pull towards the prior's centre is therefore not the main cause of the upward F1 bias on real voices; the D-020 "why" paragraph is withdrawn as an explanation (its measurements stand). *Correction (2026-10-10, D-024):* the seed replicate alone moves women's bias +15 → +22 Hz, so the d06k → v3a → v3b trend is not resolved by single runs and does not refute this either way; v3b's Hillenbrand F1 and women's |error| regressions are the parts that stand.
+
+**What it leaves open.**
+1. *Run-to-run variance is unmeasured.* Every comparison since D-018 is between single training runs; the bootstrap intervals cover speakers and clips, not initialisation or data order. Differences of 5–10 Hz in F1 bias or 0.7 points of f0 RPA may be within seed-to-seed variation. A replicate of d06k's recipe with another seed sets that floor.
+2. *A real-voice property the teacher reads as higher F1*, which Praat largely does not (+2 to +5 Hz on the same frames): open-phase damping (wider F1 bandwidths), source spectrum (H1–H2, tilt), subglottal coupling, or how harmonics sample a real resonance. A sensitivity probe (fixed vowels, one source or physics factor varied at a time, teacher F1 shift measured) can locate it without training.
+
+## D-023 (2026-10-10): glottal coupling within the cycle: what the teacher misreads (planned ablation)
+
+**Terms.** Following Birkholz et al. (2019) and Titze et al. (2015): *resonances* fR1–fR3 are the poles of the closed-glottis tract (what the synthetic labels and closed-phase LPC measure); *formants* F1–F3 are spectral peaks of the actual signal, which also depend on the source. The teacher's target stays fR: it is a property of the tract alone, so before/after comparisons are not moved by changes in the voice source. Formants are what listeners hear, and an effective-formant output may be added later for perceptual questions.
+
+**Sensitivity probe** (`runs/sensitivity*.txt`; 8 Peterson & Barney vowels per group, men f0 120 Hz / women 210 Hz, LF pulse train through per-sample resonators, one factor changed during the open phase only, label fR):
+- *The teacher reads open-phase shifts of every formant,* not only F1: about the full open-phase shift for F1 (+5 % → +22 / +25 Hz), 30–50 % of it for F2 and F3 (+5 % → +28 / +34 and +31 / +52 Hz). Wide open-phase F3 bandwidths at women's f0 cause F3 → F4 assignment errors (B3 ×4: F3 +500, F2 +132 Hz).
+- *Praat Burg follows open-phase F1 shifts as much as the teacher* (men +28 / +45 Hz for +5 / +10 %). On real voices, whole-cycle LPC agrees with the closed phase to within ±7 Hz (D-019), so open-phase F1 shifts are small in these voices and cannot be what separates the teacher (+15 to +26 Hz above the closed phase for women) from LPC. The earlier claim that Praat ignores them because closure dominates its fit is withdrawn.
+- *The teacher reads damping as higher F1, LPC much less:* open-phase B1 ×3 moves the teacher's F1 by +12 (men) / +20 (women) Hz and Praat's by +9 / +7; static B1 ×3 by +8 / +15 against +3 / +8. The teacher−Praat gap is several times larger for women, as on real voices. Leading candidate: **the teacher has learnt "broad F1 peak = higher F1"**, because training never shows wide bandwidths arising from glottal losses on a fixed resonance.
+
+**Physics** (`open_glottis.py`, `reports/analysis/sensitivity/open_glottis.txt`): the lossy tube with the glottis open (Norton form: the glottal slit's kinetic and viscous resistance and inertance, Flanagan 1972, at 800 Pa; in series with a subglottal impedance whose maxima are Ishizaka, Matsudaira & Kaneko's 1976 640 / 1400 / 2100 Hz, scaled by tract length), poles continued from the closed-glottis ones, quasi-static at a fixed open area.
+- *Check:* uniform 2.89 cm² duct with a static 0.51 cm² opening, no flow: F1 +12 % with the subglottal load (Barney, De Stefano & Henrich 2007 measured +13 %); +73 % without it, so the subglottal side cannot be left out.
+- At open areas 0.05–0.1 cm²: B1 rises 2–4× (to 90–230 Hz), consistent with the +77 to +120 Hz average B1 increase quoted for glottal openings (Hanson's chink analyses). fR1 rises +3 to +12 % for open and mid vowels and +7 to +35 % for close vowels (/i u o/), matching Birkholz et al.'s finding that vowels with fR1 < 350 Hz are much more affected (Uezu & Kaburagi 2017: /i/ up to +20 %, /o/ +10 %). F2 and F3 move +1 to +20 %, but their size and even sign depend on where they sit relative to the subglottal resonances; Birkholz et al. found no systematic F2 or F3 change in LPC estimates. Near the first subglottal resonance F1's continuation can switch branch (negative entries for /æ ʌ ɔ/), so those cells are unreliable.
+- Quasi-static values hold the opening fixed; in speech the area rises and falls within the open phase, so the time-averaged effect is smaller. Measured peak glottal areas still need a literature source before any of these are used in training.
+
+**Plan (not started; v3c ablation).**
+1. *Synthesis*: a time-domain voiced path (pulse train through `filters.filter_tv`, already used for noise) for some or all voiced clips, with every formant's frequency and bandwidth moving within each cycle from its closed-glottis value towards the open-glottis value at the instantaneous glottal area. Per clip: peak glottal area, glottal length and depth, and subglottal resonances (scaled by length, jittered) are sampled. The tube path computes open-glottis poles per target; the cascade path uses a fit to the tube table. Area goes with the source shape (a longer open phase, a larger opening), a real source → signal link that leaves the labels (fR) untouched, consistent with D-020. Magnitudes come from published glottal-area measurements; ARCTIC and PTDB-TUG are not used to tune them (evaluation sets never fit synthesis priors) and are used only to check afterwards.
+2. *Before training*: the renders must reproduce the literature's direction (Praat F1 rises with peak area, more for close vowels; F2 and F3 not systematically moved), and the time-domain path's cost must be measured against the harmonic path.
+3. *Heads*: a per-frame source head (Rd or open quotient; labels from the synthesis), evaluated against the EGG contact quotient on ARCTIC and PTDB-TUG for trends only (contact and flow quotients differ).
+4. *Decision rule, set now*: adopt if the closed-phase F1 bias (PTDB-TUG, both sexes) falls beyond the run-to-run noise floor (seed replicate `teacher_v2s1`, D-022) and the per-frame correlation of F1 error with the EGG contact quotient shrinks; guard-rails as D-022. Hillenbrand F1 is informative only: its references are LPC formants, which include some coupling, so a better fR tracker may read slightly lower there.
+
+Sources: Birkholz, Gabriel, Kürbis & Echternach (2019), JASA 146(1), 223–232 (`data/downloads/literature`); Barney, De Stefano & Henrich (2007), Acta Acust. 93(6); Uezu & Kaburagi (2017), and Badin & Fant (1984) as cited there; Ishizaka, Matsudaira & Kaneko (1976), JASA 60(1), 190–197, values as quoted by Hanna, Smith & Wolfe and by Wakita & Fant (1983; the latter gives 2150 / 2850 Hz for the upper pair); Flanagan (1972), *Speech Analysis, Synthesis and Perception*; Titze et al. (2015), JASA 137(5).
+
+**Progress (2026-10-10, while `teacher_v2s1` trains).** Implemented, off by default (earlier sets reproduce): `synth/coupling.py` (open-glottis poles; Barney check in the tests), a time-domain voiced path in `voice.synthesize(coupling=...)` that reproduces the harmonic path exactly when nothing moves, and `SynthConfig.p_coupling` for tube clips (glottis drawn per clip, shifts per target, `coupling_scale` per clip). Cost: about 0.9 s per second of audio against 0.25 s without (CPU shared with training), mostly the open-glottis pole search. *Update (2026-10-11), quiet machine:* 0.86 against 0.23 measured; after vectorising the tube chain matrix over sections and computing `open_phase` without the LF root solves, 0.24 coupled and 0.17 uncoupled (`scripts/analysis/coupling_timing.py`). Existing sets regenerate bit-identically. The 40-step continuation jumps to a neighbouring root for about 1 pole in 2000, against 160 steps.
+
+Render check (`coupling_check.py`, `reports/analysis/sensitivity/coupling_check.txt`; Story's vowels, Rd 1.0, peak areas 0–0.2 cm²): Praat's F1 rises with the opening for some close vowels but by less than the quasi-static shifts suggest, and is mixed for open ones; Praat's F3 rises systematically (+50 to +200 Hz), which Birkholz et al. did not find (their simulated F3 trend is positive but not significant). Adding a tracheal impedance floor (ρc / 2.5 cm²) to the subglottal model barely changes the shifts, so the F3 movement comes from the glottal inertance. Early estimates (Flanagan 1965; Badin & Fant 1984) put open-glottis shifts at a few percent, which at F3 is 100+ Hz, so the model is not clearly wrong; the size of F2–F3 shifts is left uncertain, and `coupling_scale` (uniform 0–1 per clip) covers the range from none to the model's. d06k on these renders: F1 +10 to +25 Hz and F2–F3 +10 to +35 Hz at 0.1 cm², and for women's /ɑ/ and /ʌ/ F2 or F3 jumps by 1.1–1.6 kHz (an assignment failure) at any opening.
+
+Still open: glottal areas from published data (Holmberg, Hillman & Perkell 1988 flows, converted with the transglottal pressure; Patel et al. 2026, JSLHR 69(5), open quotient women 0.93, men 0.71, glottal gap index 0.07 / 0.01 of the maximum area), and whether to link the opening to Rd.
+
+**Glottal sizes set (2026-10-10).** From Holmberg, Hillman & Perkell (1988, JASA 84, 511–529, Tables AI–AV, with the erratum's Table AVI, JASA 85, 1787; `data/downloads/literature`), peak flows through Bernoulli at each group's own pressure: peak glottal area men 0.12 cm² (range 0.06–0.24), women 0.07 (0.04–0.12), about the same in soft, normal and loud voice. Sampled log-uniform 0.05–0.22 cm² at 17.5 cm, scaled by length². What changes with loudness is the residual opening in the 'closed' phase (minimum / peak flow 0.22–0.52), which rises about 1.4× as fast as the open quotient within each sex. It is therefore linked to Rd through the rendered open quotient (the LF te), per sample, at no extra rendering cost (`coupling.gap_from_open_quotient`), with a per-clip offset spanning video-measured gaps (Patel et al. 2026) to flow-measured ones. Peak area is not linked to Rd. Transglottal pressure 3.6–12 cm H₂O.
+
+**External check: Birkholz et al.'s (2019) recordings** (`birkholz_eval.py`, `reports/analysis/external/birkholz_eval_d06k.txt`; their supplementary audio, evaluation only: 3D-printed vowel resonators excited by silicone vocal folds, and their simulations, each at five lung pressures, peak glottal area 11–60 mm²; the simulations also include closed-glottis LF renders).
+- *Coupling is read by both trackers, the teacher no more than Praat.* Simulations, F1 against each resonator's own closed-glottis render (median): at 11 mm² (about men's normal peak area) d06k +26, Praat +37 Hz; at 60 mm² +101 and +198 Hz. Rise from 11 to 60 mm², physical models: close vowels d06k +59, Praat +84; open vowels +14 and +31 Hz. On real coupling the teacher does not over-read it relative to LPC, so this data does not support the bandwidth explanation from the sensitivity probe; it does show that coupling at speech-like areas raises both trackers' F1 by 25–40 Hz.
+- *A coverage hole, unrelated to coupling:* back rounded vowels with F2 near 600 Hz. On the closed-glottis renders of /u/ (F1 212, F2 632 Hz by Praat) and /o/ (290, 612) the teacher misses F1 and reports F2 as F1 and F3 as F2 (606 / 2531, 573 / 2830), with F1 σ of only 180 cents for /o/; the physical models show the same (/u/ 590 against Praat's 340 Hz). Training rarely has F2 that low: the tube cannot round the lips enough (PB-fitted /u/ reaches F2 949 Hz at 17.46 cm, D-022), and the cascade's coverage floor for F2 is 600 Hz × size with F2 ≥ F1 + 200. German, Korean and many other languages' /u o/ sit there.
+
+## D-024 (2026-10-10): run-to-run variance; v1 at d06k's schedule; a faster loop
+
+**Seed replicate** (`teacher_v2s1_d06k`: train_v2, d06k's recipe, training seed 1; `reports/analysis/paired/m2_paired_v2s1.txt`, `invariance/invariance_v2s1.txt`, `closed_phase/cp_v2s1.txt`). Against d06k, with identical data:
+- Hillenbrand F1–F4: all within noise (F1 MAE all −0.4, F3 +2.0, F4 −12.7 Hz).
+- PTDB-TUG f0 RPA −1.1 [−1.4, −0.9] (all frames), −0.8 (modal), −1.3 (modal < 85 Hz): flagged "worse" by the speaker bootstrap.
+- Invariance probe: median |slope| 11.3 against 13.7 Hz/octave; at f0 ≤ 250 Hz 3.3 against 8.2; single vowel-and-length cells move by up to 30 Hz/octave.
+- Closed-phase F1, PTDB-TUG: women's bias +7.2 [+5.7, +10.1] Hz (high-F1 range +21), median |error| +0.6; men's bias +0.6, |error| −0.4. ARCTIC: bias +2 / +8 / +6.5 Hz (bdl / jmk / slt).
+
+The bootstrap intervals cover speakers and clips, not training runs, so they understate the uncertainty of any comparison between two runs. One replicate is one sample of the run-to-run spread, so it can rule out small effects but not set a threshold. Re-reading D-020 and D-022 against it:
+- *Not attributable to the data change* (within one seed's movement): every f0 RPA difference (v3a +0.2, v3b −0.7 / −1.0); the invariance slopes; v3a's women's bias (+8.0); the high-F1 bias shifts.
+- *Stand*: v3b's Hillenbrand F1 regression (all +2.5 [+1.6, +3.4] Hz against −0.4, in every group) and its women's closed-phase |error| (+5.4 against +0.6).
+- *Probable*: v3a's men's bias +4.2 and |error| +2.9, against +0.6 and −0.4.
+- d06k may be the lucky run: on women's closed-phase bias the replicate sits with v3a, not with d06k (+21.9 against +14.6 and +22.6).
+
+**Two candidate mechanisms for v3b's regression, both ruled out with probes** (no training):
+- *Bandwidths* (`sensitivity/sensitivity_bw_cmp.txt`). v3b fixed the cascade's Hawks & Miller f0 term at 132 Hz. train_v2's f0-scaled bandwidths were only ×1.22 wider at 210 Hz and ×1.48 at 300 Hz, on cascade clips only (40 %); the "up to 3.5×" in D-022 applies only at much higher f0. With B1 widened, v3b's F1 moves no more than d06k's (women at 210 Hz: +10 against +15 to +20 Hz; the two v2 seeds +2 to +9).
+- *`p_f1_band`* (`sensitivity/f1_ratio_sweep.txt`). F1 300–1000 Hz under f0 120, 210 and 260 Hz, read by F1/f0: no split between the v2 and v3 models near the 2nd and 3rd harmonics; the two v2 seeds differ as much as v2 and v3 do.
+
+**v1 at d06k's schedule** (`teacher_v1_d06k`: v1's cosine run branched at step 6000, where its rate was 0.84e-3, then decayed 1 − √ to zero at 10k like d06k; decay branches now accept cosine parents, main `4e942ab`). Against both v2 seeds (`paired/m2_paired_v1d06k*.txt`, `invariance/invariance_v1d06k.txt`, `closed_phase/cp_v1d06k.txt`):
+- *train_v2 is better on F2, F3 and invariance*: Hillenbrand F2 MAE −8.7 [−14.3, −2.8] and −10.8; F3 −35.7 [−56.8, −18.2] and −33.7 Hz. Median |slope| 13.7 and 11.3 against the v1 branch's 49.7 (v1 at 20k: 51.1), so v1's coupling comes from its data, not its schedule.
+- *train_v1 is better on closed-phase F1*: PTDB-TUG women's |error| −7.0 [−8.5, −2.9] and −6.1, men's bias −5.0 and −5.5, men's |error| −2.8 and −2.8 Hz, all beyond the seed's movement; ARCTIC lower for bdl and jmk in every vowel group.
+- *Within noise*: Hillenbrand F1, f0 RPA (the v1 branch falls between the two v2 seeds). The original comparison's women −2.6 / men +1.9 Hz were partly v1's longer annealed schedule.
+
+Closed-phase F1 bias follows how strongly the training data tie the tract to f0. Women: v1 (fully tied) +11, v2 (half) +15 / +22, v3a (none) +23, v3b (none) +26 Hz. Men: +9, +15 / +17, +20, and v3b +14, where its population tract lengths restore density at men's lengths. This is the trade-off D-020 predicted and accepted. A coupled prior scores better on typical voices but reads the tract from the pitch, as v1's invariance shows. The mechanism is still open. It is not simple pull towards a population centre, which would lower women's F1, not raise it. v1 → v2 also changed other things (v1 trained without codecs, for example), so the tie is the leading candidate, not established.
+
+**Training throughput** (`reports/analysis/bench_small.txt`). Full-size training was GPU-bound at about 60 s of audio per second. The data loader, at about 70 s/s with codecs on, was barely ahead: two ffmpeg processes per coded clip (about 330 ms) serialised across workers on Windows. Opus, AAC and MP3 now run in-process (PyAV, main `77f8289`); the loader gives 134 s/s at 12 workers and 155 at 16, limited by AMR, which PyAV's wheels can't encode. An antivirus exclusion for ffmpeg made no difference. Smaller models on the GPU: S1 (3.2M parameters) 79 s/s, S2 (1.75M) 114 s/s.
+
+**A faster loop: S2 as a proxy (pre-registered).** The planned full-size 3.5k / 5k study is replaced by S2 (channels 8 / 16 / 32, f0 channels 8, embed 192, GRU 96, f0 GRU 64; `va train teacher --model-set`, main `4b6916a`). Recipe: 2000 constant + 1500 decay steps, warmup 1000, comb-truth taper over 1400 steps, 16 loader workers.
+- Arms: train_v2, train_v3b and train_v1, seeds 0–2 each (`runs/small/`).
+- Measures: Hillenbrand in full, every 3rd PTDB-TUG file per speaker (1579 of 4718, all 20 speakers), and every 3rd closed-phase utterance per speaker. The subsets reproduce the full results (v3b − d06k women's bias +11.7 against +10.9; seed +6.6 against +7.2 Hz). Probe as before.
+- *Adopt S2 as the proxy* if it reproduces, beyond its own three-seed spread, the directions known at full size: v1 → v2 F2 and F3 better, invariance much better, closed-phase F1 worse; and v3b's Hillenbrand F1 and women's |error| regressions. Otherwise, fall back to full size at a short budget.
+
+**Weights EMA (pre-registered; main `21558f6`).** Training now keeps a moving average of the weights (decay 0.998, about the last 500 steps), saved as `ema` in each checkpoint and loadable with `<ckpt>#ema`; training itself is unchanged. Seven of the nine S2 runs carry it (all but v2 seeds 0 and 1, which started before it), so each run gives a paired raw-against-averaged comparison with no extra training (`ema_*` reports). *Adopt* if the averaged weights are not worse than the raw ones beyond the paired intervals on any main measure, and narrow the three-seed spread of the v3b and v1 arms on f0 RPA or closed-phase F1 bias. Other optimiser and schedule changes are deferred (`docs/roadmap.md`).
+
+**Result: S2 fails as a proxy (2026-10-11).** Nine S2 runs (`paired/small_*.txt`, all against v2_s0; `invariance/small.txt`; `closed_phase/cp_small.txt`). Arm means across the three seeds, with the range in brackets:
+
+| Measure | v2 | v3b | v1 |
+|---|---|---|---|
+| Hillenbrand F1 MAE, all | 36.5 (34.2–37.9) | 37.5 (36.1–39.7) | 34.1 (31.1–36.3) |
+| F1 MAE, women | 38.9 (35.7–41.3) | 41.8 (39.8–44.4) | 38.9 (34.6–42.2) |
+| F1 MAE, children | 43.3 (41.3–44.7) | 46.6 (43.3–50.2) | 40.4 (37.8–42.4) |
+| F2 MAE | 56.4 (52.8–62.7) | 53.8 (53.0–55.0) | 54.4 (49.1–58.3) |
+| F3 MAE | 96.8 (87.2–108.4) | 94.9 (82.7–104.1) | 102.4 (88.3–120.7) |
+| PTDB-TUG f0 RPA, all frames | 87.0 (86.6–87.3) | 86.6 (85.9–87.0) | 86.3 (85.3–87.8) |
+| Invariance median \|slope\| | 22.9 (20.7–24.6) | 21.2 (16.4–25.1) | 56.6 (52.0–63.1) |
+| Closed-phase F1 bias, women | +30.9 (+21.4 to +39.3) | +36.6 (+29.5 to +40.5) | +27.4 (+21.5 to +32.0) |
+| Closed-phase \|error\|, women | 45.1 (40.7–49.7) | 49.0 (44.8–52.6) | 41.8 (37.7–44.6) |
+| Closed-phase F1 bias, men | +28.6 (+16.9 to +39.0) | +28.7 (+26.6 to +29.8) | +25.4 (+18.6 to +31.4) |
+
+Against the pre-registered directions:
+- *v1 → v2 invariance much better*: reproduced, far beyond the spread (no overlap; the same size as at full scale).
+- *v1 → v2 F2 and F3 better*: not reproduced. F3 is 5.6 Hz better on the means, inside a seed range of 21–32 Hz; F2 is 2 Hz worse.
+- *v1 → v2 closed-phase F1 worse*: right direction on every measure (women's bias +3.5, |error| +3.3, men's bias +3.2 Hz on the means), but inside the spread.
+- *v3b's Hillenbrand F1 and women's closed-phase |error| regressions*: right direction (women +2.9, children +3.3, |error| +3.9 Hz on the means), but inside the spread; only v3b_s0 shows them clearly.
+
+At this size and budget, seed-to-seed movement is about as large as the effects to be detected. The F3 spread (21 Hz) is two-thirds of the full-size v1 → v2 effect; the women's closed-phase bias spread (18 Hz) is larger than any data effect seen so far. Detecting 3–5 Hz effects would need on the order of 10 seeds per arm, which costs more than full-size runs. Only invariance-sized effects (tens of Hz per octave) can be read from three S2 seeds. So the Conformer goes in as a bench run (one S2 seed: throughput and synthetic validation), not a three-seed comparison. A real-voice architecture comparison falls back to full size, as pre-registered.
+
+Fix found on the way: the EMA chain failed at its first comparison because the evaluation's checkpoint hash did not accept the `#ema` suffix (`teacher_eval._ckpt_id`). The averaged weights now get their own cache id (`<sha>-ema`); the EMA comparisons were restarted at 01:18. EMA verdict: pending.
+
+**Result: EMA rejected (2026-10-11).** Seven paired raw-against-averaged comparisons (`paired/ema_*.txt`, `invariance/small_ema.txt`). The averaged weights are worse beyond the paired intervals on at least one main measure in five of the seven runs: women's F1 MAE +0.6 to +2.2 Hz (four runs), F4 +4 to +12 Hz (two), v3b_s0 F3 +4.7 Hz. f0 RPA is a little better in six of seven (+0.1 to +0.5), and invariance |slope| is lower in all seven (by 1–10 Hz/octave). The three-seed f0 RPA spread does not narrow (v3b 1.1 → 1.0, v1 2.5 → 2.5 points), so both conditions fail. As expected after a decay to zero, which already averages late weights. EMA stays in the checkpoints (it costs nothing) but is not used for evaluation.
+
+**Conformer bench (2026-10-11; `runs/small/conf_v2_s0`).** One seed, on S2 v2's recipe, against the three GRU v2 seeds. Synthetic validation at 3.5k steps (where the three GRU seeds agree to within about 1 Hz on F1 and 3 Hz on F3, so this measure is far less noisy than the real-voice ones):
+
+| Measure | GRU v2 (3 seeds) | Conformer |
+|---|---|---|
+| F1 MAE | 40.3–41.2 | 35.8 |
+| F2 MAE | 71.6–73.6 | 71.6 |
+| F3 MAE | 95.4–98.4 | 91.8 |
+| F4 MAE | 149.5–154.7 | 141.5 |
+| f0 RPA | 98.8–98.9 | 98.7 |
+| Throughput (mean of logged s/s) | 94–107 | 92 |
+
+F1 4.5 Hz and F4 8 Hz better than every GRU seed; F3 better; f0 a hair worse. Throughput slightly lower, not 13 % higher as the short GPU check suggested. Wall time 47 min against about 37 min, though some of that was the EMA closed-phase step's CPU load at the start. Synthetic gains have not always carried to real voices (D-020), and real-voice comparisons at S2 size are too noisy (above). The next step is a full-size Conformer run against the full-size v2 seeds.
+
+**Conformer, real voices (2026-10-11; `paired/small_conf_v2_s0.txt`, `invariance/small_conformer.txt`, `closed_phase/cp_small_conformer.txt`).** Against v2_s0, the same seed's GRU:
+- *Hillenbrand much worse*, far outside any seed spread: F1 MAE +26.7 [+23.7, +30.0] Hz (women +37, children +26, men +17), F3 +48, F4 +94 Hz. PTDB-TUG f0 RPA −2.3 points. Invariance |slope| 28.8 against 21–25 (at f0 ≤ 250 Hz: 24.3 against 10–12).
+- *Closed-phase F1 as good as or better than the best GRU seed* (PTDB-TUG women's bias +23.9, men's +16.7, against v2_s0's +21.4 / +16.9; ARCTIC bdl and jmk |error| the lowest of the four).
+
+The split follows clip length. The models train on 2 s crops (200 frames) and `analyse()` runs whole files. Hillenbrand words are 0.55 s (median; 0.43–0.68 s), while PTDB-TUG and ARCTIC utterances run for several seconds. On synthetic clips cut to different lengths (`scripts/analysis/len_test.py`; 150 clips, F1 MAE in Hz):
+
+| Input length (frames) | 30 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| GRU v2_s0 | 52.4 | 40.8 | 31.3 | 29.5 | 27.4 |
+| Conformer | 74.0 | 44.6 | 31.8 | 26.5 | 24.6 |
+
+Both models degrade on short inputs; the Conformer much faster. The Conformer is better from 200 frames up and worse below about 100. So the Hillenbrand result is a length-generalisation failure, not a worse model. The fix is training on mixed crop lengths (D-021's open item), which the GRU also needs. The synthetic validation set uses 200-frame crops only, which hid this; it needs short-crop cases.
+
+**Mixed crop lengths (2026-10-11; main `fd1adeb`, `25032cf`, `896adde`; `sensitivity/len_test_mixcrop.txt`, `paired/small_mix_*.txt`, `invariance/small_mixcrop.txt`, `closed_phase/cp_small_mixcrop.txt`).** S2, seed 0, v2 recipe, one GRU and one Conformer. Crop lengths come from 8 values spaced geometrically over 32–400 frames, one per batch. The batch size scales so every step holds the same frames (64 s of audio), and short crops take several pieces from one augmented clip. About 37 % of training frames come from crops of 194 frames or more, against 100 % with fixed 200-frame crops.
+
+Synthetic F1 MAE by input length (Hz):
+
+| Model | 30 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| GRU, fixed 200 | 52.3 | 39.4 | 30.9 | 28.5 | 26.6 |
+| GRU, mixed | 53.4 | 41.9 | 32.1 | 32.2 | 30.0 |
+| Conformer, fixed 200 | 71.8 | 44.4 | 30.7 | 25.7 | 23.8 |
+| Conformer, mixed | 49.0 | 32.3 | 28.7 | 27.5 | 26.2 |
+
+The Conformer's short-input failure is fixed (F3 at 30 frames 116 → 62 Hz), at a cost of about 2 Hz on long inputs. The GRU gains nothing on short inputs and loses 3–4 Hz on long ones.
+
+Real voices, against v2_s0 (Hillenbrand MAE, Hz):
+- *Mixed Conformer*: F1 all +4.8, women +7.8, children +6.5; F3 −28.1; f0 RPA +0.5; invariance |slope| 15.5. The fixed-200 Conformer was F1 +26.7, F3 +47.8, f0 −2.3, |slope| 28.8.
+- *Mixed GRU*: F1 +2.3, women +4.4, children +3.8; F3 −17.6; f0 +0.9; |slope| 14.0.
+- Women's Hillenbrand F1 is 47.4 (Conformer) and 44.0 (GRU), against 35.7–41.3 for the three GRU v2 seeds.
+
+Closed-phase F1 (PTDB-TUG): the mixed Conformer has the lowest bias and error of any model so far. Women's bias is +12.7, |error| 36.8; men's bias +10.9, |error| 20.9. The three GRU v2 seeds give women +21 to +39 and 40.7–49.7, men +17 to +39 and 26.2–41.2. The mixed GRU is within the GRU seed range.
+
+The two references disagree on women's F1. Hillenbrand puts the mixed Conformer above the GRU seed range; closed phase puts it below. Input length doesn't explain it: Hillenbrand words are about 55 frames, where the mixed Conformer is the best model on synthetic data. Open: whether the Hillenbrand regression comes from the reduced long-crop exposure (next: a long-weighted mix at the same steps), from the short crops themselves (cut mid-utterance, where Hillenbrand words start and end in silence), or from the references.
+
+**Measures in fp32 (2026-10-11; main `69ccf9a`).** `analyse()` ran under bf16 autocast on the GPU. On the closed phase, bf16 moved the median F1 bias by about 1.7 Hz against fp32, and it is no faster on this GPU for these models. Measures now run in fp32 (`VA_EVAL_BF16=1` for the old behaviour), with cached predictions kept apart by precision. Six S2 models re-measured (`paired/fp32/`): Hillenbrand F1 reads 0.4–1.0 Hz higher in fp32 for every model, F3 −1 to +3 Hz, f0 RPA differences unchanged, so differences between models move by under 0.5 Hz. Reports from here on are fp32; earlier bf16 reports are not mixed with them. Training (and its synthetic validation) stays bf16 autocast. The closed phase also runs on the GPU now (`add_model.py`, `VA_DEVICE=cuda`: fp32, batched by frame count, MIOpen fast find mode), identical to the CPU columns, 1.9 min against 5.2.
+
+**Mixed crops: seed spread and the long-weighted mix (2026-10-11; `paired/fp32/`, `closed_phase/cp_small_crop2.txt`, `sensitivity/len_test_crop2.txt`, `invariance/small_crop2.txt`).** Two more seeds of the mixed-crop Conformer, and one with two-thirds of frames in crops of 194 frames or more (`crop_long_frac`).
+
+| fp32 | Hillenbrand F1 all | F1 women | F3 | closed-phase F1 women: bias (\|err\|) | men |
+|---|---|---|---|---|---|
+| GRU v2, seeds 0–2 | 34.9–38.3 | 36.3–41.7 | 86.9–107.3 | +21 to +39 (40.7–49.7) | +17 to +39 (26.2–41.2) |
+| Conformer mixed, seed 0 | 43.1 | 48.4 | 81.8 | +12.7 (36.8) | +10.9 (20.9) |
+| seed 1 | 48.2 | 53.6 | 130.4 | +25.8 (39.8) | +17.5 (22.6) |
+| seed 2 | 43.6 | 43.0 | 82.1 | +13.6 (35.4) | +10.0 (19.4) |
+| long-weighted, seed 0 | 46.1 | 53.4 | 111.1 | +11.8 (36.1) | +8.4 (19.6) |
+
+On every seed the mixed Conformer is worse than the GRU on Hillenbrand F1 and better on closed-phase F1 error, so the two references disagree consistently, not by chance. The long-weighted mix does not recover Hillenbrand F1 (reduced long-crop exposure is not the cause) and gains nothing on long inputs; it is dropped. Both references agree that every model reads women's and children's F1 high: Hillenbrand median signed F1 error +22 to +42 Hz for women, +14 to +22 for men.
+
+**Shared and model-specific error (`scripts/analysis/ensemble.py`).** Per frame, the error averaged over models is the part they share; per-frame median ensembles remove only the rest. Women's closed-phase F1: 84–90 % of the squared error is shared (any three seeds of one recipe, or all 13 S2 models); men's 53–73 %; Hillenbrand F1 86 %, F3 61–70 %. Median ensembles beat every member where model-specific error is large (Hillenbrand F2, F3; closed-phase |error|), not on women's F1 bias. No recipe or seed change reaches women's F1: every model makes the same error on the same frames.
+
+**Glottal coupling probes (`sensitivity/coupling_check_*.txt`, `coupling_probe2.txt`, `coupling_probe3.txt`; v2_s0 and mix_conformer_s2).** Story's vowels with the D-023 coupling: modal voice (Rd 1.0) without a closed-phase gap moves the teachers' F1 by a median 0–2 Hz for women. With a gap (0.3–0.6 of the peak opening) or a breathier source (Rd 1.6–2.2), +10 to +39 Hz for women and men, the size of the real-voice bias. Breathiness alone (Rd 1.0 → 2.2, no coupling) moves them by under 6 Hz, aspiration noise alone (HNR 30 → 8 dB) by under 4 Hz; Praat moves by up to 126 Hz under either. The Conformer responds more than the GRU (+17 to +28 against +2 to +21).
+
+**What the worst real utterances have in common (`sensitivity/voice_quality.txt`; PTDB-TUG subset, 794 utterances).** Spearman correlation of the shared F1 error (14 models) with Praat measures: CPPS −0.24 (women) / −0.52 (men), EGG contact quotient −0.14 / −0.18, H1–H2 +0.05 / +0.20, whole-cycle minus closed-phase F1 +0.48 / +0.19 (inflated: both differences share the closed-phase F1); HNR and shimmer about 0. The models read worst in breathier, less closed voices; with the probes (noise alone doesn't move them; coupling through a gap does), coupling is the leading hypothesis.
+
+**Test (pre-registered, running): `train_v2c`** = train_v2's settings and seed plus coupling on every tube clip (60 % of clips; per-clip glottis, gap and strength from the sampler); clips without coupling are bit-identical to train_v2. Three S2 mixed-crop Conformer seeds against the three on train_v2. Rule: D-023's (closed-phase F1 bias beyond the seed noise for both sexes; the correlation of F1 error with the EGG contact quotient shrinks), and by size of the women's bias change: 15 Hz or more, coupling is a large part of the problem; 5–15 Hz, three more seeds per arm; under 5 Hz, it is not the main cause. If no hypothesis survives, M3 proceeds with the M2 shortfall recorded here.
+
+**OPENGLOT (2026-10-11; Alku et al. 2019, free for research use with citation; evaluation only; `external/openglot_rep2.txt`, `openglot_rep3.txt`, `openglot_rep3_resonances.json`).** Two physical references, scored with v2_s0 and mix_conformer_s2 (median F1 minus the true first resonance, Hz):
+- *Repository II* (Story's physically modelled vowels, source-tract interaction, against resonances calculated from the area functions; 4 vowels × 4 f0 per row): GRU / Conformer, male at vocal-process separation 0.03 / 0.06 / 0.09 cm: +10 / +11 / +22 and +24 / +26 / +40; female at 0.05 / 0.07 / 0.09 cm: +28 / +22 / +60 and +58 / +63 / +87. The overread grows with the gap.
+- *Repository III* (LF excitation through a loudspeaker into 3D-printed replicas: real acoustics, no glottis, no coupling; resonances digitised from the measured sweeps, `openglot_sweeps.py`; the pressure signal is the second channel, against the readme): at f0 100–250 Hz, GRU −2 to +12, Conformer −15 to +16 (Praat −34 to −15). No systematic overread. Above 260 Hz both drift, and single replicas scatter (Conformer male [a] +246, an assignment failure); the files are 200 ms, short for the Conformer.
+
+Without a glottis both models read F1 accurately; with one they read it high, more with a wider gap, the Conformer more than the GRU. With the probes and the voice-quality correlations, four independent lines now point to source-tract coupling through the glottal gap as the cause of the shared F1 overread, and suggest the Conformer's Hillenbrand regression is a stronger response to coupling rather than a generally worse reading. The v2c test is the direct check.
+
+**Evaluation tiers (2026-10-11; main `4184813`, `vocal_analysis/eval/tiers.py`, `tiers.json`).** Every decision made by looking at a gold set makes that set's numbers optimistic for the chosen model (test-set reuse), most when the candidates are close. Hillenbrand, PTDB-TUG and ARCTIC have informed dozens of decisions. From here on:
+- *dev*: 60 % of each existing gold set's speakers, balanced within groups (Hillenbrand men / women / boys / girls; PTDB-TUG women / men): Hillenbrand 83 of 139, PTDB-TUG 12 of 20, MIR-1K 11 of 19, MDB-stem-synth 18 of 30. ARCTIC, OPENGLOT and the Birkholz audio are dev only (too few speakers to split, or analysis tools). All comparisons and decisions use dev.
+- *semi-private*: the other 40 %. It confirms a decision made on dev (does the effect replicate?) and never makes one. Every use is logged here; preferably reported as pass / fail against the dev result within a stated tolerance.
+- *lockbox*: sets not yet looked at. MOCHA-TIMIT (3 speakers) whole. Saarbrücken healthy speakers, once their manifest exists: split by speaker 50 / 50 semi-private / lockbox, balanced by sex (rule set now, before any of it is opened). Opened only at milestone acceptance, with the rule fixed beforehand; every opening logged.
+
+The assignment is seeded and committed, and `va tiers` refuses to rewrite it. Earlier full-set reports stay as they are. The v2c comparison, pre-registered and running on the full sets, is read on dev and confirmed on semi-private from its cached predictions; the measure scripts switch to dev by default once it ends. Synthetic checks (the suite, length tests, coupling probes) are regenerated from fresh seeds rather than reused.

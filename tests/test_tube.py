@@ -180,3 +180,61 @@ def test_poles_survive_a_frequency_crossing():
     d0 = T._denominator(2j * np.pi * grid, shape, 0.0).real
     assert len(f) == np.count_nonzero(np.sign(d0[:-1]) * np.sign(d0[1:]) < 0)  # one root per lossless root
     assert b.max() > 200  # the damped root is there
+
+
+def test_pb_fitted_vowels_reproduce_peterson_barney():
+    """D-022: the re-fitted targets give PB's male F1/F2 through the lossy tube (i and u at the model's limits)."""
+    from vocal_analysis.synth.tract import PB_MALE
+
+    for k, (q1, q2) in T.PB_FIT_VOWELS.items():
+        if k not in PB_MALE:
+            continue
+        f, _ = T.poles(T.build_shape(q1, q2, T.STORY_LENGTH_CM))
+        tol = (0.05, 0.10) if k in ("i", "u") else (0.01, 0.01)
+        assert f[0] == pytest.approx(PB_MALE[k][0], rel=tol[0]) and f[1] == pytest.approx(PB_MALE[k][1], rel=tol[1]), k
+
+
+def test_conversational_vowel_sampler_weights_and_coverage_centre():
+    draw = T.vowel_q_sampler(T.CONVERSATIONAL_VOWELS, T.PB_FIT_VOWELS, p_cover=0.0, jitter=0.0)
+    rng = np.random.default_rng(0)
+    q = np.array([draw(rng) for _ in range(4000)])
+    share_schwa = np.mean(np.all(np.isclose(q, T.PB_FIT_VOWELS["N"]), 1))
+    w = T.CONVERSATIONAL_VOWELS
+    assert share_schwa == pytest.approx(w["N"] / sum(w.values()), abs=0.02)
+    cover = T.vowel_q_sampler(T.CONVERSATIONAL_VOWELS, T.PB_FIT_VOWELS, p_cover=1.0)
+    qc = np.array([cover(rng) for _ in range(4000)])
+    assert np.allclose(qc.mean(0), q.mean(0), atol=0.1)  # coverage is centred on the population's centre
+
+
+def test_population_lengths_and_fixed_bandwidth_f0():
+    from vocal_analysis.synth.sampler import _population_length
+
+    rng = np.random.default_rng(1)
+    draws = [_population_length(rng) for _ in range(20000)]
+    L = np.array([d[0] for d in draws])
+    g = np.array([d[1] for d in draws])
+    assert np.mean(g == "cover") == pytest.approx(0.2, abs=0.01)
+    assert np.mean(L[g == "men"]) == pytest.approx(17.6, abs=0.05) and np.mean(L[g == "women"]) == pytest.approx(15.6, abs=0.05)
+    assert L.min() >= 10.3 and L.max() <= 22.3
+    cfg = SynthConfig(p_tube=0.0, p_length_from_f0=0.0, p_f1_band=0.0, bandwidth_f0_hz=132.0, vowel_dist="conversational",
+                      length_dist="population")
+    clip = generate(3, cfg, seed=5)
+    assert clip.meta["length_group"] in ("women", "men", "children", "cover")
+
+
+def test_group_vowel_targets_match_pb_and_interpolate_smoothly():
+    """D-022: women's and children's targets give PB Table II through the tube at their mean lengths (the open front
+    corner within 7 %), and interpolation between groups stays between their formants."""
+    from vocal_analysis.synth.tract import PB_CHILDREN, PB_WOMEN, pb_table_for_length
+
+    keys = ["i", "I", "E", "ae", "A", "O", "U", "u", "V"]
+    for L, table in ((15.6, PB_WOMEN), (12.95, PB_CHILDREN)):
+        rel = L / T.STORY_LENGTH_CM
+        for k, ref in zip(keys, table):
+            f, _ = T.poles(T.build_shape(*T.PB_FIT_VOWELS_BY_LENGTH[L][k], L, pharynx_ratio=rel ** 0.3, area_scale=rel ** 2))
+            tol = 0.07 if k in ("ae", "A", "u") else 0.03
+            assert f[0] == pytest.approx(ref[0], rel=tol) and f[1] == pytest.approx(ref[1], rel=max(tol, 0.08 if k == "u" else 0)), (L, k)
+    mid = T.vowel_centres(16.5)
+    assert all(min(a, b) - 1e-9 <= m <= max(a, b) + 1e-9 for k in mid
+               for m, a, b in zip(mid[k], T.PB_FIT_VOWELS_BY_LENGTH[15.6][k], T.PB_FIT_VOWELS[k]))
+    assert np.allclose(pb_table_for_length(15.6)[:9], PB_WOMEN) and np.allclose(pb_table_for_length(8.0)[0], PB_CHILDREN[0] * 12.95 / 8.0)

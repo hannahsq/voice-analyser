@@ -15,7 +15,19 @@ def test_targets_decode_back_to_value(hz):
     assert bool(valid[0]) and float(t.sum()) == pytest.approx(1.0)
     got, sigma = decode(t.numpy(), FORMANT_AXIS)
     assert 1200 * abs(np.log2(got[0] / hz)) < 2.0  # local mean recovers the value to within 2 cents
-    assert 25 < sigma[0] < 40  # target blur is 35 cents, truncated to +-80 cents
+    assert sigma[0] < 8.0  # a target-shaped prediction is certain: the 35-cent blur is removed
+
+
+def test_sigma_reports_broad_and_multimodal_distributions():
+    centres = FORMANT_AXIS.centres_hz
+    b = np.arange(FORMANT_AXIS.n_bins)
+    wide = np.exp(-0.5 * ((b - 150) * 20 / 150.0) ** 2)  # 150 cents
+    _, s = decode(wide, FORMANT_AXIS)
+    assert s == pytest.approx(np.sqrt(150**2 - 35**2), rel=0.03)
+    two = np.exp(-0.5 * ((b - 100) * 20 / 35.0) ** 2) + 0.9 * np.exp(-0.5 * ((b - 140) * 20 / 35.0) ** 2)
+    hz, s = decode(two, FORMANT_AXIS)
+    assert hz == pytest.approx(centres[100], rel=0.01)  # the larger mode
+    assert 500 < s < 650  # but 47 % of the mass is 800 cents away
 
 
 def test_targets_mask_out_of_range_and_missing():
@@ -159,3 +171,26 @@ def test_conformer_variant_matches_the_gru_teacher_outputs():
         assert a.keys() == b.keys() and all(a[k].shape == b[k].shape for k in a)
     n = lambda m: sum(p.numel() for p in m.parameters())  # noqa: E731
     assert abs(n(conf) / n(gru) - 1) < 0.1
+
+
+def test_schedulefree_training_saves_averaged_weights_and_resumes(tmp_path):
+    """Checkpoints hold schedule-free's evaluation weights; a resumed run continues from them (D-018)."""
+    pytest.importorskip("schedulefree")
+    import json
+    from dataclasses import replace
+
+    from vocal_analysis.models.teacher import TeacherConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.teacher import TrainConfig, train
+
+    data = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    cfg = TrainConfig(data=str(data), out=str(tmp_path / "run"), steps=4, batch=4, n_frames=50, workers=1, log_every=2,
+                      eval_every=2, ckpt_every=2, val_clips=4, optimizer="schedulefree", warmup=2)
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16)
+    out = train(cfg, small, log=lambda *a: None)
+    ck = torch.load(out / "ckpt_000004.pt", map_location="cpu", weights_only=False)
+    assert all(g["train_mode"] is False for g in ck["opt"]["param_groups"])  # saved in eval mode
+    train(replace(cfg, steps=6), small, log=lambda *a: None)
+    recs = [json.loads(line) for line in (out / "log.jsonl").read_text().splitlines()]
+    assert [r["step"] for r in recs if "eval" in r] == [2, 4, 6] and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)

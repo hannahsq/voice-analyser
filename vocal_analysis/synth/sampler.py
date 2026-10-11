@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field
 
 import numpy as np
 
-from . import tract, tube
+from . import coupling, tract, tube
 from .glottal import RD_MAX, RD_MIN, source_h_db
 from .voice import CTRL, FS, Trajectories, synthesize
 
@@ -30,6 +30,9 @@ class SynthConfig:
     length_f0_sd_cm: float = 1.5
     length_f0_cap_hz: float | None = 350.0  # above this f0 the coupled length stops shrinking (adult singers)
     length_redraw: bool = True
+    # When L is not drawn from f0: "uniform" over length_cm, or "population" (D-022: LENGTH_POPULATION, a mixture of
+    # adult women, adult men and children from imaging data plus a uniform coverage share; length_cm then unused)
+    length_dist: str = "uniform"
     p_high_f0: float = 0.45  # centre f0 log-uniform in high_f0_hz with this probability
     low_f0_hz: tuple[float, float] = (55.0, 400.0)
     high_f0_hz: tuple[float, float] = (300.0, 1300.0)
@@ -54,7 +57,15 @@ class SynthConfig:
     transition_s: tuple[float, float] = (0.03, 0.15)
     p_tube: float = 0.6  # per clip: Story area function + lossy tube (plan §5.1 preferred), else the resonator-cascade prior
     p_tube_constrict: float = 0.15  # per tube target: approximant-like tier II constriction
+    # Vowel targets: "box" (tube q1, q2 uniform over Story's box; cascade PB vowels equally likely) or "conversational"
+    # (D-022: by conversational vowel frequency around tube targets fitted to PB's men, women and children and
+    # interpolated by length, 30 % uniform coverage around their weighted centre; cascade: PB's per-group tables
+    # interpolated by length, with schwa, weighted the same way)
+    vowel_dist: str = "box"
     p_uniform_formants: float = 0.3
+    # Cascade bandwidths: Hawks & Miller's f0 scaling uses the clip's centre f0 (None), or this fixed f0, which keeps
+    # tract bandwidths independent of the source (D-020; 132 Hz is where the scaling is 1)
+    bandwidth_f0_hz: float | None = None
     # cascade clips with centre f0 in f1_band_f0_hz: per target, F1 = f0 x log-uniform(f1_band_ratio) with this probability
     p_f1_band: float = 0.3
     f1_band_f0_hz: tuple[float, float] = (150.0, 350.0)
@@ -68,6 +79,15 @@ class SynthConfig:
     p_vibrato: float = 0.8  # in singing contours
     # Hard-case hooks: None, "f1_near_h1", "f1_near_h2" (F1 within 10 % of f0 / 2 f0) or "f2_f3_close" (|F3 - F2| < 300 Hz)
     formant_constraint: str | None = None
+    # Glottal coupling within the cycle (D-023), per tube clip: F1-F5 and their bandwidths move towards their
+    # open-glottis values as the glottis opens (time-domain voiced path); labels stay the closed-glottis poles.
+    # Glottal sizes and the closed-phase gap from Holmberg et al. (1988) and Patel et al. (2026) (`coupling.sample_glottis`).
+    p_coupling: float = 0.0
+    glottal_peak_area_cm2: tuple[float, float] = (0.05, 0.22)  # at 17.5 cm; scaled by (length / 17.5)^2
+    glottal_gap_offset: tuple[float, float] = (-0.3, 0.1)  # closed-phase gap: follows the open quotient, shifted per clip
+    # per clip, every shift is multiplied by this: the model's open-glottis shifts are uncertain (D-023: its F2-F3
+    # shifts exceed what LPC studies find), and the labels don't depend on them, so the teacher sees the whole range
+    coupling_scale: tuple[float, float] = (0.0, 1.0)
 
 
 # How train_v1 and suite_v1 were generated, for fields added since (D-011, D-012). Pinning these
@@ -78,6 +98,32 @@ V1_SETTINGS = {
     "p_f1_band": 0.0, "f1_band_f0_hz": (150.0, 350.0), "f1_band_ratio": (1.5, 4.5),
     "p_whisper_clip": 0.0, "p_h_onset": 0.0, "h_amp": (1.5, 5.0), "sonorant_includes_whisper": False,
 }
+
+
+# D-022: vocal tract length population (cm). Adults: Story, Vorperian et al. (2018, JASA 143(5)), CT, ages 18-25:
+# men 17.6 (SD 0.89), women 15.6 (SD 1.14). Children: Vorperian et al.'s growth curve (same paper, Table I), ages 4-12,
+# 11.4-14.5 cm. Groups weighted 45 : 45 : 10 (balanced by sex, so ambiguous frames are not pulled towards either);
+# a 20 % coverage share is uniform over 12 cm centred on the groups' weighted mean (16.3 cm).
+LENGTH_POPULATION = {
+    "groups": (("women", 0.45, "normal", 15.6, 1.14), ("men", 0.45, "normal", 17.6, 0.89), ("children", 0.10, "uniform", 11.4, 14.5)),
+    "p_cover": 0.2, "cover_cm": (10.3, 22.3),
+}
+
+
+def _population_length(rng: np.random.Generator) -> tuple[float, str]:
+    pop = LENGTH_POPULATION
+    lo, hi = pop["cover_cm"]
+    if rng.random() < pop["p_cover"]:
+        return float(rng.uniform(lo, hi)), "cover"
+    w = np.array([g[1] for g in pop["groups"]])
+    group, _, kind, a, b = pop["groups"][rng.choice(len(w), p=w / w.sum())]
+    if kind == "uniform":
+        return float(rng.uniform(a, b)), group
+    for _ in range(100):  # redrawn into the coverage range (the tails are far inside it)
+        length = rng.normal(a, b)
+        if lo <= length <= hi:
+            return float(length), group
+    return float(np.clip(length, lo, hi)), group
 
 
 @dataclass
@@ -227,8 +273,11 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     rd = np.clip(rd, RD_MIN, RD_MAX)
     f0 = 2.0 ** log2f0
 
+    length_group = None
     if rng.random() < cfg.p_length_from_f0:
         length = _coupled_length(rng, cfg, centre)
+    elif cfg.length_dist == "population":
+        length, length_group = _population_length(rng)
     else:
         length = rng.uniform(*cfg.length_cm)
 
@@ -277,16 +326,24 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         pos += rng.uniform(*cfg.target_every_s) * 1000
         tt.append(pos)
     use_tube = cfg.p_tube > 0 and rng.random() < cfg.p_tube  # no draw at p_tube = 0, so cascade-only seeds reproduce
-    tube_info = None
+    tube_info, glottis, c_scale = None, None, None
     if use_tube:
         spk = tube.sample_speaker(rng, length)
-        drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict) for _ in tt]
+        # no draw at p_coupling = 0, so earlier sets reproduce
+        if cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
+            glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
+            c_scale = float(rng.uniform(*cfg.coupling_scale))
+        q_draw = tube.vowel_q_sampler(tube.CONVERSATIONAL_VOWELS, tube.vowel_centres(length)) if cfg.vowel_dist == "conversational" else None
+        drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw, glottis=glottis)
+                 for _ in tt]
         targets = np.array([d[0] for d in drawn])
         tube_bws = np.array([d[1] for d in drawn])
         tube_info = {"speaker": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in asdict(spk).items()},
-                     "targets": [d[2] for d in drawn]}
+                     "targets": [d[2] for d in drawn], "glottis": asdict(glottis) if glottis else None,
+                     "coupling_scale": c_scale}
     else:
-        targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster) for _ in tt])
+        targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster,
+                                                  conversational=cfg.vowel_dist == "conversational") for _ in tt])
         if cfg.p_f1_band > 0 and cfg.f1_band_f0_hz[0] <= centre <= cfg.f1_band_f0_hz[1]:
             f0_at = f0[np.clip(np.array(tt).astype(int), 0, n - 1)]
             targets = np.array([_constrain(rng, t, f, "f1_band", cfg.f1_band_ratio) if rng.random() < cfg.p_f1_band else t
@@ -301,7 +358,8 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     if use_tube:  # the tube's own bandwidths (constraints move only frequencies)
         bw_targets = tube_bws
     else:
-        bw_targets = np.stack([tract.sample_bandwidths(rng, np.exp(targets[i]), centre) for i in range(len(tt))])
+        bw_f0 = centre if cfg.bandwidth_f0_hz is None else cfg.bandwidth_f0_hz
+        bw_targets = np.stack([tract.sample_bandwidths(rng, np.exp(targets[i]), bw_f0) for i in range(len(tt))])
     logb = np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.log(np.nan_to_num(bw_targets[:, k], nan=100.0)), widths)
                      for k in range(tract.N_POLES)], 1)
     bws = np.where(np.isfinite(formants), np.exp(logb), np.nan)
@@ -317,9 +375,14 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         zeros_f=np.tile(extras["extra_zero_f"], (n, 1)).reshape(n, n_ez),
         zeros_b=np.tile(extras["extra_zero_b"], (n, 1)).reshape(n, n_ez),
     )
+    coupled = None
+    if glottis is not None:  # per-target open-glottis shifts, with the same transitions as the formants
+        steps = lambda key: np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.array([d[2][key][j] for d in drawn]), widths)  # noqa: E731
+                                      for j in range(coupling.N_COUPLED)], 1)
+        coupled = {"df": steps("open_df") * c_scale, "bm": 1.0 + (steps("open_bm") - 1.0) * c_scale, "gap_offset": glottis.gap_offset}
     jitter, shimmer = rng.uniform(*cfg.jitter), rng.uniform(*cfg.shimmer_db)
     hnr = None if cfg.hnr_db is None else rng.uniform(*cfg.hnr_db)
-    comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr)
+    comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled)
     audio = comps["total"]
     peak = np.max(np.abs(audio)) + 1e-12
     gain = 0.5 / peak
@@ -343,7 +406,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         "length_cm": np.full(len(fi), length),
     }
     meta = {
-        "index": index, "seed": seed, "fs": FS, "duration_s": len(audio) / FS, "length_cm": length,
+        "index": index, "seed": seed, "fs": FS, "duration_s": len(audio) / FS, "length_cm": length, "length_group": length_group,
         "contour": contour, "register_steps": register_steps, "segments": segments,
         "jitter": jitter, "shimmer_db": shimmer, "hnr_db": hnr, "gain": gain,
         "tract": "tube" if use_tube else "cascade", "tube": tube_info,

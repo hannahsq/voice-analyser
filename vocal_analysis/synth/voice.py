@@ -6,6 +6,11 @@ response, so the output is band-limited at any f0 and its harmonic amplitudes eq
 source x |H(k f0)| exactly on stationary, unperturbed settings. Jitter and shimmer are
 applied per glottal period.
 
+With glottal coupling (D-023, `synthesize(..., coupling=...)`), the voiced component is instead the same
+band-limited LF source rendered in the time domain and filtered by `filters.filter_tv`, with every coupled pole's
+frequency and bandwidth moving within each cycle towards its open-glottis value as the glottis opens (the harmonic
+path can't vary the tract within a period). Labels stay the closed-glottis poles.
+
 Noise components go through the same cascade in the time domain (`filters.filter_tv`):
 aspiration (modulated by glottal opening, level set by HNR), whisper (unmodulated, through
 the tract) and frication (high-passed, not through the tract). Noise sources are flow, so
@@ -121,12 +126,57 @@ def tract_filter(x: np.ndarray, traj: Trajectories, fs: float = FS) -> np.ndarra
     return filters.filter_tv(x, freqs, bws, fs, is_zero)
 
 
+def glottal_opening(cycles: np.ndarray, te_s: np.ndarray, gap: float | np.ndarray = 0.0) -> np.ndarray:
+    """Opening per sample as a fraction of the peak: sin^2 over the open phase (as the aspiration modulation), and
+    the residual gap (scalar or per sample) during the closed phase."""
+    frac = cycles % 1.0
+    return gap + (1.0 - gap) * np.where(frac < te_s, np.sin(np.pi * frac / te_s) ** 2, 0.0)
+
+
+def _open_phase_te(traj: Trajectories) -> np.ndarray:
+    from .glottal import open_phase
+
+    return _per_sample(np.array([open_phase(r) for r in np.round(traj.rd, 2)]))
+
+
+def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_max: int, fs: float) -> np.ndarray:
+    """The LF source alone (band-limited, as the harmonic path) through the tract in the time domain, poles moving
+    with the glottal opening: F(t) = F (1 + df a(t)), B(t) = B (1 + (bm - 1) a(t)). coupling: "df", "bm" (C, P) at
+    control points, P = the oral poles they cover (extra poles and zeros don't move); the closed-phase opening as a
+    fraction of the peak: "gap_offset" (follows the open quotient, `coupling.gap_from_open_quotient`) or a fixed
+    "gap" (default 0)."""
+    k = np.arange(1, k_max + 1)
+    fk = traj.f0[:, None] * k[None, :]
+    taper = np.clip((NYQ_TAPER_HZ[1] - fk) / (NYQ_TAPER_HZ[1] - NYQ_TAPER_HZ[0]), 0.0, 1.0)
+    amp = source_coefficients(traj.rd, k_max) * taper
+    kmax = np.minimum(np.ceil(NYQ_TAPER_HZ[1] / traj.f0).astype(np.int64), k_max)
+    src = _additive(cycles, np.abs(amp) * traj.voice_amp[:, None], np.unwrap(np.angle(amp), axis=0), kmax, CTRL)
+    te_s = _open_phase_te(traj)
+    if "gap_offset" in coupling:
+        from .coupling import gap_from_open_quotient
+
+        gap = gap_from_open_quotient(te_s, coupling["gap_offset"])
+    else:
+        gap = coupling.get("gap", 0.0)
+    a = glottal_opening(cycles, te_s, gap)
+    pf, pb = _sections_per_sample(traj.poles_f, traj.poles_b)
+    n_c = coupling["df"].shape[1]
+    df = np.stack([_per_sample(coupling["df"][:, j]) for j in range(n_c)])
+    bm = np.stack([_per_sample(coupling["bm"][:, j]) for j in range(n_c)])
+    pf[:n_c] = pf[:n_c] * (1.0 + df * a)
+    pb[:n_c] = pb[:n_c] * (1.0 + (bm - 1.0) * a)
+    zf, zb = _sections_per_sample(traj.zeros_f, traj.zeros_b)
+    is_zero = np.r_[np.zeros(len(pf), bool), np.ones(len(zf), bool)]
+    return filters.filter_tv(src, np.concatenate([pf, zf]), np.concatenate([pb, zb]), fs, is_zero)
+
+
 def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
-               hnr_db: float | None = None, fs: float = FS) -> dict[str, np.ndarray]:
+               hnr_db: float | None = None, fs: float = FS, coupling: dict | None = None) -> dict[str, np.ndarray]:
     """Render the components. Returns dict of float64 arrays (same length) and 'cycles' (glottal phase).
 
     jitter: SD of the per-period relative period perturbation; shimmer_db: SD of per-period amplitude (dB).
     hnr_db: voiced-to-aspiration energy ratio over voiced samples; None = no aspiration.
+    coupling: glottal coupling within the cycle (`_voiced_coupled`); None = the harmonic path.
     """
     n = traj.n_samples
     f0_s = _per_sample(traj.f0)
@@ -136,11 +186,14 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
     cycles, period = _glottal_phase(f0_s, jit, float(fs))
 
     k_max = int(min(256, np.ceil(NYQ_TAPER_HZ[1] / max(traj.f0.min(), 1.0))))
-    amp = harmonic_amplitudes(traj, k_max, fs)
-    kmax = np.minimum(np.ceil(NYQ_TAPER_HZ[1] / traj.f0).astype(np.int64), k_max)
-    mag = np.abs(amp) * traj.voice_amp[:, None]
-    phs = np.unwrap(np.angle(amp), axis=0)
-    voiced = _additive(cycles, mag, phs, kmax, CTRL) * shim[period]
+    if coupling is not None:
+        voiced = _voiced_coupled(traj, cycles, coupling, k_max, fs) * shim[period]
+    else:
+        amp = harmonic_amplitudes(traj, k_max, fs)
+        kmax = np.minimum(np.ceil(NYQ_TAPER_HZ[1] / traj.f0).astype(np.int64), k_max)
+        mag = np.abs(amp) * traj.voice_amp[:, None]
+        phs = np.unwrap(np.angle(amp), axis=0)
+        voiced = _additive(cycles, mag, phs, kmax, CTRL) * shim[period]
 
     out = {"voiced": voiced, "cycles": cycles}
     va = _per_sample(traj.voice_amp)

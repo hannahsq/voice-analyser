@@ -110,7 +110,9 @@ class ShardReader:
         self.root = Path(root)
         self.index = json.loads((self.root / "index.json").read_text(encoding="utf-8"))
         self.shards = sorted(self.root.glob("shard_*.npz"))
-        self.shard_size = self.index["shard_size"]
+        self.shard_size = self.index.get("shard_size")
+        # resynthesised sets hold a varying number of clips per shard and list the counts instead
+        self._starts = np.cumsum([0] + self.index["shard_clips"]) if "shard_clips" in self.index else None
         self._cache: dict[int, dict] = {}
         self.cache_shards = cache_shards
 
@@ -128,7 +130,13 @@ class ShardReader:
         return self._cache[s]
 
     def __getitem__(self, i: int) -> tuple[np.ndarray, dict, dict]:
-        s, j = divmod(i, self.shard_size)
+        if self._starts is None:
+            s, j = divmod(i, self.shard_size)
+        else:
+            if not 0 <= i < self._starts[-1]:
+                raise IndexError(i)
+            s = int(np.searchsorted(self._starts, i, side="right")) - 1
+            j = i - int(self._starts[s])
         d = self._shard(s)
         a0, a1 = d["audio_offsets"][j], d["audio_offsets"][j + 1]
         f0, f1 = d["frame_offsets"][j], d["frame_offsets"][j + 1]

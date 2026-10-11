@@ -15,7 +15,7 @@ def wav(path: Path, sr=16000, seconds=0.1, channels=1):
 
 
 def test_registry_lists_all_gold_sets():
-    assert set(registry()) == {"hillenbrand", "ptdb_tug", "mir1k", "mdb_stem_synth", "timit"}
+    assert set(registry()) == {"hillenbrand", "ptdb_tug", "mir1k", "mdb_stem_synth", "timit", "cmu_arctic"}
 
 
 def test_hillenbrand(tmp_path):

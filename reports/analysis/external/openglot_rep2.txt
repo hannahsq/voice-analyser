@@ -1,0 +1,105 @@
+OPENGLOT Repository II: 96 files. F1 minus calculated fR1 (Hz): median over vowels and f0, by sex and adduction
+  Male   adduction 0.03: praat F1  +242 (F2  +157)  v2_s0 F1   +10 (F2   +25)  mix_conformer_s2 F1   +24 (F2   +23)   [16 files]
+  Male   adduction 0.06: praat F1   +28 (F2   +43)  v2_s0 F1   +11 (F2   +22)  mix_conformer_s2 F1   +26 (F2   +22)   [16 files]
+  Male   adduction 0.09: praat F1   -12 (F2   -18)  v2_s0 F1   +22 (F2   +49)  mix_conformer_s2 F1   +40 (F2   +59)   [16 files]
+  Female adduction 0.05: praat F1   +42 (F2   +52)  v2_s0 F1   +28 (F2   +45)  mix_conformer_s2 F1   +58 (F2   +45)   [16 files]
+  Female adduction 0.07: praat F1   +27 (F2   +30)  v2_s0 F1   +22 (F2   +44)  mix_conformer_s2 F1   +63 (F2   +49)   [16 files]
+  Female adduction 0.09: praat F1   +17 (F2   +27)  v2_s0 F1   +60 (F2   +56)  mix_conformer_s2 F1   +87 (F2   +76)   [16 files]
+
+Per file (F1 error):
+  Female a   f0 175 add 0.09: praat   +41  v2_s0   +61  mix_conformer_s2   +33
+  Female a   f0 175 add 0.07: praat   +18  v2_s0   +23  mix_conformer_s2   +47
+  Female a   f0 175 add 0.05: praat   +25  v2_s0   +18  mix_conformer_s2   +29
+  Female a   f0 196 add 0.09: praat   +91  v2_s0   +66  mix_conformer_s2   +80
+  Female a   f0 196 add 0.07: praat   +27  v2_s0   +22  mix_conformer_s2   +46
+  Female a   f0 196 add 0.05: praat   +44  v2_s0   +31  mix_conformer_s2   +46
+  Female a   f0 220 add 0.09: praat   +65  v2_s0   +64  mix_conformer_s2   +92
+  Female a   f0 220 add 0.07: praat   +27  v2_s0   +22  mix_conformer_s2   +50
+  Female a   f0 220 add 0.05: praat   +40  v2_s0   +54  mix_conformer_s2   +55
+  Female a   f0 294 add 0.09: praat   +34  v2_s0   +56  mix_conformer_s2   +30
+  Female a   f0 294 add 0.07: praat   +59  v2_s0   +57  mix_conformer_s2  +126
+  Female a   f0 294 add 0.05: praat   +72  v2_s0   +98  mix_conformer_s2  +125
+  Female ae  f0 175 add 0.09: praat    -2  v2_s0   +36  mix_conformer_s2   +44
+  Female ae  f0 175 add 0.07: praat   +14  v2_s0    +0  mix_conformer_s2   +21
+  Female ae  f0 175 add 0.05: praat   +44  v2_s0    -0  mix_conformer_s2   +27
+  Female ae  f0 196 add 0.09: praat   +11  v2_s0   +31  mix_conformer_s2   +50
+  Female ae  f0 196 add 0.07: praat   +14  v2_s0   +19  mix_conformer_s2   +29
+  Female ae  f0 196 add 0.05: praat   +36  v2_s0   +29  mix_conformer_s2   +27
+  Female ae  f0 220 add 0.09: praat   +39  v2_s0   +38  mix_conformer_s2   +27
+  Female ae  f0 220 add 0.07: praat   +61  v2_s0   +37  mix_conformer_s2   +49
+  Female ae  f0 220 add 0.05: praat   +80  v2_s0   +38  mix_conformer_s2   +45
+  Female ae  f0 294 add 0.09: praat   +66  v2_s0   +43  mix_conformer_s2   +53
+  Female ae  f0 294 add 0.07: praat   +70  v2_s0    -4  mix_conformer_s2   +35
+  Female ae  f0 294 add 0.05: praat   +90  v2_s0   -10  mix_conformer_s2   -21
+  Female i   f0 175 add 0.09: praat   -13  v2_s0   +55  mix_conformer_s2  +130
+  Female i   f0 175 add 0.07: praat    +0  v2_s0   +12  mix_conformer_s2  +206
+  Female i   f0 175 add 0.05: praat   +11  v2_s0   -30  mix_conformer_s2   +60
+  Female i   f0 196 add 0.09: praat    +0  v2_s0   +75  mix_conformer_s2   +86
+  Female i   f0 196 add 0.07: praat   +19  v2_s0   +12  mix_conformer_s2   +60
+  Female i   f0 196 add 0.05: praat   +34  v2_s0    -1  mix_conformer_s2   +61
+  Female i   f0 220 add 0.09: praat   +17  v2_s0   +76  mix_conformer_s2  +131
+  Female i   f0 220 add 0.07: praat   +52  v2_s0   +26  mix_conformer_s2  +125
+  Female i   f0 220 add 0.05: praat   +84  v2_s0   +26  mix_conformer_s2  +126
+  Female i   f0 294 add 0.09: praat    +1  v2_s0  +113  mix_conformer_s2  +303
+  Female i   f0 294 add 0.07: praat   +27  v2_s0   +21  mix_conformer_s2  +126
+  Female i   f0 294 add 0.05: praat   +37  v2_s0   +20  mix_conformer_s2  +125
+  Female u   f0 175 add 0.09: praat    -0  v2_s0   +40  mix_conformer_s2   +91
+  Female u   f0 175 add 0.07: praat   +14  v2_s0   +28  mix_conformer_s2  +199
+  Female u   f0 175 add 0.05: praat   +29  v2_s0   +14  mix_conformer_s2   +51
+  Female u   f0 196 add 0.09: praat    +3  v2_s0   +60  mix_conformer_s2   +88
+  Female u   f0 196 add 0.07: praat    +9  v2_s0   +34  mix_conformer_s2   +66
+  Female u   f0 196 add 0.05: praat   +24  v2_s0   +30  mix_conformer_s2   +82
+  Female u   f0 220 add 0.09: praat   +17  v2_s0   +62  mix_conformer_s2   +90
+  Female u   f0 220 add 0.07: praat   +38  v2_s0   +50  mix_conformer_s2   +66
+  Female u   f0 220 add 0.05: praat   +46  v2_s0   +49  mix_conformer_s2   +82
+  Female u   f0 294 add 0.09: praat   +67  v2_s0   +61  mix_conformer_s2  +246
+  Female u   f0 294 add 0.07: praat   +95  v2_s0   +61  mix_conformer_s2  +113
+  Female u   f0 294 add 0.05: praat  +126  v2_s0   +62  mix_conformer_s2   +79
+  Male   a   f0 110 add 0.09: praat   -47  v2_s0   +22  mix_conformer_s2    +6
+  Male   a   f0 110 add 0.06: praat   +22  v2_s0   +10  mix_conformer_s2   +16
+  Male   a   f0 110 add 0.03: praat  +113  v2_s0   +10  mix_conformer_s2    -1
+  Male   a   f0 156 add 0.09: praat    -6  v2_s0   +53  mix_conformer_s2   +64
+  Male   a   f0 156 add 0.06: praat   +50  v2_s0   +21  mix_conformer_s2   +22
+  Male   a   f0 156 add 0.03: praat  +139  v2_s0   +15  mix_conformer_s2   +25
+  Male   a   f0 220 add 0.09: praat   +68  v2_s0   +66  mix_conformer_s2  +122
+  Male   a   f0 220 add 0.06: praat  +147  v2_s0   +65  mix_conformer_s2  +126
+  Male   a   f0 220 add 0.03: praat  +259  v2_s0   +40  mix_conformer_s2   +85
+  Male   a   f0  82 add 0.09: praat   -79  v2_s0   +21  mix_conformer_s2    +3
+  Male   a   f0  82 add 0.06: praat   +12  v2_s0    +9  mix_conformer_s2    +7
+  Male   a   f0  82 add 0.03: praat   +69  v2_s0    +1  mix_conformer_s2    +3
+  Male   ae  f0 110 add 0.09: praat   -16  v2_s0   +13  mix_conformer_s2   +12
+  Male   ae  f0 110 add 0.06: praat   +33  v2_s0   +17  mix_conformer_s2    +9
+  Male   ae  f0 110 add 0.03: praat  +111  v2_s0    +9  mix_conformer_s2    +2
+  Male   ae  f0 156 add 0.09: praat    +6  v2_s0   +22  mix_conformer_s2   +33
+  Male   ae  f0 156 add 0.06: praat   +62  v2_s0    +7  mix_conformer_s2   +21
+  Male   ae  f0 156 add 0.03: praat  +226  v2_s0   +11  mix_conformer_s2   +22
+  Male   ae  f0 220 add 0.09: praat   +28  v2_s0   +52  mix_conformer_s2   +37
+  Male   ae  f0 220 add 0.06: praat  +129  v2_s0   +27  mix_conformer_s2   +21
+  Male   ae  f0 220 add 0.03: praat  +464  v2_s0   -46  mix_conformer_s2   +15
+  Male   ae  f0  82 add 0.09: praat   -35  v2_s0    +8  mix_conformer_s2    +9
+  Male   ae  f0  82 add 0.06: praat    +2  v2_s0    +4  mix_conformer_s2    +8
+  Male   ae  f0  82 add 0.03: praat   +39  v2_s0    +4  mix_conformer_s2   +10
+  Male   i   f0 110 add 0.09: praat   -27  v2_s0   +21  mix_conformer_s2   +47
+  Male   i   f0 110 add 0.06: praat   +18  v2_s0    +4  mix_conformer_s2   +95
+  Male   i   f0 110 add 0.03: praat +1956  v2_s0    -8  mix_conformer_s2   -22
+  Male   i   f0 156 add 0.09: praat    -9  v2_s0   +21  mix_conformer_s2   +47
+  Male   i   f0 156 add 0.06: praat   -17  v2_s0    -4  mix_conformer_s2   +33
+  Male   i   f0 156 add 0.03: praat +1923  v2_s0   -15  mix_conformer_s2   +18
+  Male   i   f0 220 add 0.09: praat    +2  v2_s0   +22  mix_conformer_s2  +167
+  Male   i   f0 220 add 0.06: praat +1949  v2_s0   +13  mix_conformer_s2  +104
+  Male   i   f0 220 add 0.03: praat +1886  v2_s0   +12  mix_conformer_s2   +94
+  Male   i   f0  82 add 0.09: praat   -47  v2_s0    +4  mix_conformer_s2    +3
+  Male   i   f0  82 add 0.06: praat    -4  v2_s0   +19  mix_conformer_s2   +29
+  Male   i   f0  82 add 0.03: praat   +11  v2_s0   +13  mix_conformer_s2   +47
+  Male   u   f0 110 add 0.09: praat   -17  v2_s0   +28  mix_conformer_s2   +42
+  Male   u   f0 110 add 0.06: praat   +36  v2_s0   +11  mix_conformer_s2   +77
+  Male   u   f0 110 add 0.03: praat  +463  v2_s0  +805  mix_conformer_s2  +763
+  Male   u   f0 156 add 0.09: praat    +8  v2_s0   +48  mix_conformer_s2  +161
+  Male   u   f0 156 add 0.06: praat   +27  v2_s0   -10  mix_conformer_s2  +807
+  Male   u   f0 156 add 0.03: praat  +692  v2_s0   -26  mix_conformer_s2  +826
+  Male   u   f0 220 add 0.09: praat   +33  v2_s0   +72  mix_conformer_s2  +792
+  Male   u   f0 220 add 0.06: praat   +29  v2_s0  +800  mix_conformer_s2  +787
+  Male   u   f0 220 add 0.03: praat  +752  v2_s0  +806  mix_conformer_s2  +790
+  Male   u   f0  82 add 0.09: praat   -42  v2_s0    +2  mix_conformer_s2   +19
+  Male   u   f0  82 add 0.06: praat    -1  v2_s0   +11  mix_conformer_s2   +20
+  Male   u   f0  82 add 0.03: praat   +30  v2_s0   +23  mix_conformer_s2   +42

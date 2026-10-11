@@ -1,0 +1,19 @@
+OPENGLOT Repository III (loudspeaker + 3D-printed tracts, no coupling): 287 files. F1 minus the replica's measured fR1 (Hz), median over replicas and f0 in the band
+fR1 (Hz): Female_A 951, Female_E 558, Female_I 374, Male_A 666, Male_AE 573, Male_I 310, Male_U 388
+  Male   f0 100-150: praat   -34  v2_s0    -2  mix_conformer_s2    +2   [24 files]
+  Male   f0 160-250: praat   -17  v2_s0    +9  mix_conformer_s2   +16   [40 files]
+  Male   f0 260-350: praat    -1  v2_s0   +42  mix_conformer_s2   +96   [40 files]
+  Male   f0 360-500: praat   +64  v2_s0   +56  mix_conformer_s2    +3   [60 files]
+  Female f0 100-150: praat   -15  v2_s0   +12  mix_conformer_s2    +4   [18 files]
+  Female f0 160-250: praat   -16  v2_s0    -3  mix_conformer_s2   -15   [30 files]
+  Female f0 260-350: praat    -0  v2_s0   +15  mix_conformer_s2   -44   [30 files]
+  Female f0 360-500: praat    +5  v2_s0   -43  mix_conformer_s2  -151   [45 files]
+
+Per replica, f0 100-300 Hz:
+  Female_A   fR1  951: praat   -60  v2_s0   -90  mix_conformer_s2   +58
+  Female_E   fR1  558: praat   -15  v2_s0   -11  mix_conformer_s2   -46
+  Female_I   fR1  374: praat    +9  v2_s0   +46  mix_conformer_s2   +16
+  Male_A     fR1  666: praat   -36  v2_s0   -17  mix_conformer_s2  +246
+  Male_AE    fR1  573: praat   -55  v2_s0   -13  mix_conformer_s2   -19
+  Male_I     fR1  310: praat   -20  v2_s0   +43  mix_conformer_s2   +67
+  Male_U     fR1  388: praat    +2  v2_s0   +35  mix_conformer_s2   +12

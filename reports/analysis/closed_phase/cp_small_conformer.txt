@@ -1,0 +1,62 @@
+
+arctic_egg: 8896 frames. F1 vs closed phase: median signed (median |err|); by cp F1 <450 / 450-650 / >650
+  bdl (2556 frames, cp F1 median 398)
+    v2_s0   +6.8 (22.4)     +3 /  +16 /   -3
+    v2_s1  +16.6 (24.3)    +18 /  +19 /   -8
+    v2_s2   +6.6 (23.1)     +2 /  +17 /   -5
+    conf_v2_s0  -2.7 (20.3)     -8 /  +10 /   -3
+      close (iy ih uw uh)  n   856: v2_s0   +5  v2_s1  +16  v2_s2   +5  conf_v2_s0   -2
+      mid (eh ah er ao)    n  1103: v2_s0  +10  v2_s1  +18  v2_s2  +10  conf_v2_s0   -0
+      open (ae aa)         n   597: v2_s0   +3  v2_s1  +15  v2_s2   +5  conf_v2_s0   -7
+  jmk (1919 frames, cp F1 median 360)
+    v2_s0  +29.1 (44.1)    +34 /  +21 /   -4
+    v2_s1  +44.1 (50.0)    +50 /  +30 /   +4
+    v2_s2  +39.5 (46.9)    +42 /  +33 /   -6
+    conf_v2_s0 +30.7 (41.6)    +33 /  +27 /  -13
+      close (iy ih uw uh)  n   714: v2_s0  +32  v2_s1  +46  v2_s2  +40  conf_v2_s0  +34
+      mid (eh ah er ao)    n   754: v2_s0  +29  v2_s1  +40  v2_s2  +42  conf_v2_s0  +31
+      open (ae aa)         n   451: v2_s0  +22  v2_s1  +47  v2_s2  +30  conf_v2_s0  +24
+  slt (4421 frames, cp F1 median 667)
+    v2_s0   +9.5 (30.8)    +54 /  +16 /  -10
+    v2_s1   +1.2 (36.6)    +63 /  +17 /  -27
+    v2_s2   +3.3 (31.2)    +50 /  +13 /  -17
+    conf_v2_s0  +4.6 (32.9)    +52 /  +16 /  -18
+      close (iy ih uw uh)  n  1558: v2_s0  +30  v2_s1  +37  v2_s2  +24  conf_v2_s0  +30
+      mid (eh ah er ao)    n  1861: v2_s0   +4  v2_s1  -10  v2_s2   -5  conf_v2_s0   -3
+      open (ae aa)         n  1002: v2_s0   -8  v2_s1  -23  v2_s2   -9  conf_v2_s0  -13
+
+ptdb_egg: 13831 frames. F1 vs closed phase: median signed (median |err|); by cp F1 <450 / 450-650 / >650
+  f (7018 frames, cp F1 median 549)
+    v2_s0  +21.4 (40.7)    +40 /  +18 /   +4
+    v2_s1  +39.3 (49.7)    +58 /  +45 /   +8
+    v2_s2  +31.9 (44.9)    +42 /  +34 /  +17
+    conf_v2_s0 +23.9 (41.3)    +30 /  +30 /   +5
+    conf_v2_s0 - v2_s0 bias          +2.5 [-0.5, +7.8]
+    conf_v2_s0 - v2_s1 bias         -14.8 [-16.2, -12.2]
+    conf_v2_s0 - v2_s2 bias          -8.5 [-10.5, -3.5]
+    conf_v2_s0 - v2_s0 |err|         -0.0 [-2.8, +4.9]
+    conf_v2_s0 - v2_s1 |err|         -7.9 [-11.7, -4.3]
+    conf_v2_s0 - v2_s2 |err|         -3.0 [-5.8, -1.1]
+    conf_v2_s0 - v2_s0 low-F1 bias   -8.9 [-23.0, -0.6]
+    conf_v2_s0 - v2_s1 low-F1 bias  -29.5 [-40.4, -16.5]
+    conf_v2_s0 - v2_s2 low-F1 bias   -8.0 [-27.7, -5.2]
+    conf_v2_s0 - v2_s0 high-F1 bias  -1.9 [-10.3, +10.6]
+    conf_v2_s0 - v2_s1 high-F1 bias  -5.4 [-17.0, +5.2]
+    conf_v2_s0 - v2_s2 high-F1 bias -21.4 [-24.0, -6.6]
+  m (6813 frames, cp F1 median 456)
+    v2_s0  +16.9 (26.2)    +18 /  +16 /  +15
+    v2_s1  +39.0 (41.2)    +34 /  +46 /  +32
+    v2_s2  +29.9 (33.6)    +29 /  +34 /  +22
+    conf_v2_s0 +16.7 (24.8)    +12 /  +23 /  +18
+    conf_v2_s0 - v2_s0 bias          +0.3 [-0.3, +2.7]
+    conf_v2_s0 - v2_s1 bias         -20.8 [-25.8, -18.6]
+    conf_v2_s0 - v2_s2 bias         -13.0 [-16.9, -10.0]
+    conf_v2_s0 - v2_s0 |err|         -1.5 [-2.4, +0.1]
+    conf_v2_s0 - v2_s1 |err|        -15.2 [-18.3, -14.2]
+    conf_v2_s0 - v2_s2 |err|         -8.1 [-11.7, -6.7]
+    conf_v2_s0 - v2_s0 low-F1 bias   -3.9 [-9.8, -0.5]
+    conf_v2_s0 - v2_s1 low-F1 bias  -20.3 [-30.8, -18.0]
+    conf_v2_s0 - v2_s2 low-F1 bias  -15.6 [-20.4, -14.3]
+    conf_v2_s0 - v2_s0 high-F1 bias  +6.1 [+0.8, +16.0]
+    conf_v2_s0 - v2_s1 high-F1 bias -10.1 [-27.1, +1.5]
+    conf_v2_s0 - v2_s2 high-F1 bias  -2.0 [-9.1, +6.6]
