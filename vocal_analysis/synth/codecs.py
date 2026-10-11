@@ -205,7 +205,7 @@ def _roundtrip_executable(x: np.ndarray, codec: str, kbps: float) -> np.ndarray:
 
 def _roundtrip(x: np.ndarray, codec: str, kbps: float, in_process: bool | None = None, stream: bool | None = None) -> np.ndarray:
     """in_process: None = PyAV where it has the codec (unless $VA_CODECS_IN_PROCESS=0), else the ffmpeg executable,
-    through a long-lived stream (stream None: unless $VA_CODECS_STREAM=0) or a process per call."""
+    through a long-lived stream (stream None: AMR if $VA_CODECS_STREAM=1) or a process per call."""
     if in_process is None:
         in_process = codec in IN_PROCESS and _av() is not None and os.environ.get("VA_CODECS_IN_PROCESS", "1") != "0"
     if in_process:
