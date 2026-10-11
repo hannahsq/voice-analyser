@@ -1,0 +1,144 @@
+{
+ "format_version": 1,
+ "n_clips": 100000,
+ "shard_size": 256,
+ "seed": 2,
+ "synth_config": {
+  "duration_s": [
+   2.0,
+   4.0
+  ],
+  "hop_s": 0.01,
+  "length_cm": [
+   10.0,
+   20.0
+  ],
+  "p_length_from_f0": 0.5,
+  "length_f0_slope_cm": 2.5,
+  "length_f0_sd_cm": 1.5,
+  "length_f0_cap_hz": 350.0,
+  "length_redraw": true,
+  "length_dist": "uniform",
+  "p_high_f0": 0.45,
+  "low_f0_hz": [
+   55.0,
+   400.0
+  ],
+  "high_f0_hz": [
+   300.0,
+   1300.0
+  ],
+  "f0_limits_hz": [
+   50.0,
+   1600.0
+  ],
+  "rd": [
+   0.3,
+   2.7
+  ],
+  "rd_wander_sd": [
+   0.0,
+   0.25
+  ],
+  "loudness_sd_db": [
+   0.0,
+   3.0
+  ],
+  "jitter": [
+   0.0,
+   0.02
+  ],
+  "shimmer_db": [
+   0.0,
+   1.0
+  ],
+  "hnr_db": [
+   5.0,
+   40.0
+  ],
+  "vibrato_rate_hz": [
+   4.0,
+   8.0
+  ],
+  "vibrato_extent_cents": [
+   40.0,
+   100.0
+  ],
+  "p_vibrato_wide": 0.3,
+  "voiced_seg_s": [
+   0.3,
+   2.0
+  ],
+  "gap_s": [
+   0.05,
+   0.5
+  ],
+  "gap_kinds": {
+   "silence": 0.5,
+   "whisper": 0.25,
+   "frication": 0.25
+  },
+  "p_whisper_clip": 0.06,
+  "p_h_onset": 0.25,
+  "h_amp": [
+   1.5,
+   5.0
+  ],
+  "sonorant_includes_whisper": true,
+  "target_every_s": [
+   0.08,
+   0.4
+  ],
+  "transition_s": [
+   0.03,
+   0.15
+  ],
+  "p_tube": 0.6,
+  "p_tube_constrict": 0.15,
+  "vowel_dist": "box",
+  "p_uniform_formants": 0.3,
+  "bandwidth_f0_hz": null,
+  "p_f1_band": 0.3,
+  "f1_band_f0_hz": [
+   150.0,
+   350.0
+  ],
+  "f1_band_ratio": [
+   1.5,
+   4.5
+  ],
+  "p_cluster": 0.1,
+  "p_nasal": 0.15,
+  "p_subglottal": 0.2,
+  "contour_probs_low": {
+   "speech": 0.5,
+   "singing": 0.3,
+   "glide": 0.2
+  },
+  "contour_probs_high": {
+   "singing": 0.7,
+   "glide": 0.2,
+   "speech": 0.1
+  },
+  "p_register_step": 0.15,
+  "p_vibrato": 0.8,
+  "formant_constraint": null,
+  "p_coupling": 1.0,
+  "glottal_peak_area_cm2": [
+   0.05,
+   0.22
+  ],
+  "glottal_gap_offset": [
+   -0.3,
+   0.1
+  ],
+  "coupling_scale": [
+   0.0,
+   1.0
+  ]
+ },
+ "channel_config": null,
+ "channel_seed": 0,
+ "note": "train_v2 + glottal coupling on every tube clip (D-023 / D-024 test)",
+ "git_commit": "e76365d"
+}
