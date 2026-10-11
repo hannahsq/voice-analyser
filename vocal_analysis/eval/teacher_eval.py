@@ -48,8 +48,10 @@ def _analyse(path: str, x: np.ndarray, sr: int) -> dict:
 
 
 def teacher_baselines(ckpt: str | Path, name: str = "teacher") -> tuple[FormantBaseline, F0Baseline]:
+    from ..models.infer import eval_bf16
+
     ckpt = str(ckpt)
-    version = _ckpt_id(ckpt)
+    version = _ckpt_id(ckpt) + ("" if eval_bf16() else "-fp32")  # cached predictions are kept apart by precision
     step = _model(ckpt)[2].get("step", "?")
 
     def formants(x, sr, times, meta):

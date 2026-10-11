@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+import os
 from pathlib import Path
 
 import numpy as np
@@ -42,14 +43,20 @@ def _vqt(device) -> TorchVQT:
     return TorchVQT(device)
 
 
+def eval_bf16() -> bool:
+    """Measures run in fp32 unless $VA_EVAL_BF16=1. bf16 (autocast, as before 2026-10-11) moved the median closed-phase
+    F1 bias by about 1.7 Hz against fp32, and on this GPU it is no faster for these models."""
+    return os.environ.get("VA_EVAL_BF16") == "1"
+
+
 def analyse(model, audio: np.ndarray, device, sr: int = 16000) -> dict[str, np.ndarray]:
-    """Whole-file offline analysis; frame i at t = i * 10 ms."""
+    """Whole-file offline analysis; frame i at t = i * 10 ms. fp32 unless $VA_EVAL_BF16=1 (`eval_bf16`)."""
     import torch
 
     assert sr == 16000
     vq = _vqt(device)
     n_frames = len(audio) // HOP + 1
-    with torch.inference_mode(), torch.autocast(device.type, dtype=torch.bfloat16, enabled=device.type == "cuda"):
+    with torch.inference_mode(), torch.autocast(device.type, dtype=torch.bfloat16, enabled=device.type == "cuda" and eval_bf16()):
         x = torch.from_numpy(np.ascontiguousarray(audio, np.float32))[None].to(device)
         out = model(vq.log_power(x, n_frames))
     res = decode_outputs({k: v[0].float().cpu().numpy() for k, v in out.items()})
