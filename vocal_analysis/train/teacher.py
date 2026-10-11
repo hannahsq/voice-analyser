@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import subprocess
 import time
 from dataclasses import asdict, dataclass, field, replace
@@ -171,6 +172,23 @@ def evaluate(model, batches, device) -> dict:
     return res
 
 
+def _raise_priority(log) -> None:
+    """$VA_PRIORITY=above_normal: the training process (whose thread queues the GPU work) above normal priority on
+    Windows. Loader workers start at normal priority: Windows gives new processes normal priority unless the parent
+    is below normal."""
+    if os.environ.get("VA_PRIORITY") != "above_normal" or os.name != "nt":
+        return
+    import ctypes
+
+    k32 = ctypes.windll.kernel32
+    k32.GetCurrentProcess.restype = ctypes.c_void_p  # a 64-bit pseudo-handle; ctypes' default int truncates it
+    k32.SetPriorityClass.argtypes = (ctypes.c_void_p, ctypes.c_uint32)
+    if k32.SetPriorityClass(k32.GetCurrentProcess(), 0x8000):  # ABOVE_NORMAL_PRIORITY_CLASS
+        log("teacher: process priority above normal")
+    else:
+        log(f"teacher: could not raise the process priority (error {k32.GetLastError()})")
+
+
 def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -> Path:
     import torch
     from torch.utils.data import DataLoader
@@ -178,6 +196,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     from ..device import setup_device
     from ..features.vqt import TorchVQT
 
+    _raise_priority(log)
     device = setup_device()
     torch.manual_seed(cfg.seed)
     out = Path(cfg.out)
