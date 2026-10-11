@@ -3,8 +3,14 @@
 Each call encodes and decodes in memory. Opus, AAC and MP3 go through ffmpeg's libraries in-process (PyAV):
 about 20 ms per clip, where starting two ffmpeg processes costs about 330 ms and serialises across data-loader
 workers on Windows (training was loader-bound at about 60 s of audio per second). PyAV's wheels have no AMR
-encoders, so AMR still runs through the ffmpeg executable (raw float32 over pipes). AAC and MP3 are bit-identical
-either way; Opus voip mode differs between the two builds' libopus versions (same codec and settings). Codecs add
+encoders, so AMR runs through the ffmpeg executable (raw float32 over pipes), encoding and decoding in one process
+with ffmpeg's loopback decoder (`-dec`). Each loader process keeps one long-lived ffmpeg per AMR bitrate and streams
+clips through it, separated by silence (`AmrStream`): a few ms per clip, against about 270 ms per process launch,
+and launches serialise on Windows. A clip's output then depends on the codec state the previous clip left and on
+where the 20 ms frame grid falls, as in a continuous call; the first clip of a stream is bit-identical to a one-shot
+call, and a stream's delay equals the one-shot delay. $VA_CODECS_STREAM=1 turns streams on (default off for now).
+AAC and MP3 are bit-identical either way; Opus voip mode differs between the two builds' libopus versions (same
+codec and settings). Codecs add
 delay (encoder priming, filter banks), so each (codec, bitrate) is calibrated once per process by
 cross-correlating a fixed probe signal, and the decoded audio is shifted back by that many samples and
 trimmed to the input length. Frame labels therefore stay aligned (tests/test_codecs.py checks to 1 sample).
@@ -16,6 +22,7 @@ import functools
 import os
 import shutil
 import subprocess
+import threading
 from pathlib import Path
 
 import numpy as np
@@ -103,17 +110,109 @@ def _roundtrip_in_process(x: np.ndarray, codec: str, kbps: float) -> np.ndarray:
     return np.concatenate(ys) if ys else np.zeros(0, np.float32)
 
 
-def _roundtrip(x: np.ndarray, codec: str, kbps: float, in_process: bool | None = None) -> np.ndarray:
-    """in_process: None = PyAV where it has the codec (unless $VA_CODECS_IN_PROCESS=0), else the ffmpeg executable."""
-    if in_process is None:
-        in_process = codec in IN_PROCESS and _av() is not None and os.environ.get("VA_CODECS_IN_PROCESS", "1") != "0"
-    if in_process:
-        return _roundtrip_in_process(x, codec, kbps)
+STREAMED = ("amr_wb", "amr_nb")  # codecs PyAV can't run: through long-lived ffmpeg streams
+LEAD = 512  # samples of silence ahead of each clip in the executable path: AMR-NB's loopback output leads its input
+
+
+def _loopback_args(codec: str, kbps: float) -> list[str]:
+    """ffmpeg arguments: float32 in, encode, decode the encoded stream again in the same process, float32 out."""
+    enc, _, _, rate = CODECS[codec]
+    raw = ["-f", "f32le", "-ar", str(FS), "-ac", "1"]
+    return [*raw, "-i", "pipe:0", "-map", "0:a", "-ar", str(rate), *enc, "-b:a", f"{int(round(kbps * 1000))}", "-f", "null", "-",
+            "-dec", "0:0", "-filter_complex", f"[dec:0]aresample={FS},asetpts=N/SR/TB[o]", "-map", "[o]",
+            "-flush_packets", "1", *raw, "pipe:1"]
+
+
+class AmrStream:
+    """One long-lived ffmpeg (`_loopback_args`) per codec and bitrate. Each clip is written followed by `gap` samples of
+    silence; output is read on a thread (so neither pipe fills) and cut out at the clip's position in the stream,
+    with LEAD samples of the silence before it, the same layout as a one-shot call."""
+
+    def __init__(self, codec: str, kbps: float, gap: int = 4800):
+        exe = ffmpeg_path()
+        if exe is None:
+            raise FileNotFoundError("ffmpeg not found: install it (winget install ffmpeg) or set VA_FFMPEG")
+        self.proc = subprocess.Popen([exe, "-hide_banner", "-loglevel", "quiet", *_loopback_args(codec, kbps)],
+                                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        self.gap, self.buf, self.base, self.pos = gap, bytearray(), 0, 0  # base: stream sample at buf[0]; pos: written
+        self.cv = threading.Condition()
+        threading.Thread(target=self._read, daemon=True).start()
+        self._write(np.zeros(LEAD, np.float32))
+
+    def _read(self):
+        while chunk := self.proc.stdout.read1(1 << 16):
+            with self.cv:
+                self.buf += chunk
+                self.cv.notify_all()
+        with self.cv:
+            self.cv.notify_all()
+
+    def _write(self, x: np.ndarray):
+        self.proc.stdin.write(np.ascontiguousarray(x, np.float32).tobytes())
+        self.proc.stdin.flush()
+        self.pos += len(x)
+
+    def roundtrip(self, x: np.ndarray, timeout: float = 20.0) -> np.ndarray:
+        start = self.pos
+        self._write(np.concatenate([np.asarray(x, np.float32), np.zeros(self.gap, np.float32)]))
+        lo, hi, ready = start - LEAD - self.base, start + len(x) - self.base, start + len(x) + self.gap // 2 - self.base
+        with self.cv:
+            if not self.cv.wait_for(lambda: len(self.buf) >= 4 * ready or self.proc.poll() is not None, timeout)                     or len(self.buf) < 4 * ready:
+                raise TimeoutError(f"AMR stream: {len(self.buf) // 4} of {ready} samples after {timeout:.0f} s")
+            y = np.frombuffer(bytes(self.buf[4 * lo : 4 * hi]), np.float32).copy()
+            del self.buf[: 4 * hi]
+            self.base += hi
+        return y
+
+    def close(self):
+        try:
+            self.proc.stdin.close()
+            self.proc.wait(5)
+        except Exception:
+            self.proc.kill()
+
+
+_streams: dict[tuple[str, float], AmrStream] = {}
+
+
+def _roundtrip_stream(x: np.ndarray, codec: str, kbps: float) -> np.ndarray:
+    """Through this process's stream for (codec, kbps); a failed stream is dropped and the clip goes one-shot."""
+    key = (codec, float(kbps))
+    try:
+        if key not in _streams:
+            _streams[key] = AmrStream(codec, kbps)
+        return _streams[key].roundtrip(x)
+    except (OSError, TimeoutError, ValueError):
+        st = _streams.pop(key, None)
+        if st is not None:
+            st.close()
+        return _roundtrip_executable(x, codec, kbps)
+
+
+def _roundtrip_executable(x: np.ndarray, codec: str, kbps: float) -> np.ndarray:
+    """AMR: one process per call (loopback), LEAD samples of silence ahead of x, as in a stream. Others (only used
+    without PyAV): encode and decode in two processes, through the container format."""
+    if codec in STREAMED:
+        data = np.concatenate([np.zeros(LEAD, np.float32), np.asarray(x, np.float32)])
+        return np.frombuffer(_run(_loopback_args(codec, kbps), data.tobytes()), np.float32)
     enc, fmt, _, rate = CODECS[codec]
     raw = ["-f", "f32le", "-ar", str(FS), "-ac", "1"]
     coded = _run([*raw, "-i", "pipe:0", "-ar", str(rate), *enc, "-b:a", f"{int(round(kbps * 1000))}", "-f", fmt, "pipe:1"],
                  np.ascontiguousarray(x, np.float32).tobytes())
     return np.frombuffer(_run(["-f", DEMUXER.get(fmt, fmt), "-i", "pipe:0", *raw, "pipe:1"], coded), np.float32)
+
+
+def _roundtrip(x: np.ndarray, codec: str, kbps: float, in_process: bool | None = None, stream: bool | None = None) -> np.ndarray:
+    """in_process: None = PyAV where it has the codec (unless $VA_CODECS_IN_PROCESS=0), else the ffmpeg executable,
+    through a long-lived stream (stream None: unless $VA_CODECS_STREAM=0) or a process per call."""
+    if in_process is None:
+        in_process = codec in IN_PROCESS and _av() is not None and os.environ.get("VA_CODECS_IN_PROCESS", "1") != "0"
+    if in_process:
+        return _roundtrip_in_process(x, codec, kbps)
+    if stream is None:
+        stream = codec in STREAMED and os.environ.get("VA_CODECS_STREAM", "0") == "1"  # off until the 2026-10-11 mixed-crop chain ends
+    return _roundtrip_stream(x, codec, kbps) if stream else _roundtrip_executable(x, codec, kbps)
 
 
 def _probe() -> np.ndarray:
@@ -136,7 +235,7 @@ def _probe() -> np.ndarray:
 def delay(codec: str, kbps: float) -> int:
     """Samples by which the decoded signal lags the input (constant per codec and bitrate)."""
     x = _probe().astype(float)
-    y = _roundtrip(x, codec, kbps).astype(float)
+    y = _roundtrip(x, codec, kbps, stream=False).astype(float)  # a stream's first clip is bit-identical
     m = min(len(y), len(x) + MAX_LAG)
     y = np.pad(y[:m], (0, len(x) + MAX_LAG - m))
     nfft = 1 << int(np.ceil(np.log2(len(y) + len(x))))

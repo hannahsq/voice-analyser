@@ -78,7 +78,7 @@ def test_in_process_codecs_match_the_executable(codec):
     kbps = codecs.CODECS[codec][2][1]
 
     def aligned(in_process):
-        y = codecs._roundtrip(x, codec, kbps, in_process=in_process)
+        y = codecs._roundtrip(x, codec, kbps, in_process=in_process, stream=False)
         d = int(np.argmax([np.dot(y[k : k + len(x) - 2000], x[: len(x) - 2000]) for k in range(1200)]))
         return y[d : d + len(x) - 2000]
 
@@ -88,3 +88,25 @@ def test_in_process_codecs_match_the_executable(codec):
         assert abs(snr(a) - snr(b)) < 3.0
     else:
         assert np.allclose(a, b, atol=1e-6)
+
+
+@pytest.mark.parametrize("codec", ["amr_nb", "amr_wb"])
+def test_amr_stream_matches_one_shot_and_stays_aligned(codec):
+    """A stream's first clip is bit-identical to a process per call, up to the last frames (a call flushes the encoder
+    at the end of its input; a stream codes on into the silence after the clip); later clips, coded after others,
+    stay aligned (noise: within a sample)."""
+    kbps = codecs.CODECS[codec][2][0]
+    x = codecs._probe()
+    st = codecs.AmrStream(codec, kbps)
+    try:
+        n = codecs.LEAD + len(x) - 2000
+        assert np.array_equal(st.roundtrip(x)[:n], codecs._roundtrip(x, codec, kbps, stream=False)[:n])
+        d = codecs.delay(codec, kbps)
+        for i, n in enumerate((23_457, 8_000, 40_001)):
+            noise = _noise_burst(n, n // 2 - 2000)
+            st.roundtrip(_vowel_burst(5_000 + 777 * i, 1000))  # something else in between: another frame phase
+            y = st.roundtrip(np.pad(noise, (0, 2048)))[d : d + n]
+            assert len(y) == n and abs(_lag(y.astype(float), noise.astype(float), 60)) <= 1
+    finally:
+        st.close()
+
