@@ -1,0 +1,28 @@
+  [m3_conformer_s1/hillenbrand] 400/1668
+  [m3_conformer_s1/hillenbrand] 800/1668
+  [m3_conformer_s1/hillenbrand] 1200/1668
+  [m3_conformer_s1/hillenbrand] 1600/1668
+  [m3_conformer_s1/ptdb_tug] 250/1579  (RTF 0.006)
+  [m3_conformer_s1/ptdb_tug] 500/1579  (RTF 0.006)
+  [m3_conformer_s1/ptdb_tug] 750/1579  (RTF 0.006)
+  [m3_conformer_s1/ptdb_tug] 1000/1579  (RTF 0.006)
+  [m3_conformer_s1/ptdb_tug] 1250/1579  (RTF 0.006)
+  [m3_conformer_s1/ptdb_tug] 1500/1579  (RTF 0.006)
+tiers: dev
+
+Hillenbrand, mix_conformer_s1 vs m3_conformer_s1 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    55.0    39.9  diff  -15.1 [-18.9, -11.7]  better
+  F1 MAE children:    57.8    47.6  diff  -10.3 [-12.8, -7.7]  better
+  F1 MAE men     :    34.1    20.7  diff  -13.4 [-20.1, -8.2]  better
+  F1 MAE all     :    49.1    36.1  diff  -13.0 [-15.7, -10.8]  better
+  F2 MAE all     :    70.6    50.2  diff  -20.4 [-31.5, -10.7]  better
+  F2 DR  all     :    96.4    98.0  diff   +1.6 [+1.0, +2.3]  better
+  F3 MAE all     :   121.0    79.7  diff  -41.3 [-59.9, -23.5]  better
+  F3 DR  all     :    91.9    95.7  diff   +3.8 [+2.2, +5.2]  better
+  F4 MAE all     :   226.8   152.4  diff  -74.3 [-120.8, -36.7]  better
+  F4 DR  all     :    83.8    88.6  diff   +4.8 [+2.0, +7.5]  better
+
+PTDB-TUG f0 RPA, mix_conformer_s1 vs m3_conformer_s1
+  all frames    :  86.7  87.1  diff  +0.3 [+0.2, +0.5]  better  (n 154653)
+  modal         :  93.4  93.6  diff  +0.2 [+0.1, +0.3]  better  (n 126992)
+  modal < 85 Hz :  84.1  84.2  diff  +0.1 [-6.2, +0.7]  within noise  (n 11014)
