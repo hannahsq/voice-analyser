@@ -99,14 +99,16 @@ def test_amr_stream_matches_one_shot_and_stays_aligned(codec):
     x = codecs._probe()
     st = codecs.AmrStream(codec, kbps)
     try:
-        n = codecs.LEAD + len(x) - 2000
+        n = len(x) - 2000
         assert np.array_equal(st.roundtrip(x)[:n], codecs._roundtrip(x, codec, kbps, stream=False)[:n])
-        d = codecs.delay(codec, kbps)
-        for i, n in enumerate((23_457, 8_000, 40_001)):
+        for i, n in enumerate((23_457, 8_000, 40_001)):  # through this process's stream for (codec, kbps)
             noise = _noise_burst(n, n // 2 - 2000)
-            st.roundtrip(_vowel_burst(5_000 + 777 * i, 1000))  # something else in between: another frame phase
-            y = st.roundtrip(np.pad(noise, (0, 2048)))[d : d + n]
+            codecs.apply(_vowel_burst(5_000 + 777 * i, 1000), codec, kbps, stream=True)  # something else in between
+            y = codecs.apply(noise, codec, kbps, stream=True)
             assert len(y) == n and abs(_lag(y.astype(float), noise.astype(float), 60)) <= 1
+        assert (codec, kbps) in codecs._streams
     finally:
         st.close()
+        if (codec, kbps) in codecs._streams:
+            codecs._streams.pop((codec, kbps)).close()
 

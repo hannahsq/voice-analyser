@@ -103,8 +103,9 @@ def _phone(x: np.ndarray, rng: np.random.Generator, fs: float = FS) -> np.ndarra
 
 
 def augment(x: np.ndarray, rng: np.random.Generator, cfg: ChannelConfig | None = None,
-            speech_mask: np.ndarray | None = None) -> tuple[np.ndarray, dict]:
-    """Apply a random channel. speech_mask (per sample) marks where SNR is measured."""
+            speech_mask: np.ndarray | None = None, codec_stream: bool | None = None) -> tuple[np.ndarray, dict]:
+    """Apply a random channel. speech_mask (per sample) marks where SNR is measured. codec_stream: see codecs.apply
+    (False for fixed sets, whose audio must not depend on what was coded before)."""
     cfg = cfg or ChannelConfig()
     x = np.asarray(x, np.float64)
     params: dict = {"clean": False}
@@ -152,6 +153,6 @@ def augment(x: np.ndarray, rng: np.random.Generator, cfg: ChannelConfig | None =
 
         name = str(rng.choice(cfg.codecs))
         kbps = float(rng.choice(codecs.CODECS[name][2]))
-        x = codecs.apply(x, name, kbps)
+        x = codecs.apply(x, name, kbps, stream=codec_stream)
         params.update(codec=name, codec_kbps=kbps)
     return x.astype(np.float32), params

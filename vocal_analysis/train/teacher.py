@@ -53,8 +53,9 @@ class TrainConfig:
     seed: int = 0
     loss_weights: dict = field(default_factory=dict)
     # Exponential moving average of the weights, kept alongside (training itself is unchanged) and saved as "ema";
-    # 0.998 averages over roughly the last 500 steps. Load with "<ckpt>#ema" (models.infer.load_teacher). 0 = off.
-    ema_decay: float = 0.998
+    # 0.998 averages over roughly the last 500 steps. Load with "<ckpt>#ema" (models.infer.load_teacher). 0 = off:
+    # the default since D-024 (no gain where the rate decays to zero); kept for runs whose rate doesn't.
+    ema_decay: float = 0.0
 
 
 def _git() -> dict:
@@ -111,19 +112,31 @@ def _to(lab: dict, device) -> dict:
     return {k: v.to(device, non_blocking=True) for k, v in lab.items()}
 
 
-def evaluate(model, loader, vq, device, max_batches: int | None = None) -> dict:
-    """Synthetic validation: formant MAE / DR(20 %, 200 Hz), f0 RPA, voicing accuracy, by f0 band."""
+def cache_batches(loader, vq, device) -> list:
+    """A fixed validation set as (VQT log-power, labels) batches on the device, computed once as evaluate() used to
+    each time (same autocast). The VQT has no learned parameters, so the cache stays valid; evals then need no loader
+    workers and no codec work."""
+    import torch
+
+    out = []
+    with torch.inference_mode():
+        for audio, lab in loader:
+            audio, lab = audio.to(device), _to(lab, device)
+            with torch.autocast(device.type, dtype=torch.bfloat16):
+                out.append((vq.log_power_with_context(audio, lab["f0"].shape[1]), lab))
+    return out
+
+
+def evaluate(model, batches, device) -> dict:
+    """Synthetic validation (cache_batches): formant MAE / DR(20 %, 200 Hz), f0 RPA, voicing accuracy, by f0 band."""
     import torch
 
     model.eval()
     rows = {"fm_err": [], "fm_ref": [], "f0_c": [], "voiced_ok": [], "f0_ref": [], "son": []}
     with torch.inference_mode():
-        for i, (audio, lab) in enumerate(loader):
-            if max_batches and i >= max_batches:
-                break
-            audio, lab = audio.to(device), _to(lab, device)
+        for lp, lab in batches:
             with torch.autocast(device.type, dtype=torch.bfloat16):
-                out = model(vq.log_power_with_context(audio, lab["f0"].shape[1]))
+                out = model(lp)
             fm_p = out["formant_logits"].float().softmax(-1).cpu().numpy()
             f0_p = out["f0_logits"].float().softmax(-1).cpu().numpy()
             fm, _ = decode(fm_p, FORMANT_AXIS)
@@ -224,10 +237,11 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True)
-    val_loader = DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate)
     short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True)
-    short_loader = DataLoader(short_ds, cfg.batch * cfg.n_frames // cfg.val_short_frames, num_workers=4, collate_fn=collate)
     vq = TorchVQT(device)
+    val_sets = {"eval": cache_batches(DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate), vq, device),
+                "eval_short": cache_batches(DataLoader(short_ds, cfg.batch * cfg.n_frames // cfg.val_short_frames,
+                                                       num_workers=4, collate_fn=collate), vq, device)}
     rng = np.random.default_rng(cfg.seed + step)
 
     def save(path):
@@ -285,8 +299,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 for key, net in (("", model), ("_ema", ema)):
                     if net is None:
                         continue
-                    for vkey, vl in (("eval", val_loader), ("eval_short", short_loader)):
-                        ev = evaluate(net, vl, vq, device)
+                    for vkey, batches in val_sets.items():
+                        ev = evaluate(net, batches, device)
                         logf.write(json.dumps({"step": step, vkey + key: ev, "time": time.time()}) + "\n")
                         logf.flush()
                         label = vkey + (f" ({cfg.val_short_frames} frames)" if vkey == "eval_short" else "") + (" (ema)" if key else "")

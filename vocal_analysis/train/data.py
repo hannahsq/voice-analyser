@@ -119,7 +119,8 @@ class SynthCrops:
         lab = {k: np.asarray(arr[k][f0_:f1_]) for k in LABEL_KEYS}
         if self.channel is not None:
             mask = np.repeat(lab["voiced"], HOP)[: len(x)]
-            x, _ = augment(x, rng, self.channel, np.pad(mask, (0, len(x) - len(mask))))
+            # fixed (validation) sets code each clip in a fresh process: the same audio every time and in every run
+            x, _ = augment(x, rng, self.channel, np.pad(mask, (0, len(x) - len(mask))), codec_stream=False if self.fixed else None)
         if n_crops is not None:
             return [self._crop(x, lab, n_clip_frames, t, rng) for _ in range(n_crops)]
         return self._crop(x, lab, n_clip_frames, t, rng)
