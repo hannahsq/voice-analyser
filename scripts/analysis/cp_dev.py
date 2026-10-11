@@ -1,6 +1,6 @@
 """Closed-phase F1 bias per model on PTDB-TUG dev speakers (D-024 tiers; ARCTIC is dev only), with a paired speaker
 bootstrap. Args: scratch dir (holding ptdb_egg_sub.npz, arctic_egg_sub.npz), comma-separated models, pairs b-a."""
-import sys, json, numpy as np
+import os, sys, json, numpy as np
 from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8")
 S, MODELS, PAIRS = sys.argv[1], sys.argv[2].split(","), [p.split("-") for p in sys.argv[3:]]
@@ -8,11 +8,13 @@ tiers = json.load(open(Path(__file__).resolve().parents[2] / "vocal_analysis/eva
 rng = np.random.default_rng(0)
 d = dict(np.load(f"{S}/ptdb_egg_sub.npz", allow_pickle=True))
 spk_id = lambda s: s if ":" in s else f"ptdb_tug:{s}"
-dev = np.array([tiers.get(spk_id(str(s))) == "dev" for s in d["speaker"]])
+allowed = set(os.environ.get("VA_TIERS", "dev").split(","))  # semi-private: a use to log in decisions.md
+print(f"tiers: {','.join(sorted(allowed))}")
+dev = np.array([tiers.get(spk_id(str(s))) in allowed for s in d["speaker"]])
 ok = np.isfinite(d["cp"][:, 0]) & np.all([np.isfinite(d[e][:, 0]) for e in MODELS], 0) & dev
 for g in np.unique(d["sex"]):
     m = ok & (d["sex"] == g); r = d["cp"][m, 0]; spk = np.unique(d["speaker"][m])
-    print(f"PTDB-TUG dev {g}: {m.sum()} frames, {len(spk)} speakers; F1 - closed phase, median signed (|err|)")
+    print(f"PTDB-TUG {'+'.join(sorted(allowed))} {g}: {m.sum()} frames, {len(spk)} speakers; F1 - closed phase, median signed (|err|)")
     for e in MODELS:
         x = d[e][m, 0] - r
         print(f"  {e:20s} {np.median(x):+6.1f} ({np.median(np.abs(x)):5.1f})")
