@@ -37,6 +37,7 @@ Each would run on S2 and train_v2 against the three v2 seeds. The cheap screen i
 - A source head (Rd or open quotient; D-023 plan item 3).
 - A mixture-of-hypotheses formant head for assignment swaps (D-021, gap (a)).
 - `external/tcn-formants` in the architecture bake-off.
+- A learnable front end, much later: train with the fixed VQT, then unfreeze it. Learn a few parameters per filter (gain, bandwidth, small centre shifts; as in SincNet or LEAF) rather than free kernels, so the frequency axis keeps its meaning: the f0 comb and the heat-map output axes assume the VQT's bin frequencies. The cached validation log-power would then be recomputed at each eval.
 - Bayesian vocal-tract-length estimation for the labeller (`voice-dataset-labeler`, branch `feat_bayesian_vtl`).
 - Rented GPUs, if iteration time becomes the limit. Only code and synthetic data would leave this machine; the evaluation sets stay local, with checkpoints measured here. First check the loader under Linux (WSL, or a one-hour rental): process start-up there takes milliseconds, not about 120 ms as on Windows, so AMR may not be a bottleneck there. Then run one machine's worth of known runs (the three S2 v2 seeds) to check that results agree across platforms (CUDA there, ROCm here).
 
