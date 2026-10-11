@@ -1,10 +1,12 @@
 # Roadmap
 
-What is planned and in what order. Reasons and results go in `decisions.md`; this file only tracks what is next. Updated 2026-10-10.
+What is planned and in what order. Reasons and results go in `decisions.md`; this file only tracks what is next. Updated 2026-10-11.
 
 ## Now
 
-1. **S2 proxy check and the weights-EMA test** (D-024; running). S2 is the 1.75M-parameter model: three seeds each of train_v2, train_v3b and train_v1 at 3.5k steps, scored with the subset measures. Each run that kept a moving average of its weights (EMA) is also scored with those averaged weights. Results by about midnight on 2026-10-10.
+Done (D-024): S2 failed as a proxy for real-voice comparisons (seed spread as large as the effects; only invariance reproduces); weights EMA rejected (off by default, code kept); the Conformer's Hillenbrand collapse traced to short inputs and fixed by mixed crop lengths, at a cost in women's and children's F1 for both architectures.
+
+1. **Training speed** (below, item 3): AMR streaming done; benchmarks, `torch.compile` and scheduling next.
 2. **Time the coupled synthesis path** (D-023) on a quiet machine, against the harmonic path. Then speed up the open-glottis pole search (fewer continuation steps, or a cached table), so coupled rendering costs about the same as uncoupled.
 3. **Training speed** (timeboxed to about a day; a quiet-machine benchmark before and after each change). Run-to-run noise means comparisons need full-size runs or many seeds (D-024), so throughput sets how much can be tested. CPU and GPU share one power budget on this machine: while a CPU measure ran, the GPU clock fell from about 2.6 to 2.1 GHz and S2 slowed from about 100 to 86 s/s. S2's training loop is limited by the CPU thread that queues its many small GPU operations; CPU boost off slowed S2 to 78–81 s/s, so keep boost on and lower everything else's CPU use. Recipe unchanged (existing seeds stay comparable), in order:
    - AMR through persistent ffmpeg processes per loader worker: no process launches per clip. Launches serialise on Windows (about 6.5 AMR round trips/s across 16 processes), hung twice on 2026-10-11, and cause CPU bursts that dip the GPU;
@@ -12,7 +14,10 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
    - a GPU eval suite: one command for a list of checkpoints, running the paired Hillenbrand / PTDB-TUG measures, the invariance probe and the closed phase on the GPU in one process, with audio cached at 16 kHz and clips batched by length. For one new model on a quiet machine (2026-10-11): paired 1.7 min and probe 0.6 min on the GPU, closed phase 5.2 min on the CPU; about 20 min per S2 run when the closed phase shared the machine with training. Measures then run between training runs, not alongside them;
    - scheduling: training process at above-normal priority (loader workers stay normal); fewer loader workers (10–12) now that the loader has headroom; the hidden core-parking setting (`CPMINCORES`), since Windows parks the second CCD and the main thread may share a core with a worker. Pin the main thread only if these help, using AMD's preferred-core order (CPPC). On this machine (HWiNFO, 2026-10-11), fastest first: cores 7, 8, 5, 4, 1, 6, 3, 2 (first CCD), then 11, 12, 13, 15, 10, 16, 9, 14 (HWiNFO numbers cores from 1; Windows counts logical processors from 0, two per core).
    Recipe changes (need fresh baseline seeds): larger batches, combined with the learning-rate sweep below so the re-baselining happens once.
-4. **Conformer swap** (D-021 item 1) on S2, if S2 passes as a proxy.
+4. **Crop length and the Conformer** (D-021 item 1; D-024). On S2, one seed each, read with care (S2 is noisy on real voices; synthetic validation is not):
+   - a long-weighted mix (about two-thirds of frames in crops of 194 frames or more) on the Conformer at 3.5k steps: does women's and children's F1 recover while the short-input fix holds?
+   - if that is ambiguous: mixed crops at about 9.3k steps (the same long-crop exposure as 3.5k fixed steps) against a fixed-200 run at the same steps;
+   - then full size: the Conformer with the chosen crop mix against the full-size v2 seeds, with seeds of its own.
 5. **v3c, glottal coupling** (D-023), with a decision on whether to bundle the back-rounded-vowel coverage fix: more lip rounding and protrusion in the tube, and a lower cascade F2 floor of about 500 Hz × size.
 
 ## Training recipe experiments (deferred)
