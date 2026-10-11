@@ -86,6 +86,8 @@ def test_length_batches_keep_frames_per_batch(tmp_path):
     assert np.all(np.abs(frames / 6400 - 1) < 0.1)  # same audio per step, to rounding
     assert all(len({(t, k) for _, t, k in b}) == 1 for b in batches)  # one length per batch
     assert max(len(b) for b in batches) <= 36  # about as many clips as a fixed batch of 32
+    longw = [b[0][1] for b in LengthBatches(4000, 1000, (32, 400), 6400, seed=2, long_frac=2 / 3)]
+    assert abs(np.mean(np.array(longw) >= 194) - 2 / 3) < 0.03  # two-thirds of batches (and frames) in long crops
 
     root = write_set(tmp_path / "s", 2, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=2, workers=1, log=lambda m: None)
     ds = SynthCrops(consolidate(root, log=lambda m: None), np.arange(2), n_frames=200, channel=None)

@@ -151,9 +151,15 @@ class LengthBatches:
     clip (AMR launches ffmpeg), not per frame. Yields lists of (index, n_frames, n_crops) for SynthCrops."""
 
     def __init__(self, n_batches: int, epoch_size: int, frames: tuple[int, int], frames_per_batch: int, seed: int = 0,
-                 n_lengths: int = 8, crop_span: int = 200):
+                 n_lengths: int = 8, crop_span: int = 200, long_frac: float | None = None):
         self.n_batches, self.epoch_size, self.fpb, self.crop_span = n_batches, epoch_size, frames_per_batch, crop_span
         self.lengths = np.unique(np.round(np.geomspace(frames[0], frames[1], n_lengths)).astype(int))
+        # long_frac: the share of batches (so of frames) with lengths of at least 0.97 * crop_span, split equally
+        # among those lengths; the rest split equally among the shorter ones. None: all lengths equally likely.
+        self.p = None
+        if long_frac is not None:
+            long = self.lengths >= 0.97 * crop_span
+            self.p = np.where(long, long_frac / long.sum(), (1.0 - long_frac) / (~long).sum())
         self.rng = np.random.default_rng(seed)  # main process; carries on across epochs, so each epoch differs
 
     def __len__(self) -> int:
@@ -161,7 +167,7 @@ class LengthBatches:
 
     def __iter__(self):
         for _ in range(self.n_batches):
-            t = int(self.rng.choice(self.lengths))
+            t = int(self.rng.choice(self.lengths, p=self.p))
             k = max(1, math.ceil(self.crop_span / t - 0.1))  # crops per clip: at most about crop_span frames per clip
             b = max(1, round(self.fpb / (t * k)))
             yield [(int(i), t, k) for i in self.rng.integers(self.epoch_size, size=b)]

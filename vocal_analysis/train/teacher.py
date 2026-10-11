@@ -33,6 +33,7 @@ class TrainConfig:
     # Mixed crop lengths: (lo, hi) frames, 8 lengths spaced geometrically, one per batch, batch scaled to batch * n_frames frames (same audio
     # per step). None = every crop n_frames long. Validation also runs on fixed val_short_frames crops ("eval_short").
     crop_frames: tuple[int, int] | None = None
+    crop_long_frac: float | None = None  # with crop_frames: share of frames in crops of >= ~n_frames (None: lengths uniform)
     val_short_frames: int = 50
     lr: float = 1e-3
     warmup: int = 1000
@@ -251,7 +252,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=cfg.batch * 1000)
     common = dict(num_workers=cfg.workers, collate_fn=collate, persistent_workers=True, pin_memory=False, prefetch_factor=4)
     if cfg.crop_frames:
-        batches = LengthBatches(1000, ds.epoch_size, tuple(cfg.crop_frames), cfg.batch * cfg.n_frames, seed=cfg.seed + step)
+        batches = LengthBatches(1000, ds.epoch_size, tuple(cfg.crop_frames), cfg.batch * cfg.n_frames, seed=cfg.seed + step,
+                                crop_span=cfg.n_frames, long_frac=cfg.crop_long_frac)
         loader = DataLoader(ds, batch_sampler=batches, **common)
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
