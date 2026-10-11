@@ -38,7 +38,7 @@ Each would run on S2 and train_v2 against the three v2 seeds. The cheap screen i
 
 ## Later
 
-- D-021: longer and mixed crop lengths; a per-formant observability label; vocal-tract-length outputs.
+- D-021: a per-formant observability label, with independent per-formant outputs (the chained heads let a wrong F1 pull F2 with it); vocal-tract-length outputs. With observability, add voiced clips with little or no formant evidence (a few per cent): unfiltered glottal sources, formants too wide to see, F1 between sparse harmonics at high f0, a single missing formant. Their label then says 'unobservable' instead of forcing a guess (given a bare source by mistake on 2026-10-11, the teachers and Praat read formants 100–500 Hz off). Define observability physically (how far the resonance lifts the harmonics above the source envelope) so synthesis can label it per frame. Mixed crop lengths: done (D-024).
 - A source head (Rd or open quotient; D-023 plan item 3).
 - A mixture-of-hypotheses formant head for assignment swaps (D-021, gap (a)).
 - `external/tcn-formants` in the architecture bake-off.
