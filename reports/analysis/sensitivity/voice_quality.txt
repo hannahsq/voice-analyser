@@ -1,0 +1,27 @@
+Shared F1 error (14 models; per frame, mean of model F1 minus closed-phase F1; utterance median), PTDB-TUG subset, 794 utterances
+
+women: 396 utterances, shared error median +31.1 Hz; frame-level Spearman (shared error, EGG CQ) -0.03 over 7018 frames
+  measure           Spearman with error   worst 10 %   the rest
+  f0 Hz               +0.16 (p 1.4e-03)       216.48     201.85
+  EGG CQ              -0.14 (p 4.3e-03)         0.41       0.44
+  cycle - cp F1       +0.48 (p 4.3e-24)         8.07      -5.10
+  HNR dB              +0.00 (p 9.2e-01)        15.11      15.60
+  CPPS dB             -0.24 (p 8.1e-07)         4.18       4.76
+  jitter %            +0.14 (p 6.3e-03)         2.39       1.95
+  shimmer %           +0.01 (p 9.2e-01)         7.84       7.97
+  H1-H2 dB            +0.05 (p 2.8e-01)         0.43      -1.04
+  alpha ratio dB      -0.12 (p 2.0e-02)       -11.07      -8.88
+  per speaker (median shared error, Hz): F01 +29, F02 +36, F03 +24, F04 +22, F05 +26, F06 +51, F07 +23, F08 +41, F09 +31, F10 +33
+
+men: 398 utterances, shared error median +26.6 Hz; frame-level Spearman (shared error, EGG CQ) -0.08 over 6813 frames
+  measure           Spearman with error   worst 10 %   the rest
+  f0 Hz               +0.15 (p 2.8e-03)       116.03     112.90
+  EGG CQ              -0.18 (p 2.8e-04)         0.49       0.50
+  cycle - cp F1       +0.19 (p 1.3e-04)         4.83       5.90
+  HNR dB              -0.08 (p 9.0e-02)         8.28       8.89
+  CPPS dB             -0.52 (p 3.5e-29)         5.72       6.43
+  jitter %            -0.02 (p 7.1e-01)         2.81       2.63
+  shimmer %           -0.04 (p 4.4e-01)         9.71      10.31
+  H1-H2 dB            +0.20 (p 8.4e-05)        -2.52      -3.02
+  alpha ratio dB      -0.15 (p 3.2e-03)       -10.74     -10.23
+  per speaker (median shared error, Hz): M01 +32, M02 +28, M03 +19, M04 +19, M05 +21, M06 +44, M07 +33, M08 +47, M09 +26, M10 +17
