@@ -598,3 +598,25 @@ The split follows clip length. The models train on 2 s crops (200 frames) and `a
 | Conformer | 74.0 | 44.6 | 31.8 | 26.5 | 24.6 |
 
 Both models degrade on short inputs; the Conformer much faster. The Conformer is better from 200 frames up and worse below about 100. So the Hillenbrand result is a length-generalisation failure, not a worse model. The fix is training on mixed crop lengths (D-021's open item), which the GRU also needs. The synthetic validation set uses 200-frame crops only, which hid this; it needs short-crop cases.
+
+**Mixed crop lengths (2026-10-11; main `fd1adeb`, `25032cf`, `896adde`; `sensitivity/len_test_mixcrop.txt`, `paired/small_mix_*.txt`, `invariance/small_mixcrop.txt`, `closed_phase/cp_small_mixcrop.txt`).** S2, seed 0, v2 recipe, one GRU and one Conformer. Crop lengths come from 8 values spaced geometrically over 32–400 frames, one per batch. The batch size scales so every step holds the same frames (64 s of audio), and short crops take several pieces from one augmented clip. About 37 % of training frames come from crops of 194 frames or more, against 100 % with fixed 200-frame crops.
+
+Synthetic F1 MAE by input length (Hz):
+
+| Model | 30 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| GRU, fixed 200 | 52.3 | 39.4 | 30.9 | 28.5 | 26.6 |
+| GRU, mixed | 53.4 | 41.9 | 32.1 | 32.2 | 30.0 |
+| Conformer, fixed 200 | 71.8 | 44.4 | 30.7 | 25.7 | 23.8 |
+| Conformer, mixed | 49.0 | 32.3 | 28.7 | 27.5 | 26.2 |
+
+The Conformer's short-input failure is fixed (F3 at 30 frames 116 → 62 Hz), at a cost of about 2 Hz on long inputs. The GRU gains nothing on short inputs and loses 3–4 Hz on long ones.
+
+Real voices, against v2_s0 (Hillenbrand MAE, Hz):
+- *Mixed Conformer*: F1 all +4.8, women +7.8, children +6.5; F3 −28.1; f0 RPA +0.5; invariance |slope| 15.5. The fixed-200 Conformer was F1 +26.7, F3 +47.8, f0 −2.3, |slope| 28.8.
+- *Mixed GRU*: F1 +2.3, women +4.4, children +3.8; F3 −17.6; f0 +0.9; |slope| 14.0.
+- Women's Hillenbrand F1 is 47.4 (Conformer) and 44.0 (GRU), against 35.7–41.3 for the three GRU v2 seeds.
+
+Closed-phase F1 (PTDB-TUG): the mixed Conformer has the lowest bias and error of any model so far. Women's bias is +12.7, |error| 36.8; men's bias +10.9, |error| 20.9. The three GRU v2 seeds give women +21 to +39 and 40.7–49.7, men +17 to +39 and 26.2–41.2. The mixed GRU is within the GRU seed range.
+
+The two references disagree on women's F1. Hillenbrand puts the mixed Conformer above the GRU seed range; closed phase puts it below. Input length doesn't explain it: Hillenbrand words are about 55 frames, where the mixed Conformer is the best model on synthetic data. Open: whether the Hillenbrand regression comes from the reduced long-crop exposure (next: a long-weighted mix at the same steps), from the short crops themselves (cut mid-utterance, where Hillenbrand words start and end in silence), or from the references.

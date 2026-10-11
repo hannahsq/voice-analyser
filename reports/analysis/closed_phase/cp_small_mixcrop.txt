@@ -1,0 +1,72 @@
+
+arctic_egg: 8896 frames. F1 vs closed phase: median signed (median |err|); by cp F1 <450 / 450-650 / >650
+  bdl (2556 frames, cp F1 median 398)
+    v2_s0   +6.8 (22.4)     +3 /  +16 /   -3
+    v2_s1  +16.6 (24.3)    +18 /  +19 /   -8
+    v2_s2   +6.6 (23.1)     +2 /  +17 /   -5
+    mix_gru_s0 +12.4 (25.1)    +14 /  +15 /   -4
+    conf_v2_s0  -2.7 (20.3)     -8 /  +10 /   -3
+    mix_conformer_s0  +4.0 (23.1)     -0 /  +14 /   -5
+      close (iy ih uw uh)  n   856: v2_s0   +5  v2_s1  +16  v2_s2   +5  mix_gru_s0  +11  conf_v2_s0   -2  mix_conformer_s0   +5
+      mid (eh ah er ao)    n  1103: v2_s0  +10  v2_s1  +18  v2_s2  +10  mix_gru_s0  +13  conf_v2_s0   -0  mix_conformer_s0   +5
+      open (ae aa)         n   597: v2_s0   +3  v2_s1  +15  v2_s2   +5  mix_gru_s0  +15  conf_v2_s0   -7  mix_conformer_s0   +1
+  jmk (1919 frames, cp F1 median 360)
+    v2_s0  +29.1 (44.1)    +34 /  +21 /   -4
+    v2_s1  +44.1 (50.0)    +50 /  +30 /   +4
+    v2_s2  +39.5 (46.9)    +42 /  +33 /   -6
+    mix_gru_s0 +37.1 (46.5)    +43 /  +22 /  -11
+    conf_v2_s0 +30.7 (41.6)    +33 /  +27 /  -13
+    mix_conformer_s0 +34.8 (44.8)    +40 /  +26 /  -21
+      close (iy ih uw uh)  n   714: v2_s0  +32  v2_s1  +46  v2_s2  +40  mix_gru_s0  +39  conf_v2_s0  +34  mix_conformer_s0  +40
+      mid (eh ah er ao)    n   754: v2_s0  +29  v2_s1  +40  v2_s2  +42  mix_gru_s0  +35  conf_v2_s0  +31  mix_conformer_s0  +33
+      open (ae aa)         n   451: v2_s0  +22  v2_s1  +47  v2_s2  +30  mix_gru_s0  +35  conf_v2_s0  +24  mix_conformer_s0  +28
+  slt (4421 frames, cp F1 median 667)
+    v2_s0   +9.5 (30.8)    +54 /  +16 /  -10
+    v2_s1   +1.2 (36.6)    +63 /  +17 /  -27
+    v2_s2   +3.3 (31.2)    +50 /  +13 /  -17
+    mix_gru_s0  +6.2 (30.2)    +52 /  +11 /  -13
+    conf_v2_s0  +4.6 (32.9)    +52 /  +16 /  -18
+    mix_conformer_s0  +4.7 (32.0)    +46 /  +20 /  -19
+      close (iy ih uw uh)  n  1558: v2_s0  +30  v2_s1  +37  v2_s2  +24  mix_gru_s0  +29  conf_v2_s0  +30  mix_conformer_s0  +26
+      mid (eh ah er ao)    n  1861: v2_s0   +4  v2_s1  -10  v2_s2   -5  mix_gru_s0   +0  conf_v2_s0   -3  mix_conformer_s0   +0
+      open (ae aa)         n  1002: v2_s0   -8  v2_s1  -23  v2_s2   -9  mix_gru_s0  -13  conf_v2_s0  -13  mix_conformer_s0  -21
+
+ptdb_egg: 13831 frames. F1 vs closed phase: median signed (median |err|); by cp F1 <450 / 450-650 / >650
+  f (7018 frames, cp F1 median 549)
+    v2_s0  +21.4 (40.7)    +40 /  +18 /   +4
+    v2_s1  +39.3 (49.7)    +58 /  +45 /   +8
+    v2_s2  +31.9 (44.9)    +42 /  +34 /  +17
+    mix_gru_s0 +22.7 (39.5)    +49 /  +19 /   +2
+    conf_v2_s0 +23.9 (41.3)    +30 /  +30 /   +5
+    mix_conformer_s0 +12.7 (36.8)    +27 /  +20 /  -17
+    mix_gru_s0 - v2_s0 bias          +2.5 [-3.4, +5.4]
+    mix_conformer_s0 - conf_v2_s0 bias         -10.8 [-15.7, -8.4]
+    mix_conformer_s0 - mix_gru_s0 bias         -10.9 [-14.8, -3.9]
+    mix_gru_s0 - v2_s0 |err|         -0.6 [-4.8, +3.0]
+    mix_conformer_s0 - conf_v2_s0 |err|         -3.6 [-6.0, -2.4]
+    mix_conformer_s0 - mix_gru_s0 |err|         -3.2 [-6.8, +1.5]
+    mix_gru_s0 - v2_s0 low-F1 bias   +9.1 [-1.0, +16.7]
+    mix_conformer_s0 - conf_v2_s0 low-F1 bias   -5.4 [-9.7, +1.5]
+    mix_conformer_s0 - mix_gru_s0 low-F1 bias  -23.0 [-35.0, -15.0]
+    mix_gru_s0 - v2_s0 high-F1 bias  -5.0 [-8.9, +3.6]
+    mix_conformer_s0 - conf_v2_s0 high-F1 bias -20.6 [-31.8, -14.9]
+    mix_conformer_s0 - mix_gru_s0 high-F1 bias -22.1 [-29.1, -13.6]
+  m (6813 frames, cp F1 median 456)
+    v2_s0  +16.9 (26.2)    +18 /  +16 /  +15
+    v2_s1  +39.0 (41.2)    +34 /  +46 /  +32
+    v2_s2  +29.9 (33.6)    +29 /  +34 /  +22
+    mix_gru_s0 +22.9 (27.7)    +30 /  +18 /   +9
+    conf_v2_s0 +16.7 (24.8)    +12 /  +23 /  +18
+    mix_conformer_s0 +10.9 (20.9)    +14 /   +8 /   -1
+    mix_gru_s0 - v2_s0 bias          +6.3 [+3.2, +9.3]
+    mix_conformer_s0 - conf_v2_s0 bias          -5.5 [-9.9, -3.3]
+    mix_conformer_s0 - mix_gru_s0 bias         -12.2 [-15.2, -9.3]
+    mix_gru_s0 - v2_s0 |err|         +1.4 [-0.3, +3.0]
+    mix_conformer_s0 - conf_v2_s0 |err|         -4.5 [-5.6, -2.5]
+    mix_conformer_s0 - mix_gru_s0 |err|         -7.1 [-8.8, -5.6]
+    mix_gru_s0 - v2_s0 low-F1 bias  +11.2 [+6.5, +17.2]
+    mix_conformer_s0 - conf_v2_s0 low-F1 bias   +2.8 [-1.7, +4.4]
+    mix_conformer_s0 - mix_gru_s0 low-F1 bias  -13.7 [-20.4, -11.6]
+    mix_gru_s0 - v2_s0 high-F1 bias  -1.6 [-7.3, +8.1]
+    mix_conformer_s0 - conf_v2_s0 high-F1 bias -22.0 [-43.2, -16.7]
+    mix_conformer_s0 - mix_gru_s0 high-F1 bias -11.3 [-43.0, -0.5]

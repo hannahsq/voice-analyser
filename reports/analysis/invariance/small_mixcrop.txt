@@ -1,0 +1,21 @@
+144 probe clips; true F1 by (vowel, length): i/13 369, i/15.5 328, i/18 300, E/13 779, E/15.5 672, E/18 594, ae/13 929, ae/15.5 799, ae/18 704, A/13 1027, A/15.5 888, A/18 786, o/13 485, o/15.5 430, o/18 391, u/13 401, u/15.5 358, u/18 328
+
+praat_default: F1 slope vs log2 f0, median +15.0 Hz/oct, median |slope| 19.0; f0 <= 250 Hz: median +15.8, |slope| 23.9
+  median F1 error by f0: 80:-18  101:-12  127:-17  160:-6  201:+12  253:-3  318:-21  400:+24
+  slopes: A/13 -18  A/15.5 -6  A/18 +6  E/13 -9  E/15.5 +36  E/18 +49  ae/13 -9  ae/15.5 -4  ae/18 +33  i/13 +10  i/15.5 +32  i/18 +52  o/13 +9  o/15.5 +20  o/18 +29  u/13 +4  u/15.5 +24  u/18 +43
+
+v2_s0: F1 slope vs log2 f0, median +1.5 Hz/oct, median |slope| 20.7; f0 <= 250 Hz: median +1.3, |slope| 11.6
+  median F1 error by f0: 80:+5  101:+9  127:+5  160:+9  201:+11  253:+11  318:+33  400:+15
+  slopes: A/13 -22  A/15.5 -4  A/18 -20  E/13 -8  E/15.5 -10  E/18 -17  ae/13 -8  ae/15.5 -14  ae/18 -23  i/13 +7  i/15.5 +27  i/18 +26  o/13 +31  o/15.5 +25  o/18 +57  u/13 +18  u/15.5 +30  u/18 +28
+
+mix_gru_s0: F1 slope vs log2 f0, median +6.7 Hz/oct, median |slope| 14.0; f0 <= 250 Hz: median +6.1, |slope| 13.2
+  median F1 error by f0: 80:+7  101:+11  127:+14  160:+17  201:+9  253:+35  318:+44  400:+21
+  slopes: A/13 -15  A/15.5 -1  A/18 -12  E/13 -6  E/15.5 -5  E/18 -7  ae/13 +2  ae/15.5 -15  ae/18 -20  i/13 +16  i/15.5 +15  i/18 +21  o/13 +21  o/15.5 +37  o/18 +67  u/13 +12  u/15.5 +13  u/18 +13
+
+conf_v2_s0: F1 slope vs log2 f0, median -10.4 Hz/oct, median |slope| 28.8; f0 <= 250 Hz: median -6.6, |slope| 24.3
+  median F1 error by f0: 80:+10  101:+22  127:+33  160:+18  201:+20  253:+37  318:+53  400:+52
+  slopes: A/13 -73  A/15.5 -87  A/18 -101  E/13 -13  E/15.5 -23  E/18 -10  ae/13 -7  ae/15.5 -22  ae/18 -49  i/13 +42  i/15.5 -35  i/18 -10  o/13 +68  o/15.5 +47  o/18 +56  u/13 -4  u/15.5 -9  u/18 -3
+
+mix_conformer_s0: F1 slope vs log2 f0, median +8.3 Hz/oct, median |slope| 15.5; f0 <= 250 Hz: median -0.1, |slope| 12.1
+  median F1 error by f0: 80:+11  101:+4  127:+5  160:+13  201:+11  253:+12  318:+29  400:+27
+  slopes: A/13 -15  A/15.5 -12  A/18 -23  E/13 -8  E/15.5 -3  E/18 +2  ae/13 +6  ae/15.5 -9  ae/18 -16  i/13 +19  i/15.5 +28  i/18 +16  o/13 +11  o/15.5 +16  o/18 +36  u/13 +21  u/15.5 +15  u/18 +26
