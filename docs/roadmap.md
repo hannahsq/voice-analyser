@@ -6,8 +6,12 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
 
 *Handover, 2026-10-11 evening. Results and reasoning are in D-023 and D-024 (decisions.md); this section is the state of play.*
 
-**In flight**
-- `v2c` chain (`scripts/analysis/chains/v2c_chain.sh`, launched from the scratch copy; log lines "v2c: ..." in `runs/orchestrator.log`). `data/synth/train_v2c` is generated (train_v2's settings and seed 2, plus glottal coupling on every tube clip). Three S2 mixed-crop Conformer seeds (`runs/small/v2c_conformer_s0-2`) train against `mix_conformer_s0-2`; each is measured in fp32 (paired vs v2_s0 and vs the same-seed mixed Conformer in `reports/analysis/paired/fp32/`, closed phase on the GPU), then the invariance probe and `closed_phase/cp_small_v2c.txt`. Done when "v2c: done" appears (about 22:30).
+**In flight (night of 2026-10-11/12; everything stops at 06:50, machine free by 07:00)**
+- m3-resynth is merged into main (`d14fe2c`); scripts run from main now.
+- `m3_night_chain.sh` (log lines "m3: ..." in `runs/orchestrator.log`): resynthesised VocalSet (train and val splits, tracked by teacher_v2_d16k, so by no model being compared; `data/resynth/vocalset_{train,val}_d16k`), then three S2 mixed-crop Conformer seeds `runs/small/m3_conformer_s0-2` on train_v2 + 30 % resynthesised VocalSet, against `mix_conformer_s0-2`, measured on dev speakers.
+- **Pre-registered rule** (written before any M3 result; `scripts/analysis/decide_m3_s2.py`): means over the three same-seed pairs, dev speakers. "No degradation" when Hillenbrand F1 MAE (all) ≤ +3 Hz, F2 ≤ +5 Hz, F3 ≤ +10 Hz; PTDB-TUG f0 RPA (all frames) ≥ −1.0 point; PTDB-TUG closed-phase F1 women's median |err| ≤ +5 Hz. S2 only catches large regressions (seed noise is about the size of small effects), so this is a smoke check, not an improvement test.
+- Then one full-size Conformer (mixed crops): on the M3 mix if no degradation (`runs/conformer_m3`), otherwise on train_v2 alone (`runs/conformer_v2`, the M2 Conformer baseline). Constant to 6000, d06k branch (decay 4000), measured against teacher_v2_d06k; then the constant run carries on toward 16000 until the 06:50 watchdog. d16k branches later from `ckpt_016000.pt` (`--resume` by rerunning the same command with `--steps 16000`).
+- v2c finished at 22:04 (write-up pending, below).
 - Saarbrücken download (`data/downloads/saarbruecken/`: healthy, hypofunctional dysphonia, recurrent laryngeal nerve paresis, functional dysphonia, phonasthenia; CC BY 4.0). The files are being saved with a trailing carriage return in their names (the URL list had CRLF endings): rename them once complete.
 
 **Next, in order**
