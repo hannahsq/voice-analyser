@@ -70,8 +70,15 @@ def lf_waveform(rd: float, n: int) -> np.ndarray:
 
 
 def open_phase(rd: float) -> float:
-    """Fraction of the period during which the glottis is open (te; the return phase is short)."""
-    return lf_params(rd).te
+    """Fraction of the period during which the glottis is open (te; the return phase is short). The same arithmetic
+    as lf_params, without its two root solves, which te doesn't need."""
+    if not RD_MIN - 1e-9 <= rd <= RD_MAX + 1e-9:
+        raise ValueError(f"Rd {rd} outside [{RD_MIN}, {RD_MAX}]")
+    ra = (-1.0 + 4.8 * rd) / 100.0
+    rk = (22.4 + 11.8 * rd) / 100.0
+    rg = rk * (0.5 + 1.2 * rk) / (0.44 * rd - 4.0 * ra * (0.5 + 1.2 * rk))
+    tp = 1.0 / (2.0 * rg)
+    return tp * (1.0 + rk)
 
 
 RD_GRID = np.round(np.arange(RD_MIN, RD_MAX + 1e-9, 0.01), 2)
