@@ -21,7 +21,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .tube import C_CM_S, ETA, LAMBDA_OVER_CP, MU, RHO, WALL_B, WALL_K, WALL_M, TubeShape, _radiation, poles
+from .tube import MU, RHO, TubeShape, _radiation, chain_matrix, poles
 
 # Ishizaka et al. (1976) subglottal impedance maxima for adult men: Hz, peak |Z| (cgs acoustic ohm), bandwidth Hz.
 SUBGLOTTAL = ((640.0, 45.0, 160.0), (1400.0, 35.0, 200.0), (2100.0, 25.0, 300.0))
@@ -77,22 +77,8 @@ def sample_glottis(rng: np.random.Generator, tract_length_cm: float, peak_area_c
 
 
 def _chain(s: np.ndarray, shape: TubeShape) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Full glottis-to-lips chain matrix at complex s, with every loss (as `tube._chain_cd`, which keeps only C, D)."""
-    rs = np.sqrt(s)
-    A, B, C, D = np.ones_like(s), np.zeros_like(s), np.zeros_like(s), np.ones_like(s)
-    for area, l in zip(shape.areas, shape.lengths):
-        perim = shape.perimeter_factor * 2.0 * np.sqrt(np.pi * area)
-        z = s * RHO / area + perim / area**2 * np.sqrt(RHO * MU) * rs
-        y = (s * area / (RHO * C_CM_S**2) + perim * (ETA - 1) / (RHO * C_CM_S**2) * np.sqrt(LAMBDA_OVER_CP / RHO) * rs
-             + perim / (WALL_B + s * WALL_M + WALL_K / s))
-        g2l2 = z * y * l * l
-        g = np.sqrt(g2l2)
-        ch = np.cosh(g)
-        with np.errstate(invalid="ignore", divide="ignore"):
-            shc = np.where(np.abs(g) > 1e-8, np.sinh(g) / g, 1.0 + g2l2 / 6.0)
-        sb, sc = z * l * shc, y * l * shc
-        A, B, C, D = A * ch + B * sc, A * sb + B * ch, C * ch + D * sc, C * sb + D * ch
-    return A, B, C, D
+    """Full glottis-to-lips chain matrix at complex s, with every loss."""
+    return chain_matrix(s, shape)
 
 
 def source_impedance(s: np.ndarray, area_cm2: float, g: Glottis, flow: bool = True, subglottal: bool = True) -> np.ndarray:

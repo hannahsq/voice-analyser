@@ -182,29 +182,39 @@ def length_function(base: np.ndarray, pg: float = 0.0, pm: float = 0.0, rg: floa
 # ----------------------------------------------------------------------------- acoustics
 
 
-def _chain_cd(s: np.ndarray, shape: TubeShape, loss: float = 1.0) -> tuple[np.ndarray, np.ndarray]:
-    """C and D of the glottis-to-lips chain matrix at complex frequencies s (rad/s), any shape.
+def chain_matrix(s: np.ndarray, shape: TubeShape, loss: float = 1.0) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Glottis-to-lips chain matrix [[A, B], [C, D]] at complex frequencies s (rad/s), any shape.
 
     loss scales every loss term and the radiation load (0 = lossless tube, open at the lips).
     Sections use cosh(gl) and l sinhc(gl) forms, which are entire in gamma^2 = Z Y, so no branch choice is needed.
+    All sections are computed at once and their 2x2 matrices multiplied pairwise in order (a tree of about log2(N)
+    rounds instead of a loop over N sections: the same product, about 10x faster for the few points a pole search uses).
     """
-    s = np.asarray(s, complex)
+    s = np.asarray(s, complex)[None, :]
     rs = np.sqrt(s)  # principal branch; the cut (negative real axis) is far from the formant poles
-    A, B = np.ones_like(s), np.zeros_like(s)  # running product [[A, B], [C, D]], rows for P and U at the glottis
-    C, D = np.zeros_like(s), np.ones_like(s)
-    for area, l in zip(shape.areas, shape.lengths):
-        perim = shape.perimeter_factor * 2.0 * np.sqrt(np.pi * area)
-        z = s * RHO / area + loss * perim / area**2 * np.sqrt(RHO * MU) * rs
-        y = (s * area / (RHO * C_CM_S**2) + loss * perim * (ETA - 1) / (RHO * C_CM_S**2) * np.sqrt(LAMBDA_OVER_CP / RHO) * rs
-             + loss * perim / (WALL_B + s * WALL_M + WALL_K / s))
-        g2l2 = z * y * l * l
-        g = np.sqrt(g2l2)
-        ch = np.cosh(g)
-        with np.errstate(invalid="ignore", divide="ignore"):
-            shc = np.where(np.abs(g) > 1e-8, np.sinh(g) / g, 1.0 + g2l2 / 6.0)
-        sb, sc = z * l * shc, y * l * shc  # section [[ch, sb], [sc, ch]]
-        A, B, C, D = A * ch + B * sc, A * sb + B * ch, C * ch + D * sc, C * sb + D * ch
-    return C, D
+    area, l = np.asarray(shape.areas, float)[:, None], np.asarray(shape.lengths, float)[:, None]
+    perim = shape.perimeter_factor * 2.0 * np.sqrt(np.pi * area)
+    z = s * RHO / area + loss * perim / area**2 * np.sqrt(RHO * MU) * rs
+    y = (s * area / (RHO * C_CM_S**2) + loss * perim * (ETA - 1) / (RHO * C_CM_S**2) * np.sqrt(LAMBDA_OVER_CP / RHO) * rs
+         + loss * perim / (WALL_B + s * WALL_M + WALL_K / s))
+    g2l2 = z * y * l * l
+    g = np.sqrt(g2l2)
+    ch = np.cosh(g)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        shc = np.where(np.abs(g) > 1e-8, np.sinh(g) / g, 1.0 + g2l2 / 6.0)
+    A, B, C, D = ch, z * l * shc, y * l * shc, ch  # per section [[ch, sb], [sc, ch]], glottis first
+    while len(A) > 1:
+        if len(A) % 2:  # an identity section at the lips end keeps the pairs aligned
+            one, zero = np.ones_like(A[:1]), np.zeros_like(A[:1])
+            A, B, C, D = np.concatenate([A, one]), np.concatenate([B, zero]), np.concatenate([C, zero]), np.concatenate([D, one])
+        a1, b1, c1, d1, a2, b2, c2, d2 = A[0::2], B[0::2], C[0::2], D[0::2], A[1::2], B[1::2], C[1::2], D[1::2]
+        A, B, C, D = a1 * a2 + b1 * c2, a1 * b2 + b1 * d2, c1 * a2 + d1 * c2, c1 * b2 + d1 * d2
+    return A[0], B[0], C[0], D[0]
+
+
+def _chain_cd(s: np.ndarray, shape: TubeShape, loss: float = 1.0) -> tuple[np.ndarray, np.ndarray]:
+    """C and D of the glottis-to-lips chain matrix (`chain_matrix`)."""
+    return chain_matrix(s, shape, loss)[2:]
 
 
 def _radiation(s: np.ndarray, lip_area: float) -> np.ndarray:
