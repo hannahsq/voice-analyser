@@ -4,6 +4,7 @@
     va download <corpus>...|all    fetch, verify and extract public corpora into data.root
     va manifest <corpus>|all       scan a corpus under data.root and write its manifest
     va leakage                     run the leakage rules over data/manifests/
+    va tiers [--dev-copy IN OUT]   assign gold speakers to dev / semi / lockbox (eval/tiers.json); copy IN's dev rows to OUT
     va baselines [--only NAME...]  run/score baselines -> reports/baselines.md (cached in runs/)
     va config                      print the resolved config
 
@@ -110,6 +111,27 @@ def cmd_baselines(cfg: Config, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_tiers(cfg: Config, args: argparse.Namespace) -> int:
+    from .data.manifest import read_manifest, read_manifests, write_manifest
+    from .eval import tiers
+
+    if args.dev_copy:  # a manifest folder restricted to dev speakers, for the measure scripts
+        src, dst = map(Path, args.dev_copy)
+        t = tiers.load()
+        for path in sorted(src.glob("*.csv")):
+            rows = read_manifest(path)
+            kept = tiers.filter_rows(rows, ("dev",), t)
+            write_manifest(kept, dst / path.name)
+            print(f"{path.name}: {len(kept)} of {len(rows)} rows (dev speakers)")
+        return 0
+    if tiers.TIER_FILE.exists() and not args.force:
+        print(f"{tiers.TIER_FILE} exists: the assignment is fixed once made (--force rewrites it)")
+        return 1
+    speakers = tiers.write(read_manifests(cfg.data.manifests))
+    print(f"{len(speakers)} gold speakers assigned -> {tiers.TIER_FILE}")
+    return 0
+
+
 def cmd_leakage(cfg: Config, args: argparse.Namespace) -> int:
     from .data.manifest import read_manifests
     from .eval.leakage import check_leakage
@@ -207,6 +229,10 @@ def build_parser() -> argparse.ArgumentParser:
     d.add_argument("corpora", nargs="+", help="corpus names, or 'all'")
     d.set_defaults(fn=cmd_download)
     sub.add_parser("leakage", parents=[common]).set_defaults(fn=cmd_leakage)
+    tr = sub.add_parser("tiers", parents=[common], help="assign gold speakers to evaluation tiers (decisions D-024)")
+    tr.add_argument("--dev-copy", nargs=2, metavar=("IN", "OUT"), help="write IN's manifests restricted to dev speakers to OUT")
+    tr.add_argument("--force", action="store_true", help="rewrite an existing assignment")
+    tr.set_defaults(fn=cmd_tiers)
     b = sub.add_parser("baselines", parents=[common])
     b.add_argument("--only", nargs="+", default=None, help="baseline names to run (default: all)")
     b.add_argument("--force", action="store_true", help="ignore cached predictions")
