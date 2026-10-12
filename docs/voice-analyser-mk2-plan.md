@@ -438,7 +438,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 ### M0: Foundations
 - [x] Repo skeleton, config system, CLI entry points.
-- [ ] Manifests for all corpora (`path, corpus, speaker_id, split, sr, duration, licence`) and the leakage test (§6.4). *Gold sets and the leakage test done; training-pool manifests come with those corpora (M3).*
+- [ ] Manifests for all corpora (`path, corpus, speaker_id, split, sr, duration, licence`) and the leakage test (§6.4). *Gold sets, VocalSet and the leakage test done; M4Singer, Zeroth-Korean and Common Voice manifests, and registering OPENGLOT, Saarbrücken and MOCHA-TIMIT as evaluation corpora, still to do (status 2026-10-12).*
 - [x] Gold-set loaders: Hillenbrand, PTDB-TUG, MIR-1K, MDB-stem-synth (all verified on real data). VTR-TIMIT deferred: no LDC licence.
 - [x] Metrics (§6.2) with unit tests on hand-computed cases; bootstrap intervals by speaker.
 - [x] Baselines (§6.5) written to `reports/baselines.md` by a single command (`va baselines`). Formants: Praat defaults, §5.4 sweep, FastTrack-faithful, TVLP. f0: PESTO, CREPE, Praat autocorrelation, plus PTDB-TUG phonation subsets from the laryngograph (decisions D-008, D-009).
@@ -453,11 +453,11 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 
 **Accept when:** on the synthetic `reference` suite case, F1–F3 detection rate ≥ 95 % and f0 RPA ≥ 99 %; gold-set results reported against all baselines with bootstrap intervals; the sim-to-real gap documented per f0 band. *Revised after teacher v1's results (decisions D-014); v1 meets it (99.3 / 99.6 / 98.1 %, RPA 99.9 %).* ~~Teacher v1 beats Praat defaults on Hillenbrand (MAE and detection rate; VTR deferred, no TIMIT licence), and the sim-to-real gap is documented per f0 band.~~ Outcome against the original: met for F2–F4 (F3 MAE tied), not for F1 (MAE 37 vs 18 Hz).
 
-### M2: Synthetic data iteration, teacher v2
+### M2: Synthetic data iteration, teacher v2 *(closed without acceptance: the women's and children's F1 criterion was not met; shortfall recorded in D-019 and D-024, M3 proceeds, decided 2026-10-11)*
 - [x] Story area-function tube tract and ffmpeg codec augmentation (decisions D-011).
 - [x] f0 × tract-length coverage, F1 band, formants on whispered frames, new suite cases (D-012).
 - [x] WSD schedule with decay branches at 6k / 16k / 26k / 36k steps (D-013).
-- [ ] Teacher v2 trained on `train_v2`; branches scored on the fixed validation sets, the suite and the gold sets.
+- [x] Teacher v2 trained on `train_v2`; branches scored on the fixed validation sets, the suite and the gold sets. *Stopped at 20k with d06k and d16k branches (D-020; `reports/teacher_v2_d06k.md`, `teacher_v2_d16k.md`); the 26k and 36k branches were dropped. Follow-up ablations: train_v3a/v3b tract priors (D-020, D-022), Conformer and mixed crop lengths (D-021, D-024), coupled synthesis `train_v2c` (D-024).*
 
 **Accept when** (set before any gold-set or decayed-branch result of v2 existed; decisions D-014), comparing the chosen v2 branch with v1 in the same report:
 - Hillenbrand F1 MAE for women and children improves beyond bootstrap noise.
@@ -466,10 +466,11 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 - `whisper` suite case: F1–F2 DR ≥ 85 % and voicing accuracy ≥ 95 %. `adult_high_f0`: F1 DR higher than v1's.
 
 ### M3: Resynthesis labeller, teacher v3
-- [ ] Training-pool corpora (§5.6) downloaded, licences recorded, manifests and leakage test extended.
-- [ ] Inverse filtering (IAIF; QCP later), track smoothing and perturbation, time-varying resonator cascade, QC, and label export including source H1–H2. *Implemented and tested on synthetic voices (`va resynth`, decisions D-016); the QC threshold is still to be calibrated on real data; f0 and voicing losses are masked on resynthesised clips.*
-- [ ] Resynthesised speech and singing corpora.
-- [ ] Teacher v3 trained on synthetic + resynthesised data.
+*Status 2026-10-12: in progress (singing only so far).*
+- [ ] Training-pool corpora (§5.6) downloaded, licences recorded, manifests and leakage test extended. *Partly done: VocalSet, M4Singer, Zeroth-Korean and Common Voice Korean are on disk with licences recorded (D-015, D-017, `ATTRIBUTION.md`); only VocalSet has a manifest. VCTK and LibriTTS-R not downloaded.*
+- [x] Inverse filtering (IAIF; QCP later), track smoothing and perturbation, time-varying resonator cascade, QC, and label export including source H1–H2. *`va resynth` (D-016). QC weights clips by `tract_left` rather than rejecting on one threshold (D-016's VocalSet trial; `TRACT_LEFT_WEIGHT`); f0 and voicing losses are masked on resynthesised clips. Open: QCP, the singer's-formant cluster surviving inverse filtering at high f0 (D-016), coupling in the resynthesis.*
+- [ ] Resynthesised speech and singing corpora. *Singing done: VocalSet train and val, tracked by teacher_v2_d16k (`data/resynth/vocalset_{train,val}_d16k`, 10,888 / 3,800 clips). Speech: none yet (Zeroth-Korean next).*
+- [ ] Teacher v3 trained on synthetic + resynthesised data. *Started: three S2 Conformer seeds on train_v2 + 30 % resynthesised VocalSet passed the pre-registered no-degradation rule (`decide_m3_s2.txt`); full-size Conformer `conformer_m3_d06k` measured on dev, d16k branch to do. No full-size Conformer on train_v2 alone yet, so architecture and data aren't separated.*
 - [ ] Iseli–Alwan validation with predicted F/B, by f0 band.
 - [ ] Settle the women's and children's F1 offset of M1/M2 (decisions D-012): with exact labels on real voices, measure how much is the model and how much is Hillenbrand's LPC-based reference.
 

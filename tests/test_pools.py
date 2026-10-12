@@ -36,7 +36,34 @@ def test_vocalset_scan_rejects_unknown_test_singer(tmp_path):
 
 
 def test_pool_registry():
-    assert "vocalset" in registry()
+    assert {"vocalset", "zeroth_korean"} <= set(registry())
+
+
+def _zeroth_tree(root, train=("106", "107"), test=("003",)):
+    for d, spks in (("train_data_01", train), ("test_data_01", test)):
+        for spk in spks:
+            p = root / d / "003" / spk
+            p.mkdir(parents=True)
+            sf.write(p / f"{spk}_003_0001.flac", np.zeros(1600, np.float32), 16000)
+    (root / "AUDIO_INFO").write_text("SPEAKERID|NAME|SEX|SCRIPTID|DATASET\n")
+
+
+def test_zeroth_scan_splits_and_ids(tmp_path):
+    from vocal_analysis.data.pools import zeroth_korean
+
+    _zeroth_tree(tmp_path)
+    rows = zeroth_korean.scan(tmp_path)
+    assert {r.speaker_id: r.split for r in rows} == {"zeroth_korean:106": "train", "zeroth_korean:107": "train",
+                                                     "zeroth_korean:003": "val"}
+    assert rows[0].sr == 16000 and rows[0].duration == pytest.approx(0.1) and check_leakage(rows).ok
+
+
+def test_zeroth_scan_rejects_shared_speaker(tmp_path):
+    from vocal_analysis.data.pools import zeroth_korean
+
+    _zeroth_tree(tmp_path, train=("106",), test=("106",))
+    with pytest.raises(ValueError, match="106"):
+        zeroth_korean.scan(tmp_path)
 
 
 def test_vocalset_resynth_skips_lip_trills():

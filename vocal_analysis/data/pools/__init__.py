@@ -11,6 +11,6 @@ from types import ModuleType
 
 
 def registry() -> dict[str, ModuleType]:
-    from . import vocalset
+    from . import vocalset, zeroth_korean
 
-    return {m.CORPUS: m for m in (vocalset,)}
+    return {m.CORPUS: m for m in (vocalset, zeroth_korean)}
