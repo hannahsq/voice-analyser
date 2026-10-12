@@ -88,6 +88,9 @@ class SynthConfig:
     # per clip, every shift is multiplied by this: the model's open-glottis shifts are uncertain (D-023: its F2-F3
     # shifts exceed what LPC studies find), and the labels don't depend on them, so the teacher sees the whole range
     coupling_scale: tuple[float, float] = (0.0, 1.0)
+    # the lowest this many coupled poles take the model's full shift (scale 1) instead: F1 and B1's are checked against
+    # Barney et al. (2007) and Hanson's B1 increases, unlike F2-F3's (D-024, train_v2c2); 0 = all scaled (train_v2c)
+    coupling_full_poles: int = 0
 
 
 # How train_v1 and suite_v1 were generated, for fields added since (D-011, D-012). Pinning these
@@ -379,7 +382,11 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     if glottis is not None:  # per-target open-glottis shifts, with the same transitions as the formants
         steps = lambda key: np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.array([d[2][key][j] for d in drawn]), widths)  # noqa: E731
                                       for j in range(coupling.N_COUPLED)], 1)
-        coupled = {"df": steps("open_df") * c_scale, "bm": 1.0 + (steps("open_bm") - 1.0) * c_scale, "gap_offset": glottis.gap_offset}
+        sc = c_scale
+        if cfg.coupling_full_poles > 0:
+            sc = np.full(coupling.N_COUPLED, c_scale)
+            sc[:cfg.coupling_full_poles] = 1.0
+        coupled = {"df": steps("open_df") * sc, "bm": 1.0 + (steps("open_bm") - 1.0) * sc, "gap_offset": glottis.gap_offset}
     jitter, shimmer = rng.uniform(*cfg.jitter), rng.uniform(*cfg.shimmer_db)
     hnr = None if cfg.hnr_db is None else rng.uniform(*cfg.hnr_db)
     comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled)

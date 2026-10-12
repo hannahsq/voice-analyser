@@ -61,4 +61,8 @@ def test_coupled_clips_are_deterministic_and_keep_closed_glottis_labels():
                              pg=t0["pg_cm"], pm=t0["pm_cm"], perimeter_factor=a.meta["tube"]["speaker"]["perimeter_factor"])
     assert np.isclose(a.labels["formants"][0, 0], tube.poles(shape)[0][0], rtol=1e-6)
     assert generate(2, SynthConfig(p_tube=1.0, duration_s=(1.0, 1.0)), 7).meta["tube"]["glottis"] is None
+    # full-strength F1 changes the audio but not the draws or the labels
+    c = generate(2, SynthConfig(p_tube=1.0, p_coupling=1.0, duration_s=(1.0, 1.0), coupling_full_poles=1), 7)
+    assert c.meta["tube"] == a.meta["tube"] and np.array_equal(c.labels["formants"], a.labels["formants"], equal_nan=True)
+    assert not np.array_equal(c.audio, a.audio)
     assert FS == 16000
