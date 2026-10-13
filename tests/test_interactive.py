@@ -1,0 +1,87 @@
+"""Interactive glottal source (synth.interactive, D-026)."""
+
+import numpy as np
+import pytest
+
+from vocal_analysis.synth import interactive as it
+from vocal_analysis.synth import tube
+from vocal_analysis.synth.coupling import Glottis
+from vocal_analysis.synth.voice import glottal_opening
+
+FS = 16000
+
+
+@pytest.fixture(scope="module")
+def shape():
+    return tube.build_shape(*tube.STORY_VOWELS["A"], 17.5)
+
+
+@pytest.fixture(scope="module")
+def resp(shape):
+    return it.tract_responses(shape, FS)
+
+
+def _area(n, f0=120.0, oq=0.6, gap=0.0, peak=0.12):
+    return peak * glottal_opening(np.arange(n) * f0 / FS, np.full(n, oq), gap)
+
+
+def _render(area, resp, g, coupled=True):
+    nb = len(area) // 16 + 1
+    return it.render(area, [resp], np.zeros(nb, int), np.zeros(nb), g, coupled=coupled)
+
+
+def test_impulse_responses_match_the_tube(shape, resp):
+    f = np.fft.rfftfreq(4096, 1 / FS)
+    zf, hf = it.tract_frequency_responses(shape, f)
+    band = (f > 50) & (f < 7000)
+    ht = np.fft.rfft(resp.h, 4096)
+    assert np.max(np.abs(20 * np.log10(np.abs(ht[band]) / np.abs(hf[band])))) < 0.1
+    zt = np.fft.rfft(resp.z, 4096)
+    assert np.max(np.abs(zt[band] - zf[band])) < 0.01 * np.abs(zf[band]).max()
+    # the transfer is the one the labels come from: 1 at DC, peaks at the tube's poles
+    F, _ = tube.poles(shape)
+    assert abs(np.abs(hf[1]) - 1.0) < 0.05
+    assert abs(f[band][np.argmax(np.abs(hf[band]) * (f[band] < 1000))] - F[0]) < 2 * (f[1] - f[0])
+
+
+def test_uncoupled_flow_is_bernoulli_through_the_area(resp):
+    g = Glottis(0.12, 0.0, 1.4, 1e-4, 8000.0, 1.0)  # a thin glottis: inertance and viscosity negligible
+    area = _area(FS // 4)
+    u = _render(area, resp, g, coupled=False)["flow"]
+    assert np.allclose(u, area * np.sqrt(2 * 8000.0 / it.RHO), rtol=0.02, atol=1.0)
+
+
+def test_interaction_lowers_and_skews_the_flow(resp):
+    g = Glottis(0.12, 0.0, 1.4, 0.3, 8000.0, 1.0)
+    area = _area(FS)
+    per = FS // 120
+    out = {c: _render(area, resp, g, coupled=c)["flow"][FS // 2:] for c in (False, True)}
+    a = area[FS // 2:]
+    lag = {c: np.median([np.argmax(u[k * per:(k + 1) * per]) - np.argmax(a[k * per:(k + 1) * per]) for k in range(20)])
+           for c, u in out.items()}
+    assert out[True].max() < 0.9 * out[False].max()  # the tract's inertive load limits the flow
+    assert lag[True] > lag[False] + 5  # and delays its peak (skewing; about 0.8 ms here)
+    # formant ripple: the coupled flow's open phase carries energy near F1 that the uncoupled one lacks
+    spec = {c: np.abs(np.fft.rfft(np.diff(u) * np.hanning(len(u) - 1))) for c, u in out.items()}
+    f = np.fft.rfftfreq(len(out[True]) - 1, 1 / FS)
+    band = (f > 600) & (f < 1000)
+    assert spec[True][band].sum() / spec[True].sum() > spec[False][band].sum() / spec[False].sum()
+
+
+def test_closed_glottis_is_silent_and_rendering_is_finite(resp):
+    g = Glottis(0.12, 0.0, 1.4, 0.3, 8000.0, 1.0)
+    assert not _render(np.zeros(4000), resp, g)["pressure"].any()
+    o = _render(_area(FS // 2, f0=300.0, oq=0.9, gap=0.6, peak=0.3), resp, g)
+    assert np.isfinite(o["pressure"]).all() and np.isfinite(o["flow"]).all()
+
+
+def test_render_follows_targets(shape, resp):
+    """Two targets: block weights move the output from one tract's response to the other's."""
+    other = it.tract_responses(tube.build_shape(*tube.STORY_VOWELS["i"], 17.5), FS)
+    g = Glottis(0.12, 0.0, 1.4, 0.3, 8000.0, 1.0)
+    area = _area(FS)
+    nb = FS // 16 + 1
+    a = it.render(area, [resp, other], np.zeros(nb, int), np.zeros(nb), g)["pressure"]
+    b = it.render(area, [resp, other], np.zeros(nb, int), np.ones(nb), g)["pressure"]
+    c = it.render(area, [other], np.zeros(nb, int), np.zeros(nb), g)["pressure"]
+    assert not np.allclose(a, b) and np.allclose(b, c)
