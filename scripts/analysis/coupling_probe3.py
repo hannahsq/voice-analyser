@@ -16,7 +16,7 @@ from vocal_analysis.synth.voice import CTRL, FS, Trajectories, synthesize
 SPK = {"women": (15.0, (15 / 17.46) ** 2, (15 / 17.46) ** 0.3, 210.0), "men": (17.5, 1.0, 1.0, 120.0)}
 RDS, HNRS, PEAK, GAP = (1.0, 2.2), (30.0, 15.0, 8.0), 0.1, 0.3
 torch.set_num_threads(16)
-dev = torch.device("cpu")
+dev = torch.device(__import__("os").environ.get("VA_DEVICE", "cpu"))  # cuda: same readings, much faster
 models = {a.split("=", 1)[0]: load_teacher(a.split("=", 1)[1], dev)[0] for a in sys.argv[2:]}
 out = open(sys.argv[1], "w", encoding="utf-8")
 p = lambda *a: (print(*a, file=out, flush=True), print(*a, flush=True))  # noqa: E731

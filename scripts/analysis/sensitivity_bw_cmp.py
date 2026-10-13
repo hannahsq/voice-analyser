@@ -14,7 +14,7 @@ from vocal_analysis.synth import filters
 
 sys.stdout.reconfigure(encoding="utf-8")
 torch.set_num_threads(4)
-dev = torch.device("cpu")
+dev = torch.device(__import__("os").environ.get("VA_DEVICE", "cpu"))  # cuda: same readings, much faster
 models = {n: load_teacher(c, dev)[0] for n, c in (a.split("=", 1) for a in sys.argv[1:])}
 GROUPS = [("men f0 120", "men", 120.0), ("women f0 210", "women", 210.0), ("women f0 300", "women", 300.0)]
 F = [("baseline", {}), ("static B1 x2", {"b1_mult": 2.0}), ("static B1 x3", {"b1_mult": 3.0}),

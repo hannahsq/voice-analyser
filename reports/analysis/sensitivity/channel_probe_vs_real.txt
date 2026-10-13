@@ -1,0 +1,29 @@
+Per condition: probe F1 error (Hz); seed contrasts (real women: mix s1 - mean(s0,s2) = +14.7, m3 s0_d16k - s2_d16k = +12.2);
+Spearman rho of probe error with real bias (own sex), all 31 / Conformers only (20)
+
+men f0 120
+  none                     median    +0  mix s1-(s0,s2)    +0  m3 d16k s0-s2    -6  rho all +0.53  conformers +0.43
+  tilt -6 dB/oct           median   -12  mix s1-(s0,s2)    -4  m3 d16k s0-s2    +5  rho all +0.51  conformers +0.20
+  tilt -3 dB/oct           median    -6  mix s1-(s0,s2)    -4  m3 d16k s0-s2    -8  rho all +0.54  conformers +0.24
+  tilt +3 dB/oct           median    +4  mix s1-(s0,s2)    +6  m3 d16k s0-s2    +2  rho all +0.60  conformers +0.61
+  tilt +6 dB/oct           median    +2  mix s1-(s0,s2)    -8  m3 d16k s0-s2    +5  rho all +0.44  conformers +0.50
+  high-pass 150 Hz         median    -1  mix s1-(s0,s2)    +4  m3 d16k s0-s2    +4  rho all +0.56  conformers +0.60
+  high-pass 300 Hz         median    +6  mix s1-(s0,s2)   +14  m3 d16k s0-s2   +10  rho all +0.44  conformers +0.63
+  telephone 300-3400 Hz    median    +3  mix s1-(s0,s2)    +8  m3 d16k s0-s2    +4  rho all +0.27  conformers +0.34
+  low-pass 4 kHz           median    +0  mix s1-(s0,s2)    -2  m3 d16k s0-s2    -6  rho all +0.54  conformers +0.42
+  Rd 0.6 (pressed)         median    +4  mix s1-(s0,s2)    +2  m3 d16k s0-s2    +4  rho all +0.55  conformers +0.71
+  Rd 1.6                   median    -5  mix s1-(s0,s2)    -0  m3 d16k s0-s2    -1  rho all +0.53  conformers +0.30
+  Rd 2.4 (breathy)         median    -5  mix s1-(s0,s2)    -6  m3 d16k s0-s2    -4  rho all +0.57  conformers +0.28
+women f0 210
+  none                     median    +3  mix s1-(s0,s2)   -16  m3 d16k s0-s2   -12  rho all +0.13  conformers -0.25
+  tilt -6 dB/oct           median    -6  mix s1-(s0,s2)   -22  m3 d16k s0-s2   -11  rho all +0.08  conformers -0.21
+  tilt -3 dB/oct           median    -5  mix s1-(s0,s2)   -10  m3 d16k s0-s2   -14  rho all +0.16  conformers -0.18
+  tilt +3 dB/oct           median    +5  mix s1-(s0,s2)   -16  m3 d16k s0-s2    -3  rho all +0.13  conformers -0.23
+  tilt +6 dB/oct           median   +15  mix s1-(s0,s2)    -4  m3 d16k s0-s2    +6  rho all +0.13  conformers +0.03
+  high-pass 150 Hz         median    +3  mix s1-(s0,s2)   -17  m3 d16k s0-s2   -12  rho all +0.09  conformers -0.30
+  high-pass 300 Hz         median    +5  mix s1-(s0,s2)   -16  m3 d16k s0-s2   -13  rho all +0.00  conformers -0.34
+  telephone 300-3400 Hz    median    -1  mix s1-(s0,s2)   -18  m3 d16k s0-s2   -15  rho all -0.25  conformers -0.31
+  low-pass 4 kHz           median    +1  mix s1-(s0,s2)   -11  m3 d16k s0-s2   -15  rho all +0.16  conformers -0.25
+  Rd 0.6 (pressed)         median    +6  mix s1-(s0,s2)   -12  m3 d16k s0-s2    +4  rho all +0.12  conformers -0.11
+  Rd 1.6                   median    +5  mix s1-(s0,s2)   -26  m3 d16k s0-s2    -5  rho all +0.07  conformers -0.19
+  Rd 2.4 (breathy)         median    +1  mix s1-(s0,s2)   -28  m3 d16k s0-s2    -3  rho all +0.18  conformers -0.02

@@ -1,0 +1,61 @@
+31 models; real closed-phase F1 bias on PTDB-TUG dev (7743 frames valid for all)
+model                    women     men
+v1_s0                    +20.8   +18.1
+v1_s1                    +29.5   +30.5
+v1_s2                    +30.9   +25.4
+v2_s0                    +23.2   +15.9
+v2_s1                    +40.3   +37.5
+v2_s2                    +33.8   +29.2
+v3b_s0                   +42.0   +30.2
+v3b_s1                   +29.2   +26.6
+v3b_s2                   +42.5   +28.5
+conf_v2_s0               +24.6   +16.2
+mix_gru_s0               +21.2   +21.5
+longw_conformer_s0       +11.8    +7.2
+mix_conformer_s0         +12.6   +10.2
+mix_conformer_s1         +27.7   +17.2
+mix_conformer_s2         +13.3    +9.7
+v2c_conformer_s0         +15.6   +18.1
+v2c_conformer_s1         +20.2   +18.3
+v2c_conformer_s2          +8.4    +7.4
+v2c2_conformer_s0        +12.9   +14.7
+v2c2_conformer_s1        +16.2   +14.4
+v2c2_conformer_s2        +12.3   +10.0
+m3_conformer_s0          +21.2   +13.0
+m3_conformer_s1           +8.5   +10.9
+m3_conformer_s2          +17.2   +10.2
+m3_conformer_s0_d16k     +14.1   +12.0
+m3_conformer_s2_d16k      +1.9    +3.4
+d06k                     +13.9   +15.7
+d16k                     +17.3   +15.1
+conformer_m3_d06k         +7.1    +7.4
+conformer_m3_d16k        +12.6    +8.7
+conformer_v2_d16k        +15.5    +6.7
+
+Spearman rho of each probe feature with the real bias (permutation p, 2000)
+feature                                                    women             men
+bw men f0 120: baseline                           +0.61 (p 0.000)  +0.52 (p 0.003)
+bw men f0 120: static B1 x2 (change)              -0.02 (p 0.887)  +0.00 (p 1.000)
+bw men f0 120: static B1 x3 (change)              -0.05 (p 0.807)  +0.03 (p 0.863)
+bw men f0 120: open phase: B1 x3 (change)         -0.39 (p 0.029)  -0.28 (p 0.125)
+bw men f0 120: open phase: F1 +5 %, B1 x3 (change)  -0.56 (p 0.000)  -0.54 (p 0.003)
+bw women f0 210: baseline                         +0.13 (p 0.484)  +0.08 (p 0.632)
+bw women f0 210: static B1 x2 (change)            +0.36 (p 0.048)  +0.25 (p 0.188)
+bw women f0 210: static B1 x3 (change)            +0.19 (p 0.322)  +0.10 (p 0.589)
+bw women f0 210: open phase: B1 x3 (change)       +0.14 (p 0.427)  +0.04 (p 0.842)
+bw women f0 210: open phase: F1 +5 %, B1 x3 (change)  +0.12 (p 0.510)  +0.04 (p 0.807)
+bw women f0 300: baseline                         -0.27 (p 0.141)  -0.17 (p 0.361)
+bw women f0 300: static B1 x2 (change)            -0.33 (p 0.067)  -0.29 (p 0.113)
+bw women f0 300: static B1 x3 (change)            -0.36 (p 0.049)  -0.34 (p 0.054)
+bw women f0 300: open phase: B1 x3 (change)       -0.15 (p 0.398)  -0.23 (p 0.225)
+bw women f0 300: open phase: F1 +5 %, B1 x3 (change)  -0.20 (p 0.282)  -0.26 (p 0.167)
+cpl men: baseline Rd 1.0                          +0.29 (p 0.117)  +0.17 (p 0.379)
+cpl men: coupling, Rd 1.0 (change)                -0.22 (p 0.229)  -0.27 (p 0.135)
+cpl men: coupling, Rd 2.2 (change)                -0.14 (p 0.449)  -0.20 (p 0.272)
+cpl men: breathiness Rd 1.0 -> 2.2                +0.15 (p 0.408)  +0.05 (p 0.791)
+cpl men: noise HNR 30 -> 8, Rd 1.0                -0.03 (p 0.858)  -0.01 (p 0.965)
+cpl women: baseline Rd 1.0                        -0.10 (p 0.595)  -0.16 (p 0.394)
+cpl women: coupling, Rd 1.0 (change)              -0.60 (p 0.001)  -0.57 (p 0.000)
+cpl women: coupling, Rd 2.2 (change)              -0.43 (p 0.013)  -0.45 (p 0.010)
+cpl women: breathiness Rd 1.0 -> 2.2              +0.31 (p 0.094)  +0.32 (p 0.082)
+cpl women: noise HNR 30 -> 8, Rd 1.0              +0.10 (p 0.708)  -0.02 (p 0.979)
