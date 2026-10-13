@@ -1,6 +1,6 @@
 """Do the models read F1 high, and do seeds split as on real voices, when the source interacts with the tract (D-026)?
 Story's 10 vowels through `synth.interactive`, men (17.5 cm, f0 120) and women (15 cm, f0 210); Rd 1.0 / 2.0 (open
-quotient from the LF te); closed-phase gap 0 or Holmberg's (`coupling.gap_from_open_quotient`, offset -0.1); with the
+quotient from the LF te; Rosenberg area pulse, speed quotient 1.3); closed-phase gap 0 or Holmberg's (`coupling.gap_from_open_quotient`, offset -0.1); with the
 load (coupled) or without (the same area waveform and tract, no feedback: the control). Per model and condition: median
 over vowels of F1 minus the closed-glottis fR1 (the label). Then the seed contrasts (real-voice women: +14.7, +12.2,
 +11.8, +8.2, +12.7 Hz) and, across models, Spearman rho of each condition's error with the real closed-phase bias
@@ -18,7 +18,6 @@ from vocal_analysis.synth import interactive as it
 from vocal_analysis.synth import tube
 from vocal_analysis.synth.coupling import Glottis, gap_from_open_quotient
 from vocal_analysis.synth.glottal import open_phase
-from vocal_analysis.synth.voice import glottal_opening
 
 sys.stdout.reconfigure(encoding="utf-8")
 FS = 16000
@@ -52,7 +51,7 @@ for sex, (L, asc, phar, f0) in SPK.items():
         te = open_phase(rd)
         for gap_on in (False, True):
             gap = float(gap_from_open_quotient(te, g.gap_offset)) if gap_on else 0.0
-            area = g.peak_area_cm2 * glottal_opening(np.arange(n) * f0 / FS, np.full(n, te), gap)
+            area = g.peak_area_cm2 * it.area_pulse(np.arange(n) * f0 / FS, te, 1.3, gap)
             for coupled in (False, True):
                 errs = {k: [] for k in names}
                 for v in shapes:

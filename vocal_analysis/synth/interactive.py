@@ -32,6 +32,24 @@ N_IR = 1024  # impulse-response length at 16 kHz (64 ms: B1 >= 25 Hz decays by >
 N_FFT = 16384  # frequency grid for the responses (fine enough that the periodic responses don't wrap)
 
 
+def area_pulse(cycles: np.ndarray, te: np.ndarray | float, sq: np.ndarray | float = 1.3,
+               gap: np.ndarray | float = 0.0) -> np.ndarray:
+    """Glottal area per sample as a fraction of the peak: Rosenberg's (1971) type-C pulse over the open phase
+    (opening 0.5 (1 - cos(pi t / Tp)), closing cos(pi (t - Tp) / (2 Tn)), Tp / Tn = sq, Tp + Tn = te in cycles) on top
+    of the closed-phase gap. The closing branch ends with a finite slope, a corner at closure as the membranous folds
+    meet: the excitation that a smooth (sin^2) pulse lacks. With a sin^2 pulse and a gap the source spectrum had nulls
+    and fell 16-18 dB/oct, and every model read F1 25-40 Hz low (D-026); this pulse falls 7-11 dB/oct like the LF
+    derivative, and a gap raises H1-H2 as glottal chinks do."""
+    fr = np.asarray(cycles) % 1.0
+    te = np.broadcast_to(np.asarray(te, float), fr.shape)
+    sq = np.broadcast_to(np.asarray(sq, float), fr.shape)
+    tp = te * sq / (1.0 + sq)
+    tn = te - tp
+    a = np.where(fr < tp, 0.5 * (1.0 - np.cos(np.pi * fr / tp)),
+                 np.where(fr < te, np.cos(np.pi * (fr - tp) / (2.0 * tn)), 0.0))
+    return gap + (1.0 - gap) * a
+
+
 @dataclass
 class TractResponses:
     """Impulse responses of one tract shape at fs: z (N_IR,) load impedance at the glottis, tract plus subglottal

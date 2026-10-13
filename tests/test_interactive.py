@@ -6,7 +6,6 @@ import pytest
 from vocal_analysis.synth import interactive as it
 from vocal_analysis.synth import tube
 from vocal_analysis.synth.coupling import Glottis
-from vocal_analysis.synth.voice import glottal_opening
 
 FS = 16000
 
@@ -22,7 +21,7 @@ def resp(shape):
 
 
 def _area(n, f0=120.0, oq=0.6, gap=0.0, peak=0.12):
-    return peak * glottal_opening(np.arange(n) * f0 / FS, np.full(n, oq), gap)
+    return peak * it.area_pulse(np.arange(n) * f0 / FS, oq, 1.3, gap)
 
 
 def _render(area, resp, g, coupled=True):
@@ -85,3 +84,22 @@ def test_render_follows_targets(shape, resp):
     b = it.render(area, [resp, other], np.zeros(nb, int), np.ones(nb), g)["pressure"]
     c = it.render(area, [other], np.zeros(nb, int), np.zeros(nb), g)["pressure"]
     assert not np.allclose(a, b) and np.allclose(b, c)
+
+
+@pytest.mark.parametrize("gap", [0.0, 0.25, 0.43])
+def test_area_pulse_source_is_lf_like_with_a_gap(resp, gap):
+    """No spectral nulls and an LF-like roll-off at any gap (a smooth sin^2 pulse had both problems), and H1-H2
+    rises with the gap."""
+    g = Glottis(0.073, 0.0, 1.2, 0.26, 8000.0, 1.0)
+    f0, per = 210.0, FS / 210.0
+
+    def h(gap):
+        u = _render(_area(FS, f0=f0, oq=0.65, gap=gap, peak=0.073), resp, g, coupled=False)["flow"]
+        seg = np.diff(u)[FS // 2:FS // 2 + int(per * 20)]
+        X = np.abs(np.fft.rfft(seg * np.hanning(len(seg))))
+        f = np.fft.rfftfreq(len(seg), 1 / FS)
+        return np.array([20 * np.log10(X[np.argmin(np.abs(f - k * f0))]) for k in range(1, 11)])
+    x = h(gap) - h(gap)[0]
+    assert x[1:].min() > -35 and -14 < (x[9] - x[1]) / np.log2(5) < -5
+    if gap > 0:
+        assert -x[1] > -(h(0.0) - h(0.0)[0])[1] + 1.5
