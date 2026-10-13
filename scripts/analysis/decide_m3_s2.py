@@ -5,7 +5,8 @@ closed-phase frames. No degradation when all hold:
   Hillenbrand F1 MAE all <= +3 Hz, F2 MAE all <= +5 Hz, F3 MAE all <= +10 Hz;
   PTDB-TUG f0 RPA, all frames, >= -1.0 point;
   PTDB-TUG closed-phase F1, women's median |err| <= +5 Hz.
-Prints the table and, last, "DECISION: m3" (no degradation) or "DECISION: m2". Args: scratch dir, paired dir."""
+Prints the table and, last, "DECISION: m3" (no degradation) or "DECISION: m2". Args: scratch dir, paired dir, and
+optionally the base and test model prefixes (default mix_conformer m3_conformer; the same rule for later arms)."""
 import json
 import re
 import sys
@@ -15,13 +16,14 @@ import numpy as np
 
 sys.stdout.reconfigure(encoding="utf-8")
 S, P = Path(sys.argv[1]), Path(sys.argv[2])
+BASE, TEST = sys.argv[3:5] if len(sys.argv) > 4 else ("mix_conformer", "m3_conformer")
 tiers = json.load(open(Path(__file__).resolve().parents[2] / "vocal_analysis/eval/tiers.json"))["speakers"]
 LIMITS = {"F1 MAE all": 3.0, "F2 MAE all": 5.0, "F3 MAE all": 10.0}
 diffs = {k: [] for k in (*LIMITS, "RPA all frames", "cp women |err|")}
 d = dict(np.load(S / "ptdb_egg_sub.npz", allow_pickle=True))
 dev = np.array([tiers.get(str(s) if ":" in str(s) else f"ptdb_tug:{s}") == "dev" for s in d["speaker"]])
 for k in range(3):
-    a, b = f"mix_conformer_s{k}", f"m3_conformer_s{k}"
+    a, b = f"{BASE}_s{k}", f"{TEST}_s{k}"
     txt = (P / f"{a}_vs_{b}.txt").read_text(encoding="utf-8")
     for key in LIMITS:
         diffs[key].append(float(re.search(rf"{key}\s*:.*?diff\s+([+-][\d.]+)", txt).group(1)))

@@ -4,6 +4,17 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
 
 ## Now
 
+*Updated 2026-10-13 evening. Results and reasoning are in D-024 to D-026 (decisions.md).*
+
+**Queued (2026-10-13 to about 2026-10-16; chains wait on each other through `runs/orchestrator.log`)**
+1. `v2i_chain.sh`: three v2t seeds, closed-phase v2i / v2t / mix, identity test ("v2i: done").
+2. `v2i_d16k_chain.sh`: v2i s0 and s1 to d16k (does longer training again trade F1 MAE for F3 / F4 and bias?).
+3. `v2i_day1_chain.sh`: seeds 3-5 for mix, v2i and v2t; `decide_v2i.py` (pre-registered, D-026); a full-size Conformer on the carried set to d16k against `conformer_v2_d16k`.
+4. `m3_speech_chain.sh`: Zeroth-Korean resynthesis (rendering now) into M3: S2 base + VocalSet and base + VocalSet + Zeroth, the M3 no-degradation rule, the teacher v3 candidate at full size, then a second full-size seed of the main comparison.
+Alongside (no GPU): automate the identity-resynthesis acceptance test; Iseli-Alwan validation and the women's / children's F1 offset on resynthesised VocalSet val (M3 items).
+
+## Earlier state (2026-10-11)
+
 *Handover, 2026-10-11 evening. Results and reasoning are in D-023 and D-024 (decisions.md); this section is the state of play.*
 
 **In flight (night of 2026-10-11/12; everything stops at 06:50, machine free by 07:00)**
