@@ -1,0 +1,38 @@
+  [mix_conformer_s5/hillenbrand] 400/1668
+  [mix_conformer_s5/hillenbrand] 800/1668
+  [mix_conformer_s5/hillenbrand] 1200/1668
+  [mix_conformer_s5/hillenbrand] 1600/1668
+  [mix_conformer_s5/ptdb_tug] 250/1579  (RTF 0.006)
+  [mix_conformer_s5/ptdb_tug] 500/1579  (RTF 0.006)
+  [mix_conformer_s5/ptdb_tug] 750/1579  (RTF 0.006)
+  [mix_conformer_s5/ptdb_tug] 1000/1579  (RTF 0.006)
+  [mix_conformer_s5/ptdb_tug] 1250/1579  (RTF 0.006)
+  [mix_conformer_s5/ptdb_tug] 1500/1579  (RTF 0.006)
+  [v2i_conformer_s5/hillenbrand] 400/1668
+  [v2i_conformer_s5/hillenbrand] 800/1668
+  [v2i_conformer_s5/hillenbrand] 1200/1668
+  [v2i_conformer_s5/hillenbrand] 1600/1668
+  [v2i_conformer_s5/ptdb_tug] 250/1579  (RTF 0.006)
+  [v2i_conformer_s5/ptdb_tug] 500/1579  (RTF 0.006)
+  [v2i_conformer_s5/ptdb_tug] 750/1579  (RTF 0.006)
+  [v2i_conformer_s5/ptdb_tug] 1000/1579  (RTF 0.006)
+  [v2i_conformer_s5/ptdb_tug] 1250/1579  (RTF 0.006)
+  [v2i_conformer_s5/ptdb_tug] 1500/1579  (RTF 0.006)
+tiers: dev
+
+Hillenbrand, mix_conformer_s5 vs v2i_conformer_s5 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    43.4    39.8  diff   -3.6 [-7.5, +0.3]  within noise
+  F1 MAE children:    52.5    45.1  diff   -7.3 [-9.9, -4.8]  better
+  F1 MAE men     :    25.6    26.7  diff   +1.1 [-0.3, +2.7]  within noise
+  F1 MAE all     :    40.6    37.3  diff   -3.3 [-5.1, -1.5]  better
+  F2 MAE all     :    51.0    56.2  diff   +5.2 [+1.1, +10.4]  WORSE
+  F2 DR  all     :    97.6    97.7  diff   +0.1 [-0.5, +0.6]  within noise
+  F3 MAE all     :    89.7   100.0  diff  +10.2 [-0.1, +20.9]  within noise
+  F3 DR  all     :    94.6    93.5  diff   -1.2 [-2.3, -0.1]  WORSE
+  F4 MAE all     :   147.1   215.2  diff  +68.2 [+43.6, +97.6]  WORSE
+  F4 DR  all     :    88.8    79.1  diff   -9.8 [-13.0, -6.9]  WORSE
+
+PTDB-TUG f0 RPA, mix_conformer_s5 vs v2i_conformer_s5
+  all frames    :  84.6  86.3  diff  +1.7 [+0.5, +2.7]  better  (n 154653)
+  modal         :  91.7  92.7  diff  +1.0 [-0.1, +1.9]  within noise  (n 126992)
+  modal < 85 Hz :  84.0  81.8  diff  -2.2 [-4.0, +1.2]  within noise  (n 11014)
