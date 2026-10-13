@@ -103,3 +103,30 @@ def test_area_pulse_source_is_lf_like_with_a_gap(resp, gap):
     assert x[1:].min() > -35 and -14 < (x[9] - x[1]) / np.log2(5) < -5
     if gap > 0:
         assert -x[1] > -(h(0.0) - h(0.0)[0])[1] + 1.5
+
+
+def test_sampler_interactive_clips():
+    from vocal_analysis.synth.sampler import SynthConfig, generate
+
+    cfg = SynthConfig(p_tube=1.0, p_interactive=1.0, p_subglottal=0.0, duration_s=(1.0, 1.0))
+    a, b = generate(3, cfg, 5), generate(3, cfg, 5)
+    assert np.array_equal(a.audio, b.audio) and np.isfinite(a.audio).all()
+    m = a.meta["tube"]
+    assert m["interactive"] and m["glottis"] is not None and "open_df" not in m["targets"][0]
+    # at the start (before any transition) the labels are the first target's closed-glottis tube poles,
+    # with the tube's own bandwidths
+    spk = m["speaker"]
+    t0 = m["targets"][0]
+    shape = tube.build_shape(t0["q1"], t0["q2"], spk["length_cm"], pharynx_ratio=spk["pharynx_ratio"],
+                             area_scale=spk["area_scale"], omega_warp=np.array(spk["omega_warp"]), constrict=t0.get("constrict"),
+                             pg=t0["pg_cm"], pm=t0["pm_cm"], perimeter_factor=spk["perimeter_factor"])
+    F, B = tube.poles(shape)
+    assert np.allclose(a.labels["formants"][0, :3], F[:3], rtol=1e-6)
+    assert np.allclose(a.labels["bandwidths"][0, :3], B[:3], rtol=1e-6)
+    assert np.isnan(a.labels["source_h_db"]).all()
+    # the control arm: same draws and labels, no feedback, different audio
+    c = generate(3, SynthConfig(p_tube=1.0, p_interactive=1.0, p_subglottal=0.0, duration_s=(1.0, 1.0),
+                                interactive_coupled=False), 5)
+    assert np.array_equal(c.labels["formants"], a.labels["formants"], equal_nan=True) and not np.allclose(c.audio, a.audio)
+    # off by default: no interactive clips and no extra draws
+    assert not generate(3, SynthConfig(p_tube=1.0, duration_s=(1.0, 1.0)), 5).meta["tube"]["interactive"]

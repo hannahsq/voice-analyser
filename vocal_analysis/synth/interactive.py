@@ -29,7 +29,7 @@ from .tube import MU, RHO, TubeShape, _radiation, chain_matrix
 
 KT = 1.0  # transglottal kinetic pressure coefficient (Bernoulli; Titze 2006 uses about 1)
 N_IR = 1024  # impulse-response length at 16 kHz (64 ms: B1 >= 25 Hz decays by >= 60 dB)
-N_FFT = 16384  # frequency grid for the responses (fine enough that the periodic responses don't wrap)
+N_FFT = 8192  # frequency grid for the responses (16384 gives the same responses to 1e-8)
 
 
 def area_pulse(cycles: np.ndarray, te: np.ndarray | float, sq: np.ndarray | float = 1.3,
@@ -136,6 +136,27 @@ def _render(area, p_lung, z, h, block, w, ctrl, kt, depth, length_g, rho, mu, fs
     return ug, ul
 
 
+@njit(cache=True)
+def _convolve_tv(x, h, block, w, ctrl):
+    """x through the blended responses h (T, K) as in `_render` (no feedback): noise sources at the glottis."""
+    n = len(x)
+    K = h.shape[1]
+    y = np.zeros(n)
+    hc = np.empty(K)
+    for i in range(n):
+        b = i // ctrl
+        if i % ctrl == 0:
+            t0 = block[b]
+            t1 = min(t0 + 1, h.shape[0] - 1)
+            for k in range(K):
+                hc[k] = (1.0 - w[b]) * h[t0, k] + w[b] * h[t1, k]
+        s = 0.0
+        for k in range(min(K, i + 1)):
+            s += hc[k] * x[i - k]
+        y[i] = s
+    return y
+
+
 def render(area_cm2: np.ndarray, responses: list[TractResponses], block_target: np.ndarray, block_w: np.ndarray,
            glottis: Glottis, ctrl: int = 16, fs: float = 16000.0, coupled: bool = True,
            p_lung: np.ndarray | None = None) -> dict[str, np.ndarray]:
@@ -150,3 +171,70 @@ def render(area_cm2: np.ndarray, responses: list[TractResponses], block_target: 
     ug, ul = _render(np.asarray(area_cm2, float), pl, z, h, np.asarray(block_target, np.int64), np.asarray(block_w, float),
                      ctrl, KT, glottis.depth_cm, glottis.length_cm, RHO, MU, float(fs), coupled)
     return {"flow": ug, "lip_flow": ul, "pressure": np.diff(ul, prepend=0.0)}
+
+
+def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, block_w: np.ndarray, glottis: Glottis,
+               sq: float, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
+               hnr_db: float | None = None, extras: dict | None = None, fs: float = 16000.0,
+               coupled: bool = True) -> dict[str, np.ndarray]:
+    """The components of `voice.synthesize` with the interactive source (same Trajectories; its poles are ignored:
+    the tract is `responses`, blended per control block). The area is the Rosenberg pulse at the open quotient of
+    the clip's Rd (LF te), the closed-phase gap following it (`coupling.gap_from_open_quotient`), scaled by the
+    voice envelope (onsets and loudness open the glottis less). Aspiration (open-phase modulated) and whisper are
+    flow noise at the glottis through the same responses; frication is as in `voice.synthesize`. `extras` (nasal
+    and other pole-zero pairs, `tract.sample_extras`) filter every component afterwards."""
+    from scipy.signal import butter, sosfilt
+
+    from . import filters
+    from .coupling import gap_from_open_quotient
+    from .glottal import open_phase
+    from .voice import CTRL, _glottal_phase, _per_sample
+
+    n = traj.n_samples
+    f0_s = _per_sample(traj.f0)
+    n_periods = int(np.sum(f0_s) / fs * 1.1) + 16
+    jit = np.exp(rng.normal(0.0, jitter, n_periods)) if jitter > 0 else np.ones(n_periods)
+    shim = 10 ** (rng.normal(0.0, shimmer_db, n_periods) / 20) if shimmer_db > 0 else np.ones(n_periods)
+    cycles, period = _glottal_phase(f0_s, jit, float(fs))
+    rd = np.round(traj.rd, 2)
+    te_tab = {r: open_phase(float(r)) for r in np.unique(rd)}
+    te_s = _per_sample(np.array([te_tab[r] for r in rd]))
+    gap = gap_from_open_quotient(te_s, glottis.gap_offset)
+    va = _per_sample(traj.voice_amp)
+    va_n = va / va.max() if va.max() > 0 else va
+    pulse = area_pulse(cycles, te_s, sq, 0.0)
+    area = glottis.peak_area_cm2 * (gap + (1.0 - gap) * pulse) * va_n
+    bt, bw = np.asarray(block_target, np.int64), np.asarray(block_w, float)
+    out = {"voiced": render(area, responses, bt, bw, glottis, CTRL, fs, coupled)["pressure"] * shim[period], "cycles": cycles}
+    h = np.stack([r.h for r in responses])
+    if hnr_db is not None:
+        src = np.diff(rng.standard_normal(n + 1)) * (0.25 + 0.75 * pulse) * va
+        asp = _convolve_tv(src, h, bt, bw, CTRL)
+        on = va > 0.5 * va.max() if va.max() > 0 else np.zeros(n, bool)
+        if on.any():
+            ev, ea = np.mean(out["voiced"][on] ** 2), np.mean(asp[on] ** 2)
+            if ea > 0:
+                asp *= np.sqrt(ev / ea / 10 ** (hnr_db / 10))
+        out["aspiration"] = asp
+    wa = _per_sample(traj.whisper_amp)
+    if wa.any():
+        out["whisper"] = _convolve_tv(np.diff(rng.standard_normal(n + 1)) * wa, h, bt, bw, CTRL) * 0.05
+    fa = _per_sample(traj.fric_amp)
+    if fa.any():
+        sos = butter(4, rng.uniform(2000, 5000), "highpass", fs=fs, output="sos")
+        out["frication"] = sosfilt(sos, rng.standard_normal(n)) * fa * 0.05
+    if extras is not None and len(extras["extra_pole_f"]) + len(extras["extra_zero_f"]) > 0:
+        f = np.r_[extras["extra_pole_f"], extras["extra_zero_f"]]
+        b = np.r_[extras["extra_pole_b"], extras["extra_zero_b"]]
+        is_zero = np.r_[np.zeros(len(extras["extra_pole_f"]), bool), np.ones(len(extras["extra_zero_f"]), bool)]
+        for k in [k for k in out if k != "cycles"]:
+            out[k] = filters.filter_tv(out[k], np.repeat(f[:, None], n, 1), np.repeat(b[:, None], n, 1), fs, is_zero)
+    out["total"] = sum(v for k, v in out.items() if k != "cycles")
+    return out
+
+
+def blend_shapes(a: TubeShape, b: TubeShape, w: float) -> TubeShape:
+    """Area function between two articulations: diameters and tubelet lengths linear in w (Story's model is linear in
+    diameter), perimeter factor from a (the same speaker)."""
+    d = (1.0 - w) * np.sqrt(a.areas) + w * np.sqrt(b.areas)
+    return TubeShape(d * d, (1.0 - w) * a.lengths + w * b.lengths, a.perimeter_factor)

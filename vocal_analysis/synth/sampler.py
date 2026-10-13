@@ -12,6 +12,7 @@ from dataclasses import asdict, dataclass, field
 import numpy as np
 
 from . import coupling, tract, tube
+from . import interactive as interactive_source
 from .glottal import RD_MAX, RD_MIN, source_h_db
 from .voice import CTRL, FS, Trajectories, synthesize
 
@@ -91,6 +92,15 @@ class SynthConfig:
     # the lowest this many coupled poles take the model's full shift (scale 1) instead: F1 and B1's are checked against
     # Barney et al. (2007) and Hanson's B1 increases, unlike F2-F3's (D-024, train_v2c2); 0 = all scaled (train_v2c)
     coupling_full_poles: int = 0
+    # Interactive source (D-026), per tube clip: glottal flow from the glottal area and the tract's load
+    # (`interactive`), so the tract shapes the source. Replaces the quasi-static coupling on those clips. Labels are
+    # the tube's closed-glottis poles, with the area function interpolated through transitions (keyframes at quarter
+    # steps) so labels stay exact there; label bandwidths are the tube's own (the glottal losses the speaker's
+    # bw_scale stands in for now come from the interaction). Not with formant_constraint (it would move labels
+    # off the tube's poles).
+    p_interactive: float = 0.0
+    interactive_sq: tuple[float, float] = (0.9, 2.0)  # Rosenberg area pulse speed quotient, uniform per clip
+    interactive_coupled: bool = True  # False: the same clips with the load's feedback off (the control arm)
 
 
 # How train_v1 and suite_v1 were generated, for fields added since (D-011, D-012). Pinning these
@@ -249,6 +259,55 @@ def _constrain(rng, f: np.ndarray, f0: float, how: str, ratio: tuple[float, floa
     return out
 
 
+KEYFRAMES_PER_STEP = 4  # interactive tract: keyframes at quarter steps between articulatory targets
+
+
+def _target_shape(spk: tube.TubeSpeaker, info: dict) -> tube.TubeShape:
+    """The tube shape `tube.sample_target` drew (its info) for this speaker."""
+    return tube.build_shape(info["q1"], info["q2"], spk.length_cm, pharynx_ratio=spk.pharynx_ratio,
+                            area_scale=spk.area_scale, omega_warp=spk.omega_warp, constrict=info.get("constrict"),
+                            pg=info["pg_cm"], pm=info["pm_cm"], perimeter_factor=spk.perimeter_factor)
+
+
+def _interactive_tract(spk, drawn, tt, widths, n, glottis):
+    """Keyframed tract for the interactive source. The articulatory path (the fractional target index per control
+    point, with the formants' raised-cosine transitions) is sampled at quarter steps; each keyframe is the area
+    function blended between its two targets (`interactive.blend_shapes`), with its own impulse responses and poles.
+    Labels interpolate the keyframes' poles in log frequency; the source blends their responses linearly, so the
+    two agree to within a quarter step. Returns responses, per-control-point keyframe index and weight, and label
+    formants and bandwidths (n, N_POLES) (the tube's own bandwidths)."""
+    T = len(drawn)
+    shapes = [_target_shape(spk, d[2]) for d in drawn]
+    path = _raised_cosine_steps(n, np.array(tt[1:]), np.arange(T, dtype=float), widths) * KEYFRAMES_PER_STEP
+    n_kf = int(np.floor(path.max() + 1e-9)) + 2
+    n_kf = min(n_kf, (T - 1) * KEYFRAMES_PER_STEP + 1)
+    resp, kf_f, kf_b = [], [], []
+    for q in range(n_kf):
+        j, r = divmod(q, KEYFRAMES_PER_STEP)
+        if r == 0:
+            shape = shapes[j]
+            f, b = drawn[j][0], drawn[j][1] / spk.bw_scale
+        else:
+            shape = interactive_source.blend_shapes(shapes[j], shapes[j + 1], r / KEYFRAMES_PER_STEP)
+            f, b = np.full(tract.N_POLES, np.nan), np.full(tract.N_POLES, np.nan)
+            try:
+                pf, pb = tube.poles(shape, tract.F_MAX_HZ)
+                k = min(len(pf), tract.N_POLES)
+                f[:k], b[:k] = pf[:k], pb[:k]
+            except RuntimeError:  # rare: this keyframe's labels stay NaN (masked in the loss)
+                pass
+        resp.append(interactive_source.tract_responses(shape, FS, sub_scale=glottis.sub_scale))
+        kf_f.append(f)
+        kf_b.append(b)
+    kf_f, kf_b = np.log(np.array(kf_f)), np.log(np.array(kf_b))
+    block = np.minimum(np.floor(path).astype(np.int64), n_kf - 1)
+    w = np.where(block < n_kf - 1, path - block, 0.0)
+    nxt = np.minimum(block + 1, n_kf - 1)
+    formants = np.exp((1 - w)[:, None] * kf_f[block] + w[:, None] * kf_f[nxt])
+    bws = np.exp((1 - w)[:, None] * kf_b[block] + w[:, None] * kf_b[nxt])
+    return resp, block, w, formants, bws
+
+
 # ----------------------------------------------------------------------------- clip
 
 
@@ -330,20 +389,25 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         tt.append(pos)
     use_tube = cfg.p_tube > 0 and rng.random() < cfg.p_tube  # no draw at p_tube = 0, so cascade-only seeds reproduce
     tube_info, glottis, c_scale = None, None, None
+    interactive, area_sq = False, None
     if use_tube:
         spk = tube.sample_speaker(rng, length)
-        # no draw at p_coupling = 0, so earlier sets reproduce
-        if cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
+        # no draw at p_interactive = 0 or p_coupling = 0, so earlier sets reproduce
+        if cfg.p_interactive > 0 and cfg.formant_constraint is None and rng.random() < cfg.p_interactive:
+            interactive = True
+            glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
+            area_sq = float(rng.uniform(*cfg.interactive_sq))
+        elif cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
             glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
             c_scale = float(rng.uniform(*cfg.coupling_scale))
         q_draw = tube.vowel_q_sampler(tube.CONVERSATIONAL_VOWELS, tube.vowel_centres(length)) if cfg.vowel_dist == "conversational" else None
-        drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw, glottis=glottis)
-                 for _ in tt]
+        drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw,
+                                    glottis=None if interactive else glottis) for _ in tt]
         targets = np.array([d[0] for d in drawn])
         tube_bws = np.array([d[1] for d in drawn])
         tube_info = {"speaker": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in asdict(spk).items()},
                      "targets": [d[2] for d in drawn], "glottis": asdict(glottis) if glottis else None,
-                     "coupling_scale": c_scale}
+                     "coupling_scale": c_scale, "interactive": interactive, "area_sq": area_sq}
     else:
         targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster,
                                                   conversational=cfg.vowel_dist == "conversational") for _ in tt])
@@ -366,6 +430,9 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     logb = np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.log(np.nan_to_num(bw_targets[:, k], nan=100.0)), widths)
                      for k in range(tract.N_POLES)], 1)
     bws = np.where(np.isfinite(formants), np.exp(logb), np.nan)
+    if interactive:
+        kf_shapes, kf_block, kf_w, formants, bws = _interactive_tract(spk, drawn, tt, widths, n, glottis)
+        tube_info["n_keyframes"] = len(kf_shapes)
     extras = tract.sample_extras(rng, length, cfg.p_nasal, cfg.p_subglottal)
     n_ep, n_ez = len(extras["extra_pole_f"]), len(extras["extra_zero_f"])
 
@@ -379,7 +446,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         zeros_b=np.tile(extras["extra_zero_b"], (n, 1)).reshape(n, n_ez),
     )
     coupled = None
-    if glottis is not None:  # per-target open-glottis shifts, with the same transitions as the formants
+    if glottis is not None and not interactive:  # per-target open-glottis shifts, with the same transitions as the formants
         steps = lambda key: np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.array([d[2][key][j] for d in drawn]), widths)  # noqa: E731
                                       for j in range(coupling.N_COUPLED)], 1)
         sc = c_scale
@@ -389,7 +456,12 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         coupled = {"df": steps("open_df") * sc, "bm": 1.0 + (steps("open_bm") - 1.0) * sc, "gap_offset": glottis.gap_offset}
     jitter, shimmer = rng.uniform(*cfg.jitter), rng.uniform(*cfg.shimmer_db)
     hnr = None if cfg.hnr_db is None else rng.uniform(*cfg.hnr_db)
-    comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled)
+    if interactive:
+        comps = interactive_source.synthesize(traj, kf_shapes, kf_block, kf_w, glottis, area_sq, rng, jitter=jitter,
+                                              shimmer_db=shimmer, hnr_db=hnr, extras=extras,
+                                              coupled=cfg.interactive_coupled)
+    else:
+        comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled)
     audio = comps["total"]
     peak = np.max(np.abs(audio)) + 1e-12
     gain = 0.5 / peak
@@ -409,7 +481,9 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         "formants": formants[fi, :N_LABEL_FORMANTS],
         "bandwidths": bws[fi, :N_LABEL_FORMANTS],
         "rd": rd[fi],
-        "source_h_db": source_h_db(rd[fi], N_SOURCE_HARMONICS),
+        # LF harmonics; an interactive clip's source is not LF (and is shaped by the tract), so unknown there
+        "source_h_db": (np.full((len(fi), N_SOURCE_HARMONICS), np.nan) if interactive
+                        else source_h_db(rd[fi], N_SOURCE_HARMONICS)),
         "length_cm": np.full(len(fi), length),
     }
     meta = {
