@@ -292,12 +292,21 @@ def _interactive_tract(spk, drawn, tt, widths, n, glottis, sub_gain):
         else:
             shape = interactive_source.blend_shapes(shapes[j], shapes[j + 1], r / KEYFRAMES_PER_STEP)
             f, b = np.full(tract.N_POLES, np.nan), np.full(tract.N_POLES, np.nan)
-            try:
-                pf, pb = tube.poles(shape, tract.F_MAX_HZ)
-                k = min(len(pf), tract.N_POLES)
-                f[:k], b[:k] = pf[:k], pb[:k]
-            except RuntimeError:  # rare: this keyframe's labels stay NaN (masked in the loss)
-                pass
+            wq = r / KEYFRAMES_PER_STEP
+            (fa, ba), (fb, bb) = (drawn[j][0], drawn[j][1] / spk.bw_scale), (drawn[j + 1][0], drawn[j + 1][1] / spk.bw_scale)
+            both = np.isfinite(fa) & np.isfinite(fb)
+            try:  # Newton from the targets' poles (log-interpolated); the full search if that fails
+                pf, pb = tube.refine_poles(shape, np.exp((1 - wq) * np.log(fa[both]) + wq * np.log(fb[both])),
+                                           np.exp((1 - wq) * np.log(ba[both]) + wq * np.log(bb[both])))
+                keep = pf <= tract.F_MAX_HZ
+                f[:keep.sum()], b[:keep.sum()] = pf[keep], pb[keep]
+            except RuntimeError:
+                try:
+                    pf, pb = tube.poles(shape, tract.F_MAX_HZ)
+                    k = min(len(pf), tract.N_POLES)
+                    f[:k], b[:k] = pf[:k], pb[:k]
+                except RuntimeError:  # rare: this keyframe's labels stay NaN (masked in the loss)
+                    pass
         resp.append(interactive_source.tract_responses(shape, FS, sub_scale=glottis.sub_scale, sub_gain=sub_gain))
         kf_f.append(f)
         kf_b.append(b)

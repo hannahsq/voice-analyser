@@ -29,7 +29,7 @@ from .tube import MU, RHO, TubeShape, _radiation, chain_matrix
 
 KT = 1.0  # transglottal kinetic pressure coefficient (Bernoulli; Titze 2006 uses about 1)
 N_IR = 1024  # impulse-response length at 16 kHz (64 ms: B1 >= 25 Hz decays by >= 60 dB)
-N_FFT = 8192  # frequency grid for the responses (16384 gives the same responses to 1e-8)
+N_FFT = 2048  # frequency grid for the responses (7.8 Hz; 8192 changes them by ~1e-4 of the peak)
 
 
 def area_pulse(cycles: np.ndarray, te: np.ndarray | float, sq: np.ndarray | float = 1.3,

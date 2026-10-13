@@ -261,6 +261,31 @@ def poles(shape: TubeShape, f_max_hz: float = F_SEARCH_MAX_HZ, n_loss_steps: int
     return F[keep], Bw[keep]
 
 
+def refine_poles(shape: TubeShape, freqs: np.ndarray, bws: np.ndarray, tol_hz: float = 1e-6, max_iter: int = 40
+                 ) -> tuple[np.ndarray, np.ndarray]:
+    """Poles of a shape near given guesses (e.g. a neighbouring shape's poles), by Newton's method on the full lossy
+    denominator: no grid scan, so about 20x cheaper than `poles`. Raises RuntimeError when it does not converge, a
+    root moves more than 30 % or two guesses converge on the same root; the caller then falls back to `poles`."""
+    f0, b0 = np.asarray(freqs, float), np.asarray(bws, float)
+    s = -np.pi * b0 + 2j * np.pi * f0
+    n = len(s)
+    for _ in range(max_iter):
+        h = 1e-5 * np.abs(s)
+        d = _denominator(np.concatenate([s, s + h, s - h]), shape)
+        step = d[:n] / ((d[n:2 * n] - d[2 * n:]) / (2 * h))
+        s = s - step
+        if np.all(np.abs(step) < 2 * np.pi * tol_hz):
+            break
+    else:
+        raise RuntimeError("pole refinement did not converge")
+    F, Bw = s.imag / (2 * np.pi), -s.real / np.pi
+    gap = np.abs(s[:, None] - s[None, :]) + np.diag(np.full(n, np.inf))
+    if np.any(Bw <= 0) or np.any(np.abs(F / f0 - 1) > 0.3) or (n > 1 and gap.min() < 2 * np.pi * 1.0):
+        raise RuntimeError("pole refinement left its root")
+    order = np.argsort(F)
+    return F[order], Bw[order]
+
+
 def _continue_roots(shape: TubeShape, s: np.ndarray, n_loss_steps: int, tol_hz: float) -> tuple[np.ndarray, np.ndarray]:
     n = len(s)
     for loss in np.linspace(0.0, 1.0, n_loss_steps + 1)[1:]:
