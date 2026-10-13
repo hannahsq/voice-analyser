@@ -59,17 +59,18 @@ class TractResponses:
     h: np.ndarray
 
 
-def subglottal_impedance(s: np.ndarray, sub_scale: float = 1.0) -> np.ndarray:
+def subglottal_impedance(s: np.ndarray, sub_scale: float = 1.0, sub_gain: float = 1.0) -> np.ndarray:
     """Subglottal input impedance: parallel resonances at Ishizaka, Matsudaira & Kaneko's (1976) maxima, as
-    `coupling.source_impedance` uses them, scaled in frequency by sub_scale."""
+    `coupling.source_impedance` uses them, scaled in frequency by sub_scale and in magnitude by sub_gain."""
     z = np.zeros_like(s)
     for f, r, b in SUBGLOTTAL:
         w0, bw = 2 * np.pi * f * sub_scale, 2 * np.pi * b * sub_scale
-        z = z + r * bw * s / (s * s + bw * s + w0 * w0)
+        z = z + sub_gain * r * bw * s / (s * s + bw * s + w0 * w0)
     return z
 
 
-def tract_frequency_responses(shape: TubeShape, f_hz: np.ndarray, sub_scale: float | None = 1.0) -> tuple[np.ndarray, np.ndarray]:
+def tract_frequency_responses(shape: TubeShape, f_hz: np.ndarray, sub_scale: float | None = 1.0,
+                              sub_gain: float = 1.0) -> tuple[np.ndarray, np.ndarray]:
     """Load impedance at the glottis (tract input impedance plus subglottal; sub_scale None = no subglottal system)
     and U_lips / U_glottis, at real frequencies f_hz (Hz)."""
     s = 2j * np.pi * np.maximum(np.asarray(f_hz, float), 1e-3)
@@ -78,17 +79,17 @@ def tract_frequency_responses(shape: TubeShape, f_hz: np.ndarray, sub_scale: flo
     den = C * zr + D
     z = (A * zr + B) / den
     if sub_scale is not None:
-        z = z + subglottal_impedance(s, sub_scale)
+        z = z + subglottal_impedance(s, sub_scale, sub_gain)
     return z, 1.0 / den
 
 
 def tract_responses(shape: TubeShape, fs: float = 16000.0, sub_scale: float | None = 1.0, n_ir: int = N_IR,
-                    n_fft: int = N_FFT) -> TractResponses:
+                    n_fft: int = N_FFT, sub_gain: float = 1.0) -> TractResponses:
     """Impulse responses from the frequency responses sampled on an n_fft grid up to fs / 2. The tract and
     subglottal responses are causal and decay with their losses, so the periodic inverse transform is the
     (band-limited) impulse response to within its decay over n_fft samples."""
     f = np.fft.rfftfreq(n_fft, 1.0 / fs)
-    zf, hf = tract_frequency_responses(shape, f, sub_scale)
+    zf, hf = tract_frequency_responses(shape, f, sub_scale, sub_gain)
     # the Nyquist bin of a real sequence must be real: use its real part
     zf[-1], hf[-1] = zf[-1].real, hf[-1].real
     return TractResponses(np.fft.irfft(zf, n_fft)[:n_ir].copy(), np.fft.irfft(hf, n_fft)[:n_ir].copy())

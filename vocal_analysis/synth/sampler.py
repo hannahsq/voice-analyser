@@ -101,6 +101,8 @@ class SynthConfig:
     p_interactive: float = 0.0
     interactive_sq: tuple[float, float] = (0.9, 2.0)  # Rosenberg area pulse speed quotient, uniform per clip
     interactive_coupled: bool = True  # False: the same clips with the load's feedback off (the control arm)
+    # subglottal resonance strength between speakers: the subglottal impedance's magnitude x log-uniform in this range
+    interactive_sub_gain: tuple[float, float] = (0.5, 2.0)
 
 
 # How train_v1 and suite_v1 were generated, for fields added since (D-011, D-012). Pinning these
@@ -269,7 +271,7 @@ def _target_shape(spk: tube.TubeSpeaker, info: dict) -> tube.TubeShape:
                             pg=info["pg_cm"], pm=info["pm_cm"], perimeter_factor=spk.perimeter_factor)
 
 
-def _interactive_tract(spk, drawn, tt, widths, n, glottis):
+def _interactive_tract(spk, drawn, tt, widths, n, glottis, sub_gain):
     """Keyframed tract for the interactive source. The articulatory path (the fractional target index per control
     point, with the formants' raised-cosine transitions) is sampled at quarter steps; each keyframe is the area
     function blended between its two targets (`interactive.blend_shapes`), with its own impulse responses and poles.
@@ -296,7 +298,7 @@ def _interactive_tract(spk, drawn, tt, widths, n, glottis):
                 f[:k], b[:k] = pf[:k], pb[:k]
             except RuntimeError:  # rare: this keyframe's labels stay NaN (masked in the loss)
                 pass
-        resp.append(interactive_source.tract_responses(shape, FS, sub_scale=glottis.sub_scale))
+        resp.append(interactive_source.tract_responses(shape, FS, sub_scale=glottis.sub_scale, sub_gain=sub_gain))
         kf_f.append(f)
         kf_b.append(b)
     kf_f, kf_b = np.log(np.array(kf_f)), np.log(np.array(kf_b))
@@ -389,7 +391,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         tt.append(pos)
     use_tube = cfg.p_tube > 0 and rng.random() < cfg.p_tube  # no draw at p_tube = 0, so cascade-only seeds reproduce
     tube_info, glottis, c_scale = None, None, None
-    interactive, area_sq = False, None
+    interactive, area_sq, sub_gain = False, None, None
     if use_tube:
         spk = tube.sample_speaker(rng, length)
         # no draw at p_interactive = 0 or p_coupling = 0, so earlier sets reproduce
@@ -397,6 +399,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
             interactive = True
             glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
             area_sq = float(rng.uniform(*cfg.interactive_sq))
+            sub_gain = float(np.exp(rng.uniform(*np.log(cfg.interactive_sub_gain))))
         elif cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
             glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
             c_scale = float(rng.uniform(*cfg.coupling_scale))
@@ -407,7 +410,8 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         tube_bws = np.array([d[1] for d in drawn])
         tube_info = {"speaker": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in asdict(spk).items()},
                      "targets": [d[2] for d in drawn], "glottis": asdict(glottis) if glottis else None,
-                     "coupling_scale": c_scale, "interactive": interactive, "area_sq": area_sq}
+                     "coupling_scale": c_scale, "interactive": interactive, "area_sq": area_sq,
+                     "sub_gain": sub_gain}
     else:
         targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster,
                                                   conversational=cfg.vowel_dist == "conversational") for _ in tt])
@@ -431,9 +435,12 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
                      for k in range(tract.N_POLES)], 1)
     bws = np.where(np.isfinite(formants), np.exp(logb), np.nan)
     if interactive:
-        kf_shapes, kf_block, kf_w, formants, bws = _interactive_tract(spk, drawn, tt, widths, n, glottis)
+        kf_shapes, kf_block, kf_w, formants, bws = _interactive_tract(spk, drawn, tt, widths, n, glottis, sub_gain)
         tube_info["n_keyframes"] = len(kf_shapes)
     extras = tract.sample_extras(rng, length, cfg.p_nasal, cfg.p_subglottal)
+    if interactive:  # the load already has the subglottal resonances: keep only the nasal pair (drawn first)
+        keep = len(extras["extra_pole_f"]) % 3
+        extras = {k: v[:keep] for k, v in extras.items()}
     n_ep, n_ez = len(extras["extra_pole_f"]), len(extras["extra_zero_f"])
 
     traj = Trajectories(
