@@ -1,0 +1,39 @@
+Render check (D-026): Story's 10 vowels, static; label = closed-glottis poles
+
+Analytic: transfer magnitude peak minus pole (Hz), median over vowels, F1 / F2 / F3
+  men     +0.3 /   -0.2 /   +0.1
+  women   +0.2 /   -0.5 /   +0.1
+
+Models: F1 / F2 / F3 minus poles (Hz), median over vowels, mean over each arm's seeds
+  men   A cascade LF     : mix    +1    +9    -7   v2m    -9    -4   -20   v2md16k    -4    +3    -8   full    +1    +8    +3
+  men   B tube LF        : mix    +3    +0    -2   v2m    +4    +2    +5   v2md16k    +2    +2    -1   full    -1    +2    +6
+  men   C tube Rosenberg : mix    +5   +13    -5   v2m    +3    +4   -14   v2md16k    +9   +12    -2   full   +13   +14    +6
+  men   D C + feedback   : mix   +11   +16    +5   v2m    -1    +7    -5   v2md16k    +9   +11    +3   full   +15   +16   +16
+  women A cascade LF     : mix    -1    +5   -14   v2m   -15   -14   -20   v2md16k    -5   -11   -17   full    +1   -10    -3
+  women B tube LF        : mix    +3    +4   -13   v2m    -5    +2    -1   v2md16k    -5    +1    -3   full    -1    +1    -5
+  women C tube Rosenberg : mix    -6   +19   -16   v2m   -17   -13   -19   v2md16k    +3   -13   -11   full    +3    -4    +0
+  women D C + feedback   : mix    +8   +25    +5   v2m    -5    -6    -3   v2md16k    -4    +3   +11   full   +18    -2   +30
+
+Models: F1 / F2 / F3 minus poles (cents), median over vowels, mean over each arm's seeds
+  men   A cascade LF     : mix    +9   +13    -5   v2m   -21    -4   -13   v2md16k   -14    +4    -5   full    +3   +11    +2
+  men   B tube LF        : mix    +9    -0    -1   v2m   +15    +3    +3   v2md16k    +6    +2    -1   full    -4    +3    +4
+  men   C tube Rosenberg : mix   +14   +16    -3   v2m   +12    +5   -10   v2md16k   +27   +11    -2   full   +44   +14    +4
+  men   D C + feedback   : mix   +31   +21    +3   v2m    -1    +8    -4   v2md16k   +26   +16    +2   full   +41   +15   +10
+  women A cascade LF     : mix    +2    +6    -8   v2m   -35   -11   -11   v2md16k    -9   -10   -10   full    +2   -11    -2
+  women B tube LF        : mix    +6    +4    -7   v2m   -13    +2    -0   v2md16k   -13    +1    -2   full    -4    +1    -3
+  women C tube Rosenberg : mix    -9   +20    -9   v2m   -45   -10   -11   v2md16k    +9   -13    -6   full    +5    -4    +0
+  women D C + feedback   : mix   +22   +24    +3   v2m   -16    -7    -2   v2md16k    -8    +4    +6   full   +45    -1   +17
+
+Closed-phase reference on the renders (glottal area as EGG): F1 / F2 / F3 minus poles (Hz), median over vowels
+  men   C tube Rosenberg :  +12.1 /   +1.1 /   -0.5
+  men   D C + feedback   :   +1.3 /   +2.9 /   +2.4
+  women C tube Rosenberg :   -7.3 /   -5.6 /   -5.4
+  women D C + feedback   :   -0.1 /   +3.0 /   +0.7
+
+RENDER men -0.6 -12.9 +3.5
+RENDER women +4.4 -1.7 +0.8
+CPREF men C +12.1 +1.1 -0.5
+CPREF men D +1.3 +2.9 +2.4
+CPREF women C -7.3 -5.6 -5.4
+CPREF women D -0.1 +3.0 +0.7
+DECISION: mismatch
