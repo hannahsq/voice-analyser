@@ -8,7 +8,7 @@
 #    full-size base. Otherwise no candidate.
 # 3. Second full-size seed (seed 1) of the main comparison: conformer_v2 and the candidate (v3 if made, else the base
 #    set's full-size run, else conformer_m3), both to d16k, paired; identity test on all full-size models.
-# Args: scratch dir (closed-phase frames, prediction caches); optionally a base set (v2i / v2t / v2m / v2) and a log line
+# Args: scratch dir (closed-phase frames, prediction caches); optionally a base set (v2i / v2t / v2m / v2x / v2, or auto) and a log line
 # to wait for instead of the day-1 decision (2026-10-14: v2m after the dose arm, D-026).
 set -u
 S="$1"
@@ -54,9 +54,10 @@ until grep -q "$WAIT" $LOG && grep -q "zeroth: resynthesis" $LOG; do
 done
 grep -q "zeroth: resynthesis ready" $LOG || fail "zeroth resynthesis missing"
 DEC=${2:-$(sed -n 's/^DECISION: //p' $A/decide_v2i.txt)}
-[ "$DEC" = v2m ] && ! grep -q "v2m: DECISION: v2m" $LOG && { say "m3s: dose arm not carried forward; days 2-3 wait"; exit 0; }
+# "auto": the base select_base.py chose after the dose arms (D-026)
+[ "$DEC" = auto ] && DEC=$(sed -n 's/^DECISION: //p' $A/decide_base.txt)
 case "$DEC" in
-  v2i|v2t|v2m) BASE=${DEC}_conformer; DATA=data/synth/train_$DEC; ARM1=${DEC}r1_conformer; FBASE=conformer_$DEC ;;
+  v2i|v2t|v2m|v2x) BASE=${DEC}_conformer; DATA=data/synth/train_$DEC; ARM1=${DEC}r1_conformer; FBASE=conformer_$DEC ;;
   v2) BASE=mix_conformer; DATA=data/synth/train_v2; ARM1=m3_conformer; FBASE=conformer_v2 ;;
   *) say "m3s: day-1 decision '$DEC'; days 2-3 wait for the high-frequency fix"; exit 0 ;;
 esac
