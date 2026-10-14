@@ -101,6 +101,9 @@ class SynthConfig:
     p_interactive: float = 0.0
     interactive_sq: tuple[float, float] = (0.9, 2.0)  # Rosenberg area pulse speed quotient, uniform per clip
     interactive_coupled: bool = True  # False: the same clips with the load's feedback off (the control arm)
+    # per interactive clip, the chance the feedback is on (D-026: with it on for every Rosenberg clip, models learnt
+    # "Rosenberg source -> read lower" instead of detecting the interaction). 1.0 draws nothing, so earlier sets reproduce
+    p_interactive_coupled: float = 1.0
     # subglottal resonance strength between speakers: the subglottal impedance's magnitude x log-uniform in this range
     interactive_sub_gain: tuple[float, float] = (0.5, 2.0)
 
@@ -400,7 +403,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         tt.append(pos)
     use_tube = cfg.p_tube > 0 and rng.random() < cfg.p_tube  # no draw at p_tube = 0, so cascade-only seeds reproduce
     tube_info, glottis, c_scale = None, None, None
-    interactive, area_sq, sub_gain = False, None, None
+    interactive, area_sq, sub_gain, feedback = False, None, None, None
     if use_tube:
         spk = tube.sample_speaker(rng, length)
         # no draw at p_interactive = 0 or p_coupling = 0, so earlier sets reproduce
@@ -409,6 +412,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
             glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
             area_sq = float(rng.uniform(*cfg.interactive_sq))
             sub_gain = float(np.exp(rng.uniform(*np.log(cfg.interactive_sub_gain))))
+            feedback = cfg.interactive_coupled and (cfg.p_interactive_coupled >= 1 or rng.random() < cfg.p_interactive_coupled)
         elif cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
             glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
             c_scale = float(rng.uniform(*cfg.coupling_scale))
@@ -419,7 +423,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         tube_bws = np.array([d[1] for d in drawn])
         tube_info = {"speaker": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in asdict(spk).items()},
                      "targets": [d[2] for d in drawn], "glottis": asdict(glottis) if glottis else None,
-                     "coupling_scale": c_scale, "interactive": interactive, "area_sq": area_sq,
+                     "coupling_scale": c_scale, "interactive": interactive, "feedback": feedback, "area_sq": area_sq,
                      "sub_gain": sub_gain}
     else:
         targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster,
@@ -475,7 +479,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     if interactive:
         comps = interactive_source.synthesize(traj, kf_shapes, kf_block, kf_w, glottis, area_sq, rng, jitter=jitter,
                                               shimmer_db=shimmer, hnr_db=hnr, extras=extras,
-                                              coupled=cfg.interactive_coupled)
+                                              coupled=feedback)
     else:
         comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled)
     audio = comps["total"]
