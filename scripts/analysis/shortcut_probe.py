@@ -5,7 +5,8 @@ without the load's feedback. Per model, median over vowels of F1-F3 minus the cl
 Summary per arm (models named <arm>_s<k>; the reference arm, default mix, applies no correction):
   SHORTCUT <arm> = mean over sexes, pulses and F1-F3 of |error without feedback - the reference arm's|: the correction
     applied where there is nothing to correct (0 for a model that detects the feedback);
-  COUPLED <arm> = mean |error with feedback|, Rosenberg pulse only.
+  COUPLED <arm> = mean |error with feedback|, Rosenberg pulse only;
+  F3NOFB <arm> = mean over sexes of |F3 error|, Rosenberg pulse without feedback (D-026: the closure-sharpness target).
 The LF-derived pulse with feedback counts the interaction twice (`interactive.lf_area_pulse`), so its feedback rows
 are not a target; without feedback it reproduces the LF flow exactly, which is what SHORTCUT uses.
 Args: out file, reference arm, name=ckpt ... ($VA_DEVICE)."""
@@ -67,5 +68,7 @@ for a in arms:
                 cp.append(np.abs(mean))
         else:
             sc.append(np.abs(mean - np.mean([r[k] for k in models if arm[k] == ref_arm], 0)))
+    f3 = [abs(np.mean([res[sex, "Rosenberg", False][k] for k in models if arm[k] == a], 0)[2]) for sex in SPK]
     p(f"SHORTCUT {a} {np.mean(sc):.1f}")
+    p(f"F3NOFB {a} {np.mean(f3):.1f}")
     p(f"COUPLED {a} {np.mean(cp):.1f}")

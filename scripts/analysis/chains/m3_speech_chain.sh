@@ -57,7 +57,7 @@ DEC=${2:-$(sed -n 's/^DECISION: //p' $A/decide_v2i.txt)}
 # "auto": the base select_base.py chose after the dose arms (D-026)
 [ "$DEC" = auto ] && DEC=$(sed -n 's/^DECISION: //p' $A/decide_base.txt)
 case "$DEC" in
-  v2i|v2t|v2m|v2x) BASE=${DEC}_conformer; DATA=data/synth/train_$DEC; ARM1=${DEC}r1_conformer; FBASE=conformer_$DEC ;;
+  v2i|v2t|v2m|v2x|v2s) BASE=${DEC}_conformer; DATA=data/synth/train_$DEC; ARM1=${DEC}r1_conformer; FBASE=conformer_$DEC ;;
   v2) BASE=mix_conformer; DATA=data/synth/train_v2; ARM1=m3_conformer; FBASE=conformer_v2 ;;
   *) say "m3s: day-1 decision '$DEC'; days 2-3 wait for the high-frequency fix"; exit 0 ;;
 esac

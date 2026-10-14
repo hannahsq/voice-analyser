@@ -162,3 +162,35 @@ def test_sampler_lf_pulse_option_crosses_pulse_and_feedback():
         if t and t["interactive"]:
             seen.add((t["pulse"], t["feedback"]))
     assert seen == {("lf", True), ("lf", False), ("rosenberg", True), ("rosenberg", False)}
+
+
+def test_closure_sharpness():
+    cyc = np.linspace(0.0, 3.0, 3000, endpoint=False)
+    fr = cyc % 1.0
+    te, sq = 0.6, 1.3
+    tp = te * sq / (1 + sq)
+    tn = te - tp
+    rosenberg = np.where(fr < tp, 0.5 * (1 - np.cos(np.pi * fr / tp)), np.where(fr < te, np.cos(np.pi * (fr - tp) / (2 * tn)), 0.0))
+    assert np.allclose(it.area_pulse(cyc, te, sq, 0.0, 1.0), rosenberg)
+    sharp = it.area_pulse(cyc, te, sq, 0.0, 3.0)
+    assert np.all((sharp >= 0) & (sharp <= 1)) and np.allclose(sharp[fr < tp], rosenberg[fr < tp])
+    assert np.all(sharp[fr >= te] == 0.0)
+
+    def hf_share(a):  # the area derivative's harmonics 15-60 against 1-5 (3 cycles: harmonic k at bin 3k)
+        s = np.abs(np.fft.rfft(np.diff(a))) ** 2
+        return s[45:181:3].sum() / s[3:16:3].sum()
+
+    assert hf_share(sharp) > 2.0 * hf_share(rosenberg)
+
+
+def test_sampler_closure_option():
+    from dataclasses import replace
+
+    from vocal_analysis.synth.sampler import SynthConfig, generate
+
+    base = replace(SynthConfig(), p_interactive=1.0, p_interactive_coupled=0.5)
+    a = generate(4, base, 2)
+    assert a.meta["tube"] is None or not a.meta["tube"]["interactive"] or a.meta["tube"]["closure"] == 1.0
+    vals = [generate(i, replace(base, interactive_closure=(1.0, 3.0)), 2).meta["tube"] for i in range(12)]
+    vals = [t["closure"] for t in vals if t and t["interactive"]]
+    assert vals and all(1.0 <= v <= 3.0 for v in vals) and len(set(vals)) == len(vals)
