@@ -1,0 +1,12 @@
+tiers: dev
+PTDB-TUG dev f: 3867 frames, 6 speakers; F1 - closed phase, median signed (|err|)
+  conformer_v2_d16k     +15.5 ( 33.7)
+  conformer_v2_s1_d16k  +13.3 ( 32.2)
+  bias conformer_v2_s1_d16k - conformer_v2_d16k:  -1.4 [-4.7, +1.1]  per speaker [1, -5, 1, -3, -5, 0]
+PTDB-TUG dev m: 3876 frames, 6 speakers; F1 - closed phase, median signed (|err|)
+  conformer_v2_d16k      +6.7 ( 15.9)
+  conformer_v2_s1_d16k   +7.3 ( 16.7)
+  bias conformer_v2_s1_d16k - conformer_v2_d16k:  +1.1 [-1.6, +2.9]  per speaker [3, 2, 1, -1, -3, 1]
+ARCTIC bdl (2556 frames): conformer_v2_d16k +4  conformer_v2_s1_d16k +4
+ARCTIC jmk (1919 frames): conformer_v2_d16k +32  conformer_v2_s1_d16k +35
+ARCTIC slt (4421 frames): conformer_v2_d16k +6  conformer_v2_s1_d16k +8
