@@ -7,6 +7,10 @@
 #   2. dose arm, unless render_check.py said "mismatch" (then the renderer is looked at first, no arm): the better of
 #      v2m / v2s (smaller |d16k women's closed-phase F3 bias|) with the feedback on for 25 % of interactive clips
 #      (train_v2q from v2m, train_v2sq from v2s), through the same rule (decide_v2m.py).
+# Added the same day, still before select_base.py ran (render_check said "mismatch", so the dose arm won't run):
+#   1b. if mix's women's closed-phase F3 bias falls by 10 Hz or more from k35 to d16k (small models drift anyway),
+#      the better interactive set at full size to d16k, checked by decide_full.py (exploratory, not carried forward);
+#   3. then days 2-3 on the train_v2 base (m3_speech_chain.sh v2).
 # Waits for this run's "sharp: base DECISION" line. Arg: scratch dir.
 set -u
 S="$1"
@@ -73,6 +77,34 @@ closed ${N}_d16k $RD/ckpt_last.pt
 $PY -I $SA/cp_dev.py "$S" mix_conformer_s0,mix_conformer_s0_d16k,v2m_conformer_s0,v2m_conformer_s0_d16k,conformer_v2_d16k \
   mix_conformer_s0_d16k-mix_conformer_s0 v2m_conformer_s0_d16k-v2m_conformer_s0 > $A/closed_phase/cp_small_mix_d16k_dev.txt 2>&1 || fail "cp_dev mix d16k"
 say "fail: control mix_conformer_s0_d16k measured"
+$PY -I $SA/cp_bias.py "$S" mix_conformer_s0 mix_conformer_s0_d16k > $A/closed_phase/cp_bias_mix_d16k.txt 2>&1 || fail "cp_bias mix"
+f3b() { sed -n "s/^BIAS $1 f [^ ]* [^ ]* \([^ ]*\)$/\1/p" $A/closed_phase/cp_bias_mix_d16k.txt; }
+DRIFT=$($PY -c "print(f'{float(\"$(f3b mix_conformer_s0_d16k)\") - float(\"$(f3b mix_conformer_s0)\"):+.1f}')")
+say "fail: mix women's F3 bias k35 -> d16k $DRIFT Hz (full-size check if <= -10)"
+
+# 1b. full-size check (added 2026-10-15 before select_base ran): if small models drift down anyway, the better
+#     interactive set at full size, the d16k limits on one full-size model (decide_full.py; exploratory)
+if $PY -c "import sys; sys.exit(0 if float('$DRIFT') <= -10 else 1)"; then
+  R=runs/conformer_$FROM; RD=${R}_d16k; mkdir -p $R $RD
+  if [ ! -f $RD/ckpt_last.pt ]; then
+    say "fail: $R full-size Conformer (mixed crops) on train_$FROM, constant to 16000"
+    [ -f $R/ckpt_016000.pt ] || $VA train teacher --data data/synth/train_$FROM --steps 16000 --out $R --model-set temporal=conformer \
+      --workers 8 --train-set crop_frames=32,400 >> $R/train.log 2>&1 || fail "$R"
+    say "fail: $RD (decay 4000)"
+    $VA train teacher --branch-from $R/ckpt_016000.pt --decay-steps 4000 --workers 8 --out $RD >> $RD/train.log 2>&1 || fail "$RD"
+  fi
+  paired conformer_v2_d16k runs/conformer_v2_d16k/ckpt_last.pt conformer_${FROM}_d16k $RD/ckpt_last.pt
+  paired conformer_v2_s1_d16k runs/conformer_v2_s1_d16k/ckpt_last.pt conformer_${FROM}_d16k $RD/ckpt_last.pt
+  closed conformer_${FROM}_d16k $RD/ckpt_last.pt
+  $PY -I $SA/cp_dev.py "$S" d16k,conformer_v2_d16k,conformer_v2_s1_d16k,conformer_${FROM}_d16k \
+    conformer_${FROM}_d16k-conformer_v2_d16k conformer_${FROM}_d16k-conformer_v2_s1_d16k > $A/closed_phase/cp_conformer_${FROM}_d16k_dev.txt 2>&1 || fail "cp_dev conformer_$FROM"
+  VA_DEVICE=cuda $PY -u $SA/resynth_identity.py 120 d16k=runs/teacher_v2_d16k/ckpt_last.pt conformer_v2_d16k=runs/conformer_v2_d16k/ckpt_last.pt \
+    conformer_v2_s1_d16k=runs/conformer_v2_s1_d16k/ckpt_last.pt conformer_${FROM}_d16k=$RD/ckpt_last.pt \
+    > $A/sensitivity/resynth_identity_conformer_${FROM}.txt 2>&1 || fail "identity conformer_$FROM"
+  $PY -I $SA/decide_full.py "$S" conformer_${FROM}_d16k $A/sensitivity/resynth_identity_conformer_${FROM}.txt conformer_${FROM}_d16k \
+    > $A/decide_full_${FROM}.txt 2>&1 || fail "decide_full $FROM"
+  say "fail: full-size conformer_${FROM}_d16k DECISION: $(sed -n 's/^DECISION: //p' $A/decide_full_${FROM}.txt)"
+fi
 
 # 2. dose arm
 if [ -n "$RENDER" ]; then
@@ -119,3 +151,9 @@ if [ "$VERDICT" != mismatch ]; then
   say "fail: $DOSE DECISION: $(sed -n 's/^DECISION: //p' $A/decide_$DOSE.txt)"
 fi
 say "fail: done"
+
+# 3. days 2-3 on the train_v2 base (added 2026-10-15 before select_base ran): the speech questions don't depend on the
+#    interaction work; m3_speech_chain.sh's "v2" path (+VocalSet arm exists; +VocalSet+Zeroth arm, teacher v3
+#    candidate on "m3", its second seed)
+cp scripts/analysis/chains/m3_speech_chain.sh "$S/../m3_speech_chain_v2_run.sh"
+bash "$S/../m3_speech_chain_v2_run.sh" "$S" v2 "fail: done" > "$S/../m3_speech_chain_v2.out" 2>&1
