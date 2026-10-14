@@ -1,0 +1,18 @@
+tiers: dev
+
+Hillenbrand, v2m_conformer_s0 vs v2m_conformer_s0_d16k (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    42.6    42.2  diff   -0.4 [-5.7, +4.7]  within noise
+  F1 MAE children:    48.3    51.6  diff   +3.4 [+1.1, +5.6]  WORSE
+  F1 MAE men     :    21.1    23.9  diff   +2.8 [+0.0, +6.6]  WORSE
+  F1 MAE all     :    37.5    39.3  diff   +1.8 [-0.4, +4.3]  within noise
+  F2 MAE all     :    51.6    47.8  diff   -3.7 [-10.7, +1.3]  within noise
+  F2 DR  all     :    98.0    98.1  diff   +0.1 [-0.5, +0.8]  within noise
+  F3 MAE all     :   102.7    80.3  diff  -22.3 [-35.7, -9.2]  better
+  F3 DR  all     :    92.9    95.8  diff   +3.0 [+1.7, +4.4]  better
+  F4 MAE all     :   182.6   149.9  diff  -32.6 [-59.9, -5.2]  better
+  F4 DR  all     :    84.2    87.8  diff   +3.6 [+1.0, +6.1]  better
+
+PTDB-TUG f0 RPA, v2m_conformer_s0 vs v2m_conformer_s0_d16k
+  all frames    :  87.5  86.7  diff  -0.8 [-1.2, -0.4]  WORSE  (n 154653)
+  modal         :  93.8  93.2  diff  -0.6 [-1.0, -0.2]  WORSE  (n 126992)
+  modal < 85 Hz :  84.6  84.1  diff  -0.5 [-4.8, +1.1]  within noise  (n 11014)

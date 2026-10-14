@@ -1,0 +1,23 @@
+Closed phase (PTDB-TUG dev), model minus reference, Hz: F1 / F2 / F3
+  f mix        +17.9 /  +14.8 /  +26.1
+  f v2i         +4.2 /   -9.5 /  -17.9
+  f v2m         +6.6 /   -0.8 /   -7.1
+  f v2m d16k    -7.2 /  -17.2 /  -30.5
+  m mix        +12.4 /  +13.1 /   +7.6
+  m v2i         +7.2 /   +0.4 /  -14.2
+  m v2m         +7.0 /   +1.7 /   -8.4
+  m v2m d16k    +1.0 /   -1.4 /  -14.7
+
+k35 women's bias change v2m - mix: -9.8, -12.2, -4.4  mean -8.8  (limit <= -5)
+  F1 MAE all   -6.6, -6.4, -4.1  mean -5.7  (limit <= +3)  ok
+  F2 MAE all   +2.7, -17.4, +3.0  mean -3.9  (limit <= +5)  ok
+  F3 MAE all   +29.0, -29.4, +17.9  mean +5.8  (limit <= +10)  ok
+  F3 DR  all   -2.9, +2.6, -1.8  mean -0.7  (limit >= -1)  ok
+  F4 DR  all   -2.4, -0.2, -2.3  mean -1.6  (limit >= -2)  ok
+  all frames   +0.7, +0.2, +0.7  mean +0.5  (limit >= -1)  ok
+
+d16k women's closed-phase F1 bias -7.2 (limit +-10), F3 -30.5 (limit >= -10)
+d16k identity resynthesis -0.2 (limit +-5)
+
+failures: ['d16k F3 bias']
+DECISION: fix
