@@ -8,9 +8,11 @@
 #    full-size base. Otherwise no candidate.
 # 3. Second full-size seed (seed 1) of the main comparison: conformer_v2 and the candidate (v3 if made, else the base
 #    set's full-size run, else conformer_m3), both to d16k, paired; identity test on all full-size models.
-# Arg: scratch dir (closed-phase frames, prediction caches).
+# Args: scratch dir (closed-phase frames, prediction caches); optionally a base set (v2i / v2t / v2h / v2) and a log line
+# to wait for instead of the day-1 decision (2026-10-14: v2h after the dose arm, D-026).
 set -u
 S="$1"
+WAIT="${3:-day1: done}"
 cd /c/github/voice-analyser
 LOG=runs/orchestrator.log
 say() { echo "$(date '+%F %T') $*" >> "$LOG"; }
@@ -46,14 +48,15 @@ full() {  # name, seed, data args...
 }
 
 NF=$(grep -c FAILED $LOG)
-until grep -q "day1: done" $LOG && grep -q "zeroth: resynthesis" $LOG; do
+until grep -q "$WAIT" $LOG && grep -q "zeroth: resynthesis" $LOG; do
   [ "$(grep -c FAILED $LOG)" -gt "$NF" ] && { echo "earlier chain failed; days 2-3 not started"; exit 1; }
   sleep 300
 done
 grep -q "zeroth: resynthesis ready" $LOG || fail "zeroth resynthesis missing"
-DEC=$(sed -n 's/^DECISION: //p' $A/decide_v2i.txt)
+DEC=${2:-$(sed -n 's/^DECISION: //p' $A/decide_v2i.txt)}
+[ "$DEC" = v2h ] && ! grep -q "v2h: DECISION: v2h" $LOG && { say "m3s: dose arm not carried forward; days 2-3 wait"; exit 0; }
 case "$DEC" in
-  v2i|v2t) BASE=${DEC}_conformer; DATA=data/synth/train_$DEC; ARM1=${DEC}r1_conformer; FBASE=conformer_$DEC ;;
+  v2i|v2t|v2h) BASE=${DEC}_conformer; DATA=data/synth/train_$DEC; ARM1=${DEC}r1_conformer; FBASE=conformer_$DEC ;;
   v2) BASE=mix_conformer; DATA=data/synth/train_v2; ARM1=m3_conformer; FBASE=conformer_v2 ;;
   *) say "m3s: day-1 decision '$DEC'; days 2-3 wait for the high-frequency fix"; exit 0 ;;
 esac
