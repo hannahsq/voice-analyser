@@ -104,6 +104,10 @@ class SynthConfig:
     # per interactive clip, the chance the feedback is on (D-026: with it on for every Rosenberg clip, models learnt
     # "Rosenberg source -> read lower" instead of detecting the interaction). 1.0 draws nothing, so earlier sets reproduce
     p_interactive_coupled: float = 1.0
+    # per interactive clip, the chance its area pulse is LF-derived (`interactive.lf_area_pulse`, at the clip's Rd)
+    # rather than Rosenberg's. Not for training sets: with feedback it counts the interaction twice (D-026; the
+    # planned train_v2x was dropped before rendering). 0.0 draws nothing, so earlier sets reproduce
+    p_lf_pulse: float = 0.0
     # subglottal resonance strength between speakers: the subglottal impedance's magnitude x log-uniform in this range
     interactive_sub_gain: tuple[float, float] = (0.5, 2.0)
 
@@ -413,6 +417,8 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
             area_sq = float(rng.uniform(*cfg.interactive_sq))
             sub_gain = float(np.exp(rng.uniform(*np.log(cfg.interactive_sub_gain))))
             feedback = cfg.interactive_coupled and (cfg.p_interactive_coupled >= 1 or rng.random() < cfg.p_interactive_coupled)
+            if cfg.p_lf_pulse > 0 and rng.random() < cfg.p_lf_pulse:
+                area_sq = None  # LF-derived pulse
         elif cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
             glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
             c_scale = float(rng.uniform(*cfg.coupling_scale))
@@ -424,6 +430,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         tube_info = {"speaker": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in asdict(spk).items()},
                      "targets": [d[2] for d in drawn], "glottis": asdict(glottis) if glottis else None,
                      "coupling_scale": c_scale, "interactive": interactive, "feedback": feedback, "area_sq": area_sq,
+                     "pulse": (None if not interactive else "lf" if area_sq is None else "rosenberg"),
                      "sub_gain": sub_gain}
     else:
         targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster,

@@ -130,3 +130,35 @@ def test_sampler_interactive_clips():
     assert np.array_equal(c.labels["formants"], a.labels["formants"], equal_nan=True) and not np.allclose(c.audio, a.audio)
     # off by default: no interactive clips and no extra draws
     assert not generate(3, SynthConfig(p_tube=1.0, duration_s=(1.0, 1.0)), 5).meta["tube"]["interactive"]
+
+
+def test_lf_area_pulse_gives_lf_flow_without_feedback():
+    from vocal_analysis.synth.coupling import Glottis
+
+    fs, f0 = 16000, 125.0
+    g = Glottis(0.12, -0.1, 1.4, 0.3, 8000.0, 1.0)
+    shape = tube.build_shape(*tube.STORY_VOWELS[list(tube.STORY_VOWELS)[0]], 17.5)
+    resp = it.tract_responses(shape, fs, sub_scale=1.0)
+    cyc = np.arange(fs // 2) * f0 / fs
+    nb = len(cyc) // 16 + 1
+    grid, tab = it.lf_flow_table()
+    for rd in (0.6, 1.2, 2.2):
+        area = g.peak_area_cm2 * it.lf_area_pulse(cyc, rd, g)
+        assert 0.0 <= area.min() and area.max() <= g.peak_area_cm2 + 1e-12
+        u = it.render(area, [resp], np.zeros(nb, int), np.zeros(nb), g, coupled=False)["flow"][fs // 4:]
+        target = np.interp((np.arange(len(u)) + fs // 4) * f0 / fs % 1.0 * 2048, np.arange(2048), tab[np.argmin(abs(grid - rd))])
+        assert np.corrcoef(u, target)[0, 1] > 0.99
+
+
+def test_sampler_lf_pulse_option_crosses_pulse_and_feedback():
+    from dataclasses import replace
+
+    from vocal_analysis.synth.sampler import SynthConfig, generate
+
+    cfg = replace(SynthConfig(), p_interactive=1.0, p_interactive_coupled=0.5, p_lf_pulse=0.5)
+    seen = set()
+    for i in range(40):
+        t = generate(i, cfg, 3).meta["tube"]
+        if t and t["interactive"]:
+            seen.add((t["pulse"], t["feedback"]))
+    assert seen == {("lf", True), ("lf", False), ("rosenberg", True), ("rosenberg", False)}

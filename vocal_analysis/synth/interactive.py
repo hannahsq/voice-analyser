@@ -50,6 +50,64 @@ def area_pulse(cycles: np.ndarray, te: np.ndarray | float, sq: np.ndarray | floa
     return gap + (1.0 - gap) * a
 
 
+_LF_RD = np.round(np.arange(0.3, 2.7001, 0.05), 2)
+_LF_N = 2048
+_lf_flow_table: np.ndarray | None = None
+
+
+def lf_flow_table() -> tuple[np.ndarray, np.ndarray]:
+    """(Rd grid, flows): one LF period of glottal flow per Rd (the integrated `glottal.lf_waveform`), peak 1, on
+    _LF_N phase points."""
+    global _lf_flow_table
+    if _lf_flow_table is None:
+        from .glottal import lf_waveform
+
+        rows = []
+        for rd in _LF_RD:
+            u = np.cumsum(lf_waveform(float(rd), _LF_N))
+            u = np.maximum(u - min(u[0], u[-1]), 0.0)
+            rows.append(u / u.max())
+        _lf_flow_table = np.array(rows)
+    return _LF_RD, _lf_flow_table
+
+
+def lf_area_pulse(cycles: np.ndarray, rd: np.ndarray | float, glottis: Glottis) -> np.ndarray:
+    """Glottal area per sample, as a fraction of the peak, whose flow without the load's feedback is the LF flow pulse
+    at the given Rd (D-026: the LF source in the interactive model, so LF also appears with and without feedback).
+    The static flow law of `_render` without the load (Bernoulli plus the viscous term,
+    P = KT rho U^2 / (2 A^2) + 12 mu d lg^2 U / A^3) is inverted per sample for A at U = U_peak g(t), with g the LF
+    flow (peak 1) and U_peak the flow through the peak area. LF's return phase becomes a gradual closure, longer at
+    high Rd; the slope corner at the main excitation is kept.
+
+    For probes, not training sets (D-026): LF describes the flow, whose skew and return phase are partly made by
+    the interaction itself (the tract's inertance keeps air moving after the folds close). Inverted through static
+    Bernoulli, all of it lands in the area: the glottis is still 27-35 % open at the main excitation, and with the
+    load's feedback on top the interaction is counted twice (F3 read 85-113 Hz high, against 8-10 with Rosenberg's
+    pulse, which excites at closure)."""
+    grid, tab = lf_flow_table()
+    fr = np.asarray(cycles, float) % 1.0
+    ri = np.clip(np.round((np.broadcast_to(np.asarray(rd, float), fr.shape) - grid[0]) / 0.05).astype(int), 0, len(grid) - 1)
+    x = fr * _LF_N
+    i0 = np.floor(x).astype(int) % _LF_N
+    w = x - np.floor(x)
+    g = (1.0 - w) * tab[ri, i0] + w * tab[ri, (i0 + 1) % _LF_N]
+    a_pk, p = glottis.peak_area_cm2, glottis.pressure
+    ka = KT * RHO / 2.0
+    kv = 12.0 * MU * glottis.depth_cm * glottis.length_cm ** 2
+
+    def flow(area):  # positive root of ka U^2 / A^2 + kv U / A^3 = P
+        qa, qb = ka / area ** 2, kv / area ** 3
+        return 2.0 * p / (qb + np.sqrt(qb * qb + 4.0 * qa * p))
+
+    u = flow(a_pk) * g
+    # P A^3 - ka U^2 A - kv U = 0: Newton from the Bernoulli-only area (an upper bound of nothing, a good start)
+    a = np.maximum(u / np.sqrt(2.0 * p / (KT * RHO)), 1e-12)
+    for _ in range(30):
+        f = p * a ** 3 - ka * u ** 2 * a - kv * u
+        a = np.maximum(a - f / (3.0 * p * a ** 2 - ka * u ** 2), 1e-12)
+    return np.where(g > 0, np.minimum(a / a_pk, 1.0), 0.0)
+
+
 @dataclass
 class TractResponses:
     """Impulse responses of one tract shape at fs: z (N_IR,) load impedance at the glottis, tract plus subglottal
@@ -175,7 +233,7 @@ def render(area_cm2: np.ndarray, responses: list[TractResponses], block_target: 
 
 
 def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, block_w: np.ndarray, glottis: Glottis,
-               sq: float, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
+               sq: float | None, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
                hnr_db: float | None = None, extras: dict | None = None, fs: float = 16000.0,
                coupled: bool = True) -> dict[str, np.ndarray]:
     """The components of `voice.synthesize` with the interactive source (same Trajectories; its poles are ignored:
@@ -203,7 +261,8 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
     gap = gap_from_open_quotient(te_s, glottis.gap_offset)
     va = _per_sample(traj.voice_amp)
     va_n = va / va.max() if va.max() > 0 else va
-    pulse = area_pulse(cycles, te_s, sq, 0.0)
+    # sq None: the LF-derived pulse at each sample's Rd; otherwise Rosenberg's at speed quotient sq
+    pulse = lf_area_pulse(cycles, _per_sample(rd), glottis) if sq is None else area_pulse(cycles, te_s, sq, 0.0)
     area = glottis.peak_area_cm2 * (gap + (1.0 - gap) * pulse) * va_n
     bt, bw = np.asarray(block_target, np.int64), np.asarray(block_w, float)
     out = {"voiced": render(area, responses, bt, bw, glottis, CTRL, fs, coupled)["pressure"] * shim[period], "cycles": cycles}
