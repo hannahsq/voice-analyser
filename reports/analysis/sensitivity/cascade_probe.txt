@@ -1,0 +1,25 @@
+Cascade probe (D-026): PTDB-TUG dev, 7728 closed-phase frames in 474 utterances; passed-on expected bins moved by +-30 cents
+Slope = change in the later formant (cents) per cent moved, median over frames
+  mix_conformer_s0         f: F2<F1 -0.000  F3<F1 +0.000  F3<F2 -0.000  F3<F1F2 +0.000  F4<F1F2F3 -0.000
+  mix_conformer_s0         m: F2<F1 -0.000  F3<F1 +0.000  F3<F2 +0.000  F3<F1F2 +0.000  F4<F1F2F3 +0.000
+  v2m_conformer_s0         f: F2<F1 -0.000  F3<F1 +0.000  F3<F2 -0.000  F3<F1F2 +0.000  F4<F1F2F3 -0.000
+  v2m_conformer_s0         m: F2<F1 +0.000  F3<F1 +0.000  F3<F2 +0.000  F3<F1F2 +0.000  F4<F1F2F3 +0.000
+  v2m_conformer_s0_d16k    f: F2<F1 -0.000  F3<F1 +0.000  F3<F2 +0.000  F3<F1F2 +0.000  F4<F1F2F3 -0.000
+  v2m_conformer_s0_d16k    m: F2<F1 +0.000  F3<F1 +0.000  F3<F2 +0.000  F3<F1F2 +0.000  F4<F1F2F3 +0.000
+  v2m_conformer_s1_d16k    f: F2<F1 -0.000  F3<F1 +0.000  F3<F2 +0.000  F3<F1F2 +0.000  F4<F1F2F3 +0.000
+  v2m_conformer_s1_d16k    m: F2<F1 +0.000  F3<F1 +0.000  F3<F2 +0.000  F3<F1F2 +0.000  F4<F1F2F3 +0.000
+  conformer_v2_d16k        f: F2<F1 +0.000  F3<F1 +0.000  F3<F2 +0.000  F3<F1F2 +0.000  F4<F1F2F3 +0.000
+  conformer_v2_d16k        m: F2<F1 +0.000  F3<F1 +0.000  F3<F2 +0.000  F3<F1F2 +0.000  F4<F1F2F3 +0.000
+
+CASCADE mix_conformer_s0 f +0.000
+CASCADE mix_conformer_s0 m +0.000
+CASCADE v2m_conformer_s0 f +0.000
+CASCADE v2m_conformer_s0 m +0.000
+CASCADE v2m_conformer_s0_d16k f +0.000
+CASCADE v2m_conformer_s0_d16k m +0.000
+CASCADE v2m_conformer_s1_d16k f +0.000
+CASCADE v2m_conformer_s1_d16k m +0.000
+CASCADE conformer_v2_d16k f +0.000
+CASCADE conformer_v2_d16k m +0.000
+v2m d16k women's F3<F1F2: +0.000 (material if >= 0.33)
+DECISION: small
