@@ -1,0 +1,3 @@
+v2m: decision fix, k35 women's bias change -8.8, Hillenbrand F3 MAE change +5.8, shortcut 7.4, F3 without feedback 16.5, coupled 4.6 (Hz)
+v2s: decision fix, k35 women's bias change -12.3, Hillenbrand F3 MAE change +2.1, shortcut 8.9, F3 without feedback 19.0, coupled 8.5 (Hz)
+DECISION: fix

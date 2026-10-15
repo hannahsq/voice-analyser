@@ -1,0 +1,48 @@
+tiers: dev
+PTDB-TUG dev f: 3867 frames, 6 speakers; F1 - closed phase, median signed (|err|)
+  mix_conformer_s0      +12.6 ( 35.8)
+  mix_conformer_s1      +27.7 ( 39.9)
+  mix_conformer_s2      +13.3 ( 33.9)
+  v2i_conformer_s0       -4.1 ( 35.1)
+  v2i_conformer_s1      +16.5 ( 36.1)
+  v2i_conformer_s2       +0.3 ( 34.5)
+  v2s_conformer_s0       +2.8 ( 37.1)
+  v2s_conformer_s1       +7.5 ( 34.9)
+  v2s_conformer_s2       -0.4 ( 35.8)
+  v2i_conformer_s0_d16k  -12.6 ( 36.6)
+  v2i_conformer_s1_d16k  -10.0 ( 34.8)
+  v2s_conformer_s0_d16k  -14.3 ( 36.0)
+  v2s_conformer_s1_d16k   -4.3 ( 35.0)
+  bias v2s_conformer_s0 - mix_conformer_s0: -11.1 [-19.5, -2.5]  per speaker [-9, -26, -13, -3, -2, -13]
+  bias v2s_conformer_s0 - v2i_conformer_s0:  +5.4 [+1.3, +11.4]  per speaker [7, 10, 3, 4, 12, 0]
+  bias v2s_conformer_s1 - mix_conformer_s1: -18.7 [-28.2, -15.9]  per speaker [-20, -36, -14, -19, -18, -19]
+  bias v2s_conformer_s1 - v2i_conformer_s1:  -8.3 [-11.3, -5.7]  per speaker [-13, -10, -8, -6, -6, -9]
+  bias v2s_conformer_s2 - mix_conformer_s2: -10.6 [-23.0, -8.8]  per speaker [-11, -34, -8, -10, -10, -12]
+  bias v2s_conformer_s2 - v2i_conformer_s2:  -2.8 [-3.9, +2.7]  per speaker [-3, -4, 2, -2, 4, -4]
+  bias v2s_conformer_s0_d16k - v2i_conformer_s0_d16k:  -4.9 [-7.8, +2.2]  per speaker [0, -6, 5, -4, -6, -9]
+  bias v2s_conformer_s1_d16k - v2i_conformer_s1_d16k:  +4.5 [-0.6, +8.7]  per speaker [10, 4, 7, 2, 5, -3]
+PTDB-TUG dev m: 3876 frames, 6 speakers; F1 - closed phase, median signed (|err|)
+  mix_conformer_s0      +10.2 ( 19.7)
+  mix_conformer_s1      +17.2 ( 22.1)
+  mix_conformer_s2       +9.7 ( 18.9)
+  v2i_conformer_s0       +1.3 ( 16.5)
+  v2i_conformer_s1      +13.1 ( 20.8)
+  v2i_conformer_s2       +7.2 ( 19.5)
+  v2s_conformer_s0       +3.2 ( 16.1)
+  v2s_conformer_s1       +8.4 ( 18.8)
+  v2s_conformer_s2       +4.7 ( 17.2)
+  v2i_conformer_s0_d16k   -5.8 ( 16.5)
+  v2i_conformer_s1_d16k   +2.5 ( 15.8)
+  v2s_conformer_s0_d16k   -3.0 ( 17.7)
+  v2s_conformer_s1_d16k   +3.8 ( 17.2)
+  bias v2s_conformer_s0 - mix_conformer_s0:  -7.3 [-9.3, -3.9]  per speaker [-8, -2, -5, -9, -9, -7]
+  bias v2s_conformer_s0 - v2i_conformer_s0:  +1.7 [-1.6, +5.9]  per speaker [5, -1, -2, 0, 7, 3]
+  bias v2s_conformer_s1 - mix_conformer_s1:  -7.7 [-11.9, -3.8]  per speaker [-7, -8, 0, -8, -14, -10]
+  bias v2s_conformer_s1 - v2i_conformer_s1:  -4.2 [-7.5, -1.7]  per speaker [-1, -3, -2, -5, -8, -7]
+  bias v2s_conformer_s2 - mix_conformer_s2:  -6.1 [-8.4, -0.9]  per speaker [-8, -7, 0, -2, -9, -5]
+  bias v2s_conformer_s2 - v2i_conformer_s2:  -1.8 [-5.5, -0.8]  per speaker [-6, -3, -1, -1, -5, -1]
+  bias v2s_conformer_s0_d16k - v2i_conformer_s0_d16k:  +2.5 [+1.3, +4.3]  per speaker [1, 2, 5, 2, 3, 4]
+  bias v2s_conformer_s1_d16k - v2i_conformer_s1_d16k:  +1.1 [-0.4, +3.1]  per speaker [4, 0, -1, 1, 2, 2]
+ARCTIC bdl (2556 frames): mix_conformer_s0 +4  mix_conformer_s1 -1  mix_conformer_s2 +1  v2i_conformer_s0 +0  v2i_conformer_s1 +0  v2i_conformer_s2 +6  v2s_conformer_s0 -1  v2s_conformer_s1 -0  v2s_conformer_s2 -2  v2i_conformer_s0_d16k -6  v2i_conformer_s1_d16k -4  v2s_conformer_s0_d16k -3  v2s_conformer_s1_d16k -4
+ARCTIC jmk (1919 frames): mix_conformer_s0 +35  mix_conformer_s1 +31  mix_conformer_s2 +26  v2i_conformer_s0 +21  v2i_conformer_s1 +27  v2i_conformer_s2 +29  v2s_conformer_s0 +23  v2s_conformer_s1 +22  v2s_conformer_s2 +25  v2i_conformer_s0_d16k +16  v2i_conformer_s1_d16k +26  v2s_conformer_s0_d16k +16  v2s_conformer_s1_d16k +15
+ARCTIC slt (4421 frames): mix_conformer_s0 +5  mix_conformer_s1 +11  mix_conformer_s2 -4  v2i_conformer_s0 -16  v2i_conformer_s1 -11  v2i_conformer_s2 -9  v2s_conformer_s0 -13  v2s_conformer_s1 -8  v2s_conformer_s2 -18  v2i_conformer_s0_d16k -34  v2i_conformer_s1_d16k -31  v2s_conformer_s0_d16k -29  v2s_conformer_s1_d16k -25

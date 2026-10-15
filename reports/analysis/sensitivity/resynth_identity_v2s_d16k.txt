@@ -1,0 +1,11 @@
+120 VocalSet val recordings (tracker teacher_v2_d16k). Median over recordings of the median F1 error (Hz)
+'original': the model on the untouched recording minus the smoothed track; others: on the resynthesis minus its label
+model                     original   identity    bw x0.6    bw x1.6  alpha 0.9  alpha 1.1   | identity, f0 < 300 / >= 300
+d16k                          +0.3       -0.8       -3.0       +3.5       -0.7       -3.6   | -1.1 / -0.5  (n 72 / 48)
+v2s_s0                       +24.2       +7.9       +7.1       +8.4       +1.9      +21.6   | +8.3 / +7.1  (n 72 / 48)
+v2s_s1                       +18.6       +7.5       +6.3      +12.3       +1.0      +15.9   | +10.3 / +1.2  (n 72 / 48)
+v2s_s2                       +25.5       +8.8      +10.0      +11.0       +2.9      +24.2   | +8.4 / +9.0  (n 72 / 48)
+v2s_s0_d16k                   -5.0       -3.2       -2.4       -4.8       -3.5       -1.9   | -1.0 / -8.6  (n 72 / 48)
+v2s_s1_d16k                   -8.6       -2.9       -2.4       -5.5       -0.9       -5.8   | -1.0 / -19.7  (n 72 / 48)
+v2i_s0_d16k                   -4.3       -8.9       -9.6       -6.3       -6.5       -6.6   | -4.5 / -16.2  (n 72 / 48)
+v2i_s1_d16k                   +3.5       -2.3       -3.4       +3.9       -4.6       +1.7   | +1.2 / -12.4  (n 72 / 48)

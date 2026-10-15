@@ -1,0 +1,26 @@
+Model F1 / F2 / F3 minus closed-glottis poles (Hz), median over Story's 10 vowels, mean over each arm's seeds
+  men   Rosenberg  no feedback: mix    +5   +13    -5   v2i    -7    -3   -16   v2m    +3    +4   -14   v2s    +9    +1   -17
+  men   Rosenberg  feedback   : mix   +11   +16    +5   v2i    -0    +2    -9   v2m    -1    +7    -5   v2s    +3    +8   -11
+  men   LF Rd 1.0  no feedback: mix    +3    +0    -2   v2i    -1    -3    +5   v2m    +4    +2    +5   v2s    -2    +2    +5
+  men   LF Rd 1.0  feedback   : mix   +13   +35   +82   v2i    -4   +21   +41   v2m    -6   +27   +34   v2s    -4   +18   +18
+  men   LF Rd 1.7  no feedback: mix    -5    -4    +3   v2i   -14   -16   -12   v2m    -7    -9    -1   v2s    -9    -8    -5
+  men   LF Rd 1.7  feedback   : mix   +12   +23   +72   v2i   -15    -2   +24   v2m    -6    +2   +35   v2s    -5    -2   +27
+  women Rosenberg  no feedback: mix    -6   +19   -16   v2i   -35   -15   -22   v2m   -17   -13   -19   v2s   -31    +0   -21
+  women Rosenberg  feedback   : mix    +8   +25    +5   v2i    -8    -5    -7   v2m    -5    -6    -3   v2s   -12    -5   -13
+  women LF Rd 1.0  no feedback: mix    +3    +4   -13   v2i    -8    -1    -1   v2m    -5    +2    -1   v2s   -10    +1    +1
+  women LF Rd 1.0  feedback   : mix   +33   +76  +122   v2i   +15   +33   +73   v2m   +20   +38   +86   v2s    +7   +48   +68
+  women LF Rd 1.7  no feedback: mix    -4    -5    -3   v2i   -29   -18   -12   v2m   -16   -13    -1   v2s   -19    -9    +3
+  women LF Rd 1.7  feedback   : mix   +37   +47   +90   v2i    +6    -1   +39   v2m   +16    +3   +55   v2s    +9   +10   +41
+
+SHORTCUT mix 0.0
+F3NOFB mix 10.8
+COUPLED mix 11.3
+SHORTCUT v2i 12.9
+F3NOFB v2i 19.0
+COUPLED v2i 5.1
+SHORTCUT v2m 7.4
+F3NOFB v2m 16.5
+COUPLED v2m 4.6
+SHORTCUT v2s 8.9
+F3NOFB v2s 19.0
+COUPLED v2s 8.5
