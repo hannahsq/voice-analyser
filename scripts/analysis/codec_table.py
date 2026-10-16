@@ -2,7 +2,8 @@
 12 synthetic clips (train_v2's config, seed 777, a seed no set uses) through `codecs.apply` (delay-compensated,
 fresh process per clip); per STFT bin (obs_store's analysis), the transfer H = sum Y X* / sum |X|^2 over every frame,
 gain |H|^2, and coding noise sum |Y - H X|^2 / sum |X|^2 (relative to the input's power at that bin), then the mean
-over +-1/12 octave around each NOISE_GRID point. Writes vocal_analysis/synth/codec_table.json."""
+over +-1/12 octave around each NOISE_GRID point. The phone channel is measured the same way ("phone@0": D-027's
+validation found a flat -38 dB mu-law guess not good enough). Writes vocal_analysis/synth/codec_table.json."""
 import json
 import sys
 
@@ -24,12 +25,16 @@ def stft(x):
 
 
 table = {}
-for name, (_, _, rates, _) in codecs.CODECS.items():
+from vocal_analysis.synth.channel import _phone  # noqa: E402
+
+# the phone channel (band-pass, 8 kHz resampling, 8-bit mu-law) measured the same way, as "phone@0"
+for name, (_, _, rates, _) in {"phone": (None, None, (0.0,), None), **codecs.CODECS}.items():
     for kbps in rates:
         sxy = sxx = see = 0.0
         ys = []
         for x in clips:
-            y = codecs.apply(x * 0.5 / np.max(np.abs(x)), name, kbps, stream=False).astype(np.float64)
+            xn = x * 0.5 / np.max(np.abs(x))
+            y = _phone(xn) if name == "phone" else codecs.apply(xn, name, kbps, stream=False).astype(np.float64)
             ys.append(y)
         for x, y in zip(clips, ys):
             x = x * 0.5 / np.max(np.abs(x))

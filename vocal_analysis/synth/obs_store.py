@@ -38,7 +38,6 @@ SIG_GRID = 50.0 * 2.0 ** (np.arange(88) / 12.0)
 NOISE_GRID = 50.0 * 2.0 ** (np.arange(45) / 6.0)
 Q_STEP, Q_MAX, Q_MISSING = 0.5, 220, 255
 BIN_HZ = FS / N_FFT
-MU_LAW_SNR_DB = 38.0  # 8-bit mu-law: quantisation noise about 38 dB under the signal, roughly flat in level
 CODEC_TABLE = Path(__file__).with_name("codec_table.json")
 
 
@@ -222,29 +221,27 @@ class ClipSpectra:
             sh_full = _noise_shape(p, np.maximum(np.arange(N_FFT // 2 + 1) * BIN_HZ, 1.0))
             per_bin = ps * 10 ** (-p["snr_db"] / 10) / np.sum(sh_full)  # its power spread over the bins by shape
             add_s, add_n = add_s + per_bin * sh_s[None, :], add_n + per_bin * sh_n[None, :]
-        if p.get("phone"):
-            sos = butter(4, [300.0, 3400.0], "bandpass", fs=FS, output="sos")
-            gs, gn = _h2(sos, fs_) * (fs_ < 3900), _h2(sos, fn_) * (fn_ < 3900)
-            self.sig, self.noise, noise_on_sig = self.sig * gs, self.noise * gn, noise_on_sig * gs
-            add_s, add_n = add_s * gs, add_n * gn
-            band = (fn_ > 300) & (fn_ < 3400)
-            lvl = np.mean((self.noise + add_n)[:, band], axis=1) + np.mean(self._sig_mean_per_bin()[:, (fs_ > 300) & (fs_ < 3400)], axis=1)
-            q = 10 ** (-MU_LAW_SNR_DB / 10) * lvl[:, None]
-            add_s, add_n = add_s + q * (fs_ < 4000), add_n + q * (fn_ < 4000)
+        if p.get("phone"):  # measured like a codec: band gain and mu-law noise relative to the input (codec_table)
+            add_s, add_n, noise_on_sig = self._coded({"codec": "phone", "codec_kbps": 0.0}, add_s, add_n, noise_on_sig)
         if "clip_loss" in p:  # the power clipping removed (apply_channel measures it), as flat noise
             tot = float(np.mean(frame_power(self._sig_mean_per_bin(), self.noise + add_n)))
             c = p["clip_loss"] * tot / (N_FFT // 2 + 1)
             add_s, add_n = add_s + c, add_n + c
         if "codec" in p:
-            gs, ns = _codec(p, fs_)
-            gn, nn = _codec(p, fn_)
-            lvl_s = self._sig_mean_per_bin() + noise_on_sig + add_s
-            lvl_n = _regrid(lvl_s, fs_, fn_)
-            self.sig, self.noise, noise_on_sig = self.sig * gs, self.noise * gn, noise_on_sig * gs
-            add_s, add_n = add_s * gs + ns * lvl_s, add_n * gn + nn * lvl_n  # coding noise is relative to the input
+            add_s, add_n, noise_on_sig = self._coded(p, add_s, add_n, noise_on_sig)
         self.noise = self.noise + add_n
         self.noise_on_sig = noise_on_sig + add_s
         return self
+
+    def _coded(self, p, add_s, add_n, noise_on_sig):
+        """A measured stage (codec or phone): band gain on everything, plus coding noise relative to its input."""
+        fs_, fn_ = SIG_GRID, NOISE_GRID
+        gs, ns = _codec(p, fs_)
+        gn, nn = _codec(p, fn_)
+        lvl_s = self._sig_mean_per_bin() + noise_on_sig + add_s  # the stage's input per bin
+        lvl_n = _regrid(lvl_s, fs_, fn_)
+        self.sig, self.noise, noise_on_sig = self.sig * gs, self.noise * gn, noise_on_sig * gs
+        return add_s * gs + ns * lvl_s, add_n * gn + nn * lvl_n, noise_on_sig
 
     def snr_db_at(self, t: int, freqs: np.ndarray) -> np.ndarray:
         """`observability`'s callback: signal over noise (plus the analysis floor) at freqs on frame t."""
