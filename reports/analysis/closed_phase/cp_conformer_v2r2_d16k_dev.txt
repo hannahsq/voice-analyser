@@ -1,0 +1,20 @@
+tiers: dev
+PTDB-TUG dev f: 3867 frames, 6 speakers; F1 - closed phase, median signed (|err|)
+  d16k                  +17.3 ( 39.3)
+  conformer_v2_d16k     +15.5 ( 33.7)
+  conformer_m3_d16k     +12.6 ( 31.7)
+  conformer_v2_d16k     +15.5 ( 33.7)
+  conformer_v2r2_d16k    +9.8 ( 30.8)
+  bias conformer_v2r2_d16k - conformer_v2_d16k:  -5.7 [-8.2, -2.2]  per speaker [-5, -8, -5, -6, -9, 0]
+  bias conformer_v2r2_d16k - conformer_v2_d16k:  -5.7 [-8.2, -2.2]  per speaker [-5, -8, -5, -6, -9, 0]
+PTDB-TUG dev m: 3876 frames, 6 speakers; F1 - closed phase, median signed (|err|)
+  d16k                  +15.1 ( 23.4)
+  conformer_v2_d16k      +6.7 ( 15.9)
+  conformer_m3_d16k      +8.7 ( 17.7)
+  conformer_v2_d16k      +6.7 ( 15.9)
+  conformer_v2r2_d16k    +7.4 ( 15.6)
+  bias conformer_v2r2_d16k - conformer_v2_d16k:  +0.1 [-2.0, +2.2]  per speaker [3, -1, 0, 1, -3, 2]
+  bias conformer_v2r2_d16k - conformer_v2_d16k:  +0.1 [-2.0, +2.2]  per speaker [3, -1, 0, 1, -3, 2]
+ARCTIC bdl (2556 frames): d16k +4  conformer_v2_d16k +4  conformer_m3_d16k +1  conformer_v2_d16k +4  conformer_v2r2_d16k +6
+ARCTIC jmk (1919 frames): d16k +29  conformer_v2_d16k +32  conformer_m3_d16k +30  conformer_v2_d16k +32  conformer_v2r2_d16k +33
+ARCTIC slt (4421 frames): d16k -4  conformer_v2_d16k +6  conformer_m3_d16k -2  conformer_v2_d16k +6  conformer_v2r2_d16k -2

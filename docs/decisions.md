@@ -691,6 +691,12 @@ The assignment is seeded and committed, and `va tiers` refuses to rewrite it. Ea
 - *M3 data* (same architecture): F1 all −1.7 (men −1.7 better; women −1.5, children −2.1 within noise), F2 −2.2 better, F3 −7.4 and F4 −7.9 within noise; RPA +0.5 points. Closed-phase bias women −1.9 Hz (every speaker, −1 to −6), men +1.6 (noise).
 - Most of conformer_m3's lead over the GRU is the architecture (F3–F4, men's closed phase); resynthesised VocalSet adds small, consistent gains. Its S2 effect (F1 −7 to −13 Hz) did not carry over at this size, so S2 overstated it. The women's F1 regression at d06k is still unattributed (no conformer_v2 d06k branch).
 
+**Teacher v3 candidate: train_v2 + VocalSet + Zeroth Korean (2026-10-16; D-026's fail branch ran days 2–3 on train_v2; `m3_speech_chain.sh v2`).** S2: `v2r2_conformer` against mix passed the M3 rule ("m3"; Hillenbrand F1 / F2 / F3 MAE −11.5 / −13.1 / −8.4, RPA −0.2, women's closed-phase |error| −5.9). Full size, two seeds, each against the train_v2 run with the same seed (`paired/fp32/conformer_v2{,_s1}_d16k_vs_conformer_v2r2{,_s1}_d16k.txt`, `closed_phase/cp_full_seeds_conformer_v2r2_dev.txt`, `sensitivity/resynth_identity_full_seeds.txt`; dev):
+- Hillenbrand F1 MAE all −1.5 [−2.7, −0.3] / −0.6 (noise); F2 −1.1 / −0.2; **F3 −12.3 [−20.9, −5.7] / −5.6 [−10.9, −0.5]**; F3 detection +1.1 / +0.8; F4 MAE −8.3 (noise) / −22.4; F4 detection +1.2 / +0.7 (noise); RPA −0.4 [−0.6, −0.2] / 0.0.
+- **Women's closed-phase F1 bias −5.7 [−8.2, −2.2] / −5.9 [−7.0, −4.3]** (+15.5 → +9.8, +13.3 → +7.6); men +0.1 / −1.1. F2 / F3 against closed phase: women unchanged (F3 +15.9 / +15.5 against +14.4 / +16.3), men's F3 −7 / −5 → −1 / +3. ARCTIC slt +6 / +8 → −2 / 0.
+- Identity resynthesis (VocalSet val): −1.5 / 0.0 overall; at f0 ≥ 300 −0.5 / +0.4, against train_v2's −4.3 / −4.6.
+- The two seeds agree in direction everywhere, with one small cost (seed 0's RPA −0.4 points). The S2 F1 gain carries over this time, about half of it. Next: confirm on semi-private (logged), then teacher v3 if it holds.
+
 ## D-026 (2026-10-13): why seeds differ on real voices (investigation, not concluded)
 
 S2 seeds that match on synthetic validation (`mix_conformer` F1 MAE 37.9 / 37.4 / 36.5 Hz) differ widely on real voices (Hillenbrand F1 MAE 44.1 / 49.1 / 43.5; women's closed-phase bias +12.6 / +27.7 / +13.3): underspecification (McCoy et al. 2020; D'Amour et al. 2020). No bug found: the Conformer uses LayerNorm / GroupNorm only, so batch composition can't enter.
