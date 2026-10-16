@@ -57,44 +57,58 @@ def resonance_db(f: np.ndarray, F: np.ndarray, B: np.ndarray) -> np.ndarray:
     return 10.0 * np.log10(np.abs(p) ** 4 / (np.abs(s - p) ** 2 * np.abs(s - np.conj(p)) ** 2))
 
 
+def resonance_grad(f: np.ndarray, F: np.ndarray, B: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """d resonance_db / dF (dB per Hz) and d resonance_db / d ln B (dB), exact; broadcasts. With a = B / 2,
+    resonance_db = 10 / ln 10 * (2 ln(a^2 + F^2) - ln(a^2 + (f - F)^2) - ln(a^2 + (f + F)^2))."""
+    a2 = (0.5 * B) ** 2
+    d0, dm, dp = a2 + F ** 2, a2 + (f - F) ** 2, a2 + (f + F) ** 2
+    c = 10.0 / np.log(10.0)
+    gF = c * (4.0 * F / d0 + 2.0 * (f - F) / dm - 2.0 * (f + F) / dp)
+    gB = c * 2.0 * a2 * (2.0 / d0 - 1.0 / dm - 1.0 / dp)
+    return gF, gB
+
+
 def frame_bound(freqs: np.ndarray, snr_db: np.ndarray, sample_db_sd: np.ndarray, formants: np.ndarray,
                 bandwidths: np.ndarray, cfg: ObservabilityConfig | None = None) -> tuple[np.ndarray, np.ndarray]:
     """One frame. freqs: sample frequencies (Hz); snr_db: signal over noise there; sample_db_sd: their dB SD;
     formants / bandwidths: (K,) with NaN for absent formants (left out). Returns (o, sd_hz): observability and
     posterior SD per formant (NaN where absent)."""
+    o, sd = frames_bound(freqs[None], snr_db[None], sample_db_sd[None], formants[None], bandwidths[None], cfg)
+    return o[0], sd[0]
+
+
+def frames_bound(freqs: np.ndarray, snr_db: np.ndarray, sample_db_sd: np.ndarray, formants: np.ndarray,
+                 bandwidths: np.ndarray, cfg: ObservabilityConfig | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """`frame_bound` for P frames at once: freqs / snr_db / sample_db_sd (P, S), padded with NaN where a frame has
+    fewer samples; formants / bandwidths (P, K). An absent formant keeps a column whose sensitivity is zero, so it
+    only meets its prior and is decoupled from the rest (the same bound as leaving it out). Returns (o, sd_hz), (P, K)."""
     cfg = cfg or ObservabilityConfig()
-    K = len(formants)
-    o, sd = np.full(K, np.nan), np.full(K, np.nan)
-    present = np.isfinite(formants) & np.isfinite(bandwidths) & (formants > 0)
-    idx = np.flatnonzero(present)
-    if not len(idx):
-        return o, sd
-    F, B = formants[idx], bandwidths[idx]
-    keep = (freqs > 0) & (freqs < cfg.f_max_hz) & np.isfinite(sample_db_sd) & np.isfinite(snr_db)
-    rho = 10 ** (snr_db[keep] / 10.0)
-    f, w = freqs[keep], (rho / (1.0 + rho)) ** 2 / sample_db_sd[keep] ** 2
-    n = len(idx)
+    P, K = formants.shape
     m = cfg.n_env
-    prior_var = np.concatenate([np.full(m, cfg.prior_env_db ** 2), (cfg.prior_f_rel * F) ** 2,
-                                np.full(n, cfg.prior_log_bw ** 2)])
-    J = np.diag(1.0 / prior_var)
-    if len(f):
-        G = np.empty((len(f), m + 2 * n))
+    present = np.isfinite(formants) & np.isfinite(bandwidths) & (formants > 0)
+    F = np.where(present, formants, 1000.0)
+    B = np.where(present, bandwidths, 100.0)
+    keep = (freqs > 0) & (freqs < cfg.f_max_hz) & np.isfinite(sample_db_sd) & np.isfinite(snr_db)
+    rho = 10 ** (np.where(keep, snr_db, 0.0) / 10.0)
+    w = np.where(keep, (rho / (1.0 + rho)) ** 2 / np.where(keep, sample_db_sd, 1.0) ** 2, 0.0)
+    f = np.where(keep, freqs, 1000.0)
+    prior_var = np.concatenate([np.full((P, m), cfg.prior_env_db ** 2), (cfg.prior_f_rel * F) ** 2,
+                                np.full((P, K), cfg.prior_log_bw ** 2)], axis=1)
+    J = np.zeros((P, m + 2 * K, m + 2 * K))
+    J[:, np.arange(m + 2 * K), np.arange(m + 2 * K)] = 1.0 / prior_var
+    if f.shape[1]:
         lo, hi = np.log2(50.0), np.log2(cfg.f_max_hz)
         x = (np.log2(f) - lo) / (hi - lo)
-        for j in range(m):
-            G[:, j] = np.cos(np.pi * j * x)
-        for j in range(n):  # central differences: d/dF (Hz), d/d ln B
-            dF = 0.5
-            G[:, m + j] = (resonance_db(f, F[j] + dF, B[j]) - resonance_db(f, F[j] - dF, B[j])) / (2 * dF)
-            dl = 1e-3
-            G[:, m + n + j] = (resonance_db(f, F[j], B[j] * np.exp(dl)) - resonance_db(f, F[j], B[j] * np.exp(-dl))) / (2 * dl)
-        J = J + (G * w[:, None]).T @ G
+        gF, gB = resonance_grad(f[:, :, None], F[:, None, :], B[:, None, :])
+        on = present[:, None, :]
+        G = np.concatenate([np.cos(np.pi * np.arange(m) * x[:, :, None]), np.where(on, gF, 0.0), np.where(on, gB, 0.0)],
+                           axis=2)
+        J = J + np.matmul((G * w[:, :, None]).transpose(0, 2, 1), G)
     cov = np.linalg.inv(J)
-    var_f = np.diag(cov)[m : m + n]
-    sd[idx] = np.sqrt(var_f)
-    cents = 1200.0 / np.log(2.0) * sd[idx] / F
-    o[idx] = 1.0 / (1.0 + (cents / cfg.ref_cents) ** 2)
+    var_f = cov[:, np.arange(m, m + K), np.arange(m, m + K)]
+    sd = np.where(present, np.sqrt(var_f), np.nan)
+    cents = 1200.0 / np.log(2.0) * sd / F
+    o = np.where(present, 1.0 / (1.0 + (cents / cfg.ref_cents) ** 2), np.nan)
     return o, sd
 
 
@@ -108,28 +122,42 @@ def sample_sd_db(snr_db: np.ndarray, cfg: ObservabilityConfig, base_db: float | 
 
 
 def observability(f0: np.ndarray, voiced: np.ndarray, sonorant: np.ndarray, formants: np.ndarray,
-                  bandwidths: np.ndarray, snr_db_at, cfg: ObservabilityConfig | None = None) -> tuple[np.ndarray, np.ndarray]:
+                  bandwidths: np.ndarray, snr_db_at, cfg: ObservabilityConfig | None = None,
+                  snr_db_rows=None) -> tuple[np.ndarray, np.ndarray]:
     """Frames (T,), formants / bandwidths (T, K). snr_db_at(t, freqs) -> SNR (dB) of the frame's tract-filtered
     excitation over everything else (aspiration and frication on voiced frames, channel noise) at those frequencies;
     it carries the channel (a low-pass makes the SNR above the cut-off fall). Voiced frames are sampled at the
     harmonics; sonorant unvoiced (whispered) frames on a noise_grid_hz grid; other frames are NaN (absent, not
-    unobservable). Returns (o, sd_hz), each (T, K)."""
+    unobservable). snr_db_rows(ts, freqs (P, S)) -> (P, S), if given, replaces the per-frame calls (NaN freqs are
+    padding). Returns (o, sd_hz), each (T, K)."""
     cfg = cfg or ObservabilityConfig()
     T, K = formants.shape
     o, sd = np.full((T, K), np.nan), np.full((T, K), np.nan)
     grid = np.arange(cfg.noise_grid_hz, cfg.f_max_hz, cfg.noise_grid_hz)
-    for t in range(T):
-        if voiced[t] and np.isfinite(f0[t]) and f0[t] > 0:
-            freqs = f0[t] * np.arange(1, int(cfg.f_max_hz // f0[t]) + 1)
-            snr = np.asarray(snr_db_at(t, freqs), float)
-            sdb = sample_sd_db(snr, cfg)
-        elif sonorant[t]:
-            freqs = grid
-            snr = np.asarray(snr_db_at(t, freqs), float)
-            sdb = sample_sd_db(snr, cfg, base_db=np.hypot(cfg.model_db, cfg.noise_sample_db))
+    v = voiced.astype(bool) & np.isfinite(f0) & (f0 > 0)
+    g = sonorant.astype(bool) & ~v
+    rows = np.flatnonzero(v | g)
+    if len(rows):
+        vr = v[rows]
+        f0r = np.where(vr, f0[rows], 1.0)
+        nh = np.where(vr, np.floor_divide(cfg.f_max_hz, f0r), 0).astype(int)
+        S = max(int(nh.max()), len(grid) if (~vr).any() else 0)
+        k = np.arange(S)
+        harm = f0r[:, None] * np.arange(1, S + 1)
+        harm = np.where(k < nh[:, None], harm, np.nan)
+        noise_row = np.full(S, np.nan)
+        noise_row[: min(len(grid), S)] = grid[:S]
+        freqs = np.where(vr[:, None], harm, noise_row)
+        if snr_db_rows is not None:
+            snr = np.asarray(snr_db_rows(rows, freqs), float)
         else:
-            continue
-        o[t], sd[t] = frame_bound(freqs, snr, sdb, formants[t], bandwidths[t], cfg)
+            snr = np.full(freqs.shape, np.nan)
+            for j, t in enumerate(rows):
+                n_j = nh[j] if vr[j] else len(grid)
+                snr[j, :n_j] = np.asarray(snr_db_at(t, freqs[j, :n_j]), float)
+        sdb = np.where(vr[:, None], sample_sd_db(snr, cfg), sample_sd_db(snr, cfg, base_db=np.hypot(cfg.model_db, cfg.noise_sample_db)))
+        sdb = np.where(np.isfinite(freqs), sdb, np.nan)
+        o[rows], sd[rows] = frames_bound(freqs, snr, sdb, formants[rows], bandwidths[rows], cfg)
     if cfg.context_s > 0:
         # information beyond the prior, per frame and formant (frames without a value add nothing), pooled with
         # neighbours of the same sonorant run

@@ -186,7 +186,8 @@ class SynthCrops:
                 return out
             sl = slice(lo, hi)
             o, _ = observability(lab["f0"][sl], lab["voiced"][sl], lab["sonorant"][sl], lab["formants"][sl, :N_TRAIN_FORMANTS],
-                                 lab["bandwidths"][sl, :N_TRAIN_FORMANTS], lambda j, f: cs.snr_db_at(j + lo, f))
+                                 lab["bandwidths"][sl, :N_TRAIN_FORMANTS], lambda j, f: cs.snr_db_at(j + lo, f),
+                                 snr_db_rows=lambda js, f: cs.snr_db_rows(js + lo, f))
             k0, k1 = start - lo, min(start + t, n) - lo
             out[: k1 - k0] = o[k0:k1]
             return out

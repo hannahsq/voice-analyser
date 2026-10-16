@@ -254,6 +254,27 @@ class ClipSpectra:
         return 10 * np.log10(s / (n + peak * 10 ** (-FLOOR_DB / 10)))
 
 
+    def snr_db_rows(self, ts: np.ndarray, freqs: np.ndarray) -> np.ndarray:
+        """`snr_db_at` for many frames at once: ts (P,), freqs (P, S) (NaN entries give NaN). The grids are regular in
+        log2 frequency, so the interpolation is index arithmetic (np.interp's clamping at the ends included)."""
+        lf = np.log2(np.maximum(freqs, 1.0))
+
+        def interp(table, step):
+            pos = np.clip((lf - np.log2(50.0)) / step, 0.0, table.shape[1] - 1.0)
+            pos = np.where(np.isfinite(pos), pos, 0.0)
+            i = np.minimum(pos.astype(int), table.shape[1] - 2)
+            fr = pos - i
+            rows = table[ts]
+            lo, hi = np.take_along_axis(rows, i, 1), np.take_along_axis(rows, i + 1, 1)
+            return 10 ** (lo + fr * (hi - lo))
+
+        s = interp(np.log10(np.maximum(self.sig, 1e-300)), 1.0 / 12.0)
+        on_sig = self.noise_on_sig is not None
+        n = interp(np.log10(np.maximum(self.noise_on_sig if on_sig else self.noise, 1e-300)), 1.0 / 12.0 if on_sig else 1.0 / 6.0)
+        peak = np.maximum(np.max(self.sig[ts] + (self.noise_on_sig[ts] if on_sig else 0.0), axis=1), 1e-300)
+        out = 10 * np.log10(s / (n + peak[:, None] * 10 ** (-FLOOR_DB / 10)))
+        return np.where(np.isfinite(freqs), out, np.nan)
+
 # ----------------------------------------------------------------------------- the store for a written set
 
 
