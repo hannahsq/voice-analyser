@@ -112,6 +112,10 @@ class SynthConfig:
     # more pressed, flatter source above 1 kHz), log-uniform in this range; None draws nothing (1), so earlier sets
     # reproduce (D-026, train_v2s)
     interactive_closure: tuple[float, float] | None = None
+    # area return phase on interactive clips (`interactive.area_pulse` ret): an exponential approach to closure with
+    # LF's Ta at the clip's Rd, so breathy clips get the steep tilt a gradual closure gives (D-026). No draw; False
+    # reproduces earlier sets
+    interactive_return: bool = False
     # subglottal resonance strength between speakers: the subglottal impedance's magnitude x log-uniform in this range
     interactive_sub_gain: tuple[float, float] = (0.5, 2.0)
 
@@ -437,7 +441,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
                      "targets": [d[2] for d in drawn], "glottis": asdict(glottis) if glottis else None,
                      "coupling_scale": c_scale, "interactive": interactive, "feedback": feedback, "area_sq": area_sq,
                      "pulse": (None if not interactive else "lf" if area_sq is None else "rosenberg"), "closure": closure,
-                     "sub_gain": sub_gain}
+                     "return": bool(interactive and cfg.interactive_return), "sub_gain": sub_gain}
     else:
         targets = np.array([tract.sample_formants(rng, length, cfg.p_uniform_formants, cfg.p_cluster,
                                                   conversational=cfg.vowel_dist == "conversational") for _ in tt])
@@ -492,7 +496,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
     if interactive:
         comps = interactive_source.synthesize(traj, kf_shapes, kf_block, kf_w, glottis, area_sq, rng, jitter=jitter,
                                               shimmer_db=shimmer, hnr_db=hnr, extras=extras,
-                                              coupled=feedback, closure=closure)
+                                              coupled=feedback, closure=closure, ret=cfg.interactive_return)
     else:
         comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled)
     audio = comps["total"]

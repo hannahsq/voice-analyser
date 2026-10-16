@@ -32,8 +32,64 @@ N_IR = 1024  # impulse-response length at 16 kHz (64 ms: B1 >= 25 Hz decays by >
 N_FFT = 2048  # frequency grid for the responses (7.8 Hz; 8192 changes them by ~1e-4 of the peak)
 
 
+RETURN_DECAYS = 4.0  # area return phase: closure after this many time constants (the corner left: e^-4, 2 %)
+
+
+def return_fraction(rd: np.ndarray | float) -> np.ndarray:
+    """LF's return-phase time constant Ta as a fraction of the period at Rd (Fant 1995: Ra = (4.8 Rd - 1) / 100), as
+    `glottal.lf_params` uses it."""
+    return np.maximum((4.8 * np.asarray(rd, float) - 1.0) / 100.0, 0.0)
+
+
+def _return_factor(k):
+    """Area left at the hand-over, in units of slope x Ta, for a return phase of k time constants (k -> 0: k / 2)."""
+    e = np.exp(-k)
+    return 1.0 - k * e / (1.0 - e)
+
+
+def _return_phase(fr, a, tp, tn, pc, ta):
+    """Replace the end of the closing branch with an exponential return to closure (in place on `a`), as LF's return
+    phase is built but in area: from t1 the area's slope is -s1 (exp(-(t - t1) / ta) - exp(-k)) / (1 - exp(-k)),
+    continuous at t1 and reaching 0 exactly at t2 = t1 + k ta, k = RETURN_DECAYS (fewer if the cycle ends first);
+    t1 is where the branch's remaining area is what that slope removes by t2. The slope is continuous everywhere
+    (an offset on the area instead left a 2 % slope step at t2, whose interference with t1 rippled the spectrum
+    by up to 22 dB at Rd 2.5; LF's flow derivative is smooth there too)."""
+    on = ta > 0
+    if not np.any(on):
+        return a
+    fr, tp, tn, pc, ta = fr[on], tp[on], tn[on], pc[on], ta[on]
+    half_pi = 0.5 * np.pi
+
+    def branch(u):  # value and -slope (per unit of the period) of the closing branch at normalised time u
+        th = half_pi * u ** pc
+        return np.cos(th), np.sin(th) * half_pi * pc * u ** (pc - 1.0) / tn
+
+    def excess(u):  # remaining area minus what the tail removes; decreasing in u
+        v, s = branch(u)
+        k = np.minimum(RETURN_DECAYS, np.maximum(1.0 - (tp + u * tn), 1e-9) / ta)
+        return v - s * ta * _return_factor(k)
+
+    lo, hi = np.full(fr.shape, 1e-6), np.ones(fr.shape)
+    for _ in range(50):  # bisection: excess > 0 at u -> 0, <= 0 at u = 1
+        mid = 0.5 * (lo + hi)
+        pos = excess(mid) > 0
+        lo, hi = np.where(pos, mid, lo), np.where(pos, hi, mid)
+    u1 = 0.5 * (lo + hi)
+    t1 = tp + u1 * tn
+    _, s1 = branch(u1)
+    k = np.minimum(RETURN_DECAYS, np.maximum(1.0 - t1, 1e-9) / ta)
+    t2 = t1 + k * ta
+    e = np.exp(-k)
+    tail = s1 / (1.0 - e) * (ta * (np.exp(-(fr - t1) / ta) - e) - e * (t2 - fr))
+    out = a[on]
+    out = np.where(fr >= t1, np.where(fr < t2, np.maximum(tail, 0.0), 0.0), out)
+    a[on] = out
+    return a
+
+
 def area_pulse(cycles: np.ndarray, te: np.ndarray | float, sq: np.ndarray | float = 1.3,
-               gap: np.ndarray | float = 0.0, closure: np.ndarray | float = 1.0) -> np.ndarray:
+               gap: np.ndarray | float = 0.0, closure: np.ndarray | float = 1.0,
+               ret: np.ndarray | float = 0.0) -> np.ndarray:
     """Glottal area per sample as a fraction of the peak: Rosenberg's (1971) type-C pulse over the open phase
     (opening 0.5 (1 - cos(pi t / Tp)), closing cos(pi (t - Tp) / (2 Tn)), Tp / Tn = sq, Tp + Tn = te in cycles) on top
     of the closed-phase gap. The closing branch ends with a finite slope, a corner at closure as the membranous folds
@@ -44,7 +100,15 @@ def area_pulse(cycles: np.ndarray, te: np.ndarray | float, sq: np.ndarray | floa
     closure (p >= 1): the closing branch is cos(pi / 2 u^p) over the normalised closing time u, still smooth at the
     peak and closed at the same instant, ending with p times Rosenberg's slope: p = 1 is Rosenberg's pulse, larger p
     a sharper (more pressed) closure with more high-frequency excitation (D-026: Rosenberg's fixed corner leaves the
-    source's high-frequency tilt with no range of its own)."""
+    source's high-frequency tilt with no range of its own).
+
+    ret (Ta, fraction of the period; 0 = none): a return phase in area space, LF's in the folds' contact rather than
+    the flow (D-026). The closing branch hands over, with matching value and slope, to an exponential approach to
+    closure with time constant Ta, closed RETURN_DECAYS time constants later (or at the cycle's end): the gradual,
+    zipper-like closure of breathy voices. The excitation's spectrum then falls a further 6 dB/oct above about
+    1 / (2 pi Ta), as LF's return phase makes it, with no nulls (one real pole, unlike a smooth symmetric pulse such as
+    sin^2), and with the feedback on the interaction still shapes the flow from the area. Closure comes later than te.
+    `return_fraction` gives Ta from the clip's Rd."""
     fr = np.asarray(cycles) % 1.0
     te = np.broadcast_to(np.asarray(te, float), fr.shape)
     sq = np.broadcast_to(np.asarray(sq, float), fr.shape)
@@ -54,6 +118,9 @@ def area_pulse(cycles: np.ndarray, te: np.ndarray | float, sq: np.ndarray | floa
     u = np.clip((fr - tp) / tn, 0.0, 1.0)
     a = np.where(fr < tp, 0.5 * (1.0 - np.cos(np.pi * fr / tp)),
                  np.where(fr < te, np.cos(0.5 * np.pi * u ** pc), 0.0))
+    ta = np.broadcast_to(np.asarray(ret, float), fr.shape)
+    if np.any(ta > 0):
+        a = _return_phase(fr, a, tp, tn, pc, ta)
     return gap + (1.0 - gap) * a
 
 
@@ -242,13 +309,14 @@ def render(area_cm2: np.ndarray, responses: list[TractResponses], block_target: 
 def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, block_w: np.ndarray, glottis: Glottis,
                sq: float | None, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
                hnr_db: float | None = None, extras: dict | None = None, fs: float = 16000.0,
-               coupled: bool = True, closure: float = 1.0) -> dict[str, np.ndarray]:
+               coupled: bool = True, closure: float = 1.0, ret: bool = False) -> dict[str, np.ndarray]:
     """The components of `voice.synthesize` with the interactive source (same Trajectories; its poles are ignored:
     the tract is `responses`, blended per control block). The area is the Rosenberg pulse at the open quotient of
     the clip's Rd (LF te), the closed-phase gap following it (`coupling.gap_from_open_quotient`), scaled by the
     voice envelope (onsets and loudness open the glottis less). Aspiration (open-phase modulated) and whisper are
     flow noise at the glottis through the same responses; frication is as in `voice.synthesize`. `extras` (nasal
-    and other pole-zero pairs, `tract.sample_extras`) filter every component afterwards."""
+    and other pole-zero pairs, `tract.sample_extras`) filter every component afterwards. ret: the area return phase
+    at each sample's Rd (`area_pulse` ret, `return_fraction`)."""
     from scipy.signal import butter, sosfilt
 
     from . import filters
@@ -269,7 +337,10 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
     va = _per_sample(traj.voice_amp)
     va_n = va / va.max() if va.max() > 0 else va
     # sq None: the LF-derived pulse at each sample's Rd; otherwise Rosenberg's at speed quotient sq
-    pulse = lf_area_pulse(cycles, _per_sample(rd), glottis) if sq is None else area_pulse(cycles, te_s, sq, 0.0, closure)
+    if sq is None:
+        pulse = lf_area_pulse(cycles, _per_sample(rd), glottis)
+    else:
+        pulse = area_pulse(cycles, te_s, sq, 0.0, closure, return_fraction(_per_sample(rd)) if ret else 0.0)
     area = glottis.peak_area_cm2 * (gap + (1.0 - gap) * pulse) * va_n
     bt, bw = np.asarray(block_target, np.int64), np.asarray(block_w, float)
     out = {"voiced": render(area, responses, bt, bw, glottis, CTRL, fs, coupled)["pressure"] * shim[period], "cycles": cycles}

@@ -194,3 +194,49 @@ def test_sampler_closure_option():
     vals = [generate(i, replace(base, interactive_closure=(1.0, 3.0)), 2).meta["tube"] for i in range(12)]
     vals = [t["closure"] for t in vals if t and t["interactive"]]
     assert vals and all(1.0 <= v <= 3.0 for v in vals) and len(set(vals)) == len(vals)
+
+
+def _harmonics_db(a):  # the area derivative over 3 cycles: harmonic k at bin 3k
+    s = np.abs(np.fft.rfft(np.diff(a, append=a[0]))) ** 2
+    return 10 * np.log10(s[3::3][:60] + 1e-30)
+
+
+def test_return_phase():
+    from vocal_analysis.synth.glottal import open_phase
+
+    cyc = np.linspace(0.0, 3.0, 6000, endpoint=False)
+    fr = cyc % 1.0
+    for rd in (0.5, 1.0, 1.7, 2.7):
+        te, ta = open_phase(rd), float(it.return_fraction(rd))
+        ros = it.area_pulse(cyc, te, 1.3, 0.0, 1.0, 0.0)
+        ret = it.area_pulse(cyc, te, 1.3, 0.0, 1.0, ta)
+        assert np.array_equal(it.area_pulse(cyc, te, 1.3, 0.0, 1.0), ros)  # ret 0 is Rosenberg's pulse
+        assert np.all((ret >= 0) & (ret <= 1)) and np.allclose(ret[fr < 0.5 * te], ros[fr < 0.5 * te])
+        assert fr[:2000][ret[:2000] > 0].max() > te - 1e-3  # closes later than te, as LF's return phase
+        d = np.diff(ret[:2000])
+        assert np.max(np.abs(np.diff(d))) < 0.12 * np.max(np.abs(d))  # no slope step (Rosenberg's is 100 %)
+        h, hr = _harmonics_db(ret), _harmonics_db(ros)
+        tilt = lambda x: x[19:40].mean() - x[0]  # noqa: E731
+        assert tilt(h) < tilt(hr) - 5.0  # steeper above the return frequency
+        # no nulls: no harmonic more than 8 dB below its neighbours' mean (a sin^2 pulse has ~ -290 dB nulls)
+        assert np.min(h[1:-1] - 0.5 * (h[:-2] + h[2:])) > -8.0
+    sin2 = np.where(fr < 0.6, np.sin(np.pi * fr / 0.6) ** 2, 0.0)
+    hs = _harmonics_db(sin2)
+    assert np.min(hs[1:-1] - 0.5 * (hs[:-2] + hs[2:])) < -50.0  # the null check catches what it should
+
+
+def test_sampler_return_option():
+    from dataclasses import replace
+
+    from vocal_analysis.synth.sampler import SynthConfig, generate
+
+    base = replace(SynthConfig(), p_interactive=1.0, p_interactive_coupled=0.5)
+    off, on = [], []
+    for i in range(6):
+        a, b = generate(i, base, 2), generate(i, replace(base, interactive_return=True), 2)
+        if a.meta["tube"] and a.meta["tube"]["interactive"]:
+            assert not a.meta["tube"]["return"] and b.meta["tube"]["return"]
+            assert np.array_equal(a.labels["formants"], b.labels["formants"], equal_nan=True)  # no extra draws
+            off.append(a.audio)
+            on.append(b.audio)
+    assert on and any(not np.array_equal(x, y) for x, y in zip(off, on))
