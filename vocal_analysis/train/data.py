@@ -19,12 +19,13 @@ from pathlib import Path
 import numpy as np
 
 from ..features.vqt import HOP, N_MAX
-from ..synth.channel import ChannelConfig, augment
+from ..synth.channel import ChannelConfig, apply_channel, augment, draw_channel
 from ..synth.shards import INT16_SCALE, ShardReader
 
 LABEL_KEYS = ("f0", "voiced", "sonorant", "whisper", "formants", "bandwidths", "rd", "source_h_db")
 N_TRAIN_FORMANTS = 4
-TRACT_LEFT_WEIGHT = (0.15, 0.5)  # formant loss weight 1 up to this |tract_left|, falling linearly to 0 at that
+TRACT_LEFT_WEIGHT = (0.15, 0.5)
+OBS_MARGIN = 20  # frames each side of a crop for observability's temporal pooling (4 x 50 ms reaches 0.02 weight)  # formant loss weight 1 up to this |tract_left|, falling linearly to 0 at that
 
 
 def formant_weight(tract_left: np.ndarray | float, ramp: tuple[float, float] = TRACT_LEFT_WEIGHT) -> np.ndarray:
@@ -101,7 +102,8 @@ class SynthCrops:
 
     def __init__(self, flat_dir: str | Path, clip_ids: np.ndarray, n_frames: int = 200,
                  channel: ChannelConfig | None = ChannelConfig(), seed: int = 0, epoch_size: int | None = None,
-                 fixed: bool = False, tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT):
+                 fixed: bool = False, tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT,
+                 observability: bool = False):
         self.dir = Path(flat_dir)
         self.clip_ids = np.asarray(clip_ids)
         self.n_frames = n_frames
@@ -110,6 +112,9 @@ class SynthCrops:
         self.epoch_size = epoch_size or len(self.clip_ids)
         self.fixed = fixed  # same crop and channel for an item every time (validation)
         self.tract_left_weight = tuple(tract_left_weight)
+        # D-027: per-frame observability labels ("obs", (t, 4)) for the channelled audio, from the set's store
+        # (obs_store.write_store); NaN where there is none (resynthesised sets, absent formants, non-sonorant frames)
+        self.observability = observability
         self._arrays = None
 
     def _open(self):
@@ -118,6 +123,8 @@ class SynthCrops:
             self._arrays = {"audio": load("audio.npy"), "a_off": np.load(self.dir / "audio_offsets.npy"),
                             "f_off": np.load(self.dir / "frame_offsets.npy"),
                             **{k: load(f"label_{k}.npy") for k in LABEL_KEYS}}
+            if self.observability and (self.dir / "obs_sig.npy").exists():
+                self._arrays.update(obs_sig=load("obs_sig.npy"), obs_noise=load("obs_noise.npy"), obs_peak=load("obs_peak.npy"))
             tl = self.dir / "clip_tract_left.npy"
             self._arrays["clip_weight"] = formant_weight(np.load(tl), self.tract_left_weight) if tl.exists() else None
         return self._arrays
@@ -141,17 +148,52 @@ class SynthCrops:
         x = arr["audio"][a0:a1].astype(np.float32) / INT16_SCALE
         n_clip_frames = int(f1_ - f0_)
         lab = {k: np.asarray(arr[k][f0_:f1_]) for k in LABEL_KEYS}
+        params = {"clean": True}
         if self.channel is not None:
             mask = np.repeat(lab["voiced"], HOP)[: len(x)]
+            mask = np.pad(mask, (0, len(x) - len(mask)))
             # fixed (validation) sets code each clip in a fresh process: the same audio every time and in every run
-            x, _ = augment(x, rng, self.channel, np.pad(mask, (0, len(x) - len(mask))), codec_stream=False if self.fixed else None)
+            stream = False if self.fixed else None
+            if self.observability:  # augment's draws and audio, keeping what the store's channel needs
+                ch = draw_channel(rng, len(x), self.channel)
+                x, used = apply_channel(x, ch, mask, codec_stream=stream)
+                params = {k: v for k, v in ch.items() if not k.startswith("_")} | ({"clip_loss": used["clip_loss"]} if "clip_loss" in used else {})
+            else:
+                x, _ = augment(x, rng, self.channel, mask, codec_stream=stream)
+        obs = self._observability(arr, f0_, f1_, lab, params) if self.observability else None
         resynth = arr["clip_weight"] is not None
         w = (0.0 if resynth else 1.0, float(arr["clip_weight"][cid]) if resynth else 1.0)  # w_f0, w_formant
         if n_crops is not None:
-            return [self._crop(x, lab, n_clip_frames, t, rng, *w) for _ in range(n_crops)]
-        return self._crop(x, lab, n_clip_frames, t, rng, *w)
+            return [self._crop(x, lab, n_clip_frames, t, rng, *w, obs=obs) for _ in range(n_crops)]
+        return self._crop(x, lab, n_clip_frames, t, rng, *w, obs=obs)
 
-    def _crop(self, x, lab, n_clip_frames, t, rng, w_f0=1.0, w_formant=1.0):
+    def _observability(self, arr, f0_, f1_, lab, params):
+        """A callable (start, t) -> (t, 4) observability of the clip's frames under the drawn channel, computed for
+        the crop plus OBS_MARGIN frames each side (the temporal pooling's reach)."""
+        from ..synth import obs_store
+        from ..synth.observability import observability
+
+        n = int(f1_ - f0_)
+        if "obs_sig" not in arr:
+            return lambda start, t: np.full((t, N_TRAIN_FORMANTS), np.nan, np.float32)
+        cs = obs_store.ClipSpectra(arr["obs_sig"][f0_:f1_], arr["obs_noise"][f0_:f1_], arr["obs_peak"][f0_:f1_],
+                                   lab["voiced"], lab["f0"]).channel(params)
+
+        def at(start, t):
+            lo, hi = max(start - OBS_MARGIN, 0), min(start + t + OBS_MARGIN, n)
+            out = np.full((t, N_TRAIN_FORMANTS), np.nan, np.float32)
+            if hi <= lo:
+                return out
+            sl = slice(lo, hi)
+            o, _ = observability(lab["f0"][sl], lab["voiced"][sl], lab["sonorant"][sl], lab["formants"][sl, :N_TRAIN_FORMANTS],
+                                 lab["bandwidths"][sl, :N_TRAIN_FORMANTS], lambda j, f: cs.snr_db_at(j + lo, f))
+            k0, k1 = start - lo, min(start + t, n) - lo
+            out[: k1 - k0] = o[k0:k1]
+            return out
+
+        return at
+
+    def _crop(self, x, lab, n_clip_frames, t, rng, w_f0=1.0, w_formant=1.0, obs=None):
         start = int(rng.integers(0, max(n_clip_frames - t, 0) + 1))
         lab = {k: v[start : start + t] for k, v in lab.items()}
         if len(lab["f0"]) < t:  # crop runs past the clip's end: pad labels as unvoiced/absent
@@ -159,6 +201,8 @@ class SynthCrops:
             lab = {k: np.concatenate([v, _pad_labels(k, v, pad)]) for k, v in lab.items()}
         lab["w_f0"] = np.full(t, w_f0, np.float32)
         lab["w_formant"] = np.full(t, w_formant, np.float32)
+        if obs is not None:  # (t, 4), NaN past the clip's end
+            lab["obs"] = obs(start, t)
         lab["formants"] = lab["formants"][:, :N_TRAIN_FORMANTS]
         lab["bandwidths"] = lab["bandwidths"][:, :N_TRAIN_FORMANTS]
         c0 = start * HOP - N_MAX // 2

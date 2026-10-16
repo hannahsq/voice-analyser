@@ -255,3 +255,88 @@ class ClipSpectra:
         n = 10 ** np.interp(lf, np.log2(grid), np.log10(np.maximum(nz[t], 1e-300)))
         peak = max(np.max(self.sig[t] + (self.noise_on_sig[t] if self.noise_on_sig is not None else 0.0)), 1e-300)
         return 10 * np.log10(s / (n + peak * 10 ** (-FLOOR_DB / 10)))
+
+
+# ----------------------------------------------------------------------------- the store for a written set
+
+
+def config_from_index(index: dict):
+    """The SynthConfig a set was written with (index.json; JSON lists back to tuples; fields added since keep their
+    defaults, which reproduce earlier sets)."""
+    from dataclasses import fields
+
+    from .sampler import SynthConfig
+
+    known = {f.name for f in fields(SynthConfig)}
+    tup = lambda v: tuple(tup(x) for x in v) if isinstance(v, list) else v  # noqa: E731
+    return SynthConfig(**{k: tup(v) for k, v in index["synth_config"].items() if k in known})
+
+
+def _store_shard(args) -> str:
+    path, indices, cfg, seed, expect = args
+    from .sampler import generate
+    from .shards import INT16_SCALE
+
+    parts = {"sig": [], "noise": [], "peak": []}
+    for j, i in enumerate(indices):
+        c = generate(i, cfg, seed, keep_components=True)
+        if j == 0 and expect is not None:  # the regenerated clip must be the stored one
+            q = np.clip(np.round(c.audio * INT16_SCALE), -32768, 32767).astype(np.int16)
+            if not np.array_equal(q, expect):
+                raise RuntimeError(f"clip {i} does not reproduce the stored audio")
+        s = clean_spectra(c.components, c.labels["t"], c.labels["voiced"], c.labels["f0"])
+        for k in parts:
+            parts[k].append(s[k])
+    tmp = Path(path).with_suffix(".tmp.npz")
+    np.savez(tmp, **{k: np.concatenate(v) for k, v in parts.items()})
+    tmp.replace(path)
+    return path
+
+
+def write_store(set_dir: str | Path, workers: int = 8, log=print) -> Path:
+    """Observability store for a written synthetic set, beside its flat arrays: flat/obs_sig.npy (frames, 88),
+    obs_noise.npy (frames, 45), obs_peak.npy (frames,), in the flat arrays' frame order. Clips are regenerated
+    (`generate(i, cfg, seed, keep_components=True)`); each shard's first clip is checked against the stored audio.
+    Resumable (per-shard files under obs_parts/)."""
+    from concurrent.futures import ProcessPoolExecutor
+
+    from .shards import ShardReader
+
+    root = Path(set_dir)
+    reader = ShardReader(root, cache_shards=False)
+    index = reader.index
+    if index.get("kind") == "resynth":
+        raise ValueError("resynthesised sets have no separate noise component (D-027): no store")
+    cfg, seed, size = config_from_index(index), index["seed"], index["shard_size"]
+    parts = root / "obs_parts"
+    parts.mkdir(exist_ok=True)
+    jobs = []
+    for s, start in enumerate(range(0, index["n_clips"], size)):
+        path = parts / f"obs_{s:05d}.npz"
+        if not path.exists():
+            with np.load(reader.shards[s]) as z:
+                expect = z["audio"][z["audio_offsets"][0]:z["audio_offsets"][1]]
+            jobs.append((str(path), list(range(start, min(start + size, index["n_clips"]))), cfg, seed, expect))
+    log(f"{root}: observability store, {len(jobs)} shards to write")
+    with ProcessPoolExecutor(workers) as ex:
+        for k, _ in enumerate(ex.map(_store_shard, jobs), 1):
+            if k % 10 == 0 or k == len(jobs):
+                log(f"  {k}/{len(jobs)} shards")
+    flat = root / "flat"
+    n_frames = int(np.load(flat / "frame_offsets.npy")[-1])
+    files = sorted(parts.glob("obs_*.npz"))
+    out = {"sig": np.lib.format.open_memmap(flat / "obs_sig.npy", "w+", np.uint8, (n_frames, len(SIG_GRID))),
+           "noise": np.lib.format.open_memmap(flat / "obs_noise.npy", "w+", np.uint8, (n_frames, len(NOISE_GRID))),
+           "peak": np.lib.format.open_memmap(flat / "obs_peak.npy", "w+", np.float16, (n_frames,))}
+    pos = 0
+    for f in files:
+        with np.load(f) as z:
+            n = len(z["peak"])
+            for k in out:
+                out[k][pos:pos + n] = z[k]
+            pos += n
+    if pos != n_frames:
+        raise RuntimeError(f"store has {pos} frames, the set {n_frames}")
+    for m in out.values():
+        m.flush()
+    return flat

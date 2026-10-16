@@ -161,6 +161,7 @@ class SynthClip:
     audio: np.ndarray  # float32, FS
     labels: dict[str, np.ndarray]  # per frame
     meta: dict
+    components: dict | None = None  # the rendered components before normalisation (generate(keep_components=True))
 
 
 # ----------------------------------------------------------------------------- helpers
@@ -337,7 +338,9 @@ def _interactive_tract(spk, drawn, tt, widths, n, glottis, sub_gain):
 # ----------------------------------------------------------------------------- clip
 
 
-def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> SynthClip:
+def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_components: bool = False) -> SynthClip:
+    """Clip `index` of a set. keep_components: also return the rendered components (voiced, aspiration, whisper,
+    frication, total; scale before the clip's normalisation, meta["gain"]) for observability (D-027); no extra draws."""
     cfg = cfg or SynthConfig()
     rng = np.random.default_rng([seed, index])
     dur = rng.uniform(*cfg.duration_s)
@@ -531,4 +534,4 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> Synth
         "extras": {k: v.tolist() for k, v in extras.items()}, "n_extra_poles": n_ep, "n_extra_zeros": n_ez,
         "config": asdict(cfg),
     }
-    return SynthClip(audio.astype(np.float32), labels, meta)
+    return SynthClip(audio.astype(np.float32), labels, meta, comps if keep_components else None)

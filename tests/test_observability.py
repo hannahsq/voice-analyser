@@ -128,3 +128,27 @@ def test_store_channel_low_pass_and_noise():
     assert f4.any() and np.median(phone[f4, 3]) < 0.1 < np.median(clean[f4, 3])
     m = np.isfinite(clean) & np.isfinite(noisy)
     assert np.all(noisy[m] <= clean[m] + 1e-6) and np.median(clean[m] - noisy[m]) > 0.05
+
+
+def test_loader_observability_labels(tmp_path):
+    from dataclasses import replace
+
+    from vocal_analysis.synth import obs_store as st
+    from vocal_analysis.synth.channel import ChannelConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.data import SynthCrops, consolidate
+
+    cfg = replace(smp.SynthConfig(), p_interactive=1.0, p_interactive_coupled=0.5)
+    write_set(tmp_path, 6, cfg, seed=4242, shard_size=3, workers=2, log=lambda m: None)
+    flat = consolidate(tmp_path, log=lambda m: None)
+    st.write_store(tmp_path, workers=2, log=lambda m: None)
+    ch = replace(ChannelConfig(), p_codec=0.0)
+    a = SynthCrops(flat, np.arange(6), 120, ch, seed=1, fixed=True)
+    b = SynthCrops(flat, np.arange(6), 120, ch, seed=1, fixed=True, observability=True)
+    for i in range(6):
+        (xa, la), (xb, lb) = a[i], b[i]
+        assert np.array_equal(xa, xb) and all(np.array_equal(la[k], lb[k], equal_nan=True) for k in la)
+        son = lb["sonorant"].astype(bool) & np.isfinite(lb["formants"]).all(1)
+        o = lb["obs"]
+        assert o.shape == (120, 4) and np.all(np.isfinite(o[son])) and np.all((o[son] > 0) & (o[son] <= 1))
+        assert np.all(np.isnan(o[~lb["sonorant"].astype(bool)]))
