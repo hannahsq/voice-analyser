@@ -192,7 +192,9 @@ def apply_channel(x: np.ndarray, p: dict, speech_mask: np.ndarray | None = None,
     if "clip_rel" in p:
         used["clip_lim"] = float(np.max(np.abs(x)) * p["clip_rel"]) if ref is None else ref["clip_lim"]
         if clip:
-            x = np.clip(x, -used["clip_lim"], used["clip_lim"])
+            y = np.clip(x, -used["clip_lim"], used["clip_lim"])
+            used["clip_loss"] = float(np.mean((x - y) ** 2) / max(np.mean(x ** 2), 1e-30))  # removed power, relative
+            x = y
     if "codec" in p:
         from . import codecs
 

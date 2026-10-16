@@ -68,3 +68,63 @@ def test_component_snr_on_a_sampler_clip():
     son = L["sonorant"] & np.all(np.isfinite(L["formants"][:, :4]), 1)
     assert son.any() and np.all(np.isfinite(o[son])) and np.all((o[son] > 0) & (o[son] <= 1))
     assert np.all(np.isnan(o[~L["sonorant"]]))
+
+
+def _clip_with_components(index=3, cfg=None):
+    cap = {}
+    real = smp.synthesize
+
+    def keep(*a, **k):
+        cap["c"] = real(*a, **k)
+        return cap["c"]
+
+    smp.synthesize = keep
+    try:
+        c = smp.generate(index, cfg or smp.SynthConfig(p_tube=0.0), 5)
+    finally:
+        smp.synthesize = real
+    return c, cap["c"]
+
+
+def test_store_quantisation_roundtrip():
+    from vocal_analysis.synth import obs_store as st
+
+    db = np.array([0.0, -0.26, -37.4, -130.0, -np.inf])
+    back = st.dequantise(st.quantise(db))
+    assert np.allclose(back[:3], db[:3], atol=0.25) and back[3] == -st.Q_MAX * st.Q_STEP and back[4] == -np.inf
+
+
+def test_store_clean_matches_component_snr():
+    from vocal_analysis.synth import obs_store as st
+
+    c, comps = _clip_with_components()
+    L = c.labels
+    s = st.clean_spectra(comps, L["t"], L["voiced"], L["f0"])
+    cs = st.ClipSpectra(s["sig"], s["noise"], s["peak"], L["voiced"], L["f0"]).channel({"clean": True})
+    ref = ob.component_snr(comps, L["t"], L["voiced"])
+    args = (L["f0"], L["voiced"], L["sonorant"], L["formants"][:, :4], L["bandwidths"][:, :4])
+    o_store, _ = ob.observability(*args, cs.snr_db_at)
+    o_ref, _ = ob.observability(*args, ref)
+    m = np.isfinite(o_store) & np.isfinite(o_ref)
+    assert m.any() and np.median(np.abs(o_store[m] - o_ref[m])) < 0.02
+
+
+def test_store_channel_low_pass_and_noise():
+    from vocal_analysis.synth import obs_store as st
+
+    c, comps = _clip_with_components()
+    L = c.labels
+    s = st.clean_spectra(comps, L["t"], L["voiced"], L["f0"])
+    args = (L["f0"], L["voiced"], L["sonorant"], L["formants"][:, :4], L["bandwidths"][:, :4])
+
+    def o(params):
+        cs = st.ClipSpectra(s["sig"], s["noise"], s["peak"], L["voiced"], L["f0"]).channel(params)
+        return ob.observability(*args, cs.snr_db_at)[0]
+
+    clean = o({"clean": True})
+    phone = o({"clean": False, "phone": True, "gain_db": 0.0})
+    noisy = o({"clean": False, "noise": "white", "snr_db": 0.0, "gain_db": 0.0})
+    f4 = np.isfinite(clean[:, 3]) & (L["formants"][:, 3] > 3600)
+    assert f4.any() and np.median(phone[f4, 3]) < 0.1 < np.median(clean[f4, 3])
+    m = np.isfinite(clean) & np.isfinite(noisy)
+    assert np.all(noisy[m] <= clean[m] + 1e-6) and np.median(clean[m] - noisy[m]) > 0.05
