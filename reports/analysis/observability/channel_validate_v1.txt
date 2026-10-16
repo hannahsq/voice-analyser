@@ -1,0 +1,22 @@
+Observability channel validation (D-027): 300 clips, train_v2 config, seed 31337, random channel each
+  F1: 72986 frames, median |delta o| 0.002, Spearman 0.968, median signed -0.001, mean o analytic 0.554 full 0.589
+  F2: 72986 frames, median |delta o| 0.003, Spearman 0.949, median signed -0.001, mean o analytic 0.788 full 0.837
+  F3: 72986 frames, median |delta o| 0.011, Spearman 0.912, median signed -0.007, mean o analytic 0.720 full 0.801
+  F4: 72986 frames, median |delta o| 0.019, Spearman 0.902, median signed -0.014, mean o analytic 0.595 full 0.697
+Per channel stage, median over its clips of the clip's median |delta o|:
+  clean            44 clips  0.001
+  clip_loss         9 clips  0.023
+  codec            27 clips  0.014
+  drr_db          109 clips  0.036
+  eq              139 clips  0.007
+  highpass_hz     135 clips  0.006
+  lowpass_hz       61 clips  0.008
+  noise           148 clips  0.009
+  noise:babble     21 clips  0.011
+  noise:brown      36 clips  0.008
+  noise:hum        31 clips  0.006
+  noise:pink       37 clips  0.005
+  noise:white      23 clips  0.019
+  phone            13 clips  0.102
+failures: ['phone']
+DECISION: not accepted
