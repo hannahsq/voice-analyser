@@ -33,9 +33,12 @@ def decode_outputs(out: dict) -> dict[str, np.ndarray]:
     f0, f0_sig = decode(sm(out["f0_logits"]), F0_AXIS)
     fm, fm_sig = decode(sm(out["formant_logits"]), FORMANT_AXIS)
     sig = lambda x: 1 / (1 + np.exp(-x))  # noqa: E731
-    return {"f0": f0, "f0_sigma_cents": f0_sig, "voiced_p": sig(out["voicing_logit"]),
-            "formants": fm, "formant_sigma_cents": fm_sig, "bandwidths": np.exp(out["logb_mean"]),
-            "bandwidth_log_sd": np.exp(0.5 * out["logb_logvar"]), "sonorant_p": sig(out["sonorant_logit"])}
+    res = {"f0": f0, "f0_sigma_cents": f0_sig, "voiced_p": sig(out["voicing_logit"]),
+           "formants": fm, "formant_sigma_cents": fm_sig, "bandwidths": np.exp(out["logb_mean"]),
+           "bandwidth_log_sd": np.exp(0.5 * out["logb_logvar"]), "sonorant_p": sig(out["sonorant_logit"])}
+    if "obs_logit" in out:  # D-027: per-formant observability (the evidence-only precision label's estimate)
+        res["observability"] = sig(out["obs_logit"])
+    return res
 
 
 @functools.lru_cache(maxsize=4)

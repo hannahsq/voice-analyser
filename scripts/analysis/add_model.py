@@ -1,5 +1,6 @@
 """Add one teacher's F1-F3 to the saved closed-phase frames (arctic_egg.npz, ptdb_egg.npz), without redoing the
-closed-phase analysis. Same audio path and resampling as arctic_egg.py / ptdb_egg.py.
+closed-phase analysis; also each frame's formant sigma (<name>__sigma) and, for models with an observability head,
+its o (<name>__obs, D-027). Same audio path and resampling as arctic_egg.py / ptdb_egg.py.
 Args: scratch dir, name, checkpoint, optional "_sub". Run from the voice-analyser-m3 worktree.
 On the CPU by default (it can run alongside training); VA_DEVICE=cuda runs on the GPU in fp32 (no autocast), files
 with the same frame count batched together: results identical to the CPU's (2026-10-11: v2_s0 on ARCTIC, 99th
@@ -44,6 +45,7 @@ for f, wav in (("arctic_egg", arctic_wav), ("ptdb_egg", ptdb_wav)):
         print(f"{f}: {NAME} already there")
         continue
     out = np.full((len(d["t"]), 3), np.nan)
+    extra = {"sigma": np.full((len(d["t"]), 3), np.nan), "obs": np.full((len(d["t"]), 3), np.nan)}
     keys = d["voice"] if "voice" in d else d["speaker"]
     groups = {}
     for i, (k, u) in enumerate(zip(keys, d["utt"])):
@@ -54,13 +56,16 @@ for f, wav in (("arctic_egg", arctic_wav), ("ptdb_egg", ptdb_wav)):
         x, sr = sf.read(wav(d, idx[0]))
         audio.append(resample_poly(x[:, 0] if x.ndim == 2 else x, 16000, sr).astype(np.float32))
 
-    def put(idx, formants):
-        j = np.clip(np.round(d["t"][idx] / 0.010).astype(int), 0, len(formants) - 1)
-        out[idx] = formants[j, :3]
+    def put(idx, res):
+        j = np.clip(np.round(d["t"][idx] / 0.010).astype(int), 0, len(res["formants"]) - 1)
+        out[idx] = res["formants"][j, :3]
+        extra["sigma"][idx] = res["formant_sigma_cents"][j, :3]
+        if "observability" in res:
+            extra["obs"][idx] = res["observability"][j, :3]
 
     if dev.type == "cpu":
         for n, (idx, x16) in enumerate(zip(groups, audio)):
-            put(idx, analyse(model, x16, dev)["formants"])
+            put(idx, analyse(model, x16, dev))
             if (n + 1) % 250 == 0:
                 print(f"  {f}: {n + 1}/{len(groups)}", flush=True)
     else:  # files with the same frame count in one batch: zero padding to a common length is what the VQT does anyway
@@ -73,7 +78,10 @@ for f, wav in (("arctic_egg", arctic_wav), ("ptdb_egg", ptdb_wav)):
             with torch.inference_mode():
                 o = {key: v.float().cpu().numpy() for key, v in model(vq.log_power(xb, nf)).items()}
             for r, k in enumerate(ks):
-                put(groups[k], decode_outputs({key: v[r] for key, v in o.items()})["formants"])
+                put(groups[k], decode_outputs({key: v[r] for key, v in o.items()}))
     d[NAME] = out
+    d[f"{NAME}__sigma"] = extra["sigma"]  # formant sigma (cents) per frame
+    if np.isfinite(extra["obs"]).any():  # D-027: the observability head's o, for models that have one
+        d[f"{NAME}__obs"] = extra["obs"]
     np.savez(S / f"{f}{SUF}.npz", **d)
     print(f"{f}: added {NAME}", flush=True)
