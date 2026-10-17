@@ -1,0 +1,6 @@
+step 50 f0         +6.41777 +6.42245 rel 7.28e-04
+step 50 voicing    +0.59862 +0.60034 rel 2.88e-03
+step 50 sonorant   +0.49192 +0.48394 rel 1.62e-02
+step 50 formants   +5.22779 +5.22136 rel 1.23e-03
+step 50 bandwidth  +0.39732 +0.36650 rel 7.76e-02
+REPLICA: no
