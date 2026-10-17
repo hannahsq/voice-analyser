@@ -1,0 +1,38 @@
+  [mixr_conformer_s2/hillenbrand] 400/1668
+  [mixr_conformer_s2/hillenbrand] 800/1668
+  [mixr_conformer_s2/hillenbrand] 1200/1668
+  [mixr_conformer_s2/hillenbrand] 1600/1668
+  [mixr_conformer_s2/ptdb_tug] 250/1579  (RTF 0.006)
+  [mixr_conformer_s2/ptdb_tug] 500/1579  (RTF 0.006)
+  [mixr_conformer_s2/ptdb_tug] 750/1579  (RTF 0.006)
+  [mixr_conformer_s2/ptdb_tug] 1000/1579  (RTF 0.006)
+  [mixr_conformer_s2/ptdb_tug] 1250/1579  (RTF 0.006)
+  [mixr_conformer_s2/ptdb_tug] 1500/1579  (RTF 0.006)
+  [obs_conformer_s2/hillenbrand] 400/1668
+  [obs_conformer_s2/hillenbrand] 800/1668
+  [obs_conformer_s2/hillenbrand] 1200/1668
+  [obs_conformer_s2/hillenbrand] 1600/1668
+  [obs_conformer_s2/ptdb_tug] 250/1579  (RTF 0.006)
+  [obs_conformer_s2/ptdb_tug] 500/1579  (RTF 0.006)
+  [obs_conformer_s2/ptdb_tug] 750/1579  (RTF 0.006)
+  [obs_conformer_s2/ptdb_tug] 1000/1579  (RTF 0.006)
+  [obs_conformer_s2/ptdb_tug] 1250/1579  (RTF 0.006)
+  [obs_conformer_s2/ptdb_tug] 1500/1579  (RTF 0.006)
+tiers: dev
+
+Hillenbrand, mixr_conformer_s2 vs obs_conformer_s2 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    43.2    48.7  diff   +5.5 [+2.8, +8.3]  WORSE
+  F1 MAE children:    50.0    49.2  diff   -0.7 [-2.2, +0.8]  within noise
+  F1 MAE men     :    37.4    32.5  diff   -5.0 [-10.0, -0.3]  better
+  F1 MAE all     :    43.5    43.6  diff   +0.1 [-1.9, +2.0]  within noise
+  F2 MAE all     :    55.4    61.8  diff   +6.3 [+0.2, +13.5]  WORSE
+  F2 DR  all     :    97.4    96.9  diff   -0.5 [-1.0, -0.1]  WORSE
+  F3 MAE all     :    74.5    85.8  diff  +11.3 [+2.0, +21.1]  WORSE
+  F3 DR  all     :    95.7    94.6  diff   -1.1 [-1.8, -0.3]  WORSE
+  F4 MAE all     :   190.2   171.6  diff  -18.6 [-38.2, -0.5]  better
+  F4 DR  all     :    85.9    87.3  diff   +1.4 [-0.6, +3.5]  within noise
+
+PTDB-TUG f0 RPA, mixr_conformer_s2 vs obs_conformer_s2
+  all frames    :  86.5  85.6  diff  -0.9 [-1.1, -0.7]  WORSE  (n 154653)
+  modal         :  92.7  92.0  diff  -0.7 [-0.8, -0.6]  WORSE  (n 126992)
+  modal < 85 Hz :  83.1  82.1  diff  -1.0 [-4.5, -0.4]  WORSE  (n 11014)

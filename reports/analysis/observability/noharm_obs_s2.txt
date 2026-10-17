@@ -1,0 +1,6 @@
+F1 MAE all       per seed -5.2, -4.0, +0.1  mean -3.0  ok
+F2 MAE all       per seed -4.5, -12.3, +6.3  mean -3.5  ok
+F3 MAE all       per seed -5.3, -14.4, +11.3  mean -2.8  ok
+RPA all frames   per seed +0.3, +0.4, -0.9  mean -0.1  ok
+cp women |err|   per seed -2.3, -5.6, -0.2  mean -2.7  ok
+DECISION: m3
