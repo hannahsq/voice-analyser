@@ -48,6 +48,14 @@ class ObservabilityConfig:
     # exp(-|dt| / context_s) (formants move slowly while f0 sweeps the harmonics across them); 0 = frame alone
     context_s: float = 0.05
     hop_s: float = 0.010
+    # Source structure on voiced frames (D-027, 2026-10-18): harmonic levels deviate from a smooth source envelope by
+    # more than model_db, and neighbouring harmonics deviate together. Total SD per band (edges in Hz, dB; measured on
+    # the set's own sources, `scripts/analysis/source_scatter.py`); the part above model_db is correlated between two
+    # harmonics as exp(-d^2 / (2 src_corr_oct^2)), d their distance in octaves. None = independent scatter only (the
+    # first label).
+    src_band_edges_hz: tuple[float, ...] = (50.0, 500.0, 1000.0, 2000.0, 3000.0, 4500.0, 7600.0)
+    src_sd_db: tuple[float, ...] | None = (5.53, 4.74, 4.10, 3.52, 4.58, 11.30)  # train_v2 (source_scatter.txt)
+    src_corr_oct: float = 0.18
 
 
 def resonance_db(f: np.ndarray, F: np.ndarray, B: np.ndarray) -> np.ndarray:
@@ -77,8 +85,19 @@ def frame_bound(freqs: np.ndarray, snr_db: np.ndarray, sample_db_sd: np.ndarray,
     return o[0], sd[0]
 
 
+def source_sd_db(freqs: np.ndarray, cfg: ObservabilityConfig) -> np.ndarray:
+    """SD (dB) of the correlated source part at freqs: the band's total minus model_db, in quadrature (0 if off)."""
+    if cfg.src_sd_db is None:
+        return np.zeros_like(freqs, dtype=float)
+    edges = np.asarray(cfg.src_band_edges_hz)
+    band = np.clip(np.searchsorted(edges, np.nan_to_num(freqs, nan=edges[0]), side="right") - 1, 0, len(cfg.src_sd_db) - 1)
+    tot = np.asarray(cfg.src_sd_db)[band]
+    return np.sqrt(np.maximum(tot ** 2 - cfg.model_db ** 2, 0.0))
+
+
 def frames_bound(freqs: np.ndarray, snr_db: np.ndarray, sample_db_sd: np.ndarray, formants: np.ndarray,
-                 bandwidths: np.ndarray, cfg: ObservabilityConfig | None = None) -> tuple[np.ndarray, np.ndarray]:
+                 bandwidths: np.ndarray, cfg: ObservabilityConfig | None = None,
+                 correlated: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
     """`frame_bound` for P frames at once: freqs / snr_db / sample_db_sd (P, S), padded with NaN where a frame has
     fewer samples; formants / bandwidths (P, K). An absent formant keeps a column whose sensitivity is zero, so it
     only meets its prior and is decoupled from the rest (the same bound as leaving it out). Returns (o, sd_hz), (P, K)."""
@@ -103,7 +122,24 @@ def frames_bound(freqs: np.ndarray, snr_db: np.ndarray, sample_db_sd: np.ndarray
         on = present[:, None, :]
         G = np.concatenate([np.cos(np.pi * np.arange(m) * x[:, :, None]), np.where(on, gF, 0.0), np.where(on, gB, 0.0)],
                            axis=2)
-        J = J + np.matmul((G * w[:, :, None]).transpose(0, 2, 1), G)
+        corr = np.zeros(P, bool) if correlated is None or cfg.src_sd_db is None else np.asarray(correlated, bool)
+        if (~corr).any():
+            u = ~corr
+            J[u] = J[u] + np.matmul((G[u] * w[u][:, :, None]).transpose(0, 2, 1), G[u])
+        if corr.any():  # voiced frames with source structure: full covariance (generalised least squares)
+            c = corr
+            gain = np.where(keep[c], rho[c] / (1.0 + rho[c]), 0.0)
+            A = G[c] * gain[:, :, None]
+            var_i = np.where(keep[c], np.where(keep[c], sample_db_sd[c], 1.0) ** 2, 1.0)
+            ssd = np.where(keep[c], source_sd_db(f[c], cfg), 0.0)
+            lf = np.log2(f[c])
+            kern = np.exp(-((lf[:, :, None] - lf[:, None, :]) ** 2) / (2 * cfg.src_corr_oct ** 2))
+            Sig = ssd[:, :, None] * ssd[:, None, :] * kern
+            idx = np.arange(Sig.shape[1])
+            Sig[:, idx, idx] += var_i
+            L = np.linalg.cholesky(Sig)
+            Y = np.linalg.solve(L, A)  # L^-1 A, so J = Y^T Y
+            J[c] = J[c] + np.matmul(Y.transpose(0, 2, 1), Y)
     cov = np.linalg.inv(J)
     var_f = cov[:, np.arange(m, m + K), np.arange(m, m + K)]
     sd = np.where(present, np.sqrt(var_f), np.nan)
@@ -157,7 +193,7 @@ def observability(f0: np.ndarray, voiced: np.ndarray, sonorant: np.ndarray, form
                 snr[j, :n_j] = np.asarray(snr_db_at(t, freqs[j, :n_j]), float)
         sdb = np.where(vr[:, None], sample_sd_db(snr, cfg), sample_sd_db(snr, cfg, base_db=np.hypot(cfg.model_db, cfg.noise_sample_db)))
         sdb = np.where(np.isfinite(freqs), sdb, np.nan)
-        o[rows], sd[rows] = frames_bound(freqs, snr, sdb, formants[rows], bandwidths[rows], cfg)
+        o[rows], sd[rows] = frames_bound(freqs, snr, sdb, formants[rows], bandwidths[rows], cfg, correlated=vr)
     if cfg.context_s > 0:
         # information beyond the prior, per frame and formant (frames without a value add nothing), pooled with
         # neighbours of the same sonorant run
@@ -180,13 +216,16 @@ def observability(f0: np.ndarray, voiced: np.ndarray, sonorant: np.ndarray, form
 
 
 def component_snr(comps: dict[str, np.ndarray], frame_t: np.ndarray, voiced: np.ndarray, fs: float = 16000.0,
-                  win_s: float = 0.025, n_fft: int = 1024, floor_db: float = 60.0, smooth_bins: int = 3):
+                  win_s: float = 0.025, n_fft: int = 1024, floor_db: float = 60.0, smooth_bins: int = 3,
+                  rec_snr_db: float | None = 45.0):
     """snr_db_at(t, freqs) for `observability`, from a clip's rendered components (`voice.synthesize` /
     `interactive.synthesize`). Per label frame (centred at frame_t[t] s, Hann window win_s): on voiced frames the
     signal is the voiced component, read at the spectral peak within one bin of each frequency, and the noise is
     everything else (aspiration, whisper, frication), smoothed over +-smooth_bins; on unvoiced frames the signal is
     the tract-filtered noise (aspiration, whisper) and the noise frication. An analysis floor floor_db below the
-    frame's strongest bin is added to the noise (dynamic range; no channel). The channel's own gain and noise are
+    frame's strongest bin is added to the noise (dynamic range; no channel); with rec_snr_db (the default since
+    2026-10-18, D-027) the floor is instead white noise rec_snr_db under the clip's mean voiced frame power, constant
+    over the clip (a recording's noise; `obs_store.REC_SNR_DB`). The channel's own gain and noise are
     applied later, at training time, where the channel is drawn."""
     n = len(comps["total"])
     w = int(round(win_s * fs))
@@ -206,8 +245,13 @@ def component_snr(comps: dict[str, np.ndarray], frame_t: np.ndarray, voiced: np.
     noise = np.where(voiced[:, None], tract_noise + Fr, Fr + V)
     kern = np.ones(2 * smooth_bins + 1) / (2 * smooth_bins + 1)
     noise = np.apply_along_axis(lambda r: np.convolve(r, kern, mode="same"), 1, noise)
-    peak = np.maximum(np.max(sig + noise, axis=1, keepdims=True), 1e-30)
-    noise = noise + peak * 10 ** (-floor_db / 10)
+    if rec_snr_db is None:
+        peak = np.maximum(np.max(sig + noise, axis=1, keepdims=True), 1e-30)
+        noise = noise + peak * 10 ** (-floor_db / 10)
+    else:
+        fp = np.sum(sig + noise, axis=1)
+        ref = np.mean(fp[voiced]) if voiced.any() else np.mean(fp)
+        noise = noise + ref * 10 ** (-rec_snr_db / 10) / sig.shape[1]
     sig_peak = np.maximum(np.maximum(sig, np.roll(sig, 1, axis=1)), np.roll(sig, -1, axis=1))
     sig = np.where(voiced[:, None], sig_peak, sig)
     snr = 10 * np.log10(np.maximum(sig, 1e-30) / noise)

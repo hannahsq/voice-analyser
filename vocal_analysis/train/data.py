@@ -103,7 +103,8 @@ class SynthCrops:
     def __init__(self, flat_dir: str | Path, clip_ids: np.ndarray, n_frames: int = 200,
                  channel: ChannelConfig | None = ChannelConfig(), seed: int = 0, epoch_size: int | None = None,
                  fixed: bool = False, tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT,
-                 observability: bool = False):
+                 observability: bool = False, obs_config=None, obs_floor: str = "recording",
+                 obs_rec_snr_db: float | None = None):
         self.dir = Path(flat_dir)
         self.clip_ids = np.asarray(clip_ids)
         self.n_frames = n_frames
@@ -115,6 +116,8 @@ class SynthCrops:
         # D-027: per-frame observability labels ("obs", (t, 4)) for the channelled audio, from the set's store
         # (obs_store.write_store); NaN where there is none (resynthesised sets, absent formants, non-sonorant frames)
         self.observability = observability
+        # the label's definition (None: the current defaults, `ObservabilityConfig` and `obs_store.REC_SNR_DB`)
+        self.obs_config, self.obs_floor, self.obs_rec_snr_db = obs_config, obs_floor, obs_rec_snr_db
         self._arrays = None
 
     def _open(self):
@@ -177,7 +180,8 @@ class SynthCrops:
         if "obs_sig" not in arr:
             return lambda start, t: np.full((t, N_TRAIN_FORMANTS), np.nan, np.float32)
         cs = obs_store.ClipSpectra(arr["obs_sig"][f0_:f1_], arr["obs_noise"][f0_:f1_], arr["obs_peak"][f0_:f1_],
-                                   lab["voiced"], lab["f0"]).channel(params)
+                                   lab["voiced"], lab["f0"], floor=self.obs_floor,
+                                   rec_snr_db=obs_store.REC_SNR_DB if self.obs_rec_snr_db is None else self.obs_rec_snr_db).channel(params)
 
         def at(start, t):
             lo, hi = max(start - OBS_MARGIN, 0), min(start + t + OBS_MARGIN, n)
@@ -186,7 +190,7 @@ class SynthCrops:
                 return out
             sl = slice(lo, hi)
             o, _ = observability(lab["f0"][sl], lab["voiced"][sl], lab["sonorant"][sl], lab["formants"][sl, :N_TRAIN_FORMANTS],
-                                 lab["bandwidths"][sl, :N_TRAIN_FORMANTS], lambda j, f: cs.snr_db_at(j + lo, f),
+                                 lab["bandwidths"][sl, :N_TRAIN_FORMANTS], lambda j, f: cs.snr_db_at(j + lo, f), self.obs_config,
                                  snr_db_rows=lambda js, f: cs.snr_db_rows(js + lo, f))
             k0, k1 = start - lo, min(start + t, n) - lo
             out[: k1 - k0] = o[k0:k1]

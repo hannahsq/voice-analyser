@@ -34,6 +34,9 @@ from .channel import _biquad_peaking
 
 FS = 16000.0
 WIN_S, N_FFT, SMOOTH_BINS, FLOOR_DB = 0.025, 1024, 3, 60.0
+# Analysis floor (D-027, 2026-10-18): "recording" = white noise REC_SNR_DB under the clip's mean voiced frame power
+# (constant over the clip, a recording's noise); "frame" = FLOOR_DB under each frame's strongest bin (the first label).
+REC_SNR_DB = 45.0
 SIG_GRID = 50.0 * 2.0 ** (np.arange(88) / 12.0)
 NOISE_GRID = 50.0 * 2.0 ** (np.arange(45) / 6.0)
 Q_STEP, Q_MAX, Q_MISSING = 0.5, 220, 255
@@ -169,13 +172,23 @@ def _codec(p: dict, f: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 class ClipSpectra:
     """A clip's stored spectra in linear bin power (relative to REF), with the channel applied by `channel`."""
 
-    def __init__(self, sig_q: np.ndarray, noise_q: np.ndarray, peak_db: np.ndarray, voiced: np.ndarray, f0: np.ndarray):
+    def __init__(self, sig_q: np.ndarray, noise_q: np.ndarray, peak_db: np.ndarray, voiced: np.ndarray, f0: np.ndarray,
+                 floor: str = "recording", rec_snr_db: float = REC_SNR_DB):
         pk = np.asarray(peak_db, float)[:, None]
+        self.floor_mode, self.rec_snr_db = floor, rec_snr_db
         self.sig = 10 ** ((dequantise(sig_q) + pk) / 10)  # (T, 88), at harmonic peaks on voiced frames
         self.noise = 10 ** ((dequantise(noise_q) + pk) / 10)  # (T, 45) per bin
         self.voiced, self.f0 = np.asarray(voiced, bool), np.asarray(f0, float)
         self.sig_noise_add = np.zeros_like(self.sig)  # channel noise sampled on the signal grid, per bin
         self.noise_on_sig = None
+
+    def _floor(self, ts: np.ndarray) -> np.ndarray:
+        """Per-bin analysis floor for frames ts (linear, the store's units: relative to the clip's mean voiced frame
+        power summed over bins)."""
+        if self.floor_mode == "recording":
+            return np.full(len(ts), 10 ** (-self.rec_snr_db / 10) / (N_FFT // 2 + 1))
+        on = self.noise_on_sig[ts] if self.noise_on_sig is not None else 0.0
+        return np.maximum(np.max(self.sig[ts] + on, axis=1), 1e-300) * 10 ** (-FLOOR_DB / 10)
 
     def _sig_mean_per_bin(self) -> np.ndarray:
         """Mean signal power per bin on SIG_GRID: a voiced frame's harmonic peaks spread over the harmonic spacing."""
@@ -250,8 +263,7 @@ class ClipSpectra:
         nz = self.noise_on_sig if self.noise_on_sig is not None else self.noise
         grid = SIG_GRID if self.noise_on_sig is not None else NOISE_GRID
         n = 10 ** np.interp(lf, np.log2(grid), np.log10(np.maximum(nz[t], 1e-300)))
-        peak = max(np.max(self.sig[t] + (self.noise_on_sig[t] if self.noise_on_sig is not None else 0.0)), 1e-300)
-        return 10 * np.log10(s / (n + peak * 10 ** (-FLOOR_DB / 10)))
+        return 10 * np.log10(s / (n + self._floor(np.array([t]))[0]))
 
 
     def snr_db_rows(self, ts: np.ndarray, freqs: np.ndarray) -> np.ndarray:
@@ -271,8 +283,7 @@ class ClipSpectra:
         s = interp(np.log10(np.maximum(self.sig, 1e-300)), 1.0 / 12.0)
         on_sig = self.noise_on_sig is not None
         n = interp(np.log10(np.maximum(self.noise_on_sig if on_sig else self.noise, 1e-300)), 1.0 / 12.0 if on_sig else 1.0 / 6.0)
-        peak = np.maximum(np.max(self.sig[ts] + (self.noise_on_sig[ts] if on_sig else 0.0), axis=1), 1e-300)
-        out = 10 * np.log10(s / (n + peak[:, None] * 10 ** (-FLOOR_DB / 10)))
+        out = 10 * np.log10(s / (n + self._floor(ts)[:, None]))
         return np.where(np.isfinite(freqs), out, np.nan)
 
 # ----------------------------------------------------------------------------- the store for a written set
