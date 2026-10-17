@@ -1,6 +1,6 @@
 """Teacher v3's seeds and their mean, as a labeller would use them (D-025, 2026-10-17, Hannah: for labelling, the
-mean of the two best conformer_v2r2_d16k seeds, 1 and 2; one model alone, seed 1). The three-seed mean is shown beside
-it. Dev speakers only, from cached predictions (no inference):
+mean of the two best conformer_v2r2_d16k seeds, 1 and 2; one model alone, seed 1). The three-seed mean and median are shown
+beside it. Dev speakers only, from cached predictions (no inference):
 Hillenbrand MAE per formant (m2cache_sub) and PTDB-TUG closed-phase F1-F3 median signed bias (median |error|) per sex
 (ptdb_egg_sub.npz). The mean is taken per frame in log frequency (the models' axis). A measurement, not a decision.
 Args: scratch dir."""
@@ -25,6 +25,7 @@ assert all(np.array_equal(h[k]["speaker"], spk) for k in h)
 est = {k: h[k]["est"] for k in h}
 est["mean12"] = gmean([est["s1"], est["s2"]])
 est["mean3"] = gmean([est[k] for k in SEEDS])
+est["median3"] = np.median(np.stack([est[k] for k in SEEDS]), 0)
 dv = dev(spk)
 print(f"Hillenbrand dev ({len(set(spk[dv]))} speakers), MAE Hz")
 cols = {"F1 all": (dv, 0), "F1 women": (dv & (grp == "women"), 0), "F2 all": (dv, 1), "F3 all": (dv, 2), "F4 all": (dv, 3)}
@@ -40,6 +41,7 @@ d = dict(np.load(S / "ptdb_egg_sub.npz", allow_pickle=True))
 cp = {k: d[m] for k, m in SEEDS.items()}
 cp["mean12"] = gmean([cp["s1"], cp["s2"]])
 cp["mean3"] = gmean([cp[k] for k in SEEDS])
+cp["median3"] = np.median(np.stack([cp[k] for k in SEEDS]), 0)
 dvp = dev([s if ":" in str(s) else f"ptdb_tug:{s}" for s in d["speaker"]])
 print("\nPTDB-TUG dev closed phase: median signed bias (median |error|), Hz, F1 / F2 / F3")
 for sex in ("f", "m"):
