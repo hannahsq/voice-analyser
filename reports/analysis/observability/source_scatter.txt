@@ -1,0 +1,33 @@
+Source structure beyond a smooth envelope (D-027): 16204 voiced frames, 654480 harmonics, 60 clips per config, seed 5151
+SD (dB) of the deviation, by config and frequency band:
+                       50-500   500-1000  1000-2000  2000-3000  3000-4500  4500-7600     all
+train_v2                 5.53       4.74       4.10       3.52       4.58      11.30    8.20
+train_v2m                6.31       5.31       4.70       4.06       5.69      11.95    8.87
+train_v2s                6.27       5.43       4.75       3.91       5.42      11.52    8.61
+train_v2s+return         6.68       5.77       5.07       4.37       6.01      12.42    9.28
+SD (dB), all configs, by f0 band (rows) and frequency band (columns):
+  f0   60- 150         7.11       5.25       4.99       3.49       5.27      12.67
+  f0  150- 250         4.67       6.05       4.28       3.67       5.77      11.92
+  f0  250- 350         0.09       4.89       3.42       3.32       4.66      10.33
+  f0  350- 600         0.02       0.51       3.85       3.53       3.99       8.44
+  f0  600-1200          nan       0.00       0.75       2.52       3.31       7.04
+Correlation of deviations between two harmonics of one frame, by their distance (octaves), all configs:
+  0.00-0.05 oct: +0.924  (pairs 429224)
+  0.05-0.10 oct: +0.793  (pairs 688788)
+  0.10-0.20 oct: +0.489  (pairs 1304480)
+  0.20-0.33 oct: +0.080  (pairs 1588872)
+  0.33-0.50 oct: -0.255  (pairs 1861648)
+  0.50-0.75 oct: -0.513  (pairs 2383308)
+  0.75-1.00 oct: -0.628  (pairs 1840108)
+  1.00-1.50 oct: -0.211  (pairs 3250264)
+  1.50-2.00 oct: +0.381  (pairs 2123044)
+The same, harmonics below 4.5 kHz only:
+  0.00-0.05 oct: +0.865  (pairs 101336)
+  0.05-0.10 oct: +0.767  (pairs 227648)
+  0.10-0.20 oct: +0.624  (pairs 448020)
+  0.20-0.33 oct: +0.396  (pairs 560412)
+  0.33-0.50 oct: +0.044  (pairs 646076)
+  0.50-0.75 oct: -0.337  (pairs 839468)
+  0.75-1.00 oct: -0.613  (pairs 604432)
+  1.00-1.50 oct: -0.599  (pairs 1171300)
+  1.50-2.00 oct: +0.164  (pairs 732672)

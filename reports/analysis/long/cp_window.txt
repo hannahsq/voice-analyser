@@ -1,0 +1,18 @@
+12 dev speakers, 479 utterances
+  v3 f: |err| alone 28.5 36.7 43.1  joined 30.0 36.9 43.2; bias alone +7.6 +8.6 +15.5  joined +11.0 +10.4 +14.8
+JOINED v3 f +5.14 +0.50 +0.28
+  v3 m: |err| alone 16.0 23.4 32.7  joined 17.5 23.6 33.5; bias alone +6.7 +6.5 +2.9  joined +9.8 +7.2 +1.3
+JOINED v3 m +9.34 +0.71 +2.57
+CARRY v3 cross after +24.1 +4.8 +7.8  (mean |shift| 82.9 32.5 68.3)
+CARRY v3 cross before +22.1 +4.5 +7.6  (mean |shift| 73.8 27.2 57.3)
+CARRY v3 same after +2.0 +0.7 +1.4  (mean |shift| 62.2 11.0 21.8)
+CARRY v3 same before +0.1 +0.6 +1.3  (mean |shift| 44.7 8.0 20.7)
+  v3w f: |err| alone 28.0 35.8 42.8  joined 28.4 36.1 42.6; bias alone +6.2 +9.1 +15.3  joined +6.5 +8.9 +15.7
+JOINED v3w f +1.15 +0.75 -0.41
+  v3w m: |err| alone 15.3 22.9 32.0  joined 15.3 22.8 32.0; bias alone +6.6 +6.7 +3.0  joined +6.6 +6.6 +2.9
+JOINED v3w m -0.22 -0.28 +0.01
+CARRY v3w cross after +0.0 +0.0 +0.0  (mean |shift| 18.7 4.2 13.1)
+CARRY v3w cross before +0.0 +0.0 +0.0  (mean |shift| 4.0 1.2 1.0)
+CARRY v3w same after +0.0 +0.0 +0.0  (mean |shift| 25.9 3.5 12.0)
+CARRY v3w same before +0.0 +0.0 +0.0  (mean |shift| 4.1 1.2 1.0)
+{"gap_s": 0.3, "group": 4}
