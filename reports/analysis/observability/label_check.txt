@@ -1,0 +1,17 @@
+D-027 label check: 300 validation crops of train_v2 (channels on), teacher v3 (runs/conformer_v2r2_s1_d16k/ckpt_last.pt)
+Spearman(o, |error| in cents), sonorant frames with a label, F1 / F2 / F3 / F4:
+  old    -0.475  -0.387  -0.322  -0.309
+  new    -0.460  -0.384  -0.324  -0.315
+  new35  -0.462  -0.383  -0.324  -0.323
+  new55  -0.460  -0.384  -0.323  -0.308
+Median o by f0 band (voiced), F3 / F4, old -> new:
+  f0 0-150: F3 0.818 -> 0.802   F4 0.169 -> 0.148   (median |error| F3 9 cents)
+  f0 150-250: F3 0.927 -> 0.915   F4 0.610 -> 0.537   (median |error| F3 8 cents)
+  f0 250-350: F3 0.959 -> 0.944   F4 0.850 -> 0.789   (median |error| F3 10 cents)
+  f0 350-600: F3 0.943 -> 0.923   F4 0.781 -> 0.711   (median |error| F3 11 cents)
+Rd-sweep renders (clean): F3 posterior SD, cents, median over vowels, old -> new:
+  f0 210 Rd 0.5: 3.4 -> 4.4
+  f0 210 Rd 2.5: 4.3 -> 5.6
+  f0 300 Rd 0.5: 5.0 -> 6.6
+  f0 300 Rd 2.5: 6.6 -> 7.8
+DECISION: prior (the channel validation judged separately)
