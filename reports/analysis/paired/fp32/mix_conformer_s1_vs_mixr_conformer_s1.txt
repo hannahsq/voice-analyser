@@ -1,0 +1,18 @@
+tiers: dev
+
+Hillenbrand, mix_conformer_s1 vs mixr_conformer_s1 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    55.0    55.0  diff   +0.0 [-0.0, +0.0]  within noise
+  F1 MAE children:    57.8    57.8  diff   +0.0 [+0.0, +0.0]  WORSE
+  F1 MAE men     :    34.1    34.1  diff   +0.0 [-0.0, +0.0]  within noise
+  F1 MAE all     :    49.1    49.1  diff   +0.0 [+0.0, +0.0]  WORSE
+  F2 MAE all     :    70.6    70.6  diff   +0.0 [-0.0, +0.0]  within noise
+  F2 DR  all     :    96.4    96.4  diff   +0.0 [+0.0, +0.0]  within noise
+  F3 MAE all     :   121.0   121.0  diff   +0.0 [-0.0, +0.0]  within noise
+  F3 DR  all     :    91.9    91.9  diff   +0.0 [+0.0, +0.0]  within noise
+  F4 MAE all     :   226.8   226.8  diff   +0.0 [-0.0, +0.0]  within noise
+  F4 DR  all     :    83.8    83.8  diff   +0.0 [+0.0, +0.0]  within noise
+
+PTDB-TUG f0 RPA, mix_conformer_s1 vs mixr_conformer_s1
+  all frames    :  86.7  86.7  diff  +0.0 [+0.0, +0.0]  within noise  (n 154653)
+  modal         :  93.4  93.4  diff  +0.0 [+0.0, +0.0]  within noise  (n 126992)
+  modal < 85 Hz :  84.1  84.1  diff  +0.0 [+0.0, +0.0]  within noise  (n 11014)

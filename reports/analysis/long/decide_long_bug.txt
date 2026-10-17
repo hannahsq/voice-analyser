@@ -1,0 +1,10 @@
+synthetic 400-800: whole [13.8, 18.6, 23.5] 4s [15.0, 18.6, 21.6]  whole vs 4s % -8.0 +0.0 +8.8
+synthetic 800-end: whole [16.2, 19.9, 25.2] 4s [15.1, 20.0, 20.2]  whole vs 4s % +7.3 -0.5 +24.8
+joined f: % change in median |error| F1-F3 [5.14, 0.5, 0.28]
+joined m: % change in median |error| F1-F3 [9.35, 0.71, 2.57]
+carry cross after: median shift toward A, cents F1-F3 [24.1, 4.8, 7.8]
+carry cross before: median shift toward A, cents F1-F3 [22.1, 4.5, 7.6]
+carry same after: median shift toward A, cents F1-F3 [2.0, 0.7, 1.4]
+carry same before: median shift toward A, cents F1-F3 [0.1, 0.6, 1.3]
+harm synthetic True, harm real True, carry-over True; whole better: synthetic True, real False
+DECISION: long

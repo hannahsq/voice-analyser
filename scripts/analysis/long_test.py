@@ -32,7 +32,7 @@ print(f"{len(clips)} clips, {np.median([len(c[1]['sonorant']) for c in clips]):.
 
 def chunked(m, audio, n):
     out = np.full((n, 3), np.nan)
-    best = np.full(n, -1.0)
+    best = np.full(n, -np.inf)
     starts = list(range(0, max(n - W, 0) + 1, H))
     if starts[-1] + W < n:
         starts.append(n - W)
@@ -60,6 +60,7 @@ for name, ck in (a.split("=", 1) for a in sys.argv[1:]):
                 sl = slice(lo, min(hi, len(est)))
                 son = lab["sonorant"][sl].astype(bool)
                 if son.any():
+                    assert np.isfinite(est[sl][son]).all(), "every sonorant frame has an estimate"
                     err[mode][(lo, hi)].append(e[sl][son])
     for mode in err:
         for b, v in err[mode].items():

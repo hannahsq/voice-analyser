@@ -1,0 +1,26 @@
+12 dev speakers, 479 utterances
+  v3 f: |err| alone 28.5 36.7 43.1  joined 30.0 36.9 43.2; bias alone +7.6 +8.6 +15.5  joined +11.0 +10.4 +14.8
+JOINED v3 f +5.14 +0.50 +0.28
+  v3 m: |err| alone 16.0 23.4 32.7  joined 17.5 23.6 33.5; bias alone +6.7 +6.5 +2.9  joined +9.8 +7.2 +1.3
+JOINED v3 m +9.35 +0.71 +2.57
+CARRY v3 cross after +24.1 +4.8 +7.8  (mean |shift| 82.9 32.5 68.3)
+CARRY v3 cross before +22.1 +4.5 +7.6  (mean |shift| 73.8 27.2 57.3)
+CARRY v3 same after +2.0 +0.7 +1.4  (mean |shift| 62.2 11.0 21.8)
+CARRY v3 same before +0.1 +0.6 +1.3  (mean |shift| 44.7 8.0 20.7)
+  v2conf f: |err| alone 32.2 38.7 46.2  joined 36.4 39.2 46.3; bias alone +13.3 +10.4 +16.3  joined +22.7 +12.0 +15.9
+JOINED v2conf f +12.92 +1.18 +0.29
+  v2conf m: |err| alone 16.7 27.1 37.2  joined 19.5 27.0 37.6; bias alone +7.3 +7.1 -5.1  joined +13.7 +9.4 -8.7
+JOINED v2conf m +16.41 -0.11 +1.14
+CARRY v2conf cross after +36.5 +6.1 +8.6  (mean |shift| 112.4 42.7 58.4)
+CARRY v2conf cross before +29.7 +4.3 +8.3  (mean |shift| 96.8 33.6 52.9)
+CARRY v2conf same after +6.8 +0.9 +1.1  (mean |shift| 98.0 23.4 23.1)
+CARRY v2conf same before +1.7 +0.5 +0.8  (mean |shift| 85.4 16.6 19.5)
+  v2gru f: |err| alone 39.8 41.2 48.2  joined 40.3 42.1 48.8; bias alone +18.3 +7.1 +16.4  joined +19.2 +5.1 +15.7
+JOINED v2gru f +1.20 +2.20 +1.20
+  v2gru m: |err| alone 24.0 27.4 39.8  joined 24.2 27.3 40.0; bias alone +16.0 +3.4 -4.6  joined +16.9 +1.9 -5.2
+JOINED v2gru m +0.83 -0.54 +0.48
+CARRY v2gru cross after +16.6 +2.0 +3.6  (mean |shift| 126.1 36.4 48.7)
+CARRY v2gru cross before +13.1 +2.5 +3.2  (mean |shift| 114.0 38.7 38.3)
+CARRY v2gru same after -0.8 +0.1 +0.2  (mean |shift| 64.9 24.2 24.7)
+CARRY v2gru same before -0.5 -0.3 +0.6  (mean |shift| 67.2 25.4 25.0)
+{"gap_s": 0.3, "group": 4}
