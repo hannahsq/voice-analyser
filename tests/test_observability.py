@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from vocal_analysis.synth import observability as ob
 from vocal_analysis.synth import sampler as smp
@@ -152,3 +153,67 @@ def test_loader_observability_labels(tmp_path):
         o = lb["obs"]
         assert o.shape == (120, 4) and np.all(np.isfinite(o[son])) and np.all((o[son] > 0) & (o[son] <= 1))
         assert np.all(np.isnan(o[~lb["sonorant"].astype(bool)]))
+
+
+def test_obs_head_loss_masks_and_leaves_formant_heads_alone():
+    """D-027 head: (B, T, 4) logits; its loss counts sonorant frames with a label only, and reaches the trunk but not
+    the formant heads (their positions enter detached)."""
+    import torch
+
+    from vocal_analysis.features import vqt
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+    from vocal_analysis.train.losses import teacher_loss
+
+    torch.manual_seed(0)
+    small = dict(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16)
+    assert not hasattr(Teacher(TeacherConfig(**small)), "obs_head")  # off: earlier checkpoints load unchanged
+    m = Teacher(TeacherConfig(**small, obs_head=True))
+    out = m(torch.randn(2, vqt.N_BINS, 30))
+    assert out["obs_logit"].shape == (2, 30, 4)
+    son = torch.zeros(2, 30, dtype=torch.bool)
+    son[:, 5:20] = True
+    obs = torch.full((2, 30, 4), float("nan"))
+    obs[:, 5:15] = 0.7
+    lab = {"f0": torch.full((2, 30), 200.0), "voiced": son.clone(), "sonorant": son,
+           "formants": torch.tensor([500.0, 1500, 2500, 3500]).expand(2, 30, 4).clone(),
+           "bandwidths": torch.full((2, 30, 4), 80.0), "obs": obs}
+    _, parts = teacher_loss(out, lab)
+    p = torch.sigmoid(out["obs_logit"][:, 5:15].detach())
+    want = -(0.7 * torch.log(p) + 0.3 * torch.log(1 - p)).mean()
+    assert torch.allclose(parts["obs"], want, atol=1e-5)
+    m.zero_grad()
+    teacher_loss(out, lab, {k: 0.0 for k in ("f0", "voicing", "formants", "bandwidth", "sonorant")})[0].backward()
+    assert all(h.weight.grad is None or float(h.weight.grad.abs().max()) == 0.0 for h in m.formant_heads)
+    assert float(m.obs_head.weight.grad.abs().max()) > 0 and any(
+        p.grad is not None and float(p.grad.abs().max()) > 0 for p in m.enc.parameters())
+
+
+def test_training_with_obs_head_logs_its_metrics(tmp_path):
+    """End to end on a tiny set with a store: the head trains and evaluation reports its error and rank correlation."""
+    import json
+
+    import torch
+
+    from vocal_analysis.models.teacher import TeacherConfig
+    from vocal_analysis.synth import obs_store
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.data import consolidate
+    from vocal_analysis.train.teacher import TrainConfig, train
+
+    data = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    consolidate(data, log=lambda m: None)
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16,
+                          obs_head=True)
+    cfg = TrainConfig(data=str(data), out=str(tmp_path / "run"), steps=2, batch=4, n_frames=50, workers=1, log_every=1,
+                      eval_every=2, ckpt_every=2, val_clips=4, warmup=1)
+    with pytest.raises(FileNotFoundError):  # no store yet
+        train(cfg, small, log=lambda *a: None)
+    obs_store.write_store(data, workers=1, log=lambda m: None)
+    out = train(cfg, small, log=lambda *a: None)
+    recs = [json.loads(line) for line in (out / "log.jsonl").read_text().splitlines()]
+    ev = [r["eval"] for r in recs if "eval" in r][-1]
+    assert all(np.isfinite(ev[f"F{n}_obs_mae"]) for n in range(1, 5))
+    assert all(np.isfinite(r["obs"]) for r in recs if "loss" in r)
+    ck = torch.load(out / "ckpt_last.pt", map_location="cpu", weights_only=False)
+    assert ck["teacher_config"]["obs_head"] is True

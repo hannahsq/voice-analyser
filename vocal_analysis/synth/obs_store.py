@@ -329,11 +329,17 @@ def write_store(set_dir: str | Path, workers: int = 8, log=print) -> Path:
     parts = root / "obs_parts"
     parts.mkdir(exist_ok=True)
     jobs = []
+    flat_audio = root / "flat" / "audio.npy"
+    if flat_audio.exists():  # the check reads the consolidated audio (what the loader reads; shards may be gone)
+        audio, offs = np.load(flat_audio, mmap_mode="r"), np.load(root / "flat" / "audio_offsets.npy")
     for s, start in enumerate(range(0, index["n_clips"], size)):
         path = parts / f"obs_{s:05d}.npz"
         if not path.exists():
-            with np.load(reader.shards[s]) as z:
-                expect = z["audio"][z["audio_offsets"][0]:z["audio_offsets"][1]]
+            if flat_audio.exists():
+                expect = np.array(audio[offs[start]:offs[start + 1]])
+            else:
+                with np.load(reader.shards[s]) as z:
+                    expect = z["audio"][z["audio_offsets"][0]:z["audio_offsets"][1]]
             jobs.append((str(path), list(range(start, min(start + size, index["n_clips"]))), cfg, seed, expect))
     log(f"{root}: observability store, {len(jobs)} shards to write")
     with ProcessPoolExecutor(workers) as ex:

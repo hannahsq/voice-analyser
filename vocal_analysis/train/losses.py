@@ -31,7 +31,7 @@ def heatmap_ce(logits: torch.Tensor, values_hz: torch.Tensor, mask: torch.Tensor
     return _masked_mean(ce, mask & valid, weight)
 
 
-WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5}
+WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5, "obs": 0.2}
 
 
 def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[torch.Tensor, dict]:
@@ -53,5 +53,9 @@ def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[tor
     mean, logvar = out["logb_mean"], out["logb_logvar"].clamp(-8, 4)
     nll = 0.5 * (logvar + (torch.nan_to_num(logb) - mean) ** 2 / logvar.exp())
     parts["bandwidth"] = _masked_mean(nll, bmask, w_fm)
+    if "obs_logit" in out and "obs" in lab:  # D-027: soft-target BCE on sonorant frames with a label
+        o = lab["obs"]
+        omask = son[..., None] & torch.isfinite(o)
+        parts["obs"] = _masked_mean(bce(out["obs_logit"], torch.nan_to_num(o).clamp(0, 1)), omask)
     total = sum(w[k] * v for k, v in parts.items())
     return total, {k: v.detach() for k, v in parts.items()}

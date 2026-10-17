@@ -146,7 +146,7 @@ def evaluate(model, batches, device) -> dict:
     import torch
 
     model.eval()
-    rows = {"fm_err": [], "fm_ref": [], "f0_c": [], "voiced_ok": [], "f0_ref": [], "son": []}
+    rows = {"fm_err": [], "fm_ref": [], "f0_c": [], "voiced_ok": [], "f0_ref": [], "son": [], "obs_p": [], "obs": []}
     with torch.inference_mode():
         for lp, lab in batches:
             with torch.autocast(device.type, dtype=torch.bfloat16):
@@ -164,7 +164,11 @@ def evaluate(model, batches, device) -> dict:
             rows["f0_c"].append(np.where(voiced, 1200 * np.log2(f0 / np.where(voiced, ref_f0, 1.0)), np.nan))
             rows["f0_ref"].append(np.where(voiced, ref_f0, np.nan))
             rows["voiced_ok"].append((torch.sigmoid(out["voicing_logit"].float()).cpu().numpy() > 0.5) == voiced)
+            if "obs_logit" in out and "obs" in lab:
+                rows["obs_p"].append(torch.sigmoid(out["obs_logit"].float()).cpu().numpy())
+                rows["obs"].append(lab["obs"].cpu().numpy())
     model.train()
+    rows = {k: v for k, v in rows.items() if v}
     cat = {k: np.concatenate([r.reshape(-1, *r.shape[2:]) for r in v]) for k, v in rows.items()}
     son = cat["son"].astype(bool)
     err, ref = cat["fm_err"][son], cat["fm_ref"][son]
@@ -182,6 +186,15 @@ def evaluate(model, batches, device) -> dict:
         m = (f0r >= lo) & (f0r < hi) & np.isfinite(ref[:, 0])
         if m.any():
             res[f"F1_dr_f0_{lo}_{hi}"] = float(np.mean((np.abs(err[m, 0]) <= 0.2 * ref[m, 0]) & (np.abs(err[m, 0]) <= 200)))
+    if "obs" in cat:  # D-027: the observability head against its label (sonorant frames with one)
+        from scipy.stats import spearmanr
+
+        op, ol = cat["obs_p"][son], cat["obs"][son]
+        for n in range(ol.shape[1]):
+            ok = np.isfinite(ol[:, n])
+            if ok.sum() > 1:
+                res[f"F{n + 1}_obs_mae"] = float(np.mean(np.abs(op[ok, n] - ol[ok, n])))
+                res[f"F{n + 1}_obs_rho"] = float(spearmanr(op[ok, n], ol[ok, n])[0])
     return res
 
 
@@ -274,14 +287,17 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     log(f"teacher: {n_params(model):,} parameters; {len(train_ids):,} train / {len(val_ids)} val clips")
 
     epoch = cfg.batch * 1000
-    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch)
+    obs = model_cfg.obs_head  # D-027: the loaders add observability labels (NaN where a set has no store)
+    if obs and not (flat / "obs_sig.npy").exists():
+        raise FileNotFoundError(f"obs_head needs {flat}'s observability store (obs_store.write_store)")
+    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs)
     if cfg.resynth:
         parts, sizes = [], []
         for d in cfg.resynth:
             rflat = consolidate(d, log=log)
             n = json.loads((rflat / "done").read_text())["n_clips"]
             parts.append(SynthCrops(rflat, np.arange(n), cfg.n_frames, channel, seed=cfg.seed + 1 + len(parts),
-                                    epoch_size=epoch, tract_left_weight=cfg.tract_left_weight))
+                                    epoch_size=epoch, tract_left_weight=cfg.tract_left_weight, observability=obs))
             sizes.append(n)
         weights = [1.0 - cfg.resynth_frac] + [cfg.resynth_frac * n / sum(sizes) for n in sizes]
         ds = MixedCrops([ds, *parts], weights, epoch, seed=cfg.seed)
@@ -293,8 +309,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         loader = DataLoader(ds, batch_sampler=batches, **common)
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True)
-    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True)
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True, observability=obs)
+    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True, observability=obs)
     resynth_val = {}
     for d in cfg.resynth_val:
         rflat = consolidate(d, log=log)

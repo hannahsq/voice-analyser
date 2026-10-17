@@ -47,6 +47,9 @@ class TeacherConfig:
     conformer_ff_mult: int = 2
     f0_conv_dim: int = 128
     f0_conv_dilations: tuple[int, ...] = (1, 2, 4, 8, 16, 32)  # receptive field +-63 frames
+    # D-027: per-formant observability head (logit of o, the evidence-only precision label): reads the formant
+    # trunk and the formant heads' expected positions (no gradient into those heads). Off = earlier models.
+    obs_head: bool = False
 
 
 def normalise(logpow: torch.Tensor) -> torch.Tensor:
@@ -209,6 +212,8 @@ class Teacher(nn.Module):
         self.formant_heads = nn.ModuleList([nn.Linear(d + n, FORMANT_AXIS.n_bins) for n in range(N_FORMANTS)])
         self.bw_head = nn.Linear(d, 2 * N_FORMANTS)  # mean and log-variance of log B per formant
         self.sonorant_head = nn.Linear(d, 1)
+        if cfg.obs_head:
+            self.obs_head = nn.Linear(d + N_FORMANTS, N_FORMANTS)
         self.register_buffer("log2_vqt", LOG2_VQT.clone(), persistent=False)
         self.register_buffer("f0_log2", torch.log2(torch.tensor(F0_AXIS.centres_hz, dtype=torch.float32)), persistent=False)
         self.register_buffer("fm_bins", torch.arange(FORMANT_AXIS.n_bins, dtype=torch.float32), persistent=False)
@@ -248,6 +253,9 @@ class Teacher(nn.Module):
         out.update(formant_logits=torch.stack(logits, 2),  # (B, T, N, bins)
                    logb_mean=bw[..., :N_FORMANTS] + 4.5, logb_logvar=bw[..., N_FORMANTS:],
                    sonorant_logit=self.sonorant_head(h)[..., 0].float())
+        if self.cfg.obs_head:
+            pos = torch.stack(means, -1).detach() / FORMANT_AXIS.n_bins
+            out["obs_logit"] = self.obs_head(torch.cat([h, pos.to(h.dtype)], -1)).float()  # (B, T, N)
         return out
 
 
