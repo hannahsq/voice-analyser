@@ -21,8 +21,17 @@ from .metrics import f0_band_labels
 TOL = (0.20, 200.0)
 
 
+def _split_window(path: str) -> tuple[str, int | None]:
+    """"<ckpt>@w400": analyse files longer than 400 frames in windows (`infer.analyse`, D-028)."""
+    if "@w" in path:
+        base, w = path.rsplit("@w", 1)
+        return base, int(w)
+    return path, None
+
+
 def _ckpt_id(path: str) -> str:
     """Content hash of the checkpoint; "<ckpt>#ema" (its averaged weights) gets its own id."""
+    path = _split_window(path)[0]
     h = hashlib.sha256()
     with open(path.removesuffix("#ema"), "rb") as f:
         for chunk in iter(lambda: f.read(1 << 20), b""):
@@ -43,16 +52,18 @@ def _model(path: str):
 def _analyse(path: str, x: np.ndarray, sr: int) -> dict:
     from ..models.infer import analyse
 
-    model, dev, _ = _model(path)
-    return analyse(model, x, dev, sr)
+    base, window = _split_window(path)
+    model, dev, _ = _model(base)
+    return analyse(model, x, dev, sr, window_frames=window)
 
 
 def teacher_baselines(ckpt: str | Path, name: str = "teacher") -> tuple[FormantBaseline, F0Baseline]:
     from ..models.infer import eval_bf16
 
     ckpt = str(ckpt)
-    version = _ckpt_id(ckpt) + ("" if eval_bf16() else "-fp32")  # cached predictions are kept apart by precision
-    step = _model(ckpt)[2].get("step", "?")
+    window = _split_window(ckpt)[1]
+    version = _ckpt_id(ckpt) + ("" if eval_bf16() else "-fp32") + (f"-w{window}" if window else "")  # cached apart
+    step = _model(_split_window(ckpt)[0])[2].get("step", "?")
 
     def formants(x, sr, times, meta):
         res = _analyse(ckpt, x, sr)

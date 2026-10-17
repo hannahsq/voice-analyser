@@ -52,16 +52,42 @@ def eval_bf16() -> bool:
     return os.environ.get("VA_EVAL_BF16") == "1"
 
 
-def analyse(model, audio: np.ndarray, device, sr: int = 16000) -> dict[str, np.ndarray]:
-    """Whole-file offline analysis; frame i at t = i * 10 ms. fp32 unless $VA_EVAL_BF16=1 (`eval_bf16`)."""
+def analyse(model, audio: np.ndarray, device, sr: int = 16000, window_frames: int | None = None) -> dict[str, np.ndarray]:
+    """Whole-file offline analysis; frame i at t = i * 10 ms. fp32 unless $VA_EVAL_BF16=1 (`eval_bf16`).
+    window_frames: files longer than this run in windows of that many frames (hop half a window), each frame taken from
+    the window where it is most central (D-028: the models train on clips of at most 400 frames, and longer context
+    carries one speaker's tract into another's frames). None = the whole file at once."""
+    assert sr == 16000
+    n_frames = len(audio) // HOP + 1
+    if not window_frames or n_frames <= window_frames:
+        return _analyse_once(model, audio, device, n_frames)
+    W, H = int(window_frames), int(window_frames) // 2
+    starts = list(range(0, n_frames - W + 1, H))
+    if starts[-1] + W < n_frames:
+        starts.append(n_frames - W)
+    res, best = None, np.full(n_frames, -np.inf)
+    for st in starts:
+        seg = audio[st * HOP: (st + W - 1) * HOP + 1]
+        r = _analyse_once(model, seg, device, W)
+        if res is None:
+            res = {k: np.full((n_frames, *v.shape[1:]), np.nan, v.dtype if v.dtype.kind == "f" else np.float64)
+                   for k, v in r.items() if k != "t"}
+        centrality = -np.abs(np.arange(W) - (W - 1) / 2)
+        take = centrality > best[st: st + W]
+        for k in res:
+            res[k][st: st + W][take] = r[k][take]
+        best[st: st + W][take] = centrality[take]
+    res["t"] = np.arange(n_frames) * HOP / sr
+    return res
+
+
+def _analyse_once(model, audio: np.ndarray, device, n_frames: int) -> dict[str, np.ndarray]:
     import torch
 
-    assert sr == 16000
     vq = _vqt(device)
-    n_frames = len(audio) // HOP + 1
     with torch.inference_mode(), torch.autocast(device.type, dtype=torch.bfloat16, enabled=device.type == "cuda" and eval_bf16()):
         x = torch.from_numpy(np.ascontiguousarray(audio, np.float32))[None].to(device)
         out = model(vq.log_power(x, n_frames))
     res = decode_outputs({k: v[0].float().cpu().numpy() for k, v in out.items()})
-    res["t"] = np.arange(n_frames) * HOP / sr
+    res["t"] = np.arange(n_frames) * HOP / 16000
     return res

@@ -194,3 +194,21 @@ def test_schedulefree_training_saves_averaged_weights_and_resumes(tmp_path):
     train(replace(cfg, steps=6), small, log=lambda *a: None)
     recs = [json.loads(line) for line in (out / "log.jsonl").read_text().splitlines()]
     assert [r["step"] for r in recs if "eval" in r] == [2, 4, 6] and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
+
+
+def test_windowed_analysis_stitches_windows():
+    """D-028: analyse(window_frames=W) equals the whole-file result when the file fits, takes each frame from the
+    window where it is most central, and leaves no frame empty."""
+    from vocal_analysis.models.infer import analyse
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+
+    torch.manual_seed(0)
+    m = Teacher(TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16)).eval()
+    x = np.random.default_rng(0).normal(0, 0.1, 249 * vqt.HOP + 1).astype(np.float32)  # 250 frames
+    whole = analyse(m, x, torch.device("cpu"))
+    assert all(np.array_equal(whole[k], v, equal_nan=True) for k, v in analyse(m, x, torch.device("cpu"), window_frames=400).items())
+    w = analyse(m, x, torch.device("cpu"), window_frames=100)
+    assert np.isfinite(w["formants"]).all() and len(w["formants"]) == 250
+    first = analyse(m, x[: 99 * vqt.HOP + 1], torch.device("cpu"))
+    assert np.allclose(w["formants"][:50], first["formants"][:50])  # frames 0-49: window 0 is the most central
+    assert not np.allclose(w["formants"], whole["formants"])

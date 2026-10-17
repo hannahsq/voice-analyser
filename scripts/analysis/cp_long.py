@@ -6,7 +6,8 @@
 2. Carry-over: for each dev speaker B, a partner A of the other sex and one of the same sex; files A A A B and B A A A
    (three of A's utterances). B's formants on the frames B alone calls sonorant (p > 0.5) against B alone: median signed shift in cents, F1-F3, signed so that positive is toward A (A's median formants above B's ->
    upward is positive). Lines "CARRY <model> <cross|same> <before|after> <F1> <F2> <F3>" (cents), "after" = B after A.
-Device from VA_DEVICE (default cpu). Args: scratch dir, name=checkpoint pairs. Run from the main checkout."""
+Device from VA_DEVICE (default cpu). Args: scratch dir, name=checkpoint pairs ("<ckpt>@w400": windowed analysis,
+`infer.analyse`). Run from the main checkout."""
 import json
 import os
 import sys
@@ -64,13 +65,15 @@ def run(m, parts):
         starts.append(pos)
         xs.append(x)
         pos += len(x)
-    f = analyse(m, np.concatenate(xs), dev)["formants"][:, :3]
+    f = analyse(m, np.concatenate(xs), dev, window_frames=WINDOW)["formants"][:, :3]
     return [f[st // HOP: st // HOP + len(x) // HOP + 1] for st, x in zip(starts, parts)]
 
 
+WINDOW = None
 for name, ck in (a.split("=", 1) for a in sys.argv[2:]):
+    ck, WINDOW = (ck.rsplit("@w", 1)[0], int(ck.rsplit("@w", 1)[1])) if "@w" in ck else (ck, None)
     m = load_teacher(ck, dev)[0]
-    res_alone = {k: analyse(m, x, dev) for k, x in audio.items()}
+    res_alone = {k: analyse(m, x, dev, window_frames=WINDOW) for k, x in audio.items()}
     alone = {k: r["formants"][:, :3] for k, r in res_alone.items()}
     son = {k: r["sonorant_p"] > 0.5 for k, r in res_alone.items()}
     # 1. same speaker, joined in fours
