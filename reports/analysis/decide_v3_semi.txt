@@ -1,0 +1,17 @@
+dev:
+  E1            -4.8   -5.7   -4.1   mean   -4.9
+  E2           -12.3   -5.6   -6.0   mean   -8.0
+  F1 MAE all    -1.5   -0.6   -7.0   mean   -3.0
+  F3 DR  all    +1.1   +0.8   +0.6   mean   +0.8
+  F4 DR  all    +1.2   +0.7   +0.2   mean   +0.7
+  all frames    -0.4   +0.0   +0.7   mean   +0.1
+semi:
+  E1            -4.4   -7.2   -6.5   mean   -6.0
+  E2            -8.8  -11.0   -9.9   mean   -9.9
+  F1 MAE all    -2.4   -2.8   -9.3   mean   -4.8
+  F3 DR  all    +1.0   +0.7   +1.0   mean   +0.9
+  F4 DR  all    +0.2   +0.0   -0.3   mean   -0.0
+  all frames    -0.2   +0.0   +0.5   mean   +0.1
+
+failures: none
+DECISION: replicates
