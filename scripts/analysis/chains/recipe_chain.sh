@@ -37,6 +37,7 @@ run_arm_seed() {  # arm, seed
       lr3_conformer) EX="--train-set lr=0.003"; ST=2000; DS=1500 ;;
       lr5_conformer) EX="--train-set lr=0.005"; ST=2000; DS=1500 ;;
       lr8_conformer) EX="--train-set lr=0.008"; ST=2000; DS=1500 ;;
+      combo_conformer) EX="--train-set lr=0.008 --train-set warmup=250 --train-set ckpt_every=1400"; ST=2800; DS=700 ;;
       wu250_conformer) EX="--train-set warmup=250"; ST=2000; DS=1500 ;;
       dec20_conformer) EX="--train-set ckpt_every=1400"; ST=2800; DS=700 ;;
       sf_conformer) EX="--optimizer schedulefree"; ST=0; DS=0 ;;
