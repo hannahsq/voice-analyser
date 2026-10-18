@@ -46,6 +46,8 @@ for m in SD:
     d = float(np.mean(diffs[m]))
     sign = -1 if m == "RPA" else 1  # positive = worse
     z = sign * d / SE[m]
+    if not np.isfinite(z):  # a diverged run (NaN or inf validation error) is worse, never "same"
+        z = np.inf
     verdict[m] = "worse" if z >= 2 else "grey-worse" if z >= 1 else "better" if z <= -2 else "grey-better" if z <= -1 else "same"
     print(f"  mean {m}: {d:+.2f} (SE {SE[m]:.2f}, {z:+.1f} SE) -> {verdict[m]}")
 

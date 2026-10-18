@@ -47,6 +47,7 @@ class TrainConfig:
     # (any checkpoint is meant to be final-quality); `schedule` and the decay fields are then unused, and lr
     # warms up over `warmup` steps inside the optimiser.
     optimizer: str = "adamw"  # also "adan", "muon" (Muon + AdamW), "muon_adan" (Muon + Adan); D-030
+    rest_lr_scale: float = 1.0  # "muon" / "muon_adan": the other optimiser's rate as a multiple of Muon's
     schedule: str = "wsd"
     decay_start: int | None = None
     decay_steps: int = 4000
@@ -145,7 +146,10 @@ def _optimizer(model, cfg: "TrainConfig"):
         return rest(model.parameters())
     if cfg.optimizer in ("muon", "muon_adan"):
         mu, other = muon_split(model)
-        return _Combined(torch.optim.Muon(mu, lr=cfg.lr, weight_decay=cfg.weight_decay, adjust_lr_fn="match_rms_adamw"), rest(other))
+        other_opt = rest(other)
+        for g in other_opt.param_groups:
+            g["lr_scale"] = cfg.rest_lr_scale  # the schedule multiplies it in
+        return _Combined(torch.optim.Muon(mu, lr=cfg.lr, weight_decay=cfg.weight_decay, adjust_lr_fn="match_rms_adamw"), other_opt)
     raise ValueError(f"unknown optimizer {cfg.optimizer!r}")
 
 
@@ -411,7 +415,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 break
             if not sf:
                 for g in opt.param_groups:
-                    g["lr"] = _lr(step, cfg)
+                    g["lr"] = _lr(step, cfg) * g.get("lr_scale", 1.0)
             audio, lab = audio.to(device, non_blocking=True), _to(lab, device)
             p_truth = _p_comb_truth(step, cfg)
             truth = rng.random() < p_truth

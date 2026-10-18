@@ -238,3 +238,18 @@ def test_muon_and_adan_train_and_branch(tmp_path, optimizer):
     out2 = train(b, None, log=lambda *a: None)
     recs = [json.loads(line) for line in (out2 / "log.jsonl").read_text().splitlines()]
     assert recs and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
+
+
+def test_hybrid_rest_lr_scale():
+    """D-030: in the hybrid, the non-Muon groups run at rest_lr_scale x the scheduled rate."""
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+    from vocal_analysis.train.teacher import TrainConfig, _lr, _optimizer
+
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16,
+                          temporal="conformer", conformer_dim=32)
+    cfg = TrainConfig(optimizer="muon_adan", rest_lr_scale=5.0, lr=0.008, warmup=10)
+    opt = _optimizer(Teacher(small), cfg)
+    for g in opt.param_groups:
+        g["lr"] = _lr(20, cfg) * g.get("lr_scale", 1.0)
+    muon_g, rest_g = opt.opts[0].param_groups, opt.opts[1].param_groups
+    assert all(abs(g["lr"] - 0.008) < 1e-12 for g in muon_g) and all(abs(g["lr"] - 0.04) < 1e-12 for g in rest_g)
