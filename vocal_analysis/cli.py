@@ -307,7 +307,7 @@ def build_parser() -> argparse.ArgumentParser:
                    help="start a decay branch of a wsd run from this checkpoint (other options come from that run)")
     t.add_argument("--decay-steps", type=int, default=None, help="branch decay length (default: the run's, 4000)")
     t.add_argument("--batch", type=int, default=32)
-    t.add_argument("--optimizer", choices=["adamw", "schedulefree"], default="adamw",
+    t.add_argument("--optimizer", choices=["adamw", "schedulefree", "adan", "muon", "muon_adan"], default="adamw",
                    help="schedulefree: AdamW-ScheduleFree, no decay schedule or branches (D-018)")
     t.add_argument("--workers", type=int, default=12)
     t.add_argument("--no-comb", action="store_true", help="ablation: no harmonic-comb input channel")

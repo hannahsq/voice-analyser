@@ -46,7 +46,7 @@ class TrainConfig:
     # "adamw" with `schedule`, or "schedulefree": AdamW-ScheduleFree (Defazio et al. 2024), which needs no decay
     # (any checkpoint is meant to be final-quality); `schedule` and the decay fields are then unused, and lr
     # warms up over `warmup` steps inside the optimiser.
-    optimizer: str = "adamw"
+    optimizer: str = "adamw"  # also "adan", "muon" (Muon + AdamW), "muon_adan" (Muon + Adan); D-030
     schedule: str = "wsd"
     decay_start: int | None = None
     decay_steps: int = 4000
@@ -83,6 +83,70 @@ def _saved_channel(out: Path) -> ChannelConfig:
     if saved is None:
         return replace(ChannelConfig(), p_codec=0.0)
     return ChannelConfig(**{k: tuple(v) if isinstance(v, list) else v for k, v in saved.items()})
+
+
+HEAD_MODULES = ("f0_head", "voicing_head", "formant_heads", "bw_head", "sonorant_head", "obs_head")
+
+
+class _Combined:
+    """Two optimisers stepped together (Muon for hidden 2-D weights, another for the rest), exposing their param
+    groups as one list so the learning-rate schedule sets both."""
+
+    def __init__(self, *opts):
+        self.opts = opts
+
+    @property
+    def param_groups(self):
+        return [g for o in self.opts for g in o.param_groups]
+
+    def zero_grad(self, set_to_none: bool = True):
+        for o in self.opts:
+            o.zero_grad(set_to_none=set_to_none)
+
+    def step(self):
+        for o in self.opts:
+            o.step()
+
+    def state_dict(self):
+        return {"combined": [o.state_dict() for o in self.opts]}
+
+    def load_state_dict(self, sd):
+        for o, s_ in zip(self.opts, sd["combined"]):
+            o.load_state_dict(s_)
+
+
+def muon_split(model) -> tuple[list, list]:
+    """(Muon parameters, the rest): the weights of nn.Linear layers outside the output heads (Conformer attention and
+    feed-forward, projections); convolutions, recurrent weights, biases, norms and heads stay with the other optimiser."""
+    import torch.nn as nn
+
+    muon_ids = set()
+    for name, mod in model.named_modules():
+        if isinstance(mod, nn.Linear) and not name.split(".")[0] in HEAD_MODULES:
+            muon_ids.add(id(mod.weight))
+    params = list(model.parameters())
+    return [p for p in params if id(p) in muon_ids], [p for p in params if id(p) not in muon_ids]
+
+
+def _optimizer(model, cfg: "TrainConfig"):
+    """AdamW, Adan (Xie et al. 2022; adan-pytorch), or Muon (torch.optim.Muon, Jordan et al. 2024) for the hidden 2-D
+    weights with AdamW / Adan for the rest ("muon", "muon_adan"). Muon's update is scaled to AdamW's RMS
+    ("match_rms_adamw"), so the same learning rate and weight decay apply to every group (D-030)."""
+    import torch
+
+    def rest(params):
+        if cfg.optimizer in ("adan", "muon_adan"):
+            from adan_pytorch import Adan
+
+            return Adan(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
+        return torch.optim.AdamW(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
+
+    if cfg.optimizer in ("adamw", "adan"):
+        return rest(model.parameters())
+    if cfg.optimizer in ("muon", "muon_adan"):
+        mu, other = muon_split(model)
+        return _Combined(torch.optim.Muon(mu, lr=cfg.lr, weight_decay=cfg.weight_decay, adjust_lr_fn="match_rms_adamw"), rest(other))
+    raise ValueError(f"unknown optimizer {cfg.optimizer!r}")
 
 
 def _lr(step: int, cfg: TrainConfig) -> float:
@@ -249,10 +313,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         import schedulefree
 
         opt = schedulefree.AdamWScheduleFree(model.parameters(), lr=cfg.lr, warmup_steps=cfg.warmup, weight_decay=cfg.weight_decay)
-    elif cfg.optimizer == "adamw":
-        opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
     else:
-        raise ValueError(f"unknown optimizer {cfg.optimizer!r}")
+        opt = _optimizer(model, cfg)
     # Schedule-free keeps the evaluation weights (an average) apart from the training point: checkpoints and
     # evaluations use the former, so they are saved in eval mode, and training resumes in train mode.
     sf_mode = lambda mode: getattr(opt, mode)() if sf else None  # noqa: E731

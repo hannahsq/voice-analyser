@@ -212,3 +212,29 @@ def test_windowed_analysis_stitches_windows():
     first = analyse(m, x[: 99 * vqt.HOP + 1], torch.device("cpu"))
     assert np.allclose(w["formants"][:50], first["formants"][:50])  # frames 0-49: window 0 is the most central
     assert not np.allclose(w["formants"], whole["formants"])
+
+
+@pytest.mark.parametrize("optimizer", ["adan", "muon", "muon_adan"])
+def test_muon_and_adan_train_and_branch(tmp_path, optimizer):
+    """D-030: each optimiser trains, checkpoints and resumes in a decay branch; Muon takes only hidden 2-D weights."""
+    import json
+
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.teacher import TrainConfig, branch_config, muon_split, train
+
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16,
+                          temporal="conformer", conformer_dim=32)
+    mu, rest = muon_split(Teacher(small))
+    assert mu and all(p.ndim == 2 for p in mu) and len(mu) + len(rest) == len(list(Teacher(small).parameters()))
+    data = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    cfg = TrainConfig(data=str(data), out=str(tmp_path / "run"), steps=4, batch=4, n_frames=50, workers=1, log_every=2,
+                      eval_every=4, ckpt_every=2, val_clips=4, warmup=2, optimizer=optimizer)
+    out = train(cfg, small, log=lambda *a: None)
+    b = branch_config(out, 4, str(tmp_path / "branch"), decay_steps=2)
+    b.branch_from = str(out / "ckpt_000004.pt")
+    assert b.optimizer == optimizer
+    out2 = train(b, None, log=lambda *a: None)
+    recs = [json.loads(line) for line in (out2 / "log.jsonl").read_text().splitlines()]
+    assert recs and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
