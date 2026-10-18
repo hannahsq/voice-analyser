@@ -6,6 +6,7 @@
 #    otherwise: 2000 steps constant then 1500 decay, crops 32-400), decide_recipe.py per arm. Arms: learning rate x2,
 #    x0.5, x3 (quality); warmup 250 (cost); decay over 20 % of the run, 2800 + 700 (cost); schedule-free AdamW, 3500 steps,
 #    no decay (quality). "grey" arms get seeds 3-5 at the end (baselines mixr_conformer_s3-5 trained once), then n = 6.
+# 2026-10-18 afternoon: $ARMS (e.g. "lr5_conformer lr8_conformer") runs only those arms, same rule (D-029).
 # Arg: scratch dir (closed-phase frames, prediction caches).
 set -u
 S="$1"
@@ -34,6 +35,8 @@ run_arm_seed() {  # arm, seed
       lr2_conformer) EX="--train-set lr=0.002"; ST=2000; DS=1500 ;;
       lr05_conformer) EX="--train-set lr=0.0005"; ST=2000; DS=1500 ;;
       lr3_conformer) EX="--train-set lr=0.003"; ST=2000; DS=1500 ;;
+      lr5_conformer) EX="--train-set lr=0.005"; ST=2000; DS=1500 ;;
+      lr8_conformer) EX="--train-set lr=0.008"; ST=2000; DS=1500 ;;
       wu250_conformer) EX="--train-set warmup=250"; ST=2000; DS=1500 ;;
       dec20_conformer) EX="--train-set ckpt_every=1400"; ST=2800; DS=700 ;;
       sf_conformer) EX="--optimizer schedulefree"; ST=0; DS=0 ;;
@@ -55,7 +58,7 @@ run_arm_seed() {  # arm, seed
 NF=$(grep -c FAILED $LOG)
 # 0. windowed analysis
 V3=runs/conformer_v2r2_s1_d16k/ckpt_last.pt
-if [ ! -f $A/long/decide_window.txt ]; then
+if [ -z "${ARMS:-}" ] && [ ! -f $A/long/decide_window.txt ]; then
   say "recipe: D-028 windowed analysis check"
   VA_TIERS=dev $PY -I $SA/m2_paired_sub.py "$S/m2cache_sub" v3=$V3 v3w=$V3@w400 > $F/v3_vs_v3w.txt 2>&1 || fail "paired v3 window"
   VA_DEVICE=cuda $PY -I $SA/cp_long.py "$S" v3=$V3 v3w=$V3@w400 > $A/long/cp_window.txt 2>&1 || fail "cp_long window"
@@ -64,7 +67,7 @@ if [ ! -f $A/long/decide_window.txt ]; then
 fi
 # 1. arms, seeds 0-2
 GREY=""
-for ARM in lr2_conformer lr05_conformer lr3_conformer wu250_conformer dec20_conformer sf_conformer; do
+for ARM in ${ARMS:-lr2_conformer lr05_conformer lr3_conformer wu250_conformer dec20_conformer sf_conformer}; do
   for SEED in 0 1 2; do run_arm_seed $ARM $SEED; done
   $PY -I $SA/decide_recipe.py "$S" $ARM 3 > $A/recipe/decide_${ARM}_n3.txt 2>&1 || fail "decide $ARM"
   D=$(sed -n 's/^DECISION: //p' $A/recipe/decide_${ARM}_n3.txt)

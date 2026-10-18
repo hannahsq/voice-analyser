@@ -1,0 +1,16 @@
+lr2_conformer against mixr_conformer, 3 seeds; synthetic validation, arm minus baseline
+  s0: F1 -2.40  F2 -4.69  F3 -4.25  F4 -12.11  RPA +0.33
+  s1: F1 -2.84  F2 -4.26  F3 -6.08  F4 -10.32  RPA +0.28
+  s2: F1 -1.79  F2 +1.32  F3 +0.47  F4 -1.42  RPA +0.28
+  mean F1: -2.34 (SE 0.41, -5.7 SE) -> better
+  mean F2: -2.54 (SE 0.88, -2.9 SE) -> better
+  mean F3: -3.29 (SE 1.56, -2.1 SE) -> better
+  mean F4: -7.95 (SE 2.96, -2.7 SE) -> better
+  mean RPA: +0.30 (SE 0.06, -5.2 SE) -> better
+Guard-rails (dev, means over pairs)
+  F1 MAE all       per seed -7.8, -8.0, +1.3  mean -4.8  ok
+  F2 MAE all       per seed -7.9, -20.6, -6.7  mean -11.7  ok
+  F3 MAE all       per seed -22.5, -43.3, +1.3  mean -21.5  ok
+  RPA all frames   per seed +0.1, +0.3, -0.5  mean -0.0  ok
+  cp women |err|   per seed -2.1, -3.7, -1.7  mean -2.5  ok
+DECISION: better

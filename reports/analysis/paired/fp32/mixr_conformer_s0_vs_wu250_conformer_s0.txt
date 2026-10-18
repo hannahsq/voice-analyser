@@ -1,0 +1,28 @@
+  [wu250_conformer_s0/hillenbrand] 400/1668
+  [wu250_conformer_s0/hillenbrand] 800/1668
+  [wu250_conformer_s0/hillenbrand] 1200/1668
+  [wu250_conformer_s0/hillenbrand] 1600/1668
+  [wu250_conformer_s0/ptdb_tug] 250/1579  (RTF 0.006)
+  [wu250_conformer_s0/ptdb_tug] 500/1579  (RTF 0.006)
+  [wu250_conformer_s0/ptdb_tug] 750/1579  (RTF 0.006)
+  [wu250_conformer_s0/ptdb_tug] 1000/1579  (RTF 0.006)
+  [wu250_conformer_s0/ptdb_tug] 1250/1579  (RTF 0.006)
+  [wu250_conformer_s0/ptdb_tug] 1500/1579  (RTF 0.006)
+tiers: dev
+
+Hillenbrand, mixr_conformer_s0 vs wu250_conformer_s0 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    56.5    47.1  diff   -9.4 [-12.7, -6.4]  better
+  F1 MAE children:    58.7    51.1  diff   -7.6 [-10.2, -5.1]  better
+  F1 MAE men     :    27.2    22.7  diff   -4.5 [-7.5, -2.2]  better
+  F1 MAE all     :    47.7    40.5  diff   -7.2 [-8.8, -5.6]  better
+  F2 MAE all     :    54.1    51.0  diff   -3.1 [-10.1, +2.6]  within noise
+  F2 DR  all     :    97.3    97.8  diff   +0.5 [+0.1, +0.9]  better
+  F3 MAE all     :    96.9    87.1  diff   -9.8 [-19.1, +0.0]  within noise
+  F3 DR  all     :    94.1    95.2  diff   +1.1 [+0.3, +2.1]  better
+  F4 MAE all     :   189.4   166.9  diff  -22.5 [-51.0, +4.4]  within noise
+  F4 DR  all     :    84.7    86.6  diff   +1.9 [+0.0, +3.8]  within noise
+
+PTDB-TUG f0 RPA, mixr_conformer_s0 vs wu250_conformer_s0
+  all frames    :  86.3  86.3  diff  -0.1 [-0.5, +0.3]  within noise  (n 154653)
+  modal         :  93.0  92.7  diff  -0.3 [-0.6, -0.0]  WORSE  (n 126992)
+  modal < 85 Hz :  85.4  84.3  diff  -1.1 [-9.1, -0.2]  WORSE  (n 11014)
