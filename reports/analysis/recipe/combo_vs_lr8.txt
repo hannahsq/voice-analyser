@@ -1,0 +1,6 @@
+combo_conformer - lr8_conformer F1: +0.96 (+2.4 SE, positive = combo_conformer worse)
+combo_conformer - lr8_conformer F2: +2.71 (+3.1 SE, positive = combo_conformer worse)
+combo_conformer - lr8_conformer F3: +4.12 (+2.6 SE, positive = combo_conformer worse)
+combo_conformer - lr8_conformer F4: -0.16 (-0.1 SE, positive = combo_conformer worse)
+combo_conformer - lr8_conformer RPA: -0.01 (+0.2 SE, positive = combo_conformer worse)
+NOTWORSE: no
