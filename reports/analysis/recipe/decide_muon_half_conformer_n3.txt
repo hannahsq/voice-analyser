@@ -1,0 +1,16 @@
+muon_half_conformer against lr8_conformer, 3 seeds; synthetic validation, arm minus baseline
+  s0: F1 +4.09  F2 +8.12  F3 +6.65  F4 +6.26  RPA -0.12
+  s1: F1 +2.08  F2 +3.76  F3 +4.38  F4 +4.59  RPA -0.16
+  s2: F1 +2.92  F2 +6.65  F3 +4.97  F4 +7.34  RPA -0.13
+  mean F1: +3.03 (SE 0.41, +7.4 SE) -> worse
+  mean F2: +6.18 (SE 0.88, +7.0 SE) -> worse
+  mean F3: +5.33 (SE 1.56, +3.4 SE) -> worse
+  mean F4: +6.06 (SE 2.96, +2.1 SE) -> worse
+  mean RPA: -0.13 (SE 0.06, +2.3 SE) -> worse
+Guard-rails (dev, means over pairs)
+  F1 MAE all       per seed +1.1, +7.2, +1.6  mean +3.3  ok
+  F2 MAE all       per seed -1.0, +16.1, +0.4  mean +5.2  ok
+  F3 MAE all       per seed -1.9, +22.0, -8.4  mean +3.9  ok
+  RPA all frames   per seed -0.4, -1.7, +1.0  mean -0.4  ok
+  cp women |err|   per seed +0.4, +6.4, +1.7  mean +2.8  ok
+DECISION: worse

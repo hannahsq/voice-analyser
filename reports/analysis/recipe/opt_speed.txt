@@ -1,0 +1,9 @@
+lr8_conformer          audio s/s over the constant phase: median 117
+combo_conformer        audio s/s over the constant phase: median 116
+adan_conformer         audio s/s over the constant phase: median 116
+adan2_conformer        audio s/s over the constant phase: median 117
+adan5_conformer        audio s/s over the constant phase: median 117
+muon_conformer         audio s/s over the constant phase: median 117
+muonh_conformer        audio s/s over the constant phase: median 117
+muonadan_conformer     audio s/s over the constant phase: median 117
+muonadanh_conformer    audio s/s over the constant phase: median 117

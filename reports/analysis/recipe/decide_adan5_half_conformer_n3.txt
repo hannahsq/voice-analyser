@@ -1,0 +1,16 @@
+adan5_half_conformer against lr8_conformer, 3 seeds; synthetic validation, arm minus baseline
+  s0: F1 +6.15  F2 +10.48  F3 +13.24  F4 +21.20  RPA -0.19
+  s1: F1 +3.63  F2 +6.61  F3 +12.95  F4 +17.87  RPA -0.19
+  s2: F1 +5.92  F2 +9.72  F3 +9.65  F4 +19.04  RPA -0.04
+  mean F1: +5.23 (SE 0.41, +12.8 SE) -> worse
+  mean F2: +8.93 (SE 0.88, +10.1 SE) -> worse
+  mean F3: +11.95 (SE 1.56, +7.7 SE) -> worse
+  mean F4: +19.37 (SE 2.96, +6.6 SE) -> worse
+  mean RPA: -0.14 (SE 0.06, +2.4 SE) -> worse
+Guard-rails (dev, means over pairs)
+  F1 MAE all       per seed -0.2, +8.8, -2.3  mean +2.1  ok
+  F2 MAE all       per seed -1.3, +10.9, +15.1  mean +8.2  ok
+  F3 MAE all       per seed -1.6, +55.4, -8.8  mean +15.0  ok
+  RPA all frames   per seed +0.1, -1.4, -0.0  mean -0.4  ok
+  cp women |err|   per seed -4.8, +2.0, +0.7  mean -0.7  ok
+DECISION: worse
