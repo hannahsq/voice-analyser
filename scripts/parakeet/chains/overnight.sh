@@ -57,7 +57,7 @@ say "d033: recipe $RECIPE; Parakeet partner $PARM"
 # ---- (B) part 5: DAC
 if [ ! -f $W/cache/dac_v1/meta.json ]; then
   say "d033: DAC scoring cache"
-  $PYD -u $W/scripts/parakeet/dac_cache.py "$SP" $W/cache/dac_v1 > $W/cache/dac_v1.out 2>&1 || fail "dac cache"
+  $PYD -u $W/scripts/parakeet/dac_cache.py "$SP/m3" $W/cache/dac_v1 > $W/cache/dac_v1.out 2>&1 || fail "dac cache"
 fi
 if [ ! -f $R/dac_combo/combo_results.json ] || ! grep -q '"winners"' $R/dac_combo/combo_results.json; then
   say "d033: DAC ridge combinations"
@@ -66,7 +66,7 @@ fi
 TAPS=$($PY -c "import json; w = json.load(open('$R/dac_combo/combo_results.json'))['winners']['F1']; print(','.join(t[1:] for t in w.split('+')))")
 say "d033: DAC F1 winner taps $TAPS"
 if [ ! -f $W/cache/dac_heads/done ]; then
-  $PYD -u $W/scripts/parakeet/dac_cache.py "$SP" $W/cache/dac_heads --heads "$TAPS" 40000 > $W/cache/dac_heads.out 2>&1 || fail "dac head cache"
+  $PYD -u $W/scripts/parakeet/dac_cache.py "$SP/m3" $W/cache/dac_heads --heads "$TAPS" 40000 > $W/cache/dac_heads.out 2>&1 || fail "dac head cache"
 fi
 for k in 0 1 2 3 4 5; do train dac_head $W/cache/dac_heads "$TAPS" 6000 $RECIPE $k; done
 if [ ! -s $R/dac_part5.txt ]; then
