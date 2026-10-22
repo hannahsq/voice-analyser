@@ -1,0 +1,102 @@
+statistics: fit done (228 s)
+statistics: sel done (290 s)
+ridge: target F1 done (318 s)
+ridge: target F2 done (343 s)
+ridge: target F3 done (367 s)
+ridge: target F4 done (391 s)
+ridge: target B1 done (416 s)
+ridge: target B2 done (440 s)
+ridge: target B3 done (464 s)
+ridge: target B4 done (486 s)
+ridge: target f0 done (508 s)
+ridge: target voiced done (530 s)
+ridge: target sonorant done (551 s)
+[synth_train_v2] scored (561 s); teacher F1 21.9
+[synth_train_v2s] scored (572 s); teacher F1 28.6
+[resynth_vocalset_val_d16k] scored (580 s); teacher F1 33.7
+[resynth_zeroth_korean_val_d16k] scored (587 s); teacher F1 19.5
+
+## Selection: F1 (mean MAE, Hz over synth_train_v2, synth_train_v2s, resynth_vocalset_val_d16k, resynth_zeroth_korean_val_d16k)
+best L0+L1+L3+L4+L5+L6 63.51; 11 within 1 SE; winner (shallowest, then fewest layers): L3+L4+L5+L6 63.69 (diff +0.17, SE 0.19)
+top 15:
+  L0+L1+L3+L4+L5+L6              63.51  (diff +0.00, SE 0.00)
+  L0+L2+L3+L4+L5+L6              63.54  (diff +0.03, SE 0.15)
+  L0+L1+L2+L3+L4+L5+L6           63.55  (diff +0.04, SE 0.13)
+  L1+L3+L4+L5+L6                 63.55  (diff +0.04, SE 0.07)
+  L0+L2+L4+L5+L6                 63.58  (diff +0.06, SE 0.18)
+  L0+L1+L2+L4+L5+L6              63.60  (diff +0.08, SE 0.17)
+  L2+L3+L4+L5+L6                 63.62  (diff +0.10, SE 0.17)
+  L1+L2+L3+L4+L5+L6              63.65  (diff +0.14, SE 0.14)
+  L0+L3+L4+L5+L6                 63.65  (diff +0.14, SE 0.14)
+  L0+L1+L4+L5+L6                 63.66  (diff +0.15, SE 0.15)
+  L3+L4+L5+L6                    63.69  (diff +0.17, SE 0.19)
+  L2+L4+L5+L6                    63.69  (diff +0.17, SE 0.20)
+  L1+L2+L4+L5+L6                 63.73  (diff +0.22, SE 0.18)
+  L1+L4+L5+L6                    63.80  (diff +0.28, SE 0.17)
+  L0+L1+L2+L3+L4+L6              63.82  (diff +0.30, SE 0.19)
+best by deepest layer used (Pareto):
+  deepest L0: L0                             97.31
+  deepest L1: L0+L1                          81.71
+  deepest L2: L0+L1+L2                       72.23
+  deepest L3: L0+L1+L2+L3                    67.44
+  deepest L4: L0+L1+L3+L4                    64.57
+  deepest L5: L0+L1+L3+L4+L5                 63.83
+  deepest L6: L0+L1+L3+L4+L5+L6              63.51
+
+## Selection: voiced (mean accuracy, % over synth_train_v2, synth_train_v2s)
+best L1+L3+L4+L5+L6 95.77; 14 within 1 SE; winner (shallowest, then fewest layers): L1+L4+L5 95.76 (diff -0.01, SE 0.05)
+top 15:
+  L1+L3+L4+L5+L6                 95.77  (diff -0.00, SE 0.00)
+  L1+L3+L4+L5                    95.76  (diff -0.01, SE 0.04)
+  L1+L4+L5                       95.76  (diff -0.01, SE 0.05)
+  L0+L1+L3+L4+L5+L6              95.76  (diff -0.02, SE 0.02)
+  L0+L2+L3+L4+L5+L6              95.75  (diff -0.03, SE 0.05)
+  L2+L4+L5+L6                    95.74  (diff -0.03, SE 0.05)
+  L1+L2+L3+L4+L5+L6              95.74  (diff -0.03, SE 0.04)
+  L2+L3+L4+L5                    95.74  (diff -0.03, SE 0.04)
+  L1+L4+L5+L6                    95.74  (diff -0.03, SE 0.04)
+  L2+L3+L4+L5+L6                 95.74  (diff -0.03, SE 0.04)
+  L1+L3+L5+L6                    95.73  (diff -0.04, SE 0.03)
+  L1+L2+L3+L5+L6                 95.73  (diff -0.04, SE 0.04)
+  L0+L1+L3+L4+L5                 95.73  (diff -0.04, SE 0.04)
+  L0+L1+L2+L3+L4+L5+L6           95.73  (diff -0.04, SE 0.05)
+  L0+L2+L3+L4+L5                 95.73  (diff -0.04, SE 0.05)
+best by deepest layer used (Pareto):
+  deepest L0: L0                             93.15
+  deepest L1: L0+L1                          94.58
+  deepest L2: L1+L2                          95.11
+  deepest L3: L1+L3                          95.47
+  deepest L4: L1+L3+L4                       95.63
+  deepest L5: L1+L3+L4+L5                    95.76
+  deepest L6: L1+L3+L4+L5+L6                 95.77
+[gold_ptdb_tug] scored (660 s)
+[gold_mir1k] scored (669 s)
+[gold_mdb_stem_synth] scored (717 s)
+
+## Winner for F1: L3+L4+L5+L6 (teacher v3 alongside; layer 5 alone for reference)
+  synth_train_v2                   F1 61.9/21.9/63.7  F2 162.2/43.9/163.6  F3 237.3/59.8/241.8  F4 329.1/91.2/344.4  B1 20.0/12.2/20.5  B2 28.1/17.4/29.2  B3 67.1/34.9/68.6  B4 115.2/58.1/117.6  f0 15.2/99.3/14.0  voiced 97.5/99.3/96.7  sonorant 97.6/99.1/97.0
+  synth_train_v2s                  F1 70.9/28.6/72.2  F2 177.3/54.4/177.7  F3 251.7/63.6/253.4  F4 356.1/101.7/369.5  B1 27.7/18.6/27.8  B2 33.8/22.9/35.3  B3 69.6/39.8/71.0  B4 118.4/66.9/120.3  f0 13.0/90.6/11.7  voiced 93.8/94.2/93.3  sonorant 96.5/97.9/95.8
+  resynth_vocalset_val_d16k        F1 79.1/33.7/80.9  F2 322.9/123.4/325.9  F3 351.2/145.0/360.7  F4 514.1/240.9/530.0
+  resynth_zeroth_korean_val_d16k   F1 42.8/19.5/43.6  F2 109.3/37.3/107.8  F3 168.3/59.4/162.4  F4 231.8/103.7/251.6
+  gold_ptdb_tug                    f0 RPA 12.4/87.1/10.5  voicing 91.6/93.5/92.1
+  gold_mir1k                       f0 RPA 14.6/95.5/13.7  voicing 94.2/94.2/94.8
+  gold_mdb_stem_synth              f0 RPA 7.1/98.2/9.1  voicing 97.8/98.0/89.2
+  hillenbrand (median signed / MAE, Hz): F1_all +24.2/59.7 (teacher +19.9/38.9); F2_all +320.3/371.1 (teacher +1.1/47.3); F3_all +253.3/307.4 (teacher +7.1/47.7); F4_all +292.3/398.0 (teacher +6.2/98.4); F1_men +25.3/50.1 (teacher +13.2/22.4); F2_men +335.3/365.2 (teacher +3.9/39.4); F3_men +274.5/327.3 (teacher -1.2/36.0); F4_men +255.2/327.5 (teacher +6.7/78.6); F1_women +1.9/53.1 (teacher +23.6/42.5); F2_women +301.5/361.3 (teacher +1.9/51.3); F3_women +237.8/282.5 (teacher +12.0/50.5); F4_women +243.5/390.6 (teacher +6.5/113.0); F1_children +51.8/76.3 (teacher +32.1/51.4); F2_children +327.0/387.6 (teacher -3.6/51.0); F3_children +244.8/313.7 (teacher +14.4/56.4); F4_children +386.3/473.1 (teacher +2.3/101.1)
+  closed_phase (median signed / MAE, Hz): F1_women +50.7/85.8 (teacher +7.6/51.7); F2_women +77.0/181.4 (teacher +8.6/104.2); F3_women +174.4/294.7 (teacher +15.5/152.5); F1_men +69.1/78.4 (teacher +6.7/23.6); F2_men +148.7/180.7 (teacher +6.5/49.9); F3_men +197.6/270.7 (teacher +2.9/93.1)
+
+## Winner for voiced: L1+L4+L5 (teacher v3 alongside; layer 5 alone for reference)
+  synth_train_v2                   F1 62.4/21.9/63.7  F2 163.8/43.9/163.6  F3 237.0/59.8/241.8  F4 337.2/91.2/344.4  B1 20.2/12.2/20.5  B2 28.6/17.4/29.2  B3 66.7/34.9/68.6  B4 113.8/58.1/117.6  f0 14.9/99.3/14.0  voiced 97.6/99.3/96.7  sonorant 97.6/99.1/97.0
+  synth_train_v2s                  F1 72.6/28.6/72.2  F2 180.2/54.4/177.7  F3 250.5/63.6/253.4  F4 363.3/101.7/369.5  B1 27.4/18.6/27.8  B2 34.0/22.9/35.3  B3 68.5/39.8/71.0  B4 115.5/66.9/120.3  f0 12.9/90.6/11.7  voiced 93.9/94.2/93.3  sonorant 96.6/97.9/95.8
+  resynth_vocalset_val_d16k        F1 79.4/33.7/80.9  F2 324.4/123.4/325.9  F3 356.5/145.0/360.7  F4 521.2/240.9/530.0
+  resynth_zeroth_korean_val_d16k   F1 43.1/19.5/43.6  F2 110.4/37.3/107.8  F3 165.5/59.4/162.4  F4 251.4/103.7/251.6
+  gold_ptdb_tug                    f0 RPA 9.8/87.1/10.5  voicing 92.2/93.5/92.1
+  gold_mir1k                       f0 RPA 16.1/95.5/13.7  voicing 95.1/94.2/94.8
+  gold_mdb_stem_synth              f0 RPA 9.8/98.2/9.1  voicing 98.5/98.0/89.2
+  hillenbrand (median signed / MAE, Hz): F1_all -4.1/52.3 (teacher +19.9/38.9); F2_all +275.8/299.2 (teacher +1.1/47.3); F3_all +212.7/282.6 (teacher +7.1/47.7); F4_all +209.5/375.0 (teacher +6.2/98.4); F1_men -14.9/42.3 (teacher +13.2/22.4); F2_men +328.0/350.4 (teacher +3.9/39.4); F3_men +260.1/309.6 (teacher -1.2/36.0); F4_men +239.1/344.8 (teacher +6.7/78.6); F1_women -12.7/52.4 (teacher +23.6/42.5); F2_women +241.7/274.0 (teacher +1.9/51.3); F3_women +182.2/248.8 (teacher +12.0/50.5); F4_women +89.8/341.0 (teacher +6.5/113.0); F1_children +18.4/62.2 (teacher +32.1/51.4); F2_children +235.2/274.5 (teacher -3.6/51.0); F3_children +211.5/291.4 (teacher +14.4/56.4); F4_children +333.2/441.0 (teacher +2.3/101.1)
+  closed_phase (median signed / MAE, Hz): F1_women +34.0/82.2 (teacher +7.6/51.7); F2_women +47.4/172.9 (teacher +8.6/104.2); F3_women +77.1/249.4 (teacher +15.5/152.5); F1_men +55.5/68.3 (teacher +6.7/23.6); F2_men +153.2/183.5 (teacher +6.5/49.9); F3_men +164.2/254.1 (teacher +2.9/93.1)
+
+Part-2 rule for the F1 winner L3+L4+L5+L6, ensemble (c): women |F1 bias| 7.6 -> 28.1; men 6.7 -> 36.7; Hillenbrand F1 MAE 38.9 -> 43.6  DECISION: no
+  Hillenbrand men: teacher (13.17983937503061, 22.421910554120995), (c) (19.925568526022886, 31.263151927317818)
+  Hillenbrand women: teacher (23.574714832026473, 42.54949758984301), (c) (13.191346720584136, 39.435526668454706)
+  Hillenbrand children: teacher (32.07706405622133, 51.362435683654454), (c) (43.427820467726576, 60.3194235180987)
+done (717 s)
