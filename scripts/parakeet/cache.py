@@ -133,7 +133,7 @@ for d in cfg3["train"]["resynth_val"]:
 
 
 # ---- gold sets, dev speakers: whole files, reference frames only
-def gold_set(name, items):
+def gold_set(name, items, window=None):
     """items: iterable of (audio, times (s), dict of reference columns) -> cache."""
     if (OUT / name / "emb.npy").exists():
         log(f"[{name}] cached")
@@ -143,7 +143,7 @@ def gold_set(name, items):
         if QUICK and n >= 8:
             break
         embs.append(hidden([x])[0])
-        r = analyse(teacher, x, dev)
+        r = analyse(teacher, x, dev, window_frames=window)
         idx = np.clip(np.round(times / 0.01).astype(int), 0, len(r["f0"]) - 1)
         for k, v in {**refs, **teacher_frames(r, idx), "mel": times / 0.01}.items():
             cols.setdefault(k, []).append(v)
@@ -189,5 +189,7 @@ def closed_phase():
 gold_set("gold_hillenbrand", hillenbrand())
 gold_set("gold_ptdb_cp", closed_phase())
 for c in ("ptdb_tug", "mir1k", "mdb_stem_synth"):
-    gold_set(f"gold_{c}", f0_corpus(c))
+    # MDB-stem-synth's tracks run for minutes: teacher v3's whole-file attention needed > 10 GB per matrix and took the
+    # machine to 7 GB free, so its teacher columns come from D-028's windowed analysis (400 frames, hop 200)
+    gold_set(f"gold_{c}", f0_corpus(c), window=400 if c == "mdb_stem_synth" else None)
 log("done")
