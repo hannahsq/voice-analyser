@@ -5,7 +5,7 @@
     va manifest <corpus>|all       scan a corpus under data.root and write its manifest
     va leakage                     run the leakage rules over data/manifests/
     va tiers [--dev-copy IN OUT]   assign gold speakers to dev / semi / lockbox (eval/tiers.json); copy IN's dev rows to OUT
-    va baselines [--only NAME...]  run/score baselines -> reports/baselines.md (cached in runs/)
+    va baselines [--only NAME...]  run/score baselines on dev speakers -> reports/suite/baselines_dev.md (cached in runs/)
     va resynth <pool> --teacher CKPT   analysis-resynthesis training set from a training pool (plan §5.2)
     va config                      print the resolved config
 
@@ -105,10 +105,23 @@ def cmd_download(cfg: Config, args: argparse.Namespace) -> int:
     return 0
 
 
+def _tiers_arg(value: str) -> tuple[str, ...]:
+    """--tiers: dev by default; semi-private or lockbox speakers only when named (D-024), and said loudly."""
+    tiers = tuple(sorted({t.strip() for t in value.split(",") if t.strip()}))
+    if set(tiers) - {"dev"}:
+        print(f"*** tiers {', '.join(tiers)}: includes speakers outside dev. Log this use in docs/decisions.md. ***", flush=True)
+    return tiers
+
+
+TIERS_HELP = "gold-speaker tiers to score, comma-separated (D-024): dev (default), semi, lockbox; beyond dev is a logged use"
+
+
 def cmd_baselines(cfg: Config, args: argparse.Namespace) -> int:
     from .eval.report import build_report
 
-    build_report(cfg, Path(args.out), args.only, args.force, log=lambda m: print(m, flush=True))
+    tiers = _tiers_arg(args.tiers)
+    out = Path(args.out or f"reports/suite/baselines_{'+'.join(tiers)}.md")
+    build_report(cfg, out, args.only, args.force, log=lambda m: print(m, flush=True), tiers=tiers)
     return 0
 
 
@@ -259,7 +272,10 @@ def cmd_train(cfg: Config, args: argparse.Namespace) -> int:
 def cmd_eval(cfg: Config, args: argparse.Namespace) -> int:
     from .eval.teacher_eval import build_teacher_report
 
-    build_teacher_report(cfg, args.ckpt, args.out, args.suite, log=lambda m: print(m, flush=True))
+    tiers = _tiers_arg(args.tiers)
+    run = Path(args.ckpt.split("#")[0].split("@w")[0]).parent.name
+    out = args.out or f"reports/suite/{run}_{'+'.join(tiers)}.md"
+    build_teacher_report(cfg, args.ckpt, out, args.suite, log=lambda m: print(m, flush=True), tiers=tiers)
     return 0
 
 
@@ -287,7 +303,8 @@ def build_parser() -> argparse.ArgumentParser:
     b = sub.add_parser("baselines", parents=[common])
     b.add_argument("--only", nargs="+", default=None, help="baseline names to run (default: all)")
     b.add_argument("--force", action="store_true", help="ignore cached predictions")
-    b.add_argument("--out", default="reports/baselines.md")
+    b.add_argument("--out", default=None, help="default: reports/suite/baselines_<tiers>.md")
+    b.add_argument("--tiers", default="dev", help=TIERS_HELP)
     b.set_defaults(fn=cmd_baselines)
     s = sub.add_parser("synth", parents=[common], help="generate synthetic training data or the hard-case suite")
     s.add_argument("what", choices=["train", "suite"])
@@ -332,7 +349,8 @@ def build_parser() -> argparse.ArgumentParser:
     r.set_defaults(fn=cmd_resynth)
     e = sub.add_parser("eval", parents=[common], help="evaluate a trained teacher against the gold sets and the suite")
     e.add_argument("ckpt")
-    e.add_argument("--out", default="reports/teacher_v1.md")
+    e.add_argument("--out", default=None, help="default: reports/suite/<run dir>_<tiers>.md")
+    e.add_argument("--tiers", default="dev", help=TIERS_HELP)
     e.add_argument("--suite", default="data/synth/suite_v1")
     e.set_defaults(fn=cmd_eval)
     return p

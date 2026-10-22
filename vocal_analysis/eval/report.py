@@ -1,4 +1,4 @@
-"""Baseline report (plan §6.5): `va baselines` -> reports/baselines.md (+ .json).
+"""Baseline report (plan §6.5): `va baselines` -> reports/suite/baselines_<tiers>.md (+ .json); dev speakers by default (D-024).
 
 Predictions are cached per (baseline, corpus) under runs/baselines/ and reused
 while the manifest hash and baseline version are unchanged; long runs
@@ -32,8 +32,27 @@ CHECKPOINT_EVERY_S = 300.0
 # --------------------------------------------------------------------------- caching
 
 
-def _cache_path(cache_dir: Path, baseline: str, corpus: str) -> Path:
-    return cache_dir / f"{baseline}__{corpus}.npz"
+def _cache_path(cache_dir: Path, baseline: str, corpus: str, tiers: tuple[str, ...] | None = None) -> Path:
+    return cache_dir / f"{baseline}__{corpus}{_tier_tag(tiers)}.npz"
+
+
+def _tier_tag(tiers: tuple[str, ...] | None) -> str:
+    return "" if tiers is None else "__" + "+".join(sorted(tiers))
+
+
+def _key(key: dict, tiers: tuple[str, ...] | None) -> dict:
+    return key if tiers is None else {**key, "tiers": sorted(tiers)}
+
+
+def _rows(mpath: Path, tiers: tuple[str, ...] | None) -> list:
+    """The manifest's rows; with `tiers`, only gold speakers in those tiers (D-024). None = every speaker, as the
+    analysis scripts use it (they apply VA_TIERS themselves)."""
+    rows = read_manifest(mpath)
+    if tiers is None:
+        return rows
+    from .tiers import filter_rows
+
+    return filter_rows(rows, tiers)
 
 
 def _load_cache(path: Path, key: dict) -> dict | None:
@@ -59,17 +78,18 @@ def _concat(parts: list[dict]) -> dict:
 # --------------------------------------------------------------------------- running baselines
 
 
-def run_formant_baseline(b, cfg: Config, cache_dir: Path, force: bool, log: Callable) -> dict:
+def run_formant_baseline(b, cfg: Config, cache_dir: Path, force: bool, log: Callable,
+                         tiers: tuple[str, ...] | None = None) -> dict:
     corpus = FORMANT_CORPUS
     mpath = Path(cfg.data.manifests) / f"{corpus}.csv"
-    key = {"baseline": b.name, "version": b.version, "corpus": corpus, "manifest": manifest_hash(mpath)}
-    path = _cache_path(cache_dir, b.name, corpus)
+    key = _key({"baseline": b.name, "version": b.version, "corpus": corpus, "manifest": manifest_hash(mpath)}, tiers)
+    path = _cache_path(cache_dir, b.name, corpus, tiers)
     if not force and (cached := _load_cache(path, key)) is not None:
         return cached
     mod = registry()[corpus]
     root = Path(cfg.data.root) / corpus
     parts, t0, audio_s = [], time.time(), 0.0
-    rows = read_manifest(mpath)
+    rows = _rows(mpath, tiers)
     for i, row in enumerate(rows):
         item = mod.load(root, row)
         x = load_audio(item, cfg.frames.sample_rate)
@@ -107,12 +127,13 @@ def _align(ref_t: np.ndarray, est_t: np.ndarray, *est: np.ndarray, max_dt: float
     return [np.where(far, np.nan, e[idx]) for e in est]
 
 
-def run_f0_baseline(b, corpus: str, cfg: Config, cache_dir: Path, force: bool, log: Callable) -> dict:
+def run_f0_baseline(b, corpus: str, cfg: Config, cache_dir: Path, force: bool, log: Callable,
+                    tiers: tuple[str, ...] | None = None) -> dict:
     from ..baselines.f0 import HOP_S
 
     mpath = Path(cfg.data.manifests) / f"{corpus}.csv"
-    key = {"baseline": b.name, "version": b.version, "corpus": corpus, "manifest": manifest_hash(mpath)}
-    path = _cache_path(cache_dir, b.name, corpus)
+    key = _key({"baseline": b.name, "version": b.version, "corpus": corpus, "manifest": manifest_hash(mpath)}, tiers)
+    path = _cache_path(cache_dir, b.name, corpus, tiers)
     if not force and (cached := _load_cache(path, key)) is not None:
         return cached
 
@@ -125,7 +146,7 @@ def run_f0_baseline(b, corpus: str, cfg: Config, cache_dir: Path, force: bool, l
 
     mod = registry()[corpus]
     root = Path(cfg.data.root) / corpus
-    rows = read_manifest(mpath)
+    rows = _rows(mpath, tiers)
     last_ckpt = time.time()
     for i in range(done, len(rows)):
         row = rows[i]
@@ -153,18 +174,19 @@ def run_f0_baseline(b, corpus: str, cfg: Config, cache_dir: Path, force: bool, l
 LABELS_VERSION = "1"
 
 
-def run_frame_labels(corpus: str, cfg: Config, cache_dir: Path, force: bool, log: Callable) -> np.ndarray | None:
+def run_frame_labels(corpus: str, cfg: Config, cache_dir: Path, force: bool, log: Callable,
+                     tiers: tuple[str, ...] | None = None) -> np.ndarray | None:
     """Per-frame labels (manifest order, same frames as run_f0_baseline) from the corpus's frame_labels(), if any."""
     mod = registry()[corpus]
     if not hasattr(mod, "frame_labels"):
         return None
     mpath = Path(cfg.data.manifests) / f"{corpus}.csv"
-    key = {"labels": "frame_labels", "version": LABELS_VERSION, "corpus": corpus, "manifest": manifest_hash(mpath)}
-    path = cache_dir / f"labels__{corpus}.npz"
+    key = _key({"labels": "frame_labels", "version": LABELS_VERSION, "corpus": corpus, "manifest": manifest_hash(mpath)}, tiers)
+    path = cache_dir / f"labels__{corpus}{_tier_tag(tiers)}.npz"
     if not force and (cached := _load_cache(path, key)) is not None:
         return cached["labels"]
     root = Path(cfg.data.root) / corpus
-    rows = read_manifest(mpath)
+    rows = _rows(mpath, tiers)
     parts = []
     for i, row in enumerate(rows):
         parts.append(mod.frame_labels(root, row, mod.load(root, row)))
@@ -348,6 +370,16 @@ def _label_key(label: str) -> tuple:
         return (2, label)
 
 
+def _tiers_line(tiers: list[str] | None) -> str:
+    if tiers is None:
+        return "Speakers: every gold speaker (written before the evaluation tiers, D-024)."
+    line = f"Speakers: tiers {', '.join(tiers)} (D-024)."
+    others = [("semi-private" if t == "semi" else t) for t in tiers if t != "dev"]
+    if others:
+        line += f" **Includes {' and '.join(others)} speakers: a use to log in docs/decisions.md.**"
+    return line
+
+
 def render(report: dict) -> str:
     prov, cfg = report["provenance"], report["provenance"]["config"]
     tols = cfg["eval"]["formant_tolerances"]
@@ -362,6 +394,8 @@ def render(report: dict) -> str:
         f"Intervals are 95 % speaker-bootstrap percentile intervals ({cfg['eval']['bootstrap_resamples']} resamples, whole speakers resampled). "
         f"Detection rate (DR) counts a frame as correct when its error is within **both** bounds (decisions D-004); missing estimates count as misses. "
         f"Gross error means more than 30 % off, or missing.",
+        "",
+        _tiers_line(report.get("tiers")),
     ]
     if report["formants"]:
         L += _render_formants(report, tols, t0)
@@ -386,7 +420,8 @@ def _render_formants(report: dict, tols: list, t0: str) -> list[str]:
         "",
         "## Formants: Hillenbrand et al. (1995)",
         "",
-        "1,668 tokens from 139 speakers. Each token has 4 reference frames (steady state; 20/50/80 % of the vowel); F4 exists only at steady state. "
+        f"{report.get('formant_set', {}).get('tokens', 1668):,} tokens from {report.get('formant_set', {}).get('speakers', 139)} speakers. "
+        "Each token has 4 reference frames (steady state; 20/50/80 % of the vowel); F4 exists only at steady state. "
         "These are hand-checked measurements, and Hillenbrand is never trained on.",
         "",
     ]
@@ -492,8 +527,11 @@ def _render_f0(report: dict) -> list[str]:
 
 def build_report(cfg: Config, out_path: Path, only: list[str] | None, force: bool, log: Callable = print,
                  extra_formant: dict | None = None, extra_f0: dict | None = None, title: str = "Baseline report",
-                 extra_sections: Callable[[dict], list[str]] | None = None) -> Path:
+                 extra_sections: Callable[[dict], list[str]] | None = None, tiers: tuple[str, ...] = ("dev",)) -> Path:
     """Score baselines (and any extra models, e.g. a trained teacher) on the gold sets and write the report.
+
+    tiers: which gold speakers are scored (D-024): dev by default; semi-private or lockbox speakers only when named,
+    and each such use is logged in docs/decisions.md.
 
     extra_formant/extra_f0 are {name: FormantBaseline/F0Baseline} scored alongside the registered
     baselines; extra_sections(report) returns markdown lines inserted before the provenance.
@@ -504,13 +542,17 @@ def build_report(cfg: Config, out_path: Path, only: list[str] | None, force: boo
     setup_device(cfg.device)
     cache_dir = Path("runs") / "baselines"
     want = lambda name: only is None or name in only  # noqa: E731
-    report = {"provenance": provenance(cfg), "formant_baselines": {}, "formants": {}, "f0_baselines": {}, "f0": {}}
+    tiers = tuple(sorted(set(tiers)))
+    report = {"provenance": provenance(cfg), "tiers": list(tiers), "formant_baselines": {}, "formants": {}, "f0_baselines": {},
+              "f0": {}}
 
+    fs_rows = _rows(Path(cfg.data.manifests) / f"{FORMANT_CORPUS}.csv", tiers)
+    report["formant_set"] = {"tokens": len(fs_rows), "speakers": len({r.speaker_id for r in fs_rows})}
     for name, b in {**FORMANT_BASELINES, **(extra_formant or {})}.items():
         if not want(name):
             continue
         log(f"[{name}] {FORMANT_CORPUS}")
-        res = run_formant_baseline(b, cfg, cache_dir, force, log)
+        res = run_formant_baseline(b, cfg, cache_dir, force, log, tiers)
         report["formant_baselines"][name] = b.description
         report["formants"][name] = score_formants(res, cfg)
     labels: dict[str, np.ndarray | None] = {}
@@ -520,9 +562,9 @@ def build_report(cfg: Config, out_path: Path, only: list[str] | None, force: boo
         report["f0_baselines"][name] = {"description": b.description, "trained_on": list(b.trained_on)}
         for corpus in F0_CORPORA:
             log(f"[{name}] {corpus}")
-            res = run_f0_baseline(b, corpus, cfg, cache_dir, force, log)
+            res = run_f0_baseline(b, corpus, cfg, cache_dir, force, log, tiers)
             if corpus not in labels:
-                labels[corpus] = run_frame_labels(corpus, cfg, cache_dir, force, log)
+                labels[corpus] = run_frame_labels(corpus, cfg, cache_dir, force, log, tiers)
             report["f0"].setdefault(corpus, {})[name] = score_f0(res, b.voicing_threshold, cfg, corpus, labels[corpus])
 
     out_path.parent.mkdir(parents=True, exist_ok=True)

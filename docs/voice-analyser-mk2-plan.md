@@ -441,11 +441,11 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 - [ ] Manifests for all corpora (`path, corpus, speaker_id, split, sr, duration, licence`) and the leakage test (§6.4). *Gold sets, VocalSet and the leakage test done; M4Singer, Zeroth-Korean and Common Voice manifests, and registering OPENGLOT, Saarbrücken and MOCHA-TIMIT as evaluation corpora, still to do (status 2026-10-12).*
 - [x] Gold-set loaders: Hillenbrand, PTDB-TUG, MIR-1K, MDB-stem-synth (all verified on real data). VTR-TIMIT deferred: no LDC licence.
 - [x] Metrics (§6.2) with unit tests on hand-computed cases; bootstrap intervals by speaker.
-- [x] Baselines (§6.5) written to `reports/baselines.md` by a single command (`va baselines`). Formants: Praat defaults, §5.4 sweep, FastTrack-faithful, TVLP. f0: PESTO, CREPE, Praat autocorrelation, plus PTDB-TUG phonation subsets from the laryngograph (decisions D-008, D-009).
+- [x] Baselines (§6.5) written to `reports/suite/pre_tiers/baselines.md` by a single command (`va baselines`). Formants: Praat defaults, §5.4 sweep, FastTrack-faithful, TVLP. f0: PESTO, CREPE, Praat autocorrelation, plus PTDB-TUG phonation subsets from the laryngograph (decisions D-008, D-009).
 
 **Accept when:** the baseline report regenerates end to end and every baseline, including the earlier TVLP tracker, is scored on the same footing.
 
-### M1: Synthetic generator, back end v1, teacher v1 *(done: decisions D-010, D-014; `reports/teacher_v1.md`)*
+### M1: Synthetic generator, back end v1, teacher v1 *(done: decisions D-010, D-014; `reports/suite/pre_tiers/teacher_v1.md`)*
 - [x] Generator (§5.1) with label emission, sampler configs and channel augmentation; tests (poles equal labels, determinism).
 - [x] Hard-case synthetic suite.
 - [x] Back end v1 (§8.1–8.4) with synthetic tests: harmonic fit < 0.1 dB on clean frames; corrected H1–H2 matches source H1–H2 when the true F/B are supplied (< 0.5 dB *(proposed)*).
@@ -457,7 +457,7 @@ To reduce front-end delay later, use asymmetric (low-delay) analysis windows for
 - [x] Story area-function tube tract and ffmpeg codec augmentation (decisions D-011).
 - [x] f0 × tract-length coverage, F1 band, formants on whispered frames, new suite cases (D-012).
 - [x] WSD schedule with decay branches at 6k / 16k / 26k / 36k steps (D-013).
-- [x] Teacher v2 trained on `train_v2`; branches scored on the fixed validation sets, the suite and the gold sets. *Stopped at 20k with d06k and d16k branches (D-020; `reports/teacher_v2_d06k.md`, `teacher_v2_d16k.md`); the 26k and 36k branches were dropped. Follow-up ablations: train_v3a/v3b tract priors (D-020, D-022), Conformer and mixed crop lengths (D-021, D-024), coupled synthesis `train_v2c` (D-024).*
+- [x] Teacher v2 trained on `train_v2`; branches scored on the fixed validation sets, the suite and the gold sets. *Stopped at 20k with d06k and d16k branches (D-020; `reports/suite/pre_tiers/teacher_v2_d06k.md`, `teacher_v2_d16k.md`); the 26k and 36k branches were dropped. Follow-up ablations: train_v3a/v3b tract priors (D-020, D-022), Conformer and mixed crop lengths (D-021, D-024), coupled synthesis `train_v2c` (D-024).*
 
 **Accept when** (set before any gold-set or decayed-branch result of v2 existed; decisions D-014), comparing the chosen v2 branch with v1 in the same report:
 - Hillenbrand F1 MAE for women and children improves beyond bootstrap noise.

@@ -36,3 +36,28 @@ def test_committed_file_covers_every_gold_speaker():
     hb = [s for s in t if s.startswith("hillenbrand:")]
     assert len(hb) == 139 and sum(t[s] == "dev" for s in hb) == 83
     assert sorted(t[s] for s in t if s.startswith("ptdb_tug:")).count("dev") == 12
+
+
+def test_suite_report_reads_only_the_named_tiers(tmp_path, capsys):
+    """`va baselines` / `va eval teacher` score dev speakers unless told otherwise; the analysis scripts' path (tiers
+    None) keeps every speaker and its old cache names."""
+    from pathlib import Path
+
+    from vocal_analysis.cli import _tiers_arg
+    from vocal_analysis.data.manifest import write_manifest
+    from vocal_analysis.eval import report
+
+    t = tiers.load()
+    dev = next(s for s in sorted(t) if s.startswith("hillenbrand:") and t[s] == "dev")
+    semi = next(s for s in sorted(t) if s.startswith("hillenbrand:") and t[s] == "semi")
+    m = write_manifest(_rows([dev, semi]), tmp_path / "hillenbrand.csv")
+    assert {r.speaker_id for r in report._rows(m, None)} == {dev, semi}
+    assert {r.speaker_id for r in report._rows(m, ("dev",))} == {dev}
+    assert {r.speaker_id for r in report._rows(m, ("dev", "semi"))} == {dev, semi}
+    assert report._cache_path(Path("c"), "praat", "hillenbrand") == Path("c/praat__hillenbrand.npz")
+    assert report._cache_path(Path("c"), "praat", "hillenbrand", ("dev",)) == Path("c/praat__hillenbrand__dev.npz")
+    assert report._key({"a": 1}, None) == {"a": 1} and report._key({"a": 1}, ("semi", "dev"))["tiers"] == ["dev", "semi"]
+    assert "Includes" not in report._tiers_line(["dev"])
+    assert "semi-private" in report._tiers_line(["dev", "semi"]) and "every gold speaker" in report._tiers_line(None)
+    assert _tiers_arg("dev") == ("dev",) and "Log this use" not in capsys.readouterr().out
+    assert _tiers_arg("semi,dev") == ("dev", "semi") and "Log this use" in capsys.readouterr().out

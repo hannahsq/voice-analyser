@@ -59,3 +59,4 @@ Each runs on S2 and train_v2 against three same-seed baselines. The cheap screen
 
 - Update the labeller submodule pin (upstream main is 9 commits ahead and changes `extractors/tvlp.py`).
 - Each chain under `scripts/analysis/chains/` runs from a copy, so a running queue isn't affected when its committed file changes.
+- Released models go in `docs/models.md` with a checkpoint hash and an annotated tag at the training commit (D-032); whole-suite reports go in `reports/suite/` (dev by default).

@@ -75,7 +75,11 @@ class TrainConfig:
 
 def _git() -> dict:
     run = lambda *a: subprocess.run(["git", *a], capture_output=True, text=True).stdout.strip()  # noqa: E731
-    return {"commit": run("rev-parse", "--short", "HEAD"), "dirty": bool(run("status", "--porcelain"))}
+    # dirty = uncommitted changes to the code that trains (tracked files under vocal_analysis/ and configs/), listed;
+    # untracked reports no longer count (runs before 2026-10-22 were "dirty" whenever any file was)
+    changed = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no", "--", "vocal_analysis", "configs"],
+                             capture_output=True, text=True).stdout.splitlines()  # unstripped: the status columns matter
+    return {"commit": run("rev-parse", "--short", "HEAD"), "dirty": bool(changed), "dirty_files": [c[3:] for c in changed]}
 
 
 def _saved_channel(out: Path) -> ChannelConfig:

@@ -153,11 +153,12 @@ def _sections(suite: dict, name: str):
 
 
 def build_teacher_report(cfg: Config, ckpt: str | Path, out: str | Path, suite_dir: str | Path, name: str = "teacher",
-                         log=print) -> Path:
+                         log=print, tiers: tuple[str, ...] = ("dev",)) -> Path:
     from .report import build_report
 
     fb, f0b = teacher_baselines(ckpt, name)
     log("[suite]")
     suite = suite_metrics(ckpt, suite_dir, log)
     return build_report(cfg, Path(out), None, False, log, extra_formant={name: fb}, extra_f0={name: f0b},
-                        title=f"Teacher evaluation: {Path(ckpt).parent.name}", extra_sections=_sections(suite, name))
+                        title=f"Teacher evaluation: {Path(ckpt).parent.name}", extra_sections=_sections(suite, name),
+                        tiers=tiers)
