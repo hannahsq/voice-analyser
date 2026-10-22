@@ -37,10 +37,11 @@ def tap_features(enc, fe, audio_batch, device) -> torch.Tensor:
     return h.hidden_states[TAP].clone()
 
 
-def interp_time(h: torch.Tensor, mel_pos: torch.Tensor) -> torch.Tensor:
-    """(B, E, d) at encoder frames -> (B, T, d) at mel positions (frame e at mel 8e), linear, clamped at the ends."""
+def interp_time(h: torch.Tensor, mel_pos: torch.Tensor, ratio: float = load.SUBSAMPLING, offset: float = 0.0) -> torch.Tensor:
+    """(B, E, d) at encoder frames -> (B, T, d) at mel positions (frame e at mel ratio e + offset: Parakeet 8e, DAC 2e + 1),
+    linear, clamped at the ends."""
     E = h.shape[1]
-    p = (mel_pos / load.SUBSAMPLING).clamp(0, E - 1)
+    p = ((mel_pos - offset) / ratio).clamp(0, E - 1)
     if E == 1:
         return h[:, torch.zeros_like(p, dtype=torch.long)]
     i0 = p.floor().long().clamp(max=E - 2)
@@ -51,8 +52,9 @@ def interp_time(h: torch.Tensor, mel_pos: torch.Tensor) -> torch.Tensor:
 class ParakeetHead(nn.Module):
     """Layer-5 features -> teacher v3's outputs (same keys, bins and decoding)."""
 
-    def __init__(self, in_dim: int = 1024):
+    def __init__(self, in_dim: int = 1024, ratio: float = load.SUBSAMPLING, offset: float = 0.0):
         super().__init__()
+        self.ratio, self.offset = ratio, offset  # encoder frame e sits at our mel frame ratio e + offset
         cfg = T.TeacherConfig()
         self.cfg = cfg
         self.norm = nn.LayerNorm(in_dim)  # in_dim: 1024 per tapped layer, concatenated (D-033 part 4)
@@ -67,7 +69,7 @@ class ParakeetHead(nn.Module):
         self.register_buffer("fm_bins", torch.arange(T.FORMANT_AXIS.n_bins, dtype=torch.float32), persistent=False)
 
     def forward(self, feats: torch.Tensor, mel_pos: torch.Tensor) -> dict:
-        h = self.blocks(interp_time(self.proj(self.norm(feats)), mel_pos))
+        h = self.blocks(interp_time(self.proj(self.norm(feats)), mel_pos, self.ratio, self.offset))
         out = {"f0_logits": self.f0_head(h).float(), "voicing_logit": self.voicing_head(h)[..., 0].float()}
         logits, means = [], []
         for n, head in enumerate(self.formant_heads):  # as Teacher.forward: cascaded, soft mask below the previous formant
@@ -96,7 +98,7 @@ def file_mel_pos(n_frames: int, device) -> torch.Tensor:
 
 def load_head(path, device):
     ck = torch.load(path, map_location="cpu")
-    m = ParakeetHead(ck.get("in_dim", 1024))
+    m = ParakeetHead(ck.get("in_dim", 1024), ck.get("ratio", load.SUBSAMPLING), ck.get("offset", 0.0))
     m.load_state_dict(ck["model"])
     return m.eval().to(device)
 

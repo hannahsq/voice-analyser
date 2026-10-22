@@ -20,10 +20,18 @@ C, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 OUT.mkdir(parents=True, exist_ok=True)
 torch.backends.cudnn.enabled = False
 dev = torch.device(os.environ.get("VA_DEVICE", "cuda"))
-NL, D = 7, 1024
-F = NL * D
+# the cache's own description (dac_cache.py writes meta.json); Parakeet's cache (cache.py) has none: 7 x 1024, 80 ms
+META = json.loads((C / "meta.json").read_text()) if (C / "meta.json").exists() else \
+    {"widths": [1024] * 7, "names": [f"L{l}" for l in range(7)], "mel_per_frame": 8, "mel_offset": 0}
+WIDTHS, TAPNAMES = META["widths"], META["names"]
+RATIO, OFFSET = float(META["mel_per_frame"]), float(META["mel_offset"])
+LABELS = (C.parent / META["labels_from"]) if "labels_from" in META else C
+REF = "L5" if "L5" in TAPNAMES else "T5"  # reported beside the winners: Parakeet's layer 5, DAC's encoder latent
+NL = len(WIDTHS)
+OFFS = np.cumsum([0] + WIDTHS)
+F = int(OFFS[-1])
 COMBOS = [c for r in range(1, NL + 1) for c in itertools.combinations(range(NL), r)]
-NAMES = ["+".join(f"L{l}" for l in c) for c in COMBOS]
+NAMES = ["+".join(TAPNAMES[l] for l in c) for c in COMBOS]
 TARGETS = ["F1", "F2", "F3", "F4", "B1", "B2", "B3", "B4", "f0", "voiced", "sonorant"]
 LAMBDAS = [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0]
 SEL_SETS = ["synth_train_v2", "synth_train_v2s", "resynth_vocalset_val_d16k", "resynth_zeroth_korean_val_d16k"]
@@ -34,8 +42,7 @@ def breathe():
     """Keep each GPU burst short so the display stays usable and the driver's watchdog never trips (2026-10-22: a
     run with 20000-row chunks hung the machine; the GPU also drives the screen)."""
     if dev.type == "cuda":
-        torch.cuda.synchronize()
-    time.sleep(0.003)
+        torch.cuda.synchronize()  # no pause needed (Hannah, 2026-10-22): short chunks are enough
 
 
 def p(*a):
@@ -44,14 +51,16 @@ def p(*a):
 
 
 def load(name):
-    d = C / name
-    return {f.stem: np.load(f, mmap_mode="r" if f.stem == "emb" else None) for f in d.glob("*.npy")}
+    """the set's embeddings from C; labels, reference frames and teacher v3's columns from LABELS (the same items)."""
+    out = {f.stem: np.load(f) for f in (LABELS / name).glob("*.npy") if f.stem not in ("emb", "emb_off")}
+    out["emb"], out["emb_off"] = np.load(C / name / "emb.npy", mmap_mode="r"), np.load(C / name / "emb_off.npy")
+    return out
 
 
 def interp(emb: torch.Tensor, mel: torch.Tensor) -> torch.Tensor:
-    """emb (E, F) for one item at encoder frames (frame e at mel 8e); mel (T,) -> (T, F), linear, clamped."""
+    """emb (E, F) for one item at encoder frames (frame e at mel RATIO e + OFFSET); mel (T,) -> (T, F), linear, clamped."""
     E = emb.shape[0]
-    q = (mel / 8.0).clamp(0, E - 1)
+    q = ((mel - OFFSET) / RATIO).clamp(0, E - 1)
     if E == 1:
         return emb[torch.zeros_like(q, dtype=torch.long)]
     i0 = q.floor().long().clamp(max=E - 2)
@@ -153,7 +162,7 @@ else:
         fx, fy, fn = st["fit"]["xx"][t].to(dev), st["fit"]["xy"][t].to(dev), float(st["fit"]["w"][t])
         sx, sy, syy, sn = st["sel"]["xx"][t].to(dev), st["sel"]["xy"][t].to(dev), float(st["sel"]["yy"][t]), float(st["sel"]["w"][t])
         for ci, c in enumerate(COMBOS):
-            idx = torch.cat([torch.arange(l * D, (l + 1) * D) for l in c] + [torch.tensor([F])]).to(dev)
+            idx = torch.cat([torch.arange(int(OFFS[l]), int(OFFS[l + 1])) for l in c] + [torch.tensor([F])]).to(dev)
             # Cholesky in fp32 (this GPU's fp64 is too slow for 127 x 11 x 8 solves up to 7169 wide; a failed
             # factorisation skips that strength); the held-out error in fp64, where the terms nearly cancel
             A, b, As, bs = fx[idx][:, idx], fy[idx], sx[idx][:, idx], sy[idx]
@@ -187,8 +196,11 @@ def predict_all(X):
     out = torch.empty(len(COMBOS), len(X), 11, device=dev)
     for ci, c in enumerate(COMBOS):
         acc = W_all[ci][-1].expand(len(X), 11).clone()
-        for j, l in enumerate(c):
-            acc += Xs[:, l * D:(l + 1) * D] @ W_all[ci][j * D:(j + 1) * D]
+        j = 0
+        for l in c:
+            w = WIDTHS[l]
+            acc += Xs[:, int(OFFS[l]):int(OFFS[l + 1])] @ W_all[ci][j:j + w]
+            j += w
         out[ci] = acc
         if ci % 16 == 15:
             breathe()
@@ -249,7 +261,7 @@ rng = np.random.default_rng(0)
 
 def select(kind):
     """kind 'F1' (lower better, all four sets) or 'voiced' (higher better, synthetic sets)."""
-    sets = SEL_SETS if kind == "F1" else [s for s in SEL_SETS if not np.isnan(R[s]["L0"]["voiced"])]
+    sets = SEL_SETS if kind == "F1" else [s for s in SEL_SETS if not np.isnan(R[s][NAMES[0]]["voiced"])]
     if kind == "F1":
         metric = np.mean([clip[s][0].sum(1) / clip[s][1].sum() for s in sets], 0)
     else:
@@ -278,7 +290,7 @@ def select(kind):
     for depth in range(NL):
         cands = [ci for ci in range(len(COMBOS)) if max(COMBOS[ci]) == depth]
         bi = min(cands, key=lambda ci: metric[ci])
-        p(f"  deepest L{depth}: {NAMES[bi]:28s} {sign * metric[bi]:7.2f}")
+        p(f"  deepest {TAPNAMES[depth]}: {NAMES[bi]:28s} {sign * metric[bi]:7.2f}")
     return win
 
 
@@ -339,13 +351,13 @@ json.dump({"validation": R, "gold": G, "winners": {"F1": NAMES[win_f1], "voiced"
 # ------------------------------------------------------------------ 6. the winners on gold, and the part-2 rule for F1
 for kind, w in (("F1", win_f1), ("voiced", win_v)):
     nm = NAMES[w]
-    p(f"\n## Winner for {kind}: {nm} (teacher v3 alongside; layer 5 alone for reference)")
+    p(f"\n## Winner for {kind}: {nm} (teacher v3 alongside; {REF} alone for reference)")
     for vs in SEL_SETS:
-        p(f"  {vs:32s} " + "  ".join(f"{t} {R[vs][nm][t]:.1f}/{R[vs]['teacher_v3'][t]:.1f}/{R[vs]['L5'][t]:.1f}"
+        p(f"  {vs:32s} " + "  ".join(f"{t} {R[vs][nm][t]:.1f}/{R[vs]['teacher_v3'][t]:.1f}/{R[vs][REF][t]:.1f}"
                                       for t in TARGETS if not np.isnan(R[vs][nm][t])))
     for g in ("gold_ptdb_tug", "gold_mir1k", "gold_mdb_stem_synth"):
-        p(f"  {g:32s} f0 RPA {G[g][nm]['f0_rpa']:.1f}/{G[g]['teacher_v3']['f0_rpa']:.1f}/{G[g]['L5']['f0_rpa']:.1f}  "
-          f"voicing {G[g][nm]['voiced_acc']:.1f}/{G[g]['teacher_v3']['voiced_acc']:.1f}/{G[g]['L5']['voiced_acc']:.1f}")
+        p(f"  {g:32s} f0 RPA {G[g][nm]['f0_rpa']:.1f}/{G[g]['teacher_v3']['f0_rpa']:.1f}/{G[g][REF]['f0_rpa']:.1f}  "
+          f"voicing {G[g][nm]['voiced_acc']:.1f}/{G[g]['teacher_v3']['voiced_acc']:.1f}/{G[g][REF]['voiced_acc']:.1f}")
     for gname in ("hillenbrand", "closed_phase"):
         p(f"  {gname} (median signed / MAE, Hz): " + "; ".join(
             f"{k} {G[gname][nm][k][0]:+.1f}/{G[gname][nm][k][1]:.1f} (teacher {G[gname]['teacher_v3'][k][0]:+.1f}/{G[gname]['teacher_v3'][k][1]:.1f})"
