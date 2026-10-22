@@ -9,3 +9,6 @@ runs/
 
 # Local clone of hannahsq/tcn-formants for the architecture bake-off (roadmap "Later"); not part of this repo
 external/tcn-formants/
+
+# Parakeet weights (CC-BY-4.0, fetched over HTTPS; see scripts/parakeet/load.py), not committed
+external_models/
