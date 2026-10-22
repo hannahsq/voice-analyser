@@ -2,7 +2,10 @@
 teacher v3's outputs on the same frames) with part 2's bias analysis: synthetic F1-F3 by f0 band, Hillenbrand dev by
 group, PTDB-TUG dev closed phase by sex; ensembles with teacher v3 (a) mean of all formants, (b) precision-weighted,
 (c) F1 only; the part-2 rule per head; then part 4's comparison rule (layers 3-6 vs layer 5).
-Args: scoring cache dir, out txt, name=ckpt ... (the first two heads are compared: H5 first, H3456 second)."""
+Args: scoring cache dir, out txt, name=ckpt ... (the first two heads are compared: H5 first, H3456 second).
+--seedmean (D-033, 2026-10-23): heads NAME#k also enter as six-seed means (mean:NAME, frame by frame in log frequency);
+(e) = teacher v3 + every seed mean, F1 only, under the part-2 rule; with three: pairs, the cross-fitted seed-pair selection
+(needs speaker.npy, speakers.py)."""
 import json
 import os
 import sys
@@ -18,7 +21,8 @@ from vocal_analysis.models.infer import decode_outputs  # noqa: E402
 
 sys.stdout.reconfigure(encoding="utf-8")
 C, OUTF = Path(sys.argv[1]), sys.argv[2]
-ARGS = [a for a in sys.argv[3:] if not a.startswith("--dac=") and not a.startswith("three:")]
+SEEDMEAN = "--seedmean" in sys.argv[3:]
+ARGS = [a for a in sys.argv[3:] if not a.startswith("--dac=") and not a.startswith("three:") and a != "--seedmean"]
 DACDIR = next((Path(a[6:]) for a in sys.argv[3:] if a.startswith("--dac=")), None)  # DAC scoring cache (dac_cache.py)
 THREES = [a[6:].split(",") for a in sys.argv[3:] if a.startswith("three:")]  # (d): teacher + each pair of heads
 THREE = THREES[0] if THREES else None
@@ -84,6 +88,19 @@ def ensembles(s):
         d = t.copy()
         d[:, 0] = (t[:, 0] + e[pair[0]][:, 0] + e[pair[1]][:, 0]) / 3
         e["d:" + "+".join(pair)] = d
+    if SEEDMEAN:  # six-seed means of each NAME#k family; (e) and the two-way versions, F1 only
+        fams = {}
+        for name in models:
+            if "#" in name:
+                fams.setdefault(name.split("#")[0], []).append(e[name])
+        for f, xs in fams.items():
+            e[f"mean:{f}"] = np.mean(xs, 0)
+            c = t.copy()
+            c[:, 0] = (t[:, 0] + e[f"mean:{f}"][:, 0]) / 2
+            e[f"c:mean:{f}"] = c
+        x = t.copy()
+        x[:, 0] = (t[:, 0] + sum(e[f"mean:{f}"][:, 0] for f in fams)) / (1 + len(fams))
+        e["e:" + "+".join(fams)] = x
     return e
 
 
@@ -112,11 +129,13 @@ for sname in ("synth_train_v2", "synth_train_v2s"):
     table(f"synthetic {sname} by f0 band", ensembles(s), np.asarray(s["formants"]), bands, 3)
 s = load("gold_hillenbrand")
 g = np.asarray(s["group"])
-hb = table("Hillenbrand dev by group", ensembles(s), np.asarray(s["ref_formants"]),
+EH, RH, SPH = ensembles(s), np.asarray(s["ref_formants"]), s.get("speaker")
+hb = table("Hillenbrand dev by group", EH, RH,
            {"all": np.ones(len(g), bool), "men": g == "m", "women": g == "w", "children": np.isin(g, ["b", "g"])}, 4)
 s = load("gold_ptdb_cp")
 sex = np.asarray(s["sex"])
-cp = table("PTDB-TUG dev closed phase by sex", ensembles(s), np.column_stack([s["ref_cp"], np.full(len(sex), np.nan)]),
+EC, RC, SPC = ensembles(s), np.asarray(s["ref_cp"]), s.get("speaker")
+cp = table("PTDB-TUG dev closed phase by sex", EC, np.column_stack([RC, np.full(len(sex), np.nan)]),
            {"women": sex == "f", "men": sex == "m"}, 3)
 
 p("\nPart-2 rule per head, ensemble (c), F1 only")
@@ -180,3 +199,68 @@ if any(len(v) > 1 for v in groups.values()):
     if {"H5", "H5S2"} <= stat.keys():
         t5, ts2 = stat["H5"][0] + stat["H5"][2], stat["H5S2"][0] + stat["H5S2"][2]
         p(f"  part-4b trigger on means, H5S2 vs H5: total cut {ts2:.1f} vs {t5:.1f} Hz  DECISION: {'S2 recipe for heads' if ts2 > t5 else 'AdamW stays'}")
+
+
+# (e) and the cross-fitted seed-pair selection (D-033, Hannah 2026-10-23, fixed before any part-5 result)
+if SEEDMEAN:
+    p("\n## Seed-averaged ensembles (six-seed means in log frequency), F1 only")
+    ek = next(k for k in EH if k.startswith("e:"))
+    for k in [k for k in EH if k.startswith("c:mean:")] + [ek]:
+        w0, w1 = abs(cp[("teacher_v3", "women", 0)][0]), abs(cp[(k, "women", 0)][0])
+        m0, m1 = abs(cp[("teacher_v3", "men", 0)][0]), abs(cp[(k, "men", 0)][0])
+        h0, h1 = hb[("teacher_v3", "all", 0)][1], hb[(k, "all", 0)][1]
+        ok = (w0 - w1 >= 5) and (m1 - m0 <= 5) and (h1 - h0 <= 4)
+        p(f"  {k}: women |F1 bias| {w0:.1f} -> {w1:.1f}; men {m0:.1f} -> {m1:.1f}; Hillenbrand F1 MAE {h0:.1f} -> {h1:.1f}"
+          + (f"  DECISION (e): {'worth a full arm' if ok else 'no'}" if k == ek else f"  (reported: {'passes' if ok else 'fails'})"))
+
+
+def f1_stats(E, ref, mask):
+    """F1 median signed error and MAE (Hz) per estimate on the frames in mask."""
+    out = {}
+    for k, x in E.items():
+        m = mask & np.isfinite(ref) & (ref > 0) & np.isfinite(x[:, 0])
+        err = 2 ** x[m, 0] - ref[m]
+        out[k] = (float(np.median(err)), float(np.mean(np.abs(err))))
+    return out
+
+
+if SEEDMEAN and THREES and SPH is not None and SPC is not None:
+    rng = np.random.default_rng(20261023)
+    halves = {}  # set -> speaker -> half (0/1), split within each group / sex
+    for setn, spk, strat in (("hb", np.asarray(SPH), g), ("cp", np.asarray(SPC), sex)):
+        h = {}
+        for st in np.unique(strat):
+            u = sorted(set(spk[strat == st]))
+            rng.shuffle(u)
+            h.update({x: i % 2 for i, x in enumerate(u)})
+        halves[setn] = np.array([h[x] for x in spk])
+    pairs = ["d:" + "+".join(pr) for pr in THREES]
+
+    def score(k, H):
+        (hbs, cps) = H
+        cut_w = abs(cps["teacher_v3"]["women"][0]) - abs(cps[k]["women"][0])
+        rise_m = abs(cps[k]["men"][0]) - abs(cps["teacher_v3"]["men"][0])
+        cut_h = hbs["teacher_v3"][1] - hbs[k][1]
+        return cut_w + cut_h, rise_m, cut_w, cut_h
+
+    H = {}
+    for half in (0, 1):
+        hbs = f1_stats(EH, RH[:, 0], halves["hb"] == half)
+        cps = {k: {} for k in EC}
+        for sx, lab in (("f", "women"), ("m", "men")):
+            for k, v in f1_stats(EC, RC[:, 0], (halves["cp"] == half) & (sex == sx)).items():
+                cps[k][lab] = v
+        H[half] = (hbs, cps)
+    p("\n## Cross-fitted seed-pair selection (reported only): best of "
+      f"{len(pairs)} pairs on one half of the dev speakers, scored on the other")
+    p("  score = women's closed-phase |F1 bias| cut + Hillenbrand F1 MAE cut (Hz); pairs raising men's |bias| > 5 Hz excluded")
+    for a in (0, 1):
+        b = 1 - a
+        ok = [k for k in pairs if score(k, H[a])[1] <= 5]
+        best = max(ok, key=lambda k: score(k, H[a])[0])
+        sa, sb = score(best, H[a]), score(best, H[b])
+        ea, eb = score(ek, H[a]), score(ek, H[b])
+        med = np.median([score(k, H[b])[0] for k in pairs])
+        p(f"  pick on half {a}: {best}  in-half {sa[0]:+.1f} (women {sa[2]:+.1f}, Hillenbrand {sa[3]:+.1f});"
+          f" held out on half {b} {sb[0]:+.1f} (women {sb[2]:+.1f}, Hillenbrand {sb[3]:+.1f});"
+          f" median pair on half {b} {med:+.1f}; (e) on half {a} {ea[0]:+.1f}, on half {b} {eb[0]:+.1f}")

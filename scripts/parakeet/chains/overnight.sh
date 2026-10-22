@@ -17,7 +17,11 @@ PY=$W/.venv/Scripts/python.exe
 PYD=$W/.venv-dac/Scripts/python.exe
 PC=$W/cache/heads_l3_6
 
-dir() { [ "$2" = 0 ] && echo "$W/runs/$1" || echo "$W/runs/$1_s$2"; }  # seed 0 runs predate the seed suffix
+dir() {  # seed 0 runs predate the seed suffix; H5 seed 2 would be runs/h5_s2, the S2-recipe arm's seed 0
+  [ "$2" = 0 ] && echo "$W/runs/$1" && return
+  [ "$1$2" = h52 ] && echo "$W/runs/h5_seed2" && return
+  echo "$W/runs/$1_s$2"
+}
 train() {  # arm, cache, layers, steps, recipe, seed
   local out; out=$(dir "$1" "$6")
   [ -f "$out/ckpt_last.pt" ] && return 0

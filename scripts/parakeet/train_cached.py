@@ -33,6 +33,9 @@ DAC = "taps" in meta  # a DAC head cache (dac_cache.py --heads): taps already co
 cols = None if DAC else [meta["layers"].index(l) for l in want]
 emb = np.load(CACHE / "emb.npy", mmap_mode="r")
 N = meta["n"]
+# crops listed in exclude.json are never drawn (dac_heads: crop 37896, DAC activations past the fp16 range)
+EXCL = set(json.loads((CACHE / "exclude.json").read_text())["crops"]) if (CACHE / "exclude.json").exists() else set()
+POOL = np.array([i for i in range(N) if i not in EXCL])
 KEYS = ("f0", "voiced", "sonorant", "formants", "bandwidths", "w_f0", "w_formant")
 labs = {k: np.load(CACHE / f"{k}.npy", mmap_mode="r") for k in KEYS}
 IN_DIM = sum(meta["widths"]) if DAC else 1024 * len(want)
@@ -50,10 +53,10 @@ else:
     lr_at = lambda s: LR * (s + 1) / WARMUP if s < WARMUP else LR * 0.5 * (1 + math.cos(math.pi * (s - WARMUP) / (STEPS - WARMUP)))  # noqa: E731
 pos = crop_mel_pos(meta["crop_frames"], dev)
 log = open(OUT / "log.jsonl", "w")
-print(f"head on layers {want}: {sum(p.numel() for p in head.parameters()):,} parameters; {STEPS} steps of {BATCH} from {N} cached crops", flush=True)
+print(f"head on layers {want}: {sum(p.numel() for p in head.parameters()):,} parameters; {STEPS} steps of {BATCH} from {N} cached crops ({len(EXCL)} excluded)", flush=True)
 t0 = time.time()
 for step in range(STEPS):
-    idx = np.sort(rng.choice(N, BATCH, replace=False))
+    idx = np.sort(POOL[rng.choice(len(POOL), BATCH, replace=False)])
     raw = np.asarray(emb[idx], np.float16)
     feats = torch.from_numpy(raw if DAC else raw[:, :, cols]).to(dev).float().flatten(2)  # (B, E, in_dim)
     lab = {k: torch.from_numpy(np.asarray(v[idx])).to(dev) for k, v in labs.items()}
