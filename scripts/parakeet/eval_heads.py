@@ -257,6 +257,9 @@ if SEEDMEAN and THREES and SPH is not None and SPC is not None:
     for a in (0, 1):
         b = 1 - a
         ok = [k for k in pairs if score(k, H[a])[1] <= 5]
+        if not ok:
+            p(f"  pick on half {a}: none of the {len(pairs)} pairs keeps men's |F1 bias| rise within 5 Hz on this half")
+            continue
         best = max(ok, key=lambda k: score(k, H[a])[0])
         sa, sb = score(best, H[a]), score(best, H[b])
         ea, eb = score(ek, H[a]), score(ek, H[b])
