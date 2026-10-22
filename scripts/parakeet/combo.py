@@ -27,7 +27,15 @@ NAMES = ["+".join(f"L{l}" for l in c) for c in COMBOS]
 TARGETS = ["F1", "F2", "F3", "F4", "B1", "B2", "B3", "B4", "f0", "voiced", "sonorant"]
 LAMBDAS = [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0]
 SEL_SETS = ["synth_train_v2", "synth_train_v2s", "resynth_vocalset_val_d16k", "resynth_zeroth_korean_val_d16k"]
-REP = open(OUT / "combo_report.txt", "w", encoding="utf-8")
+REP = open(OUT / "combo_report.txt", "a", encoding="utf-8")
+
+
+def breathe():
+    """Keep each GPU burst short so the display stays usable and the driver's watchdog never trips (2026-10-22: a
+    run with 20000-row chunks hung the machine; the GPU also drives the screen)."""
+    if dev.type == "cuda":
+        torch.cuda.synchronize()
+    time.sleep(0.003)
 
 
 def p(*a):
@@ -51,7 +59,7 @@ def interp(emb: torch.Tensor, mel: torch.Tensor) -> torch.Tensor:
     return emb[i0] * (1 - a) + emb[i0 + 1] * a
 
 
-def frames(s, idx_items=None, every=1, chunk=40000):
+def frames(s, idx_items=None, every=1, chunk=8192):
     """yield (X (n, F) float32 unstandardised, frame slice) over a set's reference frames, items in order."""
     eo, ro, mel = s["emb_off"], s["ref_off"], s["mel"]
     items = range(len(eo) - 1) if idx_items is None else idx_items
@@ -97,10 +105,11 @@ if stats_file.exists():
     st = torch.load(stats_file)
 else:
     s1, s2, n = torch.zeros(F, device=dev, dtype=torch.float64), torch.zeros(F, device=dev, dtype=torch.float64), 0
-    for X, _ in frames(fit, every=2):
+    for X, _ in frames(fit, every=2, chunk=4096):
         s1 += X.double().sum(0)
         s2 += (X.double() ** 2).sum(0)
         n += len(X)
+        breathe()
     mu = (s1 / n).float()
     sd = ((s2 / n - (s1 / n) ** 2).clamp_min(0).sqrt() + 1e-4).float()
     st = {"mu": mu.cpu(), "sd": sd.cpu()}
@@ -108,7 +117,12 @@ else:
         xx = torch.zeros(11, F + 1, F + 1, device=dev)
         xy = torch.zeros(11, F + 1, device=dev)
         yy, ww = torch.zeros(11, dtype=torch.float64), torch.zeros(11, dtype=torch.float64)
-        for X, sl in frames(fit, list(items), every=2, chunk=20000):
+        part = OUT / f"joint_stats_{split}.pt"
+        if part.exists():
+            st[split] = torch.load(part)
+            p(f"statistics: {split} loaded")
+            continue
+        for X, sl in frames(fit, list(items), every=2, chunk=4096):
             y, w = targets(fit, sl, every=2)
             X = torch.cat([(X - mu) / sd, torch.ones(len(X), 1, device=dev)], 1)
             Y, W = torch.from_numpy(y).float().to(dev), torch.from_numpy(w).float().to(dev)
@@ -120,7 +134,10 @@ else:
                     xy[t] += Xm.T @ (W[m, t] * Y[m, t])
                     yy[t] += float((W[m, t] * Y[m, t] ** 2).double().sum())
                     ww[t] += float(W[m, t].double().sum())
+                    breathe()
         st[split] = {"xx": xx.cpu(), "xy": xy.cpu(), "yy": yy, "w": ww}
+        torch.save(st[split], part)
+        del xx, xy
         p(f"statistics: {split} done ({time.time() - t0:.0f} s)")
     torch.save(st, stats_file)
 mu, sd = st["mu"].to(dev), st["sd"].to(dev)
@@ -158,6 +175,7 @@ else:
             if t == 0:
                 W_all.append(torch.zeros(len(idx), 11, device=dev))
             W_all[ci][:, t] = wv
+            breathe()
         p(f"ridge: target {TARGETS[t]} done ({time.time() - t0:.0f} s)")
     torch.save({"W": [w.cpu() for w in W_all], "lambda": LAM, "combos": COMBOS}, coef_file)
 W_all = [w.to(dev) for w in W_all]
@@ -172,6 +190,8 @@ def predict_all(X):
         for j, l in enumerate(c):
             acc += Xs[:, l * D:(l + 1) * D] @ W_all[ci][j * D:(j + 1) * D]
         out[ci] = acc
+        if ci % 16 == 15:
+            breathe()
     out[..., :9] = out[..., :9].clamp(4.0, 13.0)
     return out
 
@@ -185,7 +205,7 @@ for name in SEL_SETS:
     sums = {k: np.zeros((len(COMBOS), 11)) for k in ("abs", "n", "hit")}
     tsum = {k: np.zeros(11) for k in ("abs", "n", "hit")}
     cF1, cN, vC, vN = np.zeros((len(COMBOS), n_items)), np.zeros(n_items), np.zeros((len(COMBOS), n_items)), np.zeros(n_items)
-    for X, sl in frames(s, chunk=20000):
+    for X, sl in frames(s, chunk=8192):
         y, w = targets(s, sl)
         P = predict_all(X).cpu().numpy()
         T = np.column_stack([s["t_log2F"][sl[0]:sl[1]], s["t_log2B"][sl[0]:sl[1]], s["t_log2f0"][sl[0]:sl[1]],
@@ -270,7 +290,7 @@ json.dump(R, open(OUT / "combo_results.json", "w"), indent=1)
 def gold_formants(name, refkey, groups_fn):
     s = load(name)
     P, T, ref = [], [], np.asarray(s[refkey])
-    for X, sl in frames(s, chunk=20000):
+    for X, sl in frames(s, chunk=8192):
         P.append(predict_all(X)[..., :4].cpu().numpy())
     P = np.concatenate(P, 1)
     T = np.asarray(s["t_log2F"])
@@ -297,7 +317,7 @@ for gname, P, T, ref, groups, nf in (("hillenbrand", hb_P, hb_T, hb_ref, hb_g, 4
 for name in ("gold_ptdb_tug", "gold_mir1k", "gold_mdb_stem_synth"):
     s = load(name)
     hit, vok, nv, nall = np.zeros(len(COMBOS)), np.zeros(len(COMBOS)), 0, 0
-    for X, sl in frames(s, chunk=40000):
+    for X, sl in frames(s, chunk=8192):
         P = predict_all(X)[..., 8:10].cpu().numpy()
         ref = np.asarray(s["ref_f0"][sl[0]:sl[1]])
         ok = np.isfinite(ref)
