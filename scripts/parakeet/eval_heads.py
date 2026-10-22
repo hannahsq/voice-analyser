@@ -17,7 +17,8 @@ from vocal_analysis.models.infer import decode_outputs  # noqa: E402
 
 sys.stdout.reconfigure(encoding="utf-8")
 C, OUTF = Path(sys.argv[1]), sys.argv[2]
-heads = [a.split("=", 1) for a in sys.argv[3:]]
+heads = [a.split("=", 1) for a in sys.argv[3:] if not a.startswith("col:")]
+COLS = [a[4:] for a in sys.argv[3:] if a.startswith("col:")]  # other models' cached columns (s2_score.py), no ensembles
 OUT = open(OUTF, "w", encoding="utf-8")
 p = lambda *a: (print(*a, file=OUT, flush=True), print(*a, flush=True))  # noqa: E731
 torch.backends.cudnn.enabled = False
@@ -47,7 +48,7 @@ def head_outputs(s, name):
 
 def ensembles(s):
     t, ts = np.asarray(s["t_log2F"]), np.asarray(s["t_sigma"])
-    e = {"teacher_v3": t}
+    e = {"teacher_v3": t, **{c: np.asarray(s[f"m_{c}_log2F"]) for c in COLS if f"m_{c}_log2F" in s}}
     for name in models:
         h, hs = head_outputs(s, name)
         e[name] = h

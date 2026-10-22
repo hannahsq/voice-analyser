@@ -21,6 +21,7 @@ from vocal_analysis.train.losses import teacher_loss  # noqa: E402
 CACHE, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 want = tuple(int(x) for x in sys.argv[3].split(","))
 STEPS = int(sys.argv[4]) if len(sys.argv) > 4 else 6000
+RECIPE = sys.argv[5] if len(sys.argv) > 5 else "adamw"  # "s2": D-030's S2 recipe (part 4b)
 BATCH, WARMUP, LR = 32, 500, 1e-3
 OUT.mkdir(parents=True, exist_ok=True)
 dev = setup_device(DeviceConfig(device=os.environ.get("VA_DEVICE", "cuda")))
@@ -33,8 +34,16 @@ N = meta["n"]
 KEYS = ("f0", "voiced", "sonorant", "formants", "bandwidths", "w_f0", "w_formant")
 labs = {k: np.load(CACHE / f"{k}.npy", mmap_mode="r") for k in KEYS}
 head = ParakeetHead(1024 * len(want)).to(dev)
-opt = torch.optim.AdamW(head.parameters(), lr=LR, weight_decay=0.01)
-lr_at = lambda s: LR * (s + 1) / WARMUP if s < WARMUP else LR * 0.5 * (1 + math.cos(math.pi * (s - WARMUP) / (STEPS - WARMUP)))  # noqa: E731
+if RECIPE == "s2":  # Muon 8e-3 (non-head linear weights) + Adan 4e-2 (rest), warm-up 1000, WSD 2000 + 1500
+    from vocal_analysis.train.teacher import TrainConfig, _lr, _optimizer
+
+    tc = TrainConfig(optimizer="muon_adan", lr=8e-3, rest_lr_scale=5.0, weight_decay=0.01, warmup=1000, schedule="wsd",
+                     steps=STEPS, decay_start=STEPS - 1500, decay_steps=1500)
+    opt = _optimizer(head, tc)
+    lr_at = lambda s: _lr(s, tc)  # noqa: E731
+else:
+    opt = torch.optim.AdamW(head.parameters(), lr=LR, weight_decay=0.01)
+    lr_at = lambda s: LR * (s + 1) / WARMUP if s < WARMUP else LR * 0.5 * (1 + math.cos(math.pi * (s - WARMUP) / (STEPS - WARMUP)))  # noqa: E731
 pos = crop_mel_pos(meta["crop_frames"], dev)
 log = open(OUT / "log.jsonl", "w")
 print(f"head on layers {want}: {sum(p.numel() for p in head.parameters()):,} parameters; {STEPS} steps of {BATCH} from {N} cached crops", flush=True)
@@ -46,7 +55,7 @@ for step in range(STEPS):
     for k in ("voiced", "sonorant"):
         lab[k] = lab[k] > 0.5
     for g in opt.param_groups:
-        g["lr"] = lr_at(step)
+        g["lr"] = lr_at(step) * g.get("lr_scale", 1.0)
     loss, parts = teacher_loss(head(feats, pos), lab)
     opt.zero_grad(set_to_none=True)
     loss.backward()
@@ -57,5 +66,5 @@ for step in range(STEPS):
                           **{k: float(v) for k, v in parts.items()}}), file=log, flush=True)
     if (step + 1) % 1000 == 0:
         print(f"step {step + 1}: loss {float(loss.detach()):.3f} ({time.time() - t0:.0f} s)", flush=True)
-torch.save({"model": head.state_dict(), "step": STEPS, "layers": want, "in_dim": 1024 * len(want)}, OUT / "ckpt_last.pt")
+torch.save({"model": head.state_dict(), "step": STEPS, "layers": want, "in_dim": 1024 * len(want), "recipe": RECIPE}, OUT / "ckpt_last.pt")
 print("done", flush=True)
