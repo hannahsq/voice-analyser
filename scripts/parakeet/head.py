@@ -51,12 +51,12 @@ def interp_time(h: torch.Tensor, mel_pos: torch.Tensor) -> torch.Tensor:
 class ParakeetHead(nn.Module):
     """Layer-5 features -> teacher v3's outputs (same keys, bins and decoding)."""
 
-    def __init__(self):
+    def __init__(self, in_dim: int = 1024):
         super().__init__()
         cfg = T.TeacherConfig()
         self.cfg = cfg
-        self.norm = nn.LayerNorm(1024)
-        self.proj = nn.Linear(1024, D)
+        self.norm = nn.LayerNorm(in_dim)  # in_dim: 1024 per tapped layer, concatenated (D-033 part 4)
+        self.proj = nn.Linear(in_dim, D)
         self.blocks = nn.Sequential(*[T.ConformerBlock(D, cfg.conformer_heads, cfg.conformer_kernel, cfg.conformer_ff_mult)
                                       for _ in range(2)])
         self.f0_head = nn.Linear(D, T.F0_AXIS.n_bins)
@@ -95,8 +95,9 @@ def file_mel_pos(n_frames: int, device) -> torch.Tensor:
 
 
 def load_head(path, device):
-    m = ParakeetHead()
-    m.load_state_dict(torch.load(path, map_location="cpu")["model"])
+    ck = torch.load(path, map_location="cpu")
+    m = ParakeetHead(ck.get("in_dim", 1024))
+    m.load_state_dict(ck["model"])
     return m.eval().to(device)
 
 
