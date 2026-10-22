@@ -6,3 +6,6 @@ __pycache__/
 data/*
 !data/manifests/
 runs/
+
+# Local clone of hannahsq/tcn-formants for the architecture bake-off (roadmap "Later"); not part of this repo
+external/tcn-formants/
