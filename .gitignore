@@ -12,3 +12,4 @@ external/tcn-formants/
 
 # Parakeet weights (CC-BY-4.0, fetched over HTTPS; see scripts/parakeet/load.py), not committed
 external_models/
+cache/
