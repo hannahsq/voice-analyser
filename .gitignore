@@ -13,3 +13,7 @@ external/tcn-formants/
 # Parakeet weights (CC-BY-4.0, fetched over HTTPS; see scripts/parakeet/load.py), not committed
 external_models/
 cache/
+
+# probe and combination statistics and coefficients (GBs; rebuilt by the scripts), run logs
+reports/analysis/parakeet/**/*.pt
+reports/analysis/parakeet/**/*.out
