@@ -21,7 +21,7 @@ from vocal_analysis.eval.datasets import load_audio, registry
 from vocal_analysis.features.vqt import TorchVQT
 from vocal_analysis.models.infer import analyse, decode_outputs, load_teacher
 from vocal_analysis.synth.channel import ChannelConfig
-from vocal_analysis.train.data import SynthCrops, split_ids
+from vocal_analysis.train.data import SynthCrops, consolidate, split_ids
 
 sys.stdout.reconfigure(encoding="utf-8")
 S, C = Path(sys.argv[1]), Path(sys.argv[2])
@@ -35,6 +35,12 @@ synth = {"synth_train_v2": SynthCrops(flat, split_ids(json.loads((Path(cfg3["tra
                                       400, channel, seed=12345, fixed=True),
          "synth_train_v2s": SynthCrops(v2s / "flat", split_ids(json.loads((v2s / "index.json").read_text())["n_clips"])[1][:512],
                                        400, channel, seed=12345, fixed=True)}
+tlw = tuple(cfg3["train"]["tract_left_weight"])
+for d in cfg3["train"]["resynth_val"]:  # as cache.py: 512 clips (permutation seed 0), crop seed 12345
+    rflat = consolidate(d)
+    n = json.loads((rflat / "done").read_text())["n_clips"]
+    ids = np.sort(np.random.default_rng(0).permutation(n)[:512])
+    synth[f"resynth_{Path(d).name}"] = SynthCrops(rflat, ids, 400, channel, seed=12345, fixed=True, tract_left_weight=tlw)
 mods = registry()
 
 
@@ -60,6 +66,8 @@ def closed_phase():
 for name, ck in (a.split("=", 1) for a in sys.argv[3:]):
     m = load_teacher(ck, dev)[0]
     for sname, ds in synth.items():
+        if (C / sname / f"m_{name}_log2F.npy").exists():
+            continue
         F, Sg, chk = [], [], []
         for s0 in range(0, 512, 16):
             items = [ds[i] for i in range(s0, min(s0 + 16, 512))]
@@ -77,6 +85,8 @@ for name, ck in (a.split("=", 1) for a in sys.argv[3:]):
         np.save(C / sname / f"m_{name}_sigma.npy", np.concatenate(Sg))
         print(f"{name} {sname}: done (labels match the cache)", flush=True)
     for sname, gen in (("gold_hillenbrand", hillenbrand()), ("gold_ptdb_cp", closed_phase())):
+        if (C / sname / f"m_{name}_log2F.npy").exists():
+            continue
         F, Sg = [], []
         for x, times in gen:
             r = analyse(m, x, dev)
