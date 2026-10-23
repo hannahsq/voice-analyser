@@ -7,8 +7,12 @@ Words: 0.2-0.9 s, a dictionary word (not MFA's <unk> / spn), with an aligned pau
 both boundaries are set against silence (inside running speech MFA's boundaries can carry part of a neighbouring word:
 Hannah heard "as leader" in one). Room tone: only 20 ms frames of the recording's pauses within 10 dB of their 10th
 percentile and at least 20 dB below the word (MFA can label noise or speech as a pause), in runs of at least 40 ms; the
-item is skipped if under 0.1 s qualifies. The 60 ms of pause next to the word on each side must also be 20 dB below it,
-so a "pause" that is really a reduced neighbouring word (Hannah heard /tə/ before "this") rejects the word."""
+item is skipped if under 0.1 s qualifies. On each side with a pause, the 60 ms next to the word must be EDGE_DB below it,
+so a "pause" that is really a reduced neighbouring word (Hannah heard /tə/ before "this") rejects the word.
+Children's words are scarce (Hannah: relax as far as possible without teaching wrong things; the targets are always
+Parakeet's on the same audio, so the limit is items that stop being a word against silence): candidates(sides=1) admits
+a pause on one side only, the other side cut at MFA's boundary with a 25 ms fade (a soft onset rather than a chop).
+Defaults (`candidates` arguments): LibriTTS-R both sides, 10 dB; speechocean762 one side, 6 dB."""
 from pathlib import Path
 
 import numpy as np
@@ -47,8 +51,9 @@ def read16k(path) -> np.ndarray:
     return x
 
 
-def candidates(corpus_dir: Path, aligned_dir: Path):
-    """[(wav, word start, word end, [(pause start, pause end)], speaker, word)] over a corpus (pauses on both sides)"""
+def candidates(corpus_dir: Path, aligned_dir: Path, sides: int = 2, edge_db: float = 10.0):
+    """[(wav, word start, word end, [(pause start, pause end)], speaker, word, pause left, pause right, edge dB)] over a
+    corpus: words with an aligned pause on `sides` (2: both, 1: at least one) sides"""
     out = []
     for tg in sorted(aligned_dir.rglob("*.TextGrid")):
         spk = tg.parent.name
@@ -59,8 +64,9 @@ def candidates(corpus_dir: Path, aligned_dir: Path):
             continue
         quiet = lambda k: 0 <= k < len(iv) and iv[k][2] == "" and iv[k][1] - iv[k][0] >= 0.1  # noqa: E731
         for k, (a, b, t) in enumerate(iv):
-            if t and t not in ("<unk>", "spn") and 0.2 <= b - a <= 0.9 and quiet(k - 1) and quiet(k + 1):
-                out.append((str(wav), a, b, pauses, spk, t))
+            lq, rq = quiet(k - 1), quiet(k + 1)
+            if t and t not in ("<unk>", "spn") and 0.2 <= b - a <= 0.9 and lq + rq >= sides:
+                out.append((str(wav), a, b, pauses, spk, t, lq, rq, edge_db))
     return out
 
 
@@ -102,16 +108,17 @@ def room_tone(segs, n: int, rng) -> np.ndarray:
 def make_item(cand, rng) -> np.ndarray | None:
     """one isolated-word file of L frames (L a multiple of 8 in [LMIN, LMAX]); None if it can't fit"""
     wav, a, b, pauses = cand[:4]
+    lq, rq, edge_db = cand[6:9] if len(cand) > 6 else (True, True, 20.0)
     x = read16k(wav)
     w = x[int(a * SR):int(b * SR)].copy()
-    f = 160  # 10 ms fades
-    w[:f] *= np.linspace(0, 1, f, dtype=np.float32)
-    w[-f:] *= np.linspace(1, 0, f, dtype=np.float32)
     word_db = 10 * np.log10(np.mean(w ** 2) + 1e-12)
+    fl, fr = (160 if lq else 400), (160 if rq else 400)  # 10 ms fades against silence, 25 ms where cut from speech
+    w[:fl] *= np.linspace(0, 1, fl, dtype=np.float32)
+    w[-fr:] *= np.linspace(1, 0, fr, dtype=np.float32)
     edge = int(0.06 * SR)
-    for seg in (x[max(int(a * SR) - edge, 0):int(a * SR)], x[int(b * SR):int(b * SR) + edge]):
-        if len(seg) < edge // 2 or 10 * np.log10(np.mean(seg ** 2) + 1e-12) > word_db - 20:
-            return None  # the boundary is not against silence
+    for has_pause, seg in ((lq, x[max(int(a * SR) - edge, 0):int(a * SR)]), (rq, x[int(b * SR):int(b * SR) + edge])):
+        if has_pause and (len(seg) < edge // 2 or 10 * np.log10(np.mean(seg ** 2) + 1e-12) > word_db - edge_db):
+            return None  # this boundary is not against silence
     segs = quiet_segments(x, pauses, word_db)
     if sum(len(s) for s in segs) < 0.1 * SR:
         return None

@@ -180,12 +180,12 @@ def main():
     R = lambda ds: Phased(ds, "random")  # noqa: E731
     if part == "words":
         cl = W.candidates(mfa / "libritts_train", mfa / "libritts_train_aligned") + W.candidates(mfa / "libritts_train360", mfa / "libritts_train360_aligned")
-        cs = W.candidates(mfa / "so762_train", mfa / "so762_train_aligned")
+        cs = W.candidates(mfa / "so762_train", mfa / "so762_train_aligned", sides=1, edge_db=6.0)
         D.log(f"word candidates (pauses both sides): LibriTTS-R train {len(cl)}, speechocean762 train {len(cs)}")
         build("words_libritts", WordItems(cl, 24000, 5101, "random"), "words")
         build("words_so762", WordItems(cs, 12000, 5102, "random"), "words")
         build("held_words_libritts", WordItems(W.candidates(mfa / "libritts_dev", mfa / "libritts_dev_aligned"), 512, 12345, ALL), "words")
-        build("held_words_so762", WordItems(W.candidates(mfa / "so762_test", mfa / "so762_test_aligned"), 512, 12345, ALL), "words")
+        build("held_words_so762", WordItems(W.candidates(mfa / "so762_test", mfa / "so762_test_aligned", sides=1, edge_db=6.0), 512, 12345, ALL), "words")
         (out / "done").write_text(json.dumps({"mix": "v4", "crop": D.CROP, "frames": E4, "word_frames": EW, "layer": D.LAYER}))
         return D.log("done")
     build("real_libritts", R(D.SpeakerCrops(D.libritts_train_speakers(), 15000, 3411)), "crops")
