@@ -181,7 +181,7 @@ def main():
     if part == "words":
         cl = W.candidates(mfa / "libritts_train", mfa / "libritts_train_aligned") + W.candidates(mfa / "libritts_train360", mfa / "libritts_train360_aligned")
         cs = W.candidates(mfa / "so762_train", mfa / "so762_train_aligned", sides=1, edge_db=6.0)
-        D.log(f"word candidates (pauses both sides): LibriTTS-R train {len(cl)}, speechocean762 train {len(cs)}")
+        D.log(f"word candidates: LibriTTS-R train {len(cl)} (pauses both sides), speechocean762 train {len(cs)} (a pause on at least one side)")
         build("words_libritts", WordItems(cl, 24000, 5101, "random"), "words")
         build("words_so762", WordItems(cs, 12000, 5102, "random"), "words")
         build("held_words_libritts", WordItems(W.candidates(mfa / "libritts_dev", mfa / "libritts_dev_aligned"), 512, 12345, ALL), "words")
