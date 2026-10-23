@@ -40,27 +40,36 @@ v1 was stopped because, at step 2000, it copied Parakeet well only on the kinds 
 
 ## Singing by VocalSet task and technique (small groups; v1 → v2)
 
-| Task | v1 | v2 |
-|---|---|---|
-| Excerpts (sung words) | 0.34 | **0.40** |
-| Scales | 0.32 | 0.32 |
-| Arpeggios | 0.25 | 0.28 |
-| Long tones | 0.25 | 0.26 |
+R² per dimension at step 2000. **Bold:** the paired bootstrap's 95% interval for v2 − v1 excludes 0 on all three metrics (R² per dimension, variance-weighted R², mean cosine). *Italic:* only cosine's does. The bootstrap uses 2,000 resamples of crops, on the same 512 VocalSet val crops for both models (`fid_paired.py`).
 
-| Technique | v1 | v2 |
-|---|---|---|
-| Vibrato | 0.35 | **0.38** |
-| Fast forte / fast piano | 0.33 / 0.34 | 0.35 / 0.34 |
-| Slow forte / slow piano | 0.31 / 0.32 | 0.31 / 0.31 |
-| Forte | 0.26 | 0.31 |
-| Trill / trillo | 0.27 / 0.27 | 0.31 / 0.29 |
-| Belt | 0.27 | 0.24 |
-| Breathy | 0.22 | 0.25 |
-| Straight | 0.24 | 0.25 |
-| Pianissimo | 0.21 | 0.24 |
-| Vocal fry | 0.22 | 0.18 |
-| Messa di voce | 0.03 | −0.03 |
-| Lip trill | −0.13 | −0.03 |
+| Task | n | v1 | v2 | v2 − v1, R² [95%] |
+|---|---|---|---|---|
+| Excerpts (sung words) | 26 | 0.34 | **0.40** | +0.06 [+0.04, +0.08] |
+| Arpeggios | 136 | 0.25 | *0.28* | +0.03 [−0.01, +0.07] |
+| Scales | 220 | 0.32 | 0.32 | [−0.03, +0.02] |
+| Long tones | 130 | 0.25 | 0.25 | [−0.01, +0.02] |
+
+| Technique | n | v1 | v2 | v2 − v1, R² [95%] |
+|---|---|---|---|---|
+| Forte | 24 | 0.26 | **0.31** | +0.05 [+0.02, +0.09] |
+| Trill | 20 | 0.27 | **0.31** | +0.04 [+0.00, +0.08] |
+| Vibrato | 35 | 0.35 | *0.38* | +0.03 [−0.00, +0.07] |
+| Fast forte | 27 | 0.33 | *0.35* | +0.02 [−0.00, +0.06] |
+| Breathy | 35 | 0.22 | *0.25* | +0.03 [−0.02, +0.07] |
+| Pianissimo | 18 | 0.21 | *0.24* | +0.03 [−0.01, +0.07] |
+| Trillo | 21 | 0.27 | *0.29* | +0.02 [−0.01, +0.04] |
+| Fast piano | 35 | 0.34 | 0.34 | [−0.04, +0.04] |
+| Slow forte / slow piano | 55 / 53 | 0.31 / 0.32 | 0.31 / 0.31 | both span 0 |
+| Straight | 61 | 0.24 | 0.25 | [−0.04, +0.05] |
+| Belt | 27 | 0.27 | 0.24 | −0.03 [−0.12, +0.04] |
+| Vocal fry | 31 | 0.22 | 0.18 | −0.04 [−0.09, +0.02] |
+| Messa di voce | 17 | 0.03 | −0.03 | −0.06 [−0.14, +0.00]; variance-weighted R² down (interval excludes 0) |
+| Lip trill | 34 | −0.13 | −0.03 | +0.10 [−0.01, +0.25] |
+
+- **Clear gains:** sung words (excerpts), forte and trill.
+- **Cosine-only gains** (direction better, R² within noise): vibrato, fast forte, breathy, pianissimo, trillo, arpeggios. Over all VocalSet, cosine rises 0.64 → 0.65 (interval excludes 0) while R² 0.30 → 0.31 doesn't.
+- **No group is worse on all three metrics.** Belt and vocal fry fall in point estimate only. Messa di voce's variance-weighted R² falls, but it has 17 crops.
+- *Caveats:* crops are resampled independently, but VocalSet val has few singers and several crops per recording, so these intervals are optimistic. With 19 groups tested, about one false positive is expected at 5%.
 
 Sustained and non-speech-like phonation is hardest (messa di voce, lip trill, vocal fry, long tones). Sung words help. Singing is VocalSet only (6 h), the smallest real pool.
 
