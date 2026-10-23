@@ -92,6 +92,33 @@ class RealCrops(torch.utils.data.Dataset):
             return x[s:s + NS], x[s - pre:s + NS + CTX], pre // 1280
 
 
+class SpeakerCrops(torch.utils.data.Dataset):
+    """n fixed crops for pools of short utterances (children's corpora): per index a speaker is drawn, then that
+    speaker's utterances in a seeded random order are joined until the crop and up to CTX either side fit, so short
+    utterances are not dropped (which would favour older, more fluent speakers). Returns as RealCrops."""
+
+    def __init__(self, speakers: dict, n, seed):
+        self.spk = sorted(speakers.items())  # [(speaker, [paths])]
+        self.n, self.seed = n, seed
+
+    def __len__(self):
+        return self.n
+
+    def __getitem__(self, i):
+        rng = np.random.default_rng([self.seed, i])
+        _, paths = self.spk[rng.integers(len(self.spk))]
+        order = rng.permutation(len(paths))
+        x, k = np.zeros(0, np.float32), 0
+        while len(x) < NS + 2 * CTX and k < 4 * len(paths):
+            x = np.concatenate([x, read16k(paths[order[k % len(paths)]])])
+            k += 1
+        if len(x) < NS + 1:
+            x = np.tile(x, int(np.ceil((NS + 1) / max(len(x), 1))))
+        s = int(rng.integers(0, len(x) - NS + 1))
+        pre = (min(s, CTX) // 1280) * 1280
+        return x[s:s + NS], x[s - pre:s + NS + CTX], pre // 1280
+
+
 class SynthWrap(torch.utils.data.Dataset):
     def __init__(self, ds, n):
         self.ds, self.n = ds, n
