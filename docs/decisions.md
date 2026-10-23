@@ -1087,3 +1087,26 @@ Hannah's question: how much of what our models learn can a large pretrained spee
   - *Hillenbrand*: still overread (seed 0 alone +23.8 Hz, all speakers), where the student barely reproduces Parakeet.
   - *Correction to the within-window diagnostic's reading*: feeding smoothed features to 10 ms-trained heads understated the effect. Heads trained on the means flip PTDB-TUG's women's error from +14.6 to −13.0 Hz, so the 10 ms detail was a large part of stage 1's failure on running speech. What remains is mainly Hillenbrand: isolated short words, where the student has no fidelity.
   - Per the pre-registration, the reported alternative is H5's heads on the student. It passed in the diagnostic, but that was measured before being pre-registered, so it can't be confirmed on dev blind.
+
+**Student v4 (pre-registered 2026-10-24, after stages 1 and 1c and their diagnostics; agreed with Hannah).** One arm with three changes from student v2, each aimed at a failure that stage 1, stage 1c and the diagnostics located. The parts are not separable within this arm (accepted: the question is whether the combination yields a student whose heads transfer).
+1. *Per-frame targets at random 10 ms phases* (Hannah's proposal): each of v2's 90,000 crops (the same files, offsets and seeds) gets a phase φ ∈ 0..7 from its own seeded generator. Parakeet sees the crop shifted by 10φ ms, so its frame e sits at the crop's mel 8e + φ. The loss matches the student's frame 8e + φ − 4 to it, for e = 1..49, instead of the means of eights. Phase 0 reproduces v2's targets. The student is close to shift-equivariant at 10 ms, so one phase per crop should constrain every phase. Checked with all eight phases on the held-out sets.
+2. *Isolated words* (`words.py`): one MFA-aligned word (english_us_mfa / english_mfa, MFA 3.4.2) of 0.2–0.9 s, with 10 ms fades, and 0.15–0.5 s of the same recording's own aligned pauses either side (room tone). Each is a short whole file of L = 48–192 frames (a whole number of eights), shown to the student as at inference (the file with the VQT's zero padding) and to Parakeet alone, at a random phase.
+   - Training items: 24,000 from LibriTTS-R train-clean-100 (2,778 aligned utterances, 12 per speaker) and 12,000 from speechocean762 train (2,500 utterances, children and adults).
+   - Each step adds a batch of 16 words of one length (lengths drawn in proportion to their counts), and its loss is added to the crops'.
+   - English only. Held-out words in Korean (Zeroth-Korean val, korean_mfa) are built as a reported transfer check, if ready before the first decision.
+3. *WSD schedule* (Hannah): warm-up 1,000, then constant at 1e-3 to step 16,000, with checkpoints every 1,000. Two decay branches (linear to 0): 8,000 + 2,000 (10k) and 16,000 + 4,000 (20k). The peak rate is unchanged (Hannah: a higher-rate bracket later, not mixed in here).
+- *Unchanged*: architecture, seed 0 (v2's initial weights, so control R is unchanged), loss form (L1 + 1 − cosine on standardised targets; statistics recomputed on v4's training targets), batch 32 crops, AdamW, weight decay, clipping, bf16.
+- *Held out*: Zeroth val, VocalSet val, synthetic train_v2 / v2s (512 each) at all eight phases; words from LibriTTS-R dev-clean and speechocean762 test (512 each, all eight phases); `fid_breakdown.py`'s populations (v2's averaged measure).
+- *Heads* on the 20k branch: six on its 10 ms frames (stage 1's form) and six on its 80 ms means (stage 1c's form); the recipe, crops and scoring as before.
+- **Rule** (stage 1's thresholds on six-seed means, tested in this order):
+  1. **"transfers"** if the 10 ms heads pass; stage 2 then reads 10 ms frames.
+  2. Otherwise **"transfers at 80 ms"** if the 80 ms heads pass.
+  3. Otherwise **"does not transfer"**. The reported comparisons then guide what's next (domain-adversarial training, or H5's heads on the student, each to be pre-registered).
+- *Reported*:
+  - fidelity per phase (flat across phases is the equivariance check);
+  - held-out word fidelity, and the student's fidelity on the gold audio (`gold_fidelity.py`; Hillenbrand was 0.10);
+  - Hillenbrand and PTDB-TUG separately;
+  - the 10k branch's fidelity;
+  - comparisons with stage 1 (v2, 10 ms) and stage 1c (v2, 80 ms);
+  - the within-window spectrum (`free_part.py`).
+- *Cost*: targets about 1.5 h (about 30 GB); training 22,000 steps, about 25 h; head caches and 12 heads about 4 h. Dev only.
