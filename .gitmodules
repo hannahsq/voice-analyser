@@ -1,3 +1,7 @@
 [submodule "external/voice-dataset-labeler"]
 	path = external/voice-dataset-labeler
 	url = https://github.com/hannahsq/voice-dataset-labeler
+[submodule "external/random-cafe"]
+	path = external/random-cafe
+	url = https://github.com/hannahsq/random-cafe
+	update = none
