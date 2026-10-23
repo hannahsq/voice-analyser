@@ -1110,3 +1110,9 @@ Hannah's question: how much of what our models learn can a large pretrained spee
   - comparisons with stage 1 (v2, 10 ms) and stage 1c (v2, 80 ms);
   - the within-window spectrum (`free_part.py`).
 - *Cost*: targets about 1.5 h (about 30 GB); training 22,000 steps, about 25 h; head caches and 12 heads about 4 h. Dev only.
+- *Student v4, amendment before any training (2026-10-24; Hannah listened to sample word items)*. Two faults heard: a loud artefact in one item's silence (MFA had labelled speech or noise as a pause), and boundary bleed from a neighbouring word in running speech ("as leader", and /tə/ before "this"). Changes, made before anything trained:
+  - **Words need an aligned pause of at least 0.1 s on both sides**, and the 60 ms of pause next to the word on each side must be at least 20 dB below the word. Otherwise the word is dropped, not trimmed. About half of the pause-bounded candidates pass: speechocean762 train 549 of 1,019, dev-clean 113 of 196, speechocean762 test 503 of 883.
+  - **Room tone is gated by level**: only 20 ms frames of the recording's pauses within 10 dB of their 10th percentile and at least 20 dB below the word, in runs of at least 40 ms.
+  - **More aligned audio**: all of LibriTTS-R train-clean-100 and dev-clean (2–12 s utterances), plus train-clean-360 (already in v2's crops), since pause-bounded words are rare in read speech.
+  - Item counts unchanged (24,000 LibriTTS-R, 12,000 speechocean762, 512 per held-out set). The few distinct child words (about 550) are repeated with different silences, lengths and phases.
+  - Run as `chains/d034_v4.sh`, which builds the crop targets first and the word sets once alignment finishes.
