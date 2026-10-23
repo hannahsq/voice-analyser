@@ -75,7 +75,22 @@ R² per dimension. The v1 → v2 comparison is at step 2000. **Bold:** the paire
 
 Sustained and non-speech-like phonation is hardest (messa di voce, lip trill, vocal fry, long tones). Sung words help. Singing is VocalSet only (6 h), the smallest real pool.
 
-## Next
+## Stage-1 result: does not transfer (2026-10-24)
+
+Six heads each on student v2 (step 12,000) and control R, with H5×6 scored in the same run (`d034_heads.txt`). Six-seed means, ensemble (c) with teacher v3:
+
+| | Women's F1 bias cut | Men's F1 bias rise | Hillenbrand F1 MAE cut | Passes? |
+|---|---|---|---|---|
+| Student v2 | −8.9 ± 4.9 | +5.4 ± 1.1 | −2.7 ± 3.4 | no |
+| Control R | −0.9 ± 6.2 | −3.9 ± 2.7 | −16.7 ± 2.5 | no |
+| H5 (Parakeet itself) | **+5.3 ± 1.1** | −2.8 ± 2.1 | **+4.1 ± 1.3** | yes |
+
+- **The pipeline works.** On synthetic validation the student's heads match H5's (F1 MAE 19.8 vs 20.2 Hz, f0 < 150 Hz), and on the gold audio the student lines up with Parakeet: R² peaks at zero shift (`d034_gold_fidelity.txt`).
+- **It fails on real voices.** The student's heads overread women's F1 on PTDB-TUG (+14.6 Hz against H5's −11.0), like our own teacher, and scatter more on Hillenbrand (F1 MAE 54 vs 43).
+- **Fidelity on the gold audio**: PTDB-TUG 0.49, like held-out speech; Hillenbrand only 0.10. Its isolated words of under half a second, with silence around them, look nothing like the 4 s crops of running speech the student trained on.
+- Stage 1b didn't run (it needed "transfers"); D-031 resumed.
+
+## Next (before the result)
 
 1. **v2 finished** at 03:22 on 2026-10-24.
 2. **Head stage, as pre-registered:**
