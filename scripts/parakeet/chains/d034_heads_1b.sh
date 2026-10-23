@@ -8,7 +8,8 @@
 #      means: "transfers" = S2 passes and R fails;
 #   3. "transfers" only: stage 1b, student v3 (v2's blend x3, 36,000 steps), its heads, decide_1b.py;
 #   4. D-031.
-# Head caches (about 33 GB each) are deleted once their heads are trained. Every step is skipped if its output exists.
+# Head caches (about 33 GB each) are deleted once their heads are trained, except the students that may become stage 2's
+# trunk (KEEP: its ensemble distillation of the six F1 heads reads the same features). Every step is skipped if its output exists.
 # Run from anywhere: bash d034_heads_1b.sh <scratch dir with m3/ptdb_egg_sub.npz and d031_chain_run.sh>
 set -u
 SP="$1"
@@ -20,6 +21,7 @@ say() { echo "$(date '+%F %T') $*" >> "$LOG"; }
 export PYTHONPATH=/c/github/voice-analyser VA_DEVICE=cuda MIOPEN_FIND_MODE=FAST PYTHONIOENCODING=utf-8
 PY=$W/.venv/Scripts/python.exe
 P=$W/scripts/parakeet
+KEEP="v2 v3"  # head caches kept (Hannah freed disk, 2026-10-23)
 
 hdir() {  # D-033's H5 run dirs (seed 0 has no suffix; seed 2 is h5_seed2)
   [ "$1" = 0 ] && echo "$W/runs/h5" && return
@@ -46,7 +48,8 @@ heads() {  # name, seeds...
     say "d034: head on $n, seed $k"
     $PY -u $P/train_cached.py $C/heads $out 5 6000 adamw $k > $out.out 2>&1 || return 1
   done
-  rm -f $C/heads/emb.npy && touch $C/heads_trained  # the 33 GB features; labels kept
+  case " $KEEP " in *" $n "*) ;; *) rm -f $C/heads/emb.npy ;; esac  # the 33 GB features; labels kept
+  touch $C/heads_trained
 }
 args() {  # label, name -> "label#k=ckpt" for seeds 0-5
   for k in 0 1 2 3 4 5; do echo -n "$1#$k=$W/runs/head_${2}_s$k/ckpt_last.pt "; done
