@@ -9,3 +9,6 @@ runs/
 
 # Local clone of hannahsq/tcn-formants for the architecture bake-off (roadmap "Later"); not part of this repo
 external/tcn-formants/
+
+# Montreal Forced Aligner environment: a junction to C:\github\.conda (shared with minimal-pairs)
+.conda/
