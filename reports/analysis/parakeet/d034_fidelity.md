@@ -1,6 +1,6 @@
 # D-034 stage 1: student fidelity to Parakeet layer 5
 
-*Updated 2026-10-23 evening, after student v2's step 2000. Training runs to step 12,000, finishing in the early hours of 2026-10-24; later checkpoints are added here.*
+*Updated 2026-10-23 evening, after student v2's step 4000. Training runs to step 12,000 (checkpoints every 1,000 steps from here), finishing around 00:00 on 2026-10-24; later checkpoints are added here.*
 
 **What this measures.** How closely the student (32 M parameters, our encoder architecture at 10 ms) reproduces Parakeet's layer-5 features on audio it was not trained on. R² is averaged over the 1,024 dimensions, on per-dimension standardised targets. Variance-weighted R² and mean cosine track it closely (see `fid_breakdown.py`).
 
@@ -11,71 +11,72 @@ This is not the bias test. The pre-registered decision comes from six heads trai
 | | Real audio in training | Synthetic |
 |---|---|---|
 | **v1** (stopped at step 2,800) | 30k crops: Korean (Zeroth, Common Voice) and VocalSet singing | 30k |
-| **v2** (running) | 45k crops: English adults (LibriTTS-R), English children and adults (speechocean762), Icelandic children (Samrómur), Korean, VocalSet, Italian / Portuguese / Polish (MLS) | 45k |
+| **v2** (running; resumed after the step-4000 breakdown) | 45k crops: English adults (LibriTTS-R), English children and adults (speechocean762), Icelandic children (Samrómur), Korean, VocalSet, Italian / Portuguese / Polish (MLS) | 45k |
 
 v1 was stopped because, at step 2000, it copied Parakeet well only on the kinds of audio it had heard. That made the blended restart a decision on fidelity alone, taken before any bias result (D-034 amendment).
 
-## Fidelity by population (step 2000 for both)
+## Fidelity by population
 
-| Held-out population | v1 | **v2** |
-|---|---|---|
-| English adults (LibriTTS-R dev-clean) | 0.21 | **0.48** |
-| English children ≤ 12 (speechocean762 test) | 0.23 | **0.38** |
-| English adults ≥ 19 (speechocean762 test) | 0.24 | **0.37** |
-| Icelandic children ≤ 12 (Samrómur test) | 0.24 | **0.35** |
-| Icelandic teens 13–17 (Samrómur test) | 0.23 | **0.33** |
-| Italian (MLS dev) | 0.28 | **0.37** |
-| Portuguese (MLS dev) | 0.26 | **0.37** |
-| Polish (MLS dev) | 0.26 | **0.35** |
-| Korean (Zeroth val) | **0.42** | 0.39 |
-| Singing (VocalSet val) | 0.30 | 0.31 |
-| Synthetic (train_v2 validation) | 0.47 | **0.50** |
-| Synthetic (train_v2s validation) | 0.42 | **0.45** |
+| Held-out population | v1, step 2000 | v2, step 2000 | **v2, step 4000** |
+|---|---|---|---|
+| English adults (LibriTTS-R dev-clean) | 0.21 | 0.48 | **0.56** |
+| English children ≤ 12 (speechocean762 test) | 0.23 | 0.38 | **0.46** |
+| English adults ≥ 19 (speechocean762 test) | 0.24 | 0.37 | **0.45** |
+| Icelandic children ≤ 12 (Samrómur test) | 0.24 | 0.35 | **0.43** |
+| Icelandic teens 13–17 (Samrómur test) | 0.23 | 0.33 | **0.41** |
+| Italian (MLS dev) | 0.28 | 0.37 | **0.45** |
+| Portuguese (MLS dev) | 0.26 | 0.37 | **0.44** |
+| Polish (MLS dev) | 0.26 | 0.35 | **0.43** |
+| Korean (Zeroth val) | 0.42 | 0.39 | **0.48** |
+| Singing (VocalSet val) | 0.30 | 0.31 | **0.36** |
+| Synthetic (train_v2 validation) | 0.47 | 0.50 | **0.54** |
+| Synthetic (train_v2s validation) | 0.42 | 0.45 | **0.50** |
 
-- **The coverage gap has closed.** Every speech population is now within 0.33–0.48, against v1's 0.21–0.42. English adults went from worst to best.
-- **Korean dropped a little** as its share of the real crops fell from 75% to 22%.
-- **Synthetic improved slightly** at the same synthetic share. This is where the formant heads train.
-- **Children and teens are the hardest speech** (0.33–0.38). They're still a small share of the mix.
+- **Step 4000 is better everywhere**, by +0.07 to +0.09 on every speech population and +0.05 on singing. Korean (0.48) is now above v1's 0.42, so the dip from its smaller share is gone.
+- **At step 2000, the coverage gap had already closed.** Every speech population was within 0.33–0.48, against v1's 0.21–0.42, and English adults went from worst to best. Korean dipped (0.42 → 0.39) as its share of the real crops fell from 75% to 22%.
+- **Synthetic keeps improving** (0.50 → 0.54 on train_v2) at the same synthetic share. This is where the formant heads train.
+- **Children and teens are still the hardest speech** (0.41–0.46 at step 4000). They're still a small share of the mix.
 - *Caveat:* v2's held-out speech sets are new speakers from corpora it trains on, so part of the gain is coverage of those corpora. The real-voice gold sets (Hillenbrand, PTDB-TUG) are separate corpora, tested only through the heads.
 
-## Singing by VocalSet task and technique (small groups; v1 → v2)
+## Singing by VocalSet task and technique (small groups)
 
-R² per dimension at step 2000. **Bold:** the paired bootstrap's 95% interval for v2 − v1 excludes 0 on all three metrics (R² per dimension, variance-weighted R², mean cosine). *Italic:* only cosine's does. The bootstrap uses 2,000 resamples of crops, on the same 512 VocalSet val crops for both models (`fid_paired.py`).
+R² per dimension. The v1 → v2 comparison is at step 2000. **Bold:** the paired bootstrap's 95% interval for v2 − v1 excludes 0 on all three metrics (R² per dimension, variance-weighted R², mean cosine). *Italic:* only cosine's does. The bootstrap uses 2,000 resamples of crops, on the same 512 VocalSet val crops for both models (`fid_paired.py`). The last column is v2 at step 4000 (point estimates).
 
-| Task | n | v1 | v2 | v2 − v1, R² [95%] |
-|---|---|---|---|---|
-| Excerpts (sung words) | 26 | 0.34 | **0.40** | +0.06 [+0.04, +0.08] |
-| Arpeggios | 136 | 0.25 | *0.28* | +0.03 [−0.01, +0.07] |
-| Scales | 220 | 0.32 | 0.32 | [−0.03, +0.02] |
-| Long tones | 130 | 0.25 | 0.25 | [−0.01, +0.02] |
+| Task | n | v1 | v2 | v2 − v1, R² [95%] | v2, step 4000 |
+|---|---|---|---|---|---|
+| Excerpts (sung words) | 26 | 0.34 | **0.40** | +0.06 [+0.04, +0.08] | 0.46 |
+| Arpeggios | 136 | 0.25 | *0.28* | +0.03 [−0.01, +0.07] | 0.33 |
+| Scales | 220 | 0.32 | 0.32 | [−0.03, +0.02] | 0.38 |
+| Long tones | 130 | 0.25 | 0.25 | [−0.01, +0.02] | 0.30 |
 
-| Technique | n | v1 | v2 | v2 − v1, R² [95%] |
-|---|---|---|---|---|
-| Forte | 24 | 0.26 | **0.31** | +0.05 [+0.02, +0.09] |
-| Trill | 20 | 0.27 | **0.31** | +0.04 [+0.00, +0.08] |
-| Vibrato | 35 | 0.35 | *0.38* | +0.03 [−0.00, +0.07] |
-| Fast forte | 27 | 0.33 | *0.35* | +0.02 [−0.00, +0.06] |
-| Breathy | 35 | 0.22 | *0.25* | +0.03 [−0.02, +0.07] |
-| Pianissimo | 18 | 0.21 | *0.24* | +0.03 [−0.01, +0.07] |
-| Trillo | 21 | 0.27 | *0.29* | +0.02 [−0.01, +0.04] |
-| Fast piano | 35 | 0.34 | 0.34 | [−0.04, +0.04] |
-| Slow forte / slow piano | 55 / 53 | 0.31 / 0.32 | 0.31 / 0.31 | both span 0 |
-| Straight | 61 | 0.24 | 0.25 | [−0.04, +0.05] |
-| Belt | 27 | 0.27 | 0.24 | −0.03 [−0.12, +0.04] |
-| Vocal fry | 31 | 0.22 | 0.18 | −0.04 [−0.09, +0.02] |
-| Messa di voce | 17 | 0.03 | −0.03 | −0.06 [−0.14, +0.00]; variance-weighted R² down (interval excludes 0) |
-| Lip trill | 34 | −0.13 | −0.03 | +0.10 [−0.01, +0.25] |
+| Technique | n | v1 | v2 | v2 − v1, R² [95%] | v2, step 4000 |
+|---|---|---|---|---|---|
+| Forte | 24 | 0.26 | **0.31** | +0.05 [+0.02, +0.09] | 0.36 |
+| Trill | 20 | 0.27 | **0.31** | +0.04 [+0.00, +0.08] | 0.35 |
+| Vibrato | 35 | 0.35 | *0.38* | +0.03 [−0.00, +0.07] | 0.45 |
+| Fast forte | 27 | 0.33 | *0.35* | +0.02 [−0.00, +0.06] | 0.39 |
+| Breathy | 35 | 0.22 | *0.25* | +0.03 [−0.02, +0.07] | 0.31 |
+| Pianissimo | 18 | 0.21 | *0.24* | +0.03 [−0.01, +0.07] | 0.30 |
+| Trillo | 21 | 0.27 | *0.29* | +0.02 [−0.01, +0.04] | 0.33 |
+| Fast piano | 35 | 0.34 | 0.34 | [−0.04, +0.04] | 0.39 |
+| Slow forte / slow piano | 55 / 53 | 0.31 / 0.32 | 0.31 / 0.31 | both span 0 | 0.38 / 0.36 |
+| Straight | 61 | 0.24 | 0.25 | [−0.04, +0.05] | 0.30 |
+| Belt | 27 | 0.27 | 0.24 | −0.03 [−0.12, +0.04] | 0.33 |
+| Vocal fry | 31 | 0.22 | 0.18 | −0.04 [−0.09, +0.02] | 0.25 |
+| Messa di voce | 17 | 0.03 | −0.03 | −0.06 [−0.14, +0.00]; variance-weighted R² down (interval excludes 0) | 0.05 |
+| Lip trill | 34 | −0.13 | −0.03 | +0.10 [−0.01, +0.25] | −0.00 |
 
 - **Clear gains:** sung words (excerpts), forte and trill.
 - **Cosine-only gains** (direction better, R² within noise): vibrato, fast forte, breathy, pianissimo, trillo, arpeggios. Over all VocalSet, cosine rises 0.64 → 0.65 (interval excludes 0) while R² 0.30 → 0.31 doesn't.
-- **No group is worse on all three metrics.** Belt and vocal fry fall in point estimate only. Messa di voce's variance-weighted R² falls, but it has 17 crops.
+- **By step 4000 every group is above both v1 and v2's step 2000**, including belt (0.24 → 0.33) and vocal fry (0.18 → 0.25), which had dipped. Messa di voce and lip trill are still near 0.
+- **At step 2000, no group was worse on all three metrics.** Belt and vocal fry fell in point estimate only. Messa di voce's variance-weighted R² fell, but it has 17 crops.
 - *Caveats:* crops are resampled independently, but VocalSet val has few singers and several crops per recording, so these intervals are optimistic. With 19 groups tested, about one false positive is expected at 5%.
 
 Sustained and non-speech-like phonation is hardest (messa di voce, lip trill, vocal fry, long tones). Sung words help. Singing is VocalSet only (6 h), the smallest real pool.
 
 ## Next
 
-1. **v2 finishes** around 02:00 on 2026-10-24, with fidelity at steps 4k, 6k, 8k, 10k and 12k (added here).
+1. **v2 finishes** around 00:00 on 2026-10-24, with fidelity at every 1k steps from 5k to 12k (added here).
 2. **Head stage, as pre-registered:**
    - six H5-recipe heads on the frozen v2 student, and six on control R (the same architecture, untrained);
    - D-033's part-2 rule on six-seed means: women's closed-phase F1 bias cut ≥ 5 Hz, men's not raised by > 5 Hz, Hillenbrand F1 MAE within +4 Hz.
