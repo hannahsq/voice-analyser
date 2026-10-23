@@ -1077,3 +1077,8 @@ Hannah's question: how much of what our models learn can a large pretrained spee
   - Otherwise, **"heads on the student fail"**, and the reported alternative is H5's heads trained on real Parakeet and run on the student (the diagnostic's form), to be pre-registered separately.
 - Reported: Hillenbrand and PTDB-TUG separately (heads alone and (c)), synthetic validation, and the H5-on-student numbers beside.
 - Dev only. Cost about 1 h.
+- *Diagnostic: the within-window part (2026-10-24, reported, no decision; `free_part.py`, before stage 1c's result)*. Hypothesis: the student's 10 ms frames carry, beyond the 80 ms means that distillation constrained, a free part that the stage-1 heads read.
+  - *Spectrum*: no excess power at 12.5 / 25 / 37.5 / 50 Hz, the frequencies a shift-equivariant student could fill at no cost (peak ratios 0.97–1.11, as control R's). 15–20 % of the trajectory's energy lies outside a centred sliding mean of eight (control R 8–11 %), spread broadly rather than at those frequencies.
+  - *Probe* (ridge, log2 F1, fit train_v2, scored train_v2s): smooth part R² 0.77, whole frame 0.76, residual 0.09. On synthetic speech, the F1 information is in the smooth part.
+  - *Ablation*: stage 1's heads fed the sliding mean instead of the frames (a distribution shift, so suggestive only). Women's closed-phase cut −8.9 → −2.4 Hz, men's rise +5.4 → −1.8 (six-seed means); seed 0's women's median error on PTDB-TUG +14.6 → +4.7 Hz, against H5's −11.0; Hillenbrand unchanged. Still fails the rule.
+  - *Reading*: the within-window part accounts for some of the overread but not most, and not through the null-space route. It is not the main cause on its own. Stage 1c, with heads trained on the means, is the clean test.
