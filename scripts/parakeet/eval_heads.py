@@ -22,8 +22,10 @@ from vocal_analysis.models.infer import decode_outputs  # noqa: E402
 sys.stdout.reconfigure(encoding="utf-8")
 C, OUTF = Path(sys.argv[1]), sys.argv[2]
 SEEDMEAN = "--seedmean" in sys.argv[3:]
-ARGS = [a for a in sys.argv[3:] if not a.startswith("--dac=") and not a.startswith("three:") and a != "--seedmean"]
+ARGS = [a for a in sys.argv[3:] if not a.startswith(("--dac=", "--feat=", "three:")) and a != "--seedmean"]
 DACDIR = next((Path(a[6:]) for a in sys.argv[3:] if a.startswith("--dac=")), None)  # DAC scoring cache (dac_cache.py)
+# other encoders' scoring caches (student_cache.py, D-034): --feat=NAME=DIR, NAME as in the heads' checkpoints
+FEATDIR = dict(a[7:].split("=", 1) for a in sys.argv[3:] if a.startswith("--feat="))
 THREES = [a[6:].split(",") for a in sys.argv[3:] if a.startswith("three:")]  # (d): teacher + each pair of heads
 THREE = THREES[0] if THREES else None
 heads = [a.split("=", 1) for a in ARGS if not a.startswith("col:")]
@@ -36,10 +38,10 @@ models = {n: load_head(ck, dev) for n, ck in heads}
 cks = {n: torch.load(ck, map_location="cpu", weights_only=False) for n, ck in heads}
 layers = {n: ck["layers"] for n, ck in cks.items()}
 encoder = {n: ck.get("encoder", "parakeet") for n, ck in cks.items()}
+DEMB = {}
 if DACDIR is not None:
     DMETA = json.loads((DACDIR / "meta.json").read_text())
     DOFF = np.cumsum([0] + DMETA["widths"])
-    DEMB = {}
 
 
 def load(name):
@@ -57,6 +59,14 @@ def head_outputs(s, name):
         emb, eo = DEMB[s["_name"]]
         cols = np.concatenate([np.arange(DOFF[t - 1], DOFF[t]) for t in layers[name]])
         pick = lambda a: a[:, cols]  # noqa: E731
+    elif encoder[name] != "parakeet":  # a student: its own scoring cache, every column
+        key = (encoder[name], s["_name"])
+        if key not in DEMB:
+            fd = Path(FEATDIR[encoder[name]]) / s["_name"]
+            DEMB[key] = (np.load(fd / "emb.npy", mmap_mode="r"), np.load(fd / "emb_off.npy"))
+        emb, eo = DEMB[key]
+        assert len(eo) == len(ro), f"{name}: {len(eo) - 1} items against {len(ro) - 1}"
+        pick = lambda a: a  # noqa: E731
     else:
         emb, eo = s["emb"], s["emb_off"]
         pick = lambda a: a[:, list(layers[name])]  # noqa: E731

@@ -29,7 +29,8 @@ dev = setup_device(DeviceConfig(device=os.environ.get("VA_DEVICE", "cuda")))
 torch.manual_seed(SEED)
 rng = np.random.default_rng(SEED)
 meta = json.loads((CACHE / "done").read_text())
-DAC = "taps" in meta  # a DAC head cache (dac_cache.py --heads): taps already concatenated, 50 Hz frames
+ENC = meta.get("encoder") or ("dac" if "taps" in meta else "parakeet")
+DAC = ENC != "parakeet"  # DAC (dac_cache.py --heads, 50 Hz) or a student (student_cache.py --heads, 10 ms): features already concatenated
 cols = None if DAC else [meta["layers"].index(l) for l in want]
 emb = np.load(CACHE / "emb.npy", mmap_mode="r")
 N = meta["n"]
@@ -75,5 +76,5 @@ for step in range(STEPS):
     if (step + 1) % 1000 == 0:
         print(f"step {step + 1}: loss {float(loss.detach()):.3f} ({time.time() - t0:.0f} s)", flush=True)
 torch.save({"model": head.state_dict(), "step": STEPS, "layers": want, "in_dim": IN_DIM, "recipe": RECIPE,
-            "encoder": "dac" if DAC else "parakeet", "ratio": RATIO, "offset": OFFSET, "seed": SEED}, OUT / "ckpt_last.pt")
+            "encoder": ENC, "ratio": RATIO, "offset": OFFSET, "seed": SEED}, OUT / "ckpt_last.pt")
 print("done", flush=True)

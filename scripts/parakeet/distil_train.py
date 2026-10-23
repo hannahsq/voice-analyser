@@ -22,6 +22,8 @@ from vocal_analysis.features.vqt import TorchVQT  # noqa: E402
 C, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 STEPS, BATCH, LR, WD, WARMUP, SEED, E = 12000, 32, 1e-3, 0.01, 1000, 0, 50
 EVERY = 1000  # checkpoint and fidelity interval (was 2,000 to step 4,000; changed mid-run, no effect on training)
+STEPS = int(os.environ.get("VA_STEPS", STEPS))  # stage 1b (student v3): 36,000
+EVERY = int(os.environ.get("VA_EVERY", EVERY))
 QUICK = os.environ.get("VA_QUICK") == "1"
 if QUICK:
     STEPS, WARMUP = 40, 10

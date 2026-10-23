@@ -198,21 +198,22 @@ def main():
 
     pools = real_files()
     mix = os.environ.get("VA_MIX", "v1")
-    n_synth = 30000 if mix == "v1" else 45000
+    k3 = 3 if mix == "v3" else 1  # D-034 stage 1b (student v3): v2's blend with every count x3, the same seeds
+    n_synth = 30000 if mix == "v1" else 45000 * k3
     if mix == "v1":
         build("real_zeroth", RealCrops(pools["zeroth_korean_train"], 15000, 3401))
         build("real_vocalset", RealCrops(pools["vocalset_train"], 7500, 3402))
         build("real_cv_ko", RealCrops(pools["cv_ko_train"], 7500, 3403))
-    else:  # D-034 amendment (student v2): the blend
+    else:  # D-034 amendment (student v2): the blend; v3 (stage 1b) the same x3
         import samromur
-        build("real_libritts", SpeakerCrops(libritts_train_speakers(), 15000, 3411))
-        build("real_so762", SpeakerCrops(so762_speakers("train"), 3000, 3412))
-        build("real_samromur", SpeakerCrops(samromur.speakers("train"), 6000, 3413))
-        build("real_zeroth", RealCrops(pools["zeroth_korean_train"], 7500, 3401))
-        build("real_cv_ko", RealCrops(pools["cv_ko_train"], 2500, 3403))
-        build("real_vocalset", RealCrops(pools["vocalset_train"], 8000, 3402))
+        build("real_libritts", SpeakerCrops(libritts_train_speakers(), 15000 * k3, 3411))
+        build("real_so762", SpeakerCrops(so762_speakers("train"), 3000 * k3, 3412))
+        build("real_samromur", SpeakerCrops(samromur.speakers("train"), 6000 * k3, 3413))
+        build("real_zeroth", RealCrops(pools["zeroth_korean_train"], 7500 * k3, 3401))
+        build("real_cv_ko", RealCrops(pools["cv_ko_train"], 2500 * k3, 3403))
+        build("real_vocalset", RealCrops(pools["vocalset_train"], 8000 * k3, 3402))
         for k, lang in enumerate(("italian", "portuguese", "polish")):
-            build(f"real_mls_{lang}", RealCrops(mls_files(lang, "train"), 1000, 3414 + k))
+            build(f"real_mls_{lang}", RealCrops(mls_files(lang, "train"), 1000 * k3, 3414 + k))
     build("held_zeroth", RealCrops(pools["zeroth_korean_val"], 512, 12345))
     build("held_vocalset", RealCrops(pools["vocalset_val"], 512, 12345))
 
