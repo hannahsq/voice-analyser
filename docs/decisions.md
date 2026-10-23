@@ -1116,3 +1116,9 @@ Hannah's question: how much of what our models learn can a large pretrained spee
   - **More aligned audio**: all of LibriTTS-R train-clean-100 and dev-clean (2–12 s utterances), plus train-clean-360 (already in v2's crops), since pause-bounded words are rare in read speech.
   - Item counts unchanged (24,000 LibriTTS-R, 12,000 speechocean762, 512 per held-out set). The few distinct child words (about 550) are repeated with different silences, lengths and phases.
   - Run as `chains/d034_v4.sh`, which builds the crop targets first and the word sets once alignment finishes.
+- *Student v4, second amendment before any training (Hannah, 2026-10-24: "relax as much as possible without learning actively wrong things for the children's samples")*.
+  - The targets are always Parakeet's own output on the audio the student hears, so a little bleed from a neighbouring word is not a wrong label. The limit is items that stop being a word against silence.
+  - **speechocean762** (training and held-out alike): a pause on at least one side. That side's 60 ms edge must be at least 6 dB below the word. The other side is cut at MFA's boundary with a 25 ms fade (a soft onset, not a chop).
+  - **LibriTTS-R**: pauses on both sides, edge relaxed from 20 to 10 dB.
+  - The room-tone gate is unchanged.
+  - Passing words: speechocean762 train 6,039 (children ≤ 12: 2,542 words from 52 speakers; was 549 in all); speechocean762 test 5,950; LibriTTS-R train-clean-100 1,278 (train-clean-360 to come); dev-clean 166.
