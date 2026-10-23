@@ -68,6 +68,32 @@ def real_files():
     return pools
 
 
+DS = Path(r"C:\github\datasets")
+
+
+def libritts_train_speakers():
+    """LibriTTS-R train-clean-100 + 360: {speaker: [wav paths]} (speaker / chapter / file)."""
+    spk = {}
+    for part in ("train-clean-100", "train-clean-360"):
+        for p in sorted((DS / "libritts_r" / "LibriTTS_R" / part).rglob("*.wav")):
+            spk.setdefault(p.parts[-3], []).append(str(p))
+    return spk
+
+
+def so762_speakers(split):
+    """speechocean762 {speaker: [wav paths]} for 'train' or 'test' (its own speaker-disjoint split)."""
+    root = DS / "speechocean762" / "speechocean762"
+    spk = {}
+    for line in open(root / split / "utt2spk"):
+        u, s = line.split()
+        spk.setdefault(s, []).append(str(root / "WAVE" / f"SPEAKER{int(s):04d}" / f"{u}.WAV"))
+    return spk
+
+
+def mls_files(lang, split):
+    return [(str(p), None) for p in sorted((DS / "mls" / f"mls_{lang}_opus" / split / "audio").rglob("*.opus"))]
+
+
 class RealCrops(torch.utils.data.Dataset):
     """n fixed crops from (path, duration) files: file and offset drawn per index from a seeded generator; files
     shorter than the crop are redrawn. Returns (crop audio, Parakeet input with context)."""
@@ -171,9 +197,22 @@ def main():
         log(f"[{name}] {n} crops")
 
     pools = real_files()
-    build("real_zeroth", RealCrops(pools["zeroth_korean_train"], 15000, 3401))
-    build("real_vocalset", RealCrops(pools["vocalset_train"], 7500, 3402))
-    build("real_cv_ko", RealCrops(pools["cv_ko_train"], 7500, 3403))
+    mix = os.environ.get("VA_MIX", "v1")
+    n_synth = 30000 if mix == "v1" else 45000
+    if mix == "v1":
+        build("real_zeroth", RealCrops(pools["zeroth_korean_train"], 15000, 3401))
+        build("real_vocalset", RealCrops(pools["vocalset_train"], 7500, 3402))
+        build("real_cv_ko", RealCrops(pools["cv_ko_train"], 7500, 3403))
+    else:  # D-034 amendment (student v2): the blend
+        import samromur
+        build("real_libritts", SpeakerCrops(libritts_train_speakers(), 15000, 3411))
+        build("real_so762", SpeakerCrops(so762_speakers("train"), 3000, 3412))
+        build("real_samromur", SpeakerCrops(samromur.speakers("train"), 6000, 3413))
+        build("real_zeroth", RealCrops(pools["zeroth_korean_train"], 7500, 3401))
+        build("real_cv_ko", RealCrops(pools["cv_ko_train"], 2500, 3403))
+        build("real_vocalset", RealCrops(pools["vocalset_train"], 8000, 3402))
+        for k, lang in enumerate(("italian", "portuguese", "polish")):
+            build(f"real_mls_{lang}", RealCrops(mls_files(lang, "train"), 1000, 3414 + k))
     build("held_zeroth", RealCrops(pools["zeroth_korean_val"], 512, 12345))
     build("held_vocalset", RealCrops(pools["vocalset_val"], 512, 12345))
 
@@ -182,15 +221,15 @@ def main():
     tlw = tuple(cfg3["train"]["tract_left_weight"])
     flat = Path(cfg3["train"]["data"]) / "flat"
     train_ids, val_ids = split_ids(json.loads((Path(cfg3["train"]["data"]) / "index.json").read_text())["n_clips"])
-    parts, sizes = [SynthCrops(flat, train_ids, CROP, channel, seed=777, epoch_size=30000, fixed=True)], []
+    parts, sizes = [SynthCrops(flat, train_ids, CROP, channel, seed=777, epoch_size=n_synth, fixed=True)], []
     for dd in cfg3["train"]["resynth"]:
         rflat = consolidate(dd)
         n = json.loads((rflat / "done").read_text())["n_clips"]
-        parts.append(SynthCrops(rflat, np.arange(n), CROP, channel, seed=778 + len(sizes), epoch_size=30000, fixed=True,
+        parts.append(SynthCrops(rflat, np.arange(n), CROP, channel, seed=778 + len(sizes), epoch_size=n_synth, fixed=True,
                                 tract_left_weight=tlw))
         sizes.append(n)
     frac = cfg3["train"]["resynth_frac"]
-    build("synth", SynthWrap(MixedCrops(parts, [1 - frac] + [frac * n / sum(sizes) for n in sizes], 30000, seed=777, fixed=True), 30000))
+    build("synth", SynthWrap(MixedCrops(parts, [1 - frac] + [frac * n / sum(sizes) for n in sizes], n_synth, seed=777, fixed=True), n_synth))
     build("held_synth_v2", SynthWrap(SynthCrops(flat, val_ids[:512], CROP, channel, seed=12345, fixed=True), 512))
     v2s = Path("data/synth/train_v2s")
     build("held_synth_v2s", SynthWrap(SynthCrops(v2s / "flat", split_ids(json.loads((v2s / "index.json").read_text())["n_clips"])[1][:512],
@@ -198,7 +237,7 @@ def main():
 
     if not (out / "stats.npz").exists():  # per-dimension statistics of the training targets
         s1, s2, cnt = np.zeros(1024), np.zeros(1024), 0
-        for name in ("real_zeroth", "real_vocalset", "real_cv_ko", "synth"):
+        for name in sorted(d.name for d in out.iterdir() if d.is_dir() and (d.name.startswith("real_") or d.name == "synth")):
             T = np.load(out / name / "target.npy", mmap_mode="r")
             for i in range(0, len(T), 2000):
                 x = np.asarray(T[i:i + 2000], np.float64).reshape(-1, 1024)
@@ -207,7 +246,7 @@ def main():
                 cnt += len(x)
         mu = s1 / cnt
         np.savez(out / "stats.npz", mean=mu, std=np.sqrt(np.maximum(s2 / cnt - mu * mu, 1e-8)))
-    (out / "done").write_text(json.dumps({"crop": CROP, "samples": NS, "frames": E, "layer": LAYER}))
+    (out / "done").write_text(json.dumps({"crop": CROP, "samples": NS, "frames": E, "layer": LAYER, "mix": mix}))
     log("done")
 
 

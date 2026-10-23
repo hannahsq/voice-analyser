@@ -29,7 +29,7 @@ dev = torch.device(os.environ.get("VA_DEVICE", "cuda"))
 vq = TorchVQT(dev)
 st = np.load(C / "stats.npz")
 MU, SD = (torch.tensor(st[k], dtype=torch.float32, device=dev) for k in ("mean", "std"))
-TRAIN = ["real_zeroth", "real_vocalset", "real_cv_ko", "synth"]
+TRAIN = sorted(d.name for d in C.iterdir() if d.is_dir() and (d.name.startswith("real_") or d.name == "synth"))  # every training pool in the cache
 HELD = ["held_zeroth", "held_vocalset", "held_synth_v2", "held_synth_v2s"]
 load = lambda n: (np.load(C / n / "audio.npy", mmap_mode="r"), np.load(C / n / "target.npy", mmap_mode="r"))  # noqa: E731
 data = {n: load(n) for n in TRAIN + HELD}
