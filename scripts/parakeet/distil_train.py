@@ -2,8 +2,8 @@
 on standardised targets, the student's 10 ms frames averaged in eights (frames 8e - 8 .. 8e - 1 for encoder frame e);
 AdamW lr 1e-3, weight decay 0.01, warm-up 1000 then cosine to 0, 12,000 steps of 32 crops, gradient norm clipped at 1.0
 (as our training loop), bf16 autocast, seed 0. The initial weights are saved first (ckpt_init.pt: control R).
-Fidelity (mean per-dimension R^2 and cosine, standardised targets) on the held-out crops every 2,000 steps; checkpoints
-every 2,000 steps; resumes from ckpt_last.pt. Args: cache dir (distil_cache.py), out dir. Run from the main checkout."""
+Fidelity (mean per-dimension R^2 and cosine, standardised targets) on the held-out crops every 1,000 steps (EVERY); checkpoints
+at the same steps; resumes from ckpt_last.pt. Args: cache dir (distil_cache.py), out dir. Run from the main checkout."""
 import json
 import math
 import os
@@ -21,6 +21,7 @@ from vocal_analysis.features.vqt import TorchVQT  # noqa: E402
 
 C, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 STEPS, BATCH, LR, WD, WARMUP, SEED, E = 12000, 32, 1e-3, 0.01, 1000, 0, 50
+EVERY = 1000  # checkpoint and fidelity interval (was 2,000 to step 4,000; changed mid-run, no effect on training)
 QUICK = os.environ.get("VA_QUICK") == "1"
 if QUICK:
     STEPS, WARMUP = 40, 10
@@ -106,7 +107,7 @@ for step in range(start, STEPS):
         log.flush()
         print(f"step {s} loss {np.mean(acc):.4f} grad {float(gn):.2f} lr {lr_at(step):.2e} {rate:.0f} audio s/s", flush=True)
         t0, acc = time.time(), []
-    if s % 2000 == 0 or s == STEPS:
+    if s % EVERY == 0 or s == STEPS:
         f = fidelity(model)
         log.write(json.dumps({"step": s, "fidelity": f}) + "\n")
         log.flush()
