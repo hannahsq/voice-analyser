@@ -12,6 +12,11 @@ This project is for personal and research use. Anyone wanting a commercial versi
 | M4Singer | training (resynthesis), planned | CC BY-NC-SA 4.0 (`dataset_license.md` in the M4Singer repository) | Zhang et al. (2022). M4Singer: a multi-style, multi-singer and musical score provided Mandarin singing corpus. NeurIPS Datasets and Benchmarks. |
 | Common Voice 27.0, Korean | training, planned | CC0; downloading it means agreeing not to try to identify its speakers | Ardila et al. (2020). Common Voice: a massively-multilingual speech corpus. LREC. |
 | Zeroth-Korean | training, planned | CC BY 4.0 (OpenSLR 40) | Lucas Jo and Wonkyum Lee, Zeroth-Korean, OpenSLR SLR40, https://www.openslr.org/40/ |
+| LibriTTS-R (train-clean-100, train-clean-360, dev-clean) | training (distillation audio, D-034); dev-clean held out for fidelity | CC BY 4.0 (OpenSLR 141) | Koizumi et al. (2023). LibriTTS-R: a restored multi-speaker text-to-speech corpus. Interspeech. Derived from LibriTTS (Zen et al. 2019) and LibriSpeech (Panayotov et al. 2015). |
+| VCTK 0.92 | training, planned | CC BY 4.0 | Yamagishi, Veaux & MacDonald (2019). CSTR VCTK Corpus: English multi-speaker corpus for CSTR voice cloning toolkit (version 0.92). University of Edinburgh. doi:10.7488/ds/2645 |
+| speechocean762 | training (distillation audio, D-034); half the speakers children | CC BY 4.0 (OpenSLR 101) | Zhang et al. (2021). speechocean762: an open-source non-native English speech corpus for pronunciation assessment. Interspeech. |
+| Samrómur Children 21.09 | training (distillation audio, D-034); children aged 4–17, speakers never identified | CC BY 4.0 (OpenSLR 117) | Hernández Mena et al. (2022). Samrómur Children: an Icelandic speech corpus. LREC. Language and Voice Lab, Reykjavik University, with Almannarómur. |
+| Multilingual LibriSpeech (Italian, Portuguese, Polish; Opus) | training (distillation audio, D-034) | CC BY 4.0 (OpenSLR 94) | Pratap et al. (2020). MLS: a large-scale multilingual dataset for speech research. Interspeech. |
 | Hillenbrand et al. (1995) | evaluation only (gold) | free for research, distributed by J. Hillenbrand | Hillenbrand, Getty, Clark & Wheeler (1995). Acoustic characteristics of American English vowels. JASA 97(5). |
 | PTDB-TUG | evaluation only (gold) | ODbL 1.0 (to verify) | Pirker, Wohlmayr, Petrik & Pernkopf (2011). A pitch tracking corpus with evaluation on multipitch tracking scenario. Interspeech. |
 | MIR-1K | evaluation only (gold) | research use; no explicit licence found | Hsu & Jang (2010). On the improvement of singing voice separation for monaural recordings using the MIR-1K dataset. IEEE TASLP. |
@@ -29,6 +34,7 @@ Evaluation-only corpora are never trained on (plan §6.4, enforced by `va leakag
 Whether trained weights are an adaptation of their training data is legally unsettled. This project takes the conservative reading: **weights carry the most restrictive licence among the corpora they were trained on**, plus attribution to all of them.
 - Synthetic data, VocalSet, Zeroth-Korean, Common Voice (and other CC0/CC BY pools): **CC BY 4.0**, attributing those corpora.
 - Anything that includes M4Singer: **CC BY-NC-SA 4.0**.
+- Distilled students (D-034) are also trained on the outputs of NVIDIA's `parakeet-tdt-0.6b-v3` (CC BY 4.0; weights fetched directly, not redistributed): **CC BY 4.0**, attributing NVIDIA (Parakeet TDT 0.6B v3, NeMo) as well as the audio corpora.
 
 If permissively licensed weights are wanted later, train a build without the NC-SA pools; the code makes that a configuration change.
 
