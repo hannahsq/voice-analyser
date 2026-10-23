@@ -33,7 +33,10 @@ def libritts(split, corpus, per_spk, seed):
         wavs = sorted(spk.glob("*/*.wav"))
         ok = [w for w in wavs if 2.0 <= sf.info(str(w)).duration <= 12.0]
         for w in [ok[i] for i in sorted(rng.permutation(len(ok))[:per_spk])]:
-            put(corpus, spk.name, w.stem, w, (w.parent / f"{w.stem}.normalized.txt").read_text(encoding="utf-8"))
+            lab = w.parent / f"{w.stem}.normalized.txt"
+            if not lab.exists():  # LibriTTS-R dropped some utterances' transcripts
+                continue
+            put(corpus, spk.name, w.stem, w, lab.read_text(encoding="utf-8"))
             n += 1
     print(f"{corpus}: {n} utterances")
 
