@@ -17,3 +17,6 @@ cache/
 # probe and combination statistics and coefficients (GBs; rebuilt by the scripts), run logs
 reports/analysis/parakeet/**/*.pt
 reports/analysis/parakeet/**/*.out
+
+# Montreal Forced Aligner environment: a junction to C:\github\.conda (shared with minimal-pairs)
+.conda
