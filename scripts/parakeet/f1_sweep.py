@@ -7,6 +7,7 @@ variants per cell.
   B. Students' normalised error against Parakeet (as fxf1_grid.py) peaks at k: the cell nearest k exceeds the mean of
      the cells at k +- 0.3 by more than twice the across-variant SD.
 Readings over the (f0, k) pairs: >= 75 % -> confirmed, <= 25 % -> not, otherwise mixed.
+Source via $VA_RD (default 1.0) and $VA_HNR (aspiration, dB HNR; default none).
 Args: v4 cache dir, teacher checkpoint, out prefix, then LABEL=CKPT=STATS_DIR per student. Writes <prefix>.txt and
 <prefix>_cells.csv. Run from the main checkout (VA_DEVICE=cuda)."""
 import csv
@@ -32,6 +33,8 @@ UPPER = (1700.0, 2800.0, 3800.0, 4800.0)
 BWS = (80.0, 100.0, 140.0, 180.0, 220.0)
 VARIANTS, E4, FS = 4, 49, 16000
 NTOT = D.NS + 8 * HOP
+RD = float(os.environ.get("VA_RD", 1.0))  # source: LF Rd (1.0 modal)
+HNR = None if os.environ.get("VA_HNR") is None else float(os.environ["VA_HNR"])  # aspiration, dB; None = none
 
 
 def render(f0, f1, v):
@@ -41,9 +44,9 @@ def render(f0, f1, v):
     f0t = f0 * (1 + 0.01 * np.sin(2 * np.pi * 0.5 * t + rng.uniform(0, 2 * np.pi)))
     pf, pb = np.full((C, tract.N_POLES), np.nan), np.full((C, tract.N_POLES), np.nan)
     pf[:, :5], pb[:, :5] = (f1, *UPPER), BWS
-    traj = voice.Trajectories(f0=f0t, rd=np.full(C, 1.0), voice_amp=np.ones(C), whisper_amp=np.zeros(C), fric_amp=np.zeros(C),
+    traj = voice.Trajectories(f0=f0t, rd=np.full(C, RD), voice_amp=np.ones(C), whisper_amp=np.zeros(C), fric_amp=np.zeros(C),
                               poles_f=pf, poles_b=pb, zeros_f=np.zeros((C, 0)), zeros_b=np.zeros((C, 0)))
-    y = voice.synthesize(traj, rng)["total"][:NTOT]
+    y = voice.synthesize(traj, rng, hnr_db=HNR)["total"][:NTOT]
     return (0.5 * y / np.abs(y).max()).astype(np.float32)
 
 
@@ -98,7 +101,7 @@ def main():
         print(s, flush=True)
         fo.write(s + "\n")
 
-    say("D-034 fine F1 sweep at fixed f0 (reported only; pre-registered 2026-10-24)")
+    say(f"D-034 fine F1 sweep at fixed f0 (reported only; pre-registered 2026-10-24); source Rd {RD}, aspiration {HNR if HNR is not None else 'none'} dB HNR")
     names = ["teacher_cents"] + [lab for lab, *_ in students] + ["parakeet_variation"]
     for f0 in F0S:
         say(f"\nf0 {f0:.0f} Hz   F1/f0 " + " ".join(f"{name:>14s}" for name in names))
