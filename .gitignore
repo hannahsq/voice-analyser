@@ -11,4 +11,4 @@ runs/
 external/tcn-formants/
 
 # Montreal Forced Aligner environment: a junction to C:\github\.conda (shared with minimal-pairs)
-.conda/
+.conda
