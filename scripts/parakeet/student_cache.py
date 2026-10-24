@@ -72,7 +72,11 @@ if __name__ == "__main__":
         assert QUICK or len(embs) == ref, f"[{name}] {len(embs)} items against the scoring cache's {ref}"
         log(f"[{name}] {len(embs)} items, {sum(len(e) for e in embs)} frames")
 
+    ONLY = os.environ.get("VA_SETS")  # comma-separated set names: only those (e.g. a quick look at the gold audio)
+
     def crop_set(name, ds, n):
+        if ONLY and name not in ONLY.split(","):
+            return
         if (OUT / name / "emb.npy").exists():
             return log(f"[{name}] cached")
         n = 32 if QUICK else n
@@ -82,6 +86,8 @@ if __name__ == "__main__":
         save(name, embs)
 
     def gold_set(name, items):
+        if ONLY and name not in ONLY.split(","):
+            return
         if (OUT / name / "emb.npy").exists():
             return log(f"[{name}] cached")
         embs = []

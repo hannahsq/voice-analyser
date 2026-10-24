@@ -36,6 +36,8 @@ def score(P, S):
 
 
 for name in ("gold_hillenbrand", "gold_ptdb_cp"):
+    if not (SC / name / "emb.npy").exists():
+        continue
     P, S = pairs(name)
     r2, cos = score(P, S)
     print(f"{name}: R2 {r2:.3f}, cosine {cos:.3f} ({len(P)} encoder frames)")
