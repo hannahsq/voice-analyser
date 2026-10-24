@@ -1,0 +1,22 @@
+D-034 harmonic locking on real singing, VocalSet val (reported only; pre-registered 2026-10-24); teacher v3
+150 files; 50 matched (singer, exercise, vowel) triples
+
+by technique (all files): median f0 / locking excess / following slope (median of file medians) / resynth |F1 error| / with |tract_left| < 0.2 / |tract_left|
+  straight  n  50  f0   187 Hz  lock -0.024  follow +0.02  |err|    39 c  low-tl    44 c  |tl| 0.10
+  vibrato   n  50  f0   181 Hz  lock -0.033  follow -0.00  |err|    30 c  low-tl    28 c  |tl| 0.14
+  breathy   n  50  f0   175 Hz  lock -0.092  follow +0.02  |err|    29 c  low-tl    28 c  |tl| 0.08
+
+R1: vibrato files' following slope, median -0.00 over 50 files -> F1 holds
+R2: locking excess straight - vibrato: +0.009 [-0.011, +0.029] over 50 triples -> no difference
+R2: locking excess straight - breathy: +0.068 [+0.046, +0.092] over 50 triples -> breathy locks less
+R3: resynth |F1 error| straight - vibrato: +12 cents [-18, +40] over 50 triples -> no difference
+R3: resynth |F1 error| straight - breathy: +14 cents [-10, +38] over 50 triples -> no difference
+R3 (|tract_left| < 0.2, check): resynth |F1 error| straight - vibrato: +25 cents [-2, +53] over 35 triples -> no difference
+R3 (|tract_left| < 0.2, check): resynth |F1 error| straight - breathy: +15 cents [-16, +46] over 38 triples -> no difference
+
+by singer (locking excess straight / vibrato / breathy; resynth |error| straight / vibrato / breathy)
+  female2   -0.034 / -0.036 / -0.155     97 /  143 /   56
+  female8   -0.082 / -0.081 / -0.124     63 /   35 /   42
+  male10    -0.012 / -0.012 / -0.045     51 /   26 /   87
+  male3     -0.013 / -0.015 / -0.052     44 /   34 /   42
+  male5     +0.023 / -0.021 / -0.082     70 /   30 /   28
