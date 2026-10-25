@@ -1165,3 +1165,8 @@ Hannah's question: how much of what our models learn can a large pretrained spee
     - the 20k branch at its end.
   - *Measure*: as the 10k-branch diagnostic (`chains/d034_v4_h5diag.sh`): D-033's six H5 heads fed the student's 80 ms means, with the matched-noise control, plus gold fidelity. Reported as the six-seed means, and as the student's margin over its own noise control.
   - *When*: after every pre-registered 20k-branch step (heads, rule, gold fidelity, free part), before D-031 resumes. Each checkpoint's caches are deleted once its reports are written.
+  - *Korean words, result (2026-10-25; `korean_words_v2.jsonl`, `korean_words_v4.jsonl`; reported only)*. Per-frame R² on the 512 Korean held-out words:
+    - v2 never learns them: 0.07–0.10 at every checkpoint, as on the English words (LibriTTS-R 0.04 and speechocean762 0.11 at step 12,000).
+    - v4 learns them from English words alone: 0.21 at step 1,000, 0.45 at 8,000, 0.48 at 16,000, and 0.492 at the end of the 10k branch. At the same checkpoints, LibriTTS-R scores 0.660 and speechocean762 0.636; Zeroth crops score 0.557.
+    - Transfer ratio at the 10k branch: (0.492 − 0.096) / (0.660 − 0.037) = 0.64 against LibriTTS-R, and 0.75 against speechocean762, the like-for-like set (one-sided pauses).
+    - On the constant-rate run from 8,000 to 16,000, Korean gains +0.037 against +0.026 / +0.028 for the English sets. The decay adds +0.035 at 10k (English +0.028 / +0.031).
