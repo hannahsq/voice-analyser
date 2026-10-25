@@ -8,7 +8,9 @@ Words: Parakeet sees the word file (its first phi * 160 samples dropped), frame 
 frame 8e + phi (the student gets the file with N_MAX / 2 zeros either side, as log_power pads it at inference);
 targets for e with 8e + phi < L and e inside Parakeet's output, masked.
 -> <out>/<set>/audio.npy, target.npy, phase.npy (and length.npy, mask.npy for words); stats.npz from the training crops'
-targets; done. Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/distil_cache_v4.py <out dir> <mfa dir>"""
+targets; done. Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/distil_cache_v4.py <out dir> <mfa dir>
+VA_PART=korean builds only held_words_zeroth (Zeroth-Korean val words, from minimal-pairs' alignment cache given as
+<mfa dir>; a pause on at least one side, as speechocean762's) into <out dir>, kept apart from the training cache."""
 import json
 import os
 import sys
@@ -176,6 +178,14 @@ def main():
 
     import samromur
 
+    if part == "korean":  # reported transfer check (amended 2026-10-25): <out> is its own dir, <mfa> minimal-pairs' alignment cache
+        import csv
+        wavs = {Path(r["path"]).stem: (Path("data/zeroth_korean") / r["path"], r["speaker_id"].split(":")[1])
+                for r in csv.DictReader(open("data/manifests/zeroth_korean.csv")) if r["split"] == "val"}
+        ck = W.json_candidates(mfa, wavs, sides=1, edge_db=6.0)
+        D.log(f"Korean word candidates: Zeroth-Korean val {len(ck)} (a pause on at least one side), {len({c[4] for c in ck})} speakers")
+        build("held_words_zeroth", WordItems(ck, 512, 12345, ALL), "words")
+        return D.log("done")
     pools = D.real_files()
     R = lambda ds: Phased(ds, "random")  # noqa: E731
     if part == "words":

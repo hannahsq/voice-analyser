@@ -1,8 +1,11 @@
 """D-034, reported only: student v4's held-out fidelity measure (distil_train_v4.py's `fidelity`, run unchanged from that
 file) on other students' checkpoints, e.g. v2's, for an apples-to-apples per-phase comparison. A student trained against
 another cache's statistics has its output destandardised with those and restandardised with v4's.
+VA_ONLY_SETS=<dir> scores only the held-out sets in that dir (e.g. the Korean words, kept apart from the training cache)
+instead of v4's own; v4's statistics still standardise them.
 Args: v4 cache dir, student's own cache dir (stats.npz), out .jsonl, checkpoints... Run from the main checkout."""
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -20,6 +23,12 @@ g = {"__name__": "fid_v4", "__file__": str(HERE / "distil_train_v4.py")}
 sys.argv = [sys.argv[0], C4, tempfile.mkdtemp()]
 exec(compile(src[:src.index("torch.manual_seed(SEED)")], "distil_train_v4.py", "exec"), g)  # data loading and fidelity()
 dev, MU4, SD4 = g["dev"], g["MU"], g["SD"]
+if os.environ.get("VA_ONLY_SETS"):
+    g["C"] = Path(os.environ["VA_ONLY_SETS"])
+    names = sorted(x.name for x in g["C"].iterdir() if (x / "done").exists())
+    g["data"].update({n: g["load"](n) for n in names})
+    g["HELD"] = [n for n in names if not n.startswith("held_words")]
+    g["HELDW"] = [n for n in names if n.startswith("held_words")]
 s = np.load(CS / "stats.npz")
 MU, SD = (torch.tensor(s[k], dtype=torch.float32, device=dev) for k in ("mean", "std"))
 

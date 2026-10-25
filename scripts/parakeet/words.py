@@ -13,6 +13,7 @@ Children's words are scarce (Hannah: relax as far as possible without teaching w
 Parakeet's on the same audio, so the limit is items that stop being a word against silence): candidates(sides=1) admits
 a pause on one side only, the other side cut at MFA's boundary with a 25 ms fade (a soft onset rather than a chop).
 Defaults (`candidates` arguments): LibriTTS-R both sides, 10 dB; speechocean762 one side, 6 dB."""
+import json
 from pathlib import Path
 
 import numpy as np
@@ -61,6 +62,36 @@ def candidates(corpus_dir: Path, aligned_dir: Path, sides: int = 2, edge_db: flo
         iv = textgrid_tier(tg)
         pauses = [(a + 0.02, b - 0.02) for a, b, t in iv if t == "" and b - a >= 0.1]
         if not pauses or not wav.exists():
+            continue
+        quiet = lambda k: 0 <= k < len(iv) and iv[k][2] == "" and iv[k][1] - iv[k][0] >= 0.1  # noqa: E731
+        for k, (a, b, t) in enumerate(iv):
+            lq, rq = quiet(k - 1), quiet(k + 1)
+            if t and t not in ("<unk>", "spn") and 0.2 <= b - a <= 0.9 and lq + rq >= sides:
+                out.append((str(wav), a, b, pauses, spk, t, lq, rq, edge_db))
+    return out
+
+
+def json_candidates(align_dir: Path, wavs: dict, sides: int = 2, edge_db: float = 10.0):
+    """as `candidates`, from minimal-pairs' cached MFA alignments (one JSON per utterance: {"alignment": {"utterance_id",
+    "words": [[word, start, end, phones], ...]}}), for the utterances in `wavs` ({utterance id: (audio path, speaker)});
+    the gaps between words (and before the first and after the last, to the file's end) are the pauses"""
+    out = []
+    for f in sorted(align_dir.glob("*.json")):
+        al = json.loads(f.read_text(encoding="utf-8")).get("alignment") or {}
+        if al.get("utterance_id") not in wavs:
+            continue
+        wav, spk = wavs[al["utterance_id"]]
+        dur = sf.info(str(wav)).duration
+        iv, t0 = [], 0.0  # words and gaps as one interval tier, gaps with text ""
+        for t, a, b, _ in al["words"]:
+            if a - t0 > 1e-3:
+                iv.append((t0, a, ""))
+            iv.append((a, b, t))
+            t0 = b
+        if dur - t0 > 1e-3:
+            iv.append((t0, dur, ""))
+        pauses = [(a + 0.02, b - 0.02) for a, b, t in iv if t == "" and b - a >= 0.1]
+        if not pauses:
             continue
         quiet = lambda k: 0 <= k < len(iv) and iv[k][2] == "" and iv[k][1] - iv[k][0] >= 0.1  # noqa: E731
         for k, (a, b, t) in enumerate(iv):
