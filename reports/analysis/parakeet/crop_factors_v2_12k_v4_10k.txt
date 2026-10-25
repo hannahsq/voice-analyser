@@ -1,0 +1,117 @@
+D-034 crop factors: v2 step 12,000 and v4 step 5,000 on the held-out synthetic crops (reported only)
+
+=== held_synth_v2
+labels for 512 crops; audio against the cache: max |difference| 0.0001 (fp16 storage)
+Parakeet's grid pattern: median share of a crop's variance 0.0082, 90th percentile 0.0206
+
+1. Do the students agree?
+  crop mean R2, v2 vs v4: Spearman +0.918 (512 crops)
+  10 ms phase profiles (8 phases), v2 vs v4 same crop: median r +0.881; crops shuffled +0.018
+  2 ms offset profiles (40 offsets, 128 crops): median r +0.843; crops shuffled +0.057
+
+2. Do the students' bad phases line up with Parakeet's grid pattern?
+  v2: median over crops of r(R2 deviation, grid energy) across phases -0.175; crop mean R2 vs crop grid share Spearman -0.615
+  v4: median over crops of r(R2 deviation, grid energy) across phases -0.218; crop mean R2 vs crop grid share Spearman -0.717
+
+3. What do the hard crops have in common?
+  Spearman with crop mean R2      v2       v4    v4-v2 gain
+    voiced_frac                -0.179   -0.028   +0.365   (n 512)
+    sonorant_frac              -0.166   -0.008   +0.380   (n 512)
+    whisper_frac               -0.046   -0.002   +0.118   (n 512)
+    f0_hz                      -0.368   -0.389   -0.086   (n 478)
+    f1_hz                      +0.065   +0.035   -0.105   (n 478)
+    f2_hz                      +0.040   +0.025   -0.030   (n 478)
+    b1_hz                      -0.176   -0.150   +0.003   (n 478)
+    f1_over_f0                 +0.388   +0.405   +0.075   (n 478)
+    rd                         +0.072   +0.044   -0.069   (n 478)
+  mean R2 by median voiced f0      n     v2     v4
+       0-150  Hz               141  0.569  0.658
+     150-250  Hz                70  0.604  0.704
+     250-400  Hz                93  0.600  0.693
+     400-2000 Hz               174  0.442  0.527
+  mean R2 by median F1 / f0 (harmonics per F1)
+     0.0-1.5                    165  0.434  0.518
+     1.5-2.5                    113  0.598  0.692
+     2.5-4.0                     68  0.598  0.699
+     4.0-100.0                  132  0.571  0.659
+  worst tenth for both students: 45 crops; medians, those crops / the rest
+    voiced_frac        0.565 /     0.560
+    sonorant_frac      0.580 /     0.603
+    whisper_frac       0.000 /     0.025
+    f0_hz            936.237 /   269.543
+    f1_hz            604.166 /   589.880
+    f2_hz           1735.395 /  1611.929
+    b1_hz             91.609 /    76.623
+    f1_over_f0         0.665 /     2.334
+    rd                 1.290 /     1.555
+  Parakeet's grid share by median voiced f0 (median over crops)
+       0-150  Hz               141  0.0068
+     150-250  Hz                70  0.0068
+     250-400  Hz                93  0.0070
+     400-2000 Hz               174  0.0134
+
+=== held_synth_v2s
+labels for 512 crops; audio against the cache: max |difference| 0.0001 (fp16 storage)
+Parakeet's grid pattern: median share of a crop's variance 0.0089, 90th percentile 0.0299
+
+1. Do the students agree?
+  crop mean R2, v2 vs v4: Spearman +0.930 (512 crops)
+  10 ms phase profiles (8 phases), v2 vs v4 same crop: median r +0.902; crops shuffled -0.050
+  2 ms offset profiles (40 offsets, 128 crops): median r +0.877; crops shuffled -0.012
+
+2. Do the students' bad phases line up with Parakeet's grid pattern?
+  v2: median over crops of r(R2 deviation, grid energy) across phases -0.216; crop mean R2 vs crop grid share Spearman -0.633
+  v4: median over crops of r(R2 deviation, grid energy) across phases -0.252; crop mean R2 vs crop grid share Spearman -0.730
+
+3. What do the hard crops have in common?
+  Spearman with crop mean R2      v2       v4    v4-v2 gain
+    voiced_frac                -0.191   -0.078   +0.281   (n 512)
+    sonorant_frac              -0.187   -0.061   +0.307   (n 512)
+    whisper_frac               +0.016   +0.062   +0.139   (n 512)
+    f0_hz                      -0.388   -0.413   -0.132   (n 478)
+    f1_hz                      -0.102   -0.124   -0.084   (n 478)
+    f2_hz                      -0.057   -0.069   -0.047   (n 478)
+    b1_hz                      -0.182   -0.191   -0.061   (n 478)
+    f1_over_f0                 +0.370   +0.391   +0.120   (n 478)
+    rd                         +0.001   -0.010   -0.073   (n 478)
+  mean R2 by median voiced f0      n     v2     v4
+       0-150  Hz               141  0.560  0.644
+     150-250  Hz                70  0.541  0.642
+     250-400  Hz                93  0.580  0.667
+     400-2000 Hz               174  0.405  0.479
+  mean R2 by median F1 / f0 (harmonics per F1)
+     0.0-1.5                    162  0.407  0.479
+     1.5-2.5                    113  0.561  0.652
+     2.5-4.0                     70  0.546  0.642
+     4.0-100.0                  133  0.555  0.638
+  worst tenth for both students: 43 crops; medians, those crops / the rest
+    voiced_frac        0.600 /     0.560
+    sonorant_frac      0.625 /     0.598
+    whisper_frac       0.000 /     0.025
+    f0_hz            725.939 /   280.485
+    f1_hz            647.014 /   597.910
+    f2_hz           1670.250 /  1623.929
+    b1_hz             62.707 /    57.180
+    f1_over_f0         1.016 /     2.271
+    rd                 1.592 /     1.550
+  Parakeet's grid share by median voiced f0 (median over crops)
+       0-150  Hz               141  0.0067
+     150-250  Hz                70  0.0076
+     250-400  Hz                93  0.0074
+     400-2000 Hz               174  0.0154
+
+=== held_synth_v2 against held_synth_v2s, crop by crop
+  f0_hz        correlation 1.000, identical 100%
+  voiced_frac  correlation 1.000, identical 100%
+  rd           correlation 1.000, identical 100%
+  f1_hz        correlation 0.887, identical 45%
+  crop mean R2, v2: Spearman +0.693
+  crop mean R2, v4: Spearman +0.703
+  10 ms phase profiles, v2 on v2 vs v2 on v2s: median r +0.682; shuffled -0.016
+  2 ms offset profiles, v2 on v2 vs v2 on v2s: median r +0.629; shuffled +0.099
+  10 ms phase profiles, v2 on v2 vs v4 on v2s: median r +0.488; shuffled -0.054
+  2 ms offset profiles, v2 on v2 vs v4 on v2s: median r +0.511; shuffled +0.007
+  10 ms phase profiles, v4 on v2 vs v2 on v2s: median r +0.484; shuffled -0.006
+  2 ms offset profiles, v4 on v2 vs v2 on v2s: median r +0.476; shuffled -0.024
+  10 ms phase profiles, v4 on v2 vs v4 on v2s: median r +0.677; shuffled +0.027
+  2 ms offset profiles, v4 on v2 vs v4 on v2s: median r +0.598; shuffled +0.003

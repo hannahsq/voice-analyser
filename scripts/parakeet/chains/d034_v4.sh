@@ -42,7 +42,10 @@ v4() {
       VA_STEPS=$1000 VA_BRANCH_FROM=$S/ckpt_$(printf %06d $(( $2 * 1000 ))).pt VA_DECAY=$3 \
         $PY -u $P/distil_train_v4.py $C4 $B >> $B.out 2>&1 || return 1
     fi
-    [ -s $R/fid_v4_b$1k.txt ] || $PY -u $P/fid_breakdown.py $C4 $B/ckpt_0$1000.pt 2>&1 | grep -v -i warn > $R/fid_v4_b$1k.txt
+    if [ ! -s $R/fid_v4_b$1k.txt ]; then
+      $PY -u $P/fid_breakdown.py $C4 $B/ckpt_0$1000.pt > $W/runs/fid_v4_b$1k.out 2>&1 || { say "FAILED: d034 v4 fid_breakdown $1k"; return 1; }
+      grep -v -i warn $W/runs/fid_v4_b$1k.out > $R/fid_v4_b$1k.txt
+    fi
   done
 
   local CK=${S}_b20k/ckpt_020000.pt SC=$W/cache/stc_v4

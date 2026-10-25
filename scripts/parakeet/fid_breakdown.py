@@ -105,7 +105,7 @@ def predict(m, audio, target):
             a = torch.from_numpy(np.asarray(audio[s:s + 32], np.float32)).to(dev)
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 y = m(vq.log_power_with_context(a, 400))
-            Y.append(y.float().reshape(len(a), 50, 8, 1024).mean(2))
+            Y.append(y.float()[:, :8 * target.shape[1]].reshape(len(a), target.shape[1], 8, 1024).mean(2))  # means of eights, as many as targets
             T.append((torch.from_numpy(np.asarray(target[s:s + 32], np.float32)).to(dev) - MU) / SD)
     return torch.cat(Y), torch.cat(T)
 
@@ -125,8 +125,9 @@ if __name__ == "__main__":
             data[name] = (d["audio"], d["target"])
         except (StopIteration, FileNotFoundError, ImportError) as e:
             print(f"  (skipped {name}: {e!r})", flush=True)
-    data["Korean (Zeroth val)"] = tuple(np.load(C / "held_zeroth" / f"{k}.npy", mmap_mode="r") for k in ("audio", "target"))
-    data["Singing (VocalSet val)"] = tuple(np.load(C / "held_vocalset" / f"{k}.npy", mmap_mode="r") for k in ("audio", "target"))
+    for name, held in (("Korean (Zeroth val)", "held_zeroth"), ("Singing (VocalSet val)", "held_vocalset")):
+        a, t = (np.load(C / held / f"{k}.npy", mmap_mode="r") for k in ("audio", "target"))
+        data[name] = (a, np.asarray(t[:, 0]) if t.ndim == 4 else t)  # v4 caches hold all eight phases: phase 0 is v2's target
     vpaths = vocalset_paths()
     task = np.array([Path(p).parts[-3] for p in vpaths])  # FULL/<singer>/<task>/<technique>/<file>
     tech = np.array([Path(p).parts[-2] for p in vpaths])
