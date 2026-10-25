@@ -1,0 +1,17 @@
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_001000.pt", "step": 1000, "fidelity": {"held_words_zeroth": {"r2": 0.21291866898536682, "cos": 0.6217770576477051}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_002000.pt", "step": 2000, "fidelity": {"held_words_zeroth": {"r2": 0.32572829723358154, "cos": 0.687224805355072}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_003000.pt", "step": 3000, "fidelity": {"held_words_zeroth": {"r2": 0.3718152642250061, "cos": 0.7123845219612122}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_004000.pt", "step": 4000, "fidelity": {"held_words_zeroth": {"r2": 0.4027758836746216, "cos": 0.7294734120368958}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_005000.pt", "step": 5000, "fidelity": {"held_words_zeroth": {"r2": 0.41615527868270874, "cos": 0.735929012298584}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_006000.pt", "step": 6000, "fidelity": {"held_words_zeroth": {"r2": 0.4397246837615967, "cos": 0.7489347457885742}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_007000.pt", "step": 7000, "fidelity": {"held_words_zeroth": {"r2": 0.4427015781402588, "cos": 0.750039279460907}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_008000.pt", "step": 8000, "fidelity": {"held_words_zeroth": {"r2": 0.4446991980075836, "cos": 0.7506808042526245}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_009000.pt", "step": 9000, "fidelity": {"held_words_zeroth": {"r2": 0.44605785608291626, "cos": 0.7515872716903687}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_010000.pt", "step": 10000, "fidelity": {"held_words_zeroth": {"r2": 0.4573507308959961, "cos": 0.7582276463508606}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_011000.pt", "step": 11000, "fidelity": {"held_words_zeroth": {"r2": 0.4623259902000427, "cos": 0.760075569152832}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_012000.pt", "step": 12000, "fidelity": {"held_words_zeroth": {"r2": 0.47323232889175415, "cos": 0.7659827470779419}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_013000.pt", "step": 13000, "fidelity": {"held_words_zeroth": {"r2": 0.4740496277809143, "cos": 0.7666051983833313}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_014000.pt", "step": 14000, "fidelity": {"held_words_zeroth": {"r2": 0.4767100214958191, "cos": 0.7681339383125305}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_015000.pt", "step": 15000, "fidelity": {"held_words_zeroth": {"r2": 0.4808114469051361, "cos": 0.7699606418609619}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_016000.pt", "step": 16000, "fidelity": {"held_words_zeroth": {"r2": 0.48169970512390137, "cos": 0.7705271244049072}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4_b10k/ckpt_010000.pt", "step": 10000, "fidelity": {"held_words_zeroth": {"r2": 0.4921482801437378, "cos": 0.7757558226585388}}}
