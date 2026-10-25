@@ -1194,3 +1194,18 @@ Hannah's question: how much of what our models learn can a large pretrained spee
 
   - No student beats its own noise control by more than 1 Hz at any checkpoint. v2 reaches the noise level by 8,000 and stays there. v4 peaks near it at 8,000 and then falls back, while its Hillenbrand gold fidelity keeps rising. More training doesn't move v4 toward Parakeet's H5 behaviour, so a longer run is not the lever for the bias.
   - *Korean words at the 20k branch*: 0.516 (10k branch 0.492). Transfer ratio (against v2 at 12,000) 0.66 against LibriTTS-R ((0.516 − 0.096) / (0.677 − 0.037)) and 0.77 against speechocean762 ((0.516 − 0.096) / (0.657 − 0.110)), up from 0.64 / 0.75.
+- *Pre-registered 2026-10-26 (Hannah's observation), before running: the 10 ms ripple in R² at 2 ms offsets on synthetic audio (reported only, no decision).* Seen before this entry (`subhop_2ms_v2_12k_v4_10k_r2.csv` and the f0 500–700 Hz rerun, `a6038af`): on the synthetic held-out crops, R² across the forty 2 ms offsets ripples with the students' 10 ms hop, and on the real sets it doesn't. Share of the variation at the 10 ms period: synthetic v2 0.14, v2s 0.48–0.53, VocalSet and Zeroth-Korean 0.01–0.15. Within each hop R² is highest at 2–4 ms and lowest at 6–8 ms, and the trained alignment (0 ms) is slightly below average. Both students show the same shape, at v4 steps 5,000 and 10,000. On crops with median voiced f0 500–700 Hz the range roughly triples (0.035–0.048 against 0.013–0.019).
+  - *Question*: is the ripple (1) an artefact of `subhop.py`'s synthetic path, (2) structure in the synthetic audio locked to the clip's 10 ms frame clock, or (3) neither?
+    - (1): synthetic crops are used alone and zero-padded, so a student shifted by 2s ms ends on up to 8 ms of digital silence. Real crops are cut from a longer file and get real audio there.
+    - (2): `SynthCrops._crop` starts every crop on a whole 10 ms frame of its clip.
+  - *Arms* (`subhop.py` with `VA_ARM`): the first 256 crops of each synthetic held-out set (v2 and v2s), drawn by `SynthCrops` with three frames (30 ms) of extra clip audio after the crop (`n_frames` = 403; same seed, so the draws differ from the cached sets'). Same crops in every arm:
+    - **base**: the crop alone (its first 400 frames), zero-padded as now. This reproduces the ripple on these draws.
+    - **edge**: the same crop, with the real audio after it in place of the padding (`subhop.py`'s real-crop path, start 0).
+    - **clock**: as edge, with the crop's start moved by u ms, u drawn per crop from 0–9 (seeded), so any clip-locked structure lands at a different place in each crop.
+    - Students and measure as before: v2 at step 12,000 and v4's 10k branch; R² per crop at each 2 ms offset against Parakeet's layer 5 at the same offset.
+  - *Ripple measure* P: the peak-to-peak of R² averaged by position inside the 10 ms hop (the five sub-offsets 0–8 ms, each averaged over the eight hops), over crops. Also reported: the share of variation at the 10 ms period, and P by median voiced f0 (< 250, 250–400, ≥ 400 Hz).
+  - *Readings*, per student and set, on ratios with 95 % paired bootstrap intervals over crops (1,000 resamples):
+    - edge / base: upper bound < 0.5 → "the padding accounts for most of it"; lower bound > 0.75 → "not the padding"; otherwise "partly".
+    - clock / edge: upper bound < 0.5 → "locked to the clip's clock"; lower bound > 0.75 → "not clip-locked"; otherwise "partly".
+    - Overall, if both students and both sets agree: (1), (2), or (3) if neither ratio falls below 0.5. Otherwise "mixed".
+  - *Expectation written beforehand*: "partly" for edge (the padding can't explain why the 0 ms position isn't best), and clip-locked for whatever remains, more on v2s.
