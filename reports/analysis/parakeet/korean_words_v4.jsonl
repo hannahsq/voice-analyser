@@ -15,3 +15,4 @@
 {"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_015000.pt", "step": 15000, "fidelity": {"held_words_zeroth": {"r2": 0.4808114469051361, "cos": 0.7699606418609619}}}
 {"checkpoint": "../voice-analyser-parakeet/runs/student_v4/ckpt_016000.pt", "step": 16000, "fidelity": {"held_words_zeroth": {"r2": 0.48169970512390137, "cos": 0.7705271244049072}}}
 {"checkpoint": "../voice-analyser-parakeet/runs/student_v4_b10k/ckpt_010000.pt", "step": 10000, "fidelity": {"held_words_zeroth": {"r2": 0.4921482801437378, "cos": 0.7757558226585388}}}
+{"checkpoint": "../voice-analyser-parakeet/runs/student_v4_b20k/ckpt_020000.pt", "step": 20000, "fidelity": {"held_words_zeroth": {"r2": 0.5158504247665405, "cos": 0.7880060076713562}}}

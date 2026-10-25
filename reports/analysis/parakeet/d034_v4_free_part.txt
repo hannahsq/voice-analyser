@@ -1,0 +1,11 @@
+1. spectrum of the 10 ms trajectory: peak / neighbours at 12.5, 25, 37.5, 50 Hz; energy share outside the sliding mean
+  student v2 synth_train_v2     1.03    1.03    1.01    1.13   residual share 0.038  (512 segments)
+  student v2 gold_ptdb_cp       1.08    1.03    1.01    0.99   residual share 0.048  (633 segments)
+  control R  synth_train_v2     1.03    1.01    1.00    1.19   residual share 0.083  (512 segments)
+  control R  gold_ptdb_cp       1.09    1.02    1.02    1.01   residual share 0.114  (633 segments)
+2. ridge probe for log2 F1 (fit synth_train_v2, score synth_train_v2s; R2)
+  whole frame                        0.767   (123932 / 123932 frames)
+  smooth part (sliding mean of 8)    0.769   (123932 / 123932 frames)
+  residual (frame - mean)            0.172   (123932 / 123932 frames)
+3. filtered scoring cache -> ..\voice-analyser-parakeet\cache\stc_v4_box8
+done
