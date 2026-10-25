@@ -1170,3 +1170,27 @@ Hannah's question: how much of what our models learn can a large pretrained spee
     - v4 learns them from English words alone: 0.21 at step 1,000, 0.45 at 8,000, 0.48 at 16,000, and 0.492 at the end of the 10k branch. At the same checkpoints, LibriTTS-R scores 0.660 and speechocean762 0.636; Zeroth crops score 0.557.
     - Transfer ratio at the 10k branch: (0.492 − 0.096) / (0.660 − 0.037) = 0.64 against LibriTTS-R, and 0.75 against speechocean762, the like-for-like set (one-sided pauses).
     - On the constant-rate run from 8,000 to 16,000, Korean gains +0.037 against +0.026 / +0.028 for the English sets. The decay adds +0.035 at 10k (English +0.028 / +0.031).
+- **Student v4 result (2026-10-25, dev; `d034_v4_heads_10ms.txt`, `d034_v4_heads_80ms.txt`): "does not transfer".** Six-seed means, ensemble (c) with teacher v3, on the 20k branch (step 20,000):
+  - *10 ms heads*: women's closed-phase |F1 bias| cut −1.1 ± 2.6 Hz (needs ≥ 5), men's rise +7.1 ± 1.6 (limit 5), Hillenbrand F1 MAE cut +5.0 ± 1.3. Fails on both bias parts. Stage 1 (v2, 10 ms) gave −8.9 / +5.4 / −2.7.
+  - *80 ms heads*: +1.3 ± 2.6 / −0.6 ± 2.5 / +5.7 ± 0.6. Fails on the women's cut. Stage 1c (v2, 80 ms) gave +3.6 / −5.1 / +2.4. One seed of six passes alone (S4x80#2: women 7.6 → 1.9 Hz); the rule is on means.
+  - *Beside the rule*: both head sets improve Hillenbrand F1 MAE more than H5×6 does on Parakeet (+4.1), and more than either v2 stage, so the students' heads add accuracy but not the women's bias correction.
+  - *Gold fidelity* (means of eights): Hillenbrand 0.474 (10k branch 0.438; v2 at 12,000 0.100), PTDB-TUG 0.419 (0.422; v2 0.485).
+  - *Free part* (`d034_v4_free_part.txt`; the file's "student v2" label is a fixed string in `free_part.py`, the rows are the 20k branch): energy share outside the 80 ms sliding mean 0.038 (synthetic) and 0.048 (PTDB-TUG), against control R's 0.083 / 0.114. A ridge probe for log2 F1 on synth_train_v2s gives R² 0.767 on whole frames, 0.769 on the 80 ms smooth part and 0.172 on the residual.
+  - *Fidelity by population* (`fid_v4_b20k.txt`): every population up 0.016–0.027 on the 10k branch. Per-frame held-out R²: synthetic v2 0.646, v2s 0.612, VocalSet 0.479, Zeroth 0.583, words 0.677 (LibriTTS-R) / 0.657 (speechocean762). Weakest VocalSet techniques: lip trill 0.14, messa di voce 0.22, vocal fry 0.34; long tones 0.40.
+  - *Per the rule*, what's next (domain-adversarial training, or H5's heads on the student) is to be pre-registered separately. Higher fidelity has not brought the bias correction with it (Hillenbrand gold fidelity 0.10 → 0.47 from v2 to v4, women's cut at 80 ms +3.6 → +1.3), which argues against "too small" as the explanation.
+- *H5-by-checkpoint sweep, result (2026-10-25; `d034_h5sweep_<tag>_*.txt`; reported only, no decision)*. Six-seed means of D-033's H5 heads on each student's 80 ms means; women's closed-phase F1 bias cut, then the margin over the matched-noise control (noise alone: +4.6 to +4.9 at every checkpoint):
+
+  | Checkpoint | Women's cut | Over noise | Men's rise | Hillenbrand F1 MAE cut | Gold fidelity Hillenbrand / PTDB-TUG |
+  |---|---|---|---|---|---|
+  | v2 4k | −0.7 ± 2.1 | −5.5 | −5.4 | +3.0 | 0.087 / 0.386 |
+  | v2 8k | +5.5 ± 0.8 | +0.8 | −5.5 | +1.7 | 0.092 / 0.382 |
+  | v2 12k (earlier) | +5.6 ± 0.8 | +0.7 | −5.0 | +1.6 | 0.100 / 0.485 |
+  | v4 4k | −9.0 ± 2.0 | −13.6 | −0.5 | +3.5 | 0.330 / 0.359 |
+  | v4 8k | +3.0 ± 2.1 | −1.7 | −5.5 | +2.7 | 0.402 / 0.374 |
+  | v4 12k | +0.0 ± 2.1 | −4.9 | −5.1 | +4.1 | 0.376 / 0.461 |
+  | v4 16k | −2.1 ± 1.9 | −6.9 | −2.6 | +3.3 | 0.430 / 0.406 |
+  | v4 10k branch (earlier) | −0.5 ± 1.9 | −5.3 | −4.1 | +3.1 | 0.438 / 0.422 |
+  | v4 20k branch | +0.4 ± 2.4 | −4.4 | −4.5 | +4.1 | 0.474 / 0.419 |
+
+  - No student beats its own noise control by more than 1 Hz at any checkpoint. v2 reaches the noise level by 8,000 and stays there. v4 peaks near it at 8,000 and then falls back, while its Hillenbrand gold fidelity keeps rising. More training doesn't move v4 toward Parakeet's H5 behaviour, so a longer run is not the lever for the bias.
+  - *Korean words at the 20k branch*: 0.516 (10k branch 0.492). Transfer ratio (against v2 at 12,000) 0.66 against LibriTTS-R ((0.516 − 0.096) / (0.677 − 0.037)) and 0.77 against speechocean762 ((0.516 − 0.096) / (0.657 − 0.110)), up from 0.64 / 0.75.
