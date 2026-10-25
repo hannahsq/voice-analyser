@@ -1,0 +1,25 @@
+model,set,band,share_of_power,excess_db
+parakeet,held_synth_v2,0-6.25 Hz,0.8299,0.0
+parakeet,held_synth_v2,6.25-12.5 Hz,0.1111,0.0
+parakeet,held_synth_v2,12.5-25 Hz,0.0414,0.0
+parakeet,held_synth_v2,25-50 Hz,0.0176,0.0
+parakeet,held_synth_v2s,0-6.25 Hz,0.816,0.0
+parakeet,held_synth_v2s,6.25-12.5 Hz,0.1139,0.0
+parakeet,held_synth_v2s,12.5-25 Hz,0.048,0.0
+parakeet,held_synth_v2s,25-50 Hz,0.0221,0.0
+v2,held_synth_v2,0-6.25 Hz,0.7059,-1.16
+v2,held_synth_v2,6.25-12.5 Hz,0.2537,3.13
+v2,held_synth_v2,12.5-25 Hz,0.033,-1.44
+v2,held_synth_v2,25-50 Hz,0.0073,-4.29
+v2,held_synth_v2s,0-6.25 Hz,0.7107,-1.25
+v2,held_synth_v2s,6.25-12.5 Hz,0.2496,2.76
+v2,held_synth_v2s,12.5-25 Hz,0.0327,-2.31
+v2,held_synth_v2s,25-50 Hz,0.007,-5.66
+v4,held_synth_v2,0-6.25 Hz,0.9202,-2.11
+v4,held_synth_v2,6.25-12.5 Hz,0.0733,-4.37
+v4,held_synth_v2,12.5-25 Hz,0.006,-10.98
+v4,held_synth_v2,25-50 Hz,0.0006,-17.14
+v4,held_synth_v2s,0-6.25 Hz,0.9213,-2.18
+v4,held_synth_v2s,6.25-12.5 Hz,0.0722,-4.68
+v4,held_synth_v2s,12.5-25 Hz,0.0059,-11.82
+v4,held_synth_v2s,25-50 Hz,0.0006,-18.26

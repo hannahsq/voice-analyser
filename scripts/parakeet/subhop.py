@@ -8,7 +8,8 @@ Alignment: Parakeet frame e at offset 2k ms against student frame 8e + q - 4 at 
   <prefix>_spectrum.csv model,set,hz,power_db: the 2 ms trajectory's power spectrum (Parakeet: 40 offsets interleaved;
                         students: 5 sub-offsets interleaved), 1960 points, 0-250 Hz, dB relative to Parakeet's peak.
 Students trained against another cache's statistics are restandardised to v4's (as fid_v4_on.py).
-Args: v4 cache dir, out prefix, then LABEL=CKPT=STATS_DIR per student. Run from the main checkout (VA_DEVICE=cuda)."""
+Args: v4 cache dir, out prefix, then LABEL=CKPT=STATS_DIR per student. Run from the main checkout (VA_DEVICE=cuda).
+VA_CROPS=<csv with set,crop columns>: only those crops of those sets, in place of the first N (e.g. one f0 range)."""
 import csv
 import json
 import os
@@ -35,14 +36,14 @@ T2 = E4 * K  # 2 ms trajectory length
 class SubHop(torch.utils.data.Dataset):
     """per crop: five student inputs (shifted 0..8 ms) and forty Parakeet contexts (shifted 0..78 ms, leading frames)"""
 
-    def __init__(self, base):
-        self.p = Phased(base, ALL)
+    def __init__(self, base, idx):
+        self.p, self.idx = Phased(base, ALL), idx
 
     def __len__(self):
-        return N
+        return len(self.idx)
 
     def __getitem__(self, i):
-        x, s = self.p.source(i)
+        x, s = self.p.source(self.idx[i])
         if s is None:  # synthetic: the crop alone
             pad = np.concatenate([x, np.zeros(S * OFF, np.float32)])
             return [pad[OFF * j:OFF * j + D.NS] for j in range(S)], [(x[OFF * k:], 0) for k in range(K)]
@@ -93,6 +94,11 @@ def main():
         "held_vocalset": D.RealCrops(pools["vocalset_val"], 512, 12345),
         "held_zeroth": D.RealCrops(pools["zeroth_korean_val"], 512, 12345),
     }
+    IDX = {}  # set -> crop indices (the first N when VA_CROPS is unset)
+    if os.environ.get("VA_CROPS"):
+        for r in csv.DictReader(open(os.environ["VA_CROPS"], encoding="utf-8")):
+            IDX.setdefault(r["set"], []).append(int(r["crop"]))
+        SETS = {k: v for k, v in SETS.items() if k in IDX}
     j0 = torch.arange(1, E4 + 1, device=dev) * 8 - 4
     HANN = torch.hann_window(T2, periodic=False, device=dev)[None, :, None]
     FREQ = np.fft.rfftfreq(T2, 0.002)
@@ -103,13 +109,15 @@ def main():
     ws.writerow(["model", "set", "hz", "power_db"])
 
     for name, base in SETS.items():
+        idx = IDX.get(name) or list(range(N))
+        NC = len(idx)
         cached = np.load(C4 / name / "target.npy", mmap_mode="r")
-        se = {lab: torch.zeros(N, K, 1024, dtype=torch.float64) for lab, *_ in students}
+        se = {lab: torch.zeros(NC, K, 1024, dtype=torch.float64) for lab, *_ in students}
         s1 = torch.zeros(K, 1024, dtype=torch.float64, device=dev)
         s2 = torch.zeros(K, 1024, dtype=torch.float64, device=dev)
         P = {lab: torch.zeros(T2 // 2 + 1, dtype=torch.float64, device=dev) for lab in ["parakeet"] + [s[0] for s in students]}
         worst = 0.0
-        dl = torch.utils.data.DataLoader(SubHop(base), batch_size=16, num_workers=6, collate_fn=D.as_list)
+        dl = torch.utils.data.DataLoader(SubHop(base, idx), batch_size=16, num_workers=6, collate_fn=D.as_list)
         i0 = 0
         for b in dl:
             B = len(b)
@@ -120,7 +128,7 @@ def main():
                     pre = it[1][k][1]
                     tg[r, k] = h[r, pre + 1:pre + 1 + E4]
             for q in range(8):  # k = 5q is v4's phase q
-                worst = max(worst, float((tg[:, 5 * q] - torch.from_numpy(np.asarray(cached[i0:i0 + B, q], np.float32)).to(dev)).abs().max()))
+                worst = max(worst, float((tg[:, 5 * q] - torch.from_numpy(np.stack([np.asarray(cached[j, q], np.float32) for j in idx[i0:i0 + B]])).to(dev)).abs().max()))
             tg = (tg - MU4) / SD4
             s1 += tg.sum((0, 2)).double()
             s2 += (tg ** 2).sum((0, 2)).double()
@@ -134,15 +142,15 @@ def main():
                 z = ys[:, :, 4:4 + 8 * E4].permute(0, 2, 1, 3).reshape(B, T2, 1024)  # time index 5(j - 4) + s
                 P[lab] += (torch.fft.rfft((z - z.mean(1, keepdim=True)) * HANN, dim=1).abs() ** 2).sum((0, 2)).double()
             i0 += B
-            D.log(f"[{name}] {i0}/{N}")
-        cnt = N * E4
+            D.log(f"[{name}] {i0}/{NC}")
+        cnt = NC * E4
         var = (s2 / cnt - (s1 / cnt) ** 2).cpu()
         for lab in se:
-            r2c = (1 - (se[lab] / (E4 * var[None])).mean(-1)).numpy()  # (N, K)
+            r2c = (1 - (se[lab] / (E4 * var[None])).mean(-1)).numpy()  # (NC, K)
             for k in range(K):
                 wr.writerow([lab, name, 2 * k, round(float(r2c[:, k].mean()), 4)])
-                for i in range(N):
-                    wc.writerow([lab, name, i, 2 * k, round(float(r2c[i, k]), 4)])
+                for i in range(NC):
+                    wc.writerow([lab, name, idx[i], 2 * k, round(float(r2c[i, k]), 4)])
             D.log(f"[{name}] {lab} R2 by 2 ms offset: {np.round(r2c.mean(0), 3).tolist()}")
         ref = P["parakeet"][1:].max()
         for lab, p in P.items():

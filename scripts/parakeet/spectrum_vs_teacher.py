@@ -5,8 +5,10 @@ Hann window, |rfft|^2 summed over the 1024 standardised dimensions; averaged ove
 Parakeet's peak above 0 Hz in that set; band powers as student / Parakeet in dB. Students trained against another cache's
 statistics are restandardised to v4's (as fid_v4_on.py).
 Args: v4 cache dir, out prefix, then LABEL=CKPT=STATS_DIR per student. Writes <prefix>_spectrum.csv and <prefix>_bands.csv.
+VA_CROPS=<csv with set,crop columns>: only those crops of those sets (e.g. one f0 range; crop_subset.py).
 Run from the main checkout."""
 import csv
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -28,6 +30,12 @@ A, T = 4, 8 * g["E4"]  # frames 4 .. 395
 HANN = torch.hann_window(T, periodic=False, device=dev, dtype=torch.float64)[None, :, None]
 FREQ = np.fft.rfftfreq(T, 0.01)
 BANDS = [(0, 6.25), (6.25, 12.5), (12.5, 25), (25, 50.01)]
+IDX = {}  # set -> crop indices (all crops when VA_CROPS is unset)
+if os.environ.get("VA_CROPS"):
+    for r in csv.DictReader(open(os.environ["VA_CROPS"], encoding="utf-8")):
+        IDX.setdefault(r["set"], []).append(int(r["crop"]))
+HELD = list(IDX) or g["HELD"]
+crops = lambda n: IDX.get(n) or list(range(len(data[n]["phase"])))  # noqa: E731
 
 
 def power(y):
@@ -37,12 +45,12 @@ def power(y):
 
 
 P = {}
-for n in g["HELD"]:
-    d = data[n]
-    N = len(d["phase"])
+for n in HELD:
+    d, ci = data[n], crops(n)
+    N = len(ci)
     acc = torch.zeros(len(FREQ), device=dev, dtype=torch.float64)
     for b in range(0, N, 32):
-        t = std(np.stack([np.asarray(d["target"][i], np.float32) for i in range(b, min(b + 32, N))]))  # (b, 8, 49, 1024)
+        t = std(np.stack([np.asarray(d["target"][i], np.float32) for i in ci[b:b + 32]]))  # (b, 8, 49, 1024)
         acc += power(t.permute(0, 2, 1, 3).reshape(t.shape[0], T, 1024))  # time index 8(e-1) + q
     P[("parakeet", n)] = (acc / N).cpu().numpy()
 for label, ck, sdir in SPECS:
@@ -50,12 +58,12 @@ for label, ck, sdir in SPECS:
     MU, SD = (torch.tensor(s[k], dtype=torch.float32, device=dev) for k in ("mean", "std"))
     m = load_student(ck, dev)
     with torch.no_grad():
-        for n in g["HELD"]:
-            d = data[n]
-            N = len(d["phase"])
+        for n in HELD:
+            d, ci = data[n], crops(n)
+            N = len(ci)
             acc = torch.zeros(len(FREQ), device=dev, dtype=torch.float64)
             for b in range(0, N, 32):
-                idx = range(b, min(b + 32, N))
+                idx = ci[b:b + 32]
                 y = (run(m, torch.from_numpy(np.stack([np.asarray(d["audio"][i], np.float32) for i in idx])).to(dev), 400) * SD + MU - MU4) / SD4
                 acc += power(y[:, A:A + T])
             P[(label, n)] = (acc / N).cpu().numpy()
