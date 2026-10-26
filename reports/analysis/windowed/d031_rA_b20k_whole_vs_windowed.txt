@@ -1,0 +1,38 @@
+  [d031_rA_b20k_whole/hillenbrand] 400/1668
+  [d031_rA_b20k_whole/hillenbrand] 800/1668
+  [d031_rA_b20k_whole/hillenbrand] 1200/1668
+  [d031_rA_b20k_whole/hillenbrand] 1600/1668
+  [d031_rA_b20k_whole/ptdb_tug] 250/1579  (RTF 0.014)
+  [d031_rA_b20k_whole/ptdb_tug] 500/1579  (RTF 0.013)
+  [d031_rA_b20k_whole/ptdb_tug] 750/1579  (RTF 0.013)
+  [d031_rA_b20k_whole/ptdb_tug] 1000/1579  (RTF 0.013)
+  [d031_rA_b20k_whole/ptdb_tug] 1250/1579  (RTF 0.013)
+  [d031_rA_b20k_whole/ptdb_tug] 1500/1579  (RTF 0.013)
+  [d031_rA_b20k/hillenbrand] 400/1668
+  [d031_rA_b20k/hillenbrand] 800/1668
+  [d031_rA_b20k/hillenbrand] 1200/1668
+  [d031_rA_b20k/hillenbrand] 1600/1668
+  [d031_rA_b20k/ptdb_tug] 250/1579  (RTF 0.021)
+  [d031_rA_b20k/ptdb_tug] 500/1579  (RTF 0.021)
+  [d031_rA_b20k/ptdb_tug] 750/1579  (RTF 0.021)
+  [d031_rA_b20k/ptdb_tug] 1000/1579  (RTF 0.021)
+  [d031_rA_b20k/ptdb_tug] 1250/1579  (RTF 0.021)
+  [d031_rA_b20k/ptdb_tug] 1500/1579  (RTF 0.021)
+tiers: dev
+
+Hillenbrand, d031_rA_b20k_whole vs d031_rA_b20k (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    42.0    42.0  diff   +0.0 [+0.0, +0.0]  within noise
+  F1 MAE children:    50.3    50.3  diff   +0.0 [+0.0, +0.0]  within noise
+  F1 MAE men     :    20.1    20.1  diff   +0.0 [+0.0, +0.0]  within noise
+  F1 MAE all     :    37.6    37.6  diff   +0.0 [+0.0, +0.0]  within noise
+  F2 MAE all     :    46.8    46.8  diff   +0.0 [+0.0, +0.0]  within noise
+  F2 DR  all     :    98.2    98.2  diff   +0.0 [+0.0, +0.0]  within noise
+  F3 MAE all     :    47.8    47.8  diff   +0.0 [+0.0, +0.0]  within noise
+  F3 DR  all     :    98.0    98.0  diff   +0.0 [+0.0, +0.0]  within noise
+  F4 MAE all     :    93.5    93.5  diff   +0.0 [+0.0, +0.0]  within noise
+  F4 DR  all     :    92.9    92.9  diff   +0.0 [+0.0, +0.0]  within noise
+
+PTDB-TUG f0 RPA, d031_rA_b20k_whole vs d031_rA_b20k
+  all frames    :  86.9  87.3  diff  +0.5 [+0.3, +0.7]  better  (n 154653)
+  modal         :  93.8  94.1  diff  +0.3 [+0.1, +0.4]  better  (n 126992)
+  modal < 85 Hz :  86.4  85.7  diff  -0.7 [-5.6, -0.2]  WORSE  (n 11014)

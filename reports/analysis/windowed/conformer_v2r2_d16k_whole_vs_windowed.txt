@@ -1,0 +1,38 @@
+  [conformer_v2r2_d16k_whole/hillenbrand] 400/1668
+  [conformer_v2r2_d16k_whole/hillenbrand] 800/1668
+  [conformer_v2r2_d16k_whole/hillenbrand] 1200/1668
+  [conformer_v2r2_d16k_whole/hillenbrand] 1600/1668
+  [conformer_v2r2_d16k_whole/ptdb_tug] 250/1579  (RTF 0.013)
+  [conformer_v2r2_d16k_whole/ptdb_tug] 500/1579  (RTF 0.013)
+  [conformer_v2r2_d16k_whole/ptdb_tug] 750/1579  (RTF 0.013)
+  [conformer_v2r2_d16k_whole/ptdb_tug] 1000/1579  (RTF 0.013)
+  [conformer_v2r2_d16k_whole/ptdb_tug] 1250/1579  (RTF 0.013)
+  [conformer_v2r2_d16k_whole/ptdb_tug] 1500/1579  (RTF 0.013)
+  [conformer_v2r2_d16k/hillenbrand] 400/1668
+  [conformer_v2r2_d16k/hillenbrand] 800/1668
+  [conformer_v2r2_d16k/hillenbrand] 1200/1668
+  [conformer_v2r2_d16k/hillenbrand] 1600/1668
+  [conformer_v2r2_d16k/ptdb_tug] 250/1579  (RTF 0.022)
+  [conformer_v2r2_d16k/ptdb_tug] 500/1579  (RTF 0.021)
+  [conformer_v2r2_d16k/ptdb_tug] 750/1579  (RTF 0.021)
+  [conformer_v2r2_d16k/ptdb_tug] 1000/1579  (RTF 0.021)
+  [conformer_v2r2_d16k/ptdb_tug] 1250/1579  (RTF 0.021)
+  [conformer_v2r2_d16k/ptdb_tug] 1500/1579  (RTF 0.021)
+tiers: dev
+
+Hillenbrand, conformer_v2r2_d16k_whole vs conformer_v2r2_d16k (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    44.8    44.8  diff   +0.0 [+0.0, +0.0]  within noise
+  F1 MAE children:    52.7    52.7  diff   +0.0 [+0.0, +0.0]  within noise
+  F1 MAE men     :    22.3    22.3  diff   +0.0 [+0.0, +0.0]  within noise
+  F1 MAE all     :    40.0    40.0  diff   +0.0 [+0.0, +0.0]  within noise
+  F2 MAE all     :    46.5    46.5  diff   +0.0 [+0.0, +0.0]  within noise
+  F2 DR  all     :    98.2    98.2  diff   +0.0 [+0.0, +0.0]  within noise
+  F3 MAE all     :    51.2    51.2  diff   +0.0 [+0.0, +0.0]  within noise
+  F3 DR  all     :    97.9    97.9  diff   +0.0 [+0.0, +0.0]  within noise
+  F4 MAE all     :    98.6    98.6  diff   +0.0 [+0.0, +0.0]  within noise
+  F4 DR  all     :    91.8    91.8  diff   +0.0 [+0.0, +0.0]  within noise
+
+PTDB-TUG f0 RPA, conformer_v2r2_d16k_whole vs conformer_v2r2_d16k
+  all frames    :  85.6  86.6  diff  +1.0 [+0.8, +1.2]  better  (n 154653)
+  modal         :  93.0  93.7  diff  +0.7 [+0.5, +0.8]  better  (n 126992)
+  modal < 85 Hz :  86.1  86.5  diff  +0.4 [-3.3, +0.9]  within noise  (n 11014)
