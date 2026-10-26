@@ -912,7 +912,7 @@ With Hannah. D-030's S2 recipe (Muon 8e-3 for the non-head linear weights, Adan 
 - *Cost*: about 5.3 h per 16k constant phase and 2.3 h for the three branches, so about 23 h for rA–rC plus about 4 h for the control; a little over a day of GPU. Approach agreed with Hannah 2026-10-22; it is next on the GPU, ahead of the joint-head trial. Heads that pass at S2 then share one full-size retrain with whatever this adopts (roadmap item 6).
 
 - *Result (2026-10-26, `reports/analysis/d031/decide_d031.txt`, paired reports in `reports/analysis/paired/fp32/`): **rA is adopted as the full-size recipe** (Muon 2e-3, Adan 1e-2, wd 0.007; 16000 constant + 4000 decay). Weight decay: no difference.*
-  - *Choice*: at 20k, rA has the lowest summed difference (−10.9 SE units). Against teacher v3: F1 −1.15, F2 −3.42, F3 −2.89, F4 −9.55 Hz (−1.6 / −3.7 / −1.8 / −3.7 SE), RPA +0.09. rB's sum is −6.5 SE units; rC's is +2.6.
+  - *Choice*: at 20k, rA has the lowest summed difference (−10.9 SE units). Against teacher v3: F1 −1.15, F2 −3.42, F3 −2.89, F4 −9.55 Hz (−1.6 / −3.7 / −1.8 / −3.7 SE), RPA +0.09. rB's sum is −5.5 SE units; rC's is +2.6.
   - *Adoption*: better by D-029's rule (F2 and F4 beyond −2 SE, nothing beyond +2 SE).
   - *Guard-rails at 20k*: rA's dev Hillenbrand F1 / F2 / F3 −1.3 / −0.5 / +0.2 Hz, PTDB-TUG RPA +0.1, women's closed phase +1.4 Hz; all pass. The only failure in the sweep is rC's 10k branch (RPA −2.0).
   - *Weight decay*: rB against its wd 0.01 control is within 2 SE everywhere (5k: −0.3 / −0.3 / +0.1 / −0.1; 10k: −0.5 / +0.6 / +1.5 / +1.5 SE units). "No difference", so the scaling rule (lr × wd held at 1.4e-5) stays the default.
