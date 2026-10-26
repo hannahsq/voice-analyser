@@ -911,6 +911,15 @@ With Hannah. D-030's S2 recipe (Muon 8e-3 for the non-head linear weights, Adan 
   4. *Reported, not decided*: the best arm at each horizon, which tests the run-length rule (a lower best rate at 20k than at 5k supports it). The shortest horizon at which the chosen rates are not worse than the reference at 20k (no measure beyond +2 SE), which is the full-size budget the new recipe needs and the speed answer at this size.
 - *Cost*: about 5.3 h per 16k constant phase and 2.3 h for the three branches, so about 23 h for rA–rC plus about 4 h for the control; a little over a day of GPU. Approach agreed with Hannah 2026-10-22; it is next on the GPU, ahead of the joint-head trial. Heads that pass at S2 then share one full-size retrain with whatever this adopts (roadmap item 6).
 
+- *Result (2026-10-26, `reports/analysis/d031/decide_d031.txt`, paired reports in `reports/analysis/paired/fp32/`): **rA is adopted as the full-size recipe** (Muon 2e-3, Adan 1e-2, wd 0.007; 16000 constant + 4000 decay). Weight decay: no difference.*
+  - *Choice*: at 20k, rA has the lowest summed difference (−10.9 SE units). Against teacher v3: F1 −1.15, F2 −3.42, F3 −2.89, F4 −9.55 Hz (−1.6 / −3.7 / −1.8 / −3.7 SE), RPA +0.09. rB's sum is −6.5 SE units; rC's is +2.6.
+  - *Adoption*: better by D-029's rule (F2 and F4 beyond −2 SE, nothing beyond +2 SE).
+  - *Guard-rails at 20k*: rA's dev Hillenbrand F1 / F2 / F3 −1.3 / −0.5 / +0.2 Hz, PTDB-TUG RPA +0.1, women's closed phase +1.4 Hz; all pass. The only failure in the sweep is rC's 10k branch (RPA −2.0).
+  - *Weight decay*: rB against its wd 0.01 control is within 2 SE everywhere (5k: −0.3 / −0.3 / +0.1 / −0.1; 10k: −0.5 / +0.6 / +1.5 / +1.5 SE units). "No difference", so the scaling rule (lr × wd held at 1.4e-5) stays the default.
+  - *Reported*: the best arm is rB at 5k, then rA at 10k and 20k. The best rate falls with run length, supporting the run-length rule. Hillenbrand F1 against teacher v3 at 20k: rA −1.3, rB +0.1, rC −1.4 Hz. The shortest horizon at which rA is no worse than teacher v3 at 20k is 20k, so the new recipe needs the same budget and gives no speed saving at this size.
+  - *Follow-up recorded at registration*: the bracket's best is its lowest arm, so the optimum may lie below rA. Per-layer (μP) scaling of the widened front end's Adan rate was the planned follow-up for this case. Not run now: rA already passes, and the next full-size run is item 5's shared retrain, which uses rA. A lower-rate arm or μP scaling could ride alongside that retrain if GPU time allows.
+  - *Caveats*: one seed per arm, with seed noise inside the SEs (from six existing runs). Synthetic gains are F2 and F4; real-voice F1 moves within noise.
+
 ## D-032 (2026-10-22): whole-suite reports respect the tiers; a model register; release tags
 
 Housekeeping with Hannah; no result changes.
