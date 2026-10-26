@@ -13,8 +13,13 @@ VA_CROPS=<csv with set,crop columns>: only those crops of those sets, in place o
 VA_ARM=base|edge|clock (D-034's ripple check): the synthetic sets only, drawn with three extra frames (30 ms) of clip audio
 after the crop. base: the crop alone, zero-padded (as without VA_ARM); edge: the real audio after it in place of the
 padding; clock: as edge, the crop's start moved by 0-9 ms (seeded per crop). Parakeet sees the same span in every arm
-(no context outside the crop). Also writes <prefix>_f0.csv (set,crop,f0_hz: median voiced f0)."""
+(no context outside the crop). Also writes <prefix>_f0.csv (set,crop,f0_hz: median voiced f0).
+D-034's follow-ups (as base unless stated): regen / jit0 / jit2 / hnr0 / whisper: each clip regenerated from its index
+and seed (as drawn; jitter fixed at 1e-6 or 0.02; aspiration at 0 dB HNR; whispered whole), then cropped and channelled
+exactly as SynthCrops; end0 / end40 / endR: crops drawn with
+80 ms of extra clip audio, Parakeet's input ending at the crop's end, 40 ms later, or 0-78 ms later (seeded per crop)."""
 import csv
+import dataclasses
 import json
 import os
 import sys
@@ -31,11 +36,44 @@ from distil_cache_v4 import ALL, Phased  # noqa: E402
 
 from vocal_analysis.features.vqt import TorchVQT  # noqa: E402
 from vocal_analysis.synth.channel import ChannelConfig  # noqa: E402
+from vocal_analysis.synth.sampler import SynthConfig, generate  # noqa: E402
+from vocal_analysis.synth.shards import INT16_SCALE  # noqa: E402
 from vocal_analysis.train.data import SynthCrops, split_ids  # noqa: E402
 
 ARM = os.environ.get("VA_ARM")
 N, K, S, E4, OFF = int(os.environ.get("VA_N", 256)), 40, 5, 49, 32  # crops, Parakeet offsets, student sub-offsets, encoder frames, samples per 2 ms
 T2 = E4 * K  # 2 ms trajectory length
+# SynthConfig overrides per arm; jitter 1e-6, not 0, keeps the generator's random stream (whisper changes it: unpaired)
+REGEN = {"regen": {}, "jit0": {"jitter": (1e-6, 1e-6)}, "jit2": {"jitter": (0.02, 0.02)}, "hnr0": {"hnr_db": (0.0, 0.0)},
+         "whisper": {"p_whisper_clip": 1.0}}
+
+
+class Regen:
+    """stand-in for a flat store's audio array: slicing one clip returns it regenerated from its index and seed, stored
+    as the shards store it (int16), with the config overrides given"""
+
+    def __init__(self, flat, a_off, over):
+        ix = json.loads((Path(flat).parent / "index.json").read_text())
+        cfg = SynthConfig(**{k: tuple(v) if isinstance(v, list) else v for k, v in ix["synth_config"].items()})
+        self.cfg = dataclasses.replace(cfg, **over)
+        self.seed, self.cid = ix["seed"], {int(a): c for c, a in enumerate(a_off[:-1])}
+
+    def __getitem__(self, sl):
+        a = generate(self.cid[sl.start], self.cfg, self.seed).audio
+        assert len(a) == sl.stop - sl.start, "regenerated clip differs in length"
+        return np.clip(np.round(a * INT16_SCALE), -32768, 32767).astype(np.int16)
+
+
+class RegenCrops(SynthCrops):
+    def __init__(self, *a, over=None, **k):
+        super().__init__(*a, **k)
+        self.over = over or {}
+
+    def _open(self):
+        arr = super()._open()
+        if not isinstance(arr["audio"], Regen):
+            arr["audio"] = Regen(self.dir, arr["a_off"], self.over)
+        return arr
 
 
 class SubHop(torch.utils.data.Dataset):
@@ -52,7 +90,10 @@ class SubHop(torch.utils.data.Dataset):
             x, lab = self.p.ds.ds[self.idx[i]]
             x, v = np.asarray(x, np.float32), lab["voiced"][:D.CROP].astype(bool)
             f0 = float(np.median(lab["f0"][:D.CROP][v])) if v.any() else float("nan")
-            if ARM == "base":
+            if ARM in ("end0", "end40", "endR"):
+                e = {"end0": 0, "end40": 640, "endR": OFF * int(np.random.default_rng([4343, self.idx[i]]).integers(0, 40))}[ARM]
+                return [x[OFF * j:OFF * j + D.NS] for j in range(S)], [(x[OFF * k:D.NS + e], 0) for k in range(K)], f0
+            if ARM in ("base",) + tuple(REGEN):
                 x = x[:D.NS]
                 pad = np.concatenate([x, np.zeros(S * OFF, np.float32)])
                 return [pad[OFF * j:OFF * j + D.NS] for j in range(S)], [(x[OFF * k:], 0) for k in range(K)], f0
@@ -109,11 +150,13 @@ def main():
         "held_vocalset": D.RealCrops(pools["vocalset_val"], 512, 12345),
         "held_zeroth": D.RealCrops(pools["zeroth_korean_val"], 512, 12345),
     } if not ARM else {}
-    if ARM:  # the synthetic sets, with 30 ms of clip audio after each crop
+    if ARM:  # the synthetic sets, with 30 ms (80 ms for the end arms) of clip audio after each crop
+        nf = D.CROP + (8 if ARM.startswith("end") else 3)
+        mk = (lambda *a, **k: RegenCrops(*a, over=REGEN[ARM], **k)) if ARM in REGEN else SynthCrops
         SETS = {
-            "held_synth_v2": D.SynthWrap(SynthCrops(flat, val_ids[:512], D.CROP + 3, channel, seed=12345, fixed=True), 512),
-            "held_synth_v2s": D.SynthWrap(SynthCrops(v2s / "flat", split_ids(json.loads((v2s / "index.json").read_text())["n_clips"])[1][:512],
-                                                     D.CROP + 3, channel, seed=12345, fixed=True), 512),
+            "held_synth_v2": D.SynthWrap(mk(flat, val_ids[:512], nf, channel, seed=12345, fixed=True), 512),
+            "held_synth_v2s": D.SynthWrap(mk(v2s / "flat", split_ids(json.loads((v2s / "index.json").read_text())["n_clips"])[1][:512],
+                                             nf, channel, seed=12345, fixed=True), 512),
         }
         ff = open(f"{PRE}_f0.csv", "w", newline="")
         wf = csv.writer(ff)
