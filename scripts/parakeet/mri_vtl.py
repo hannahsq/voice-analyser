@@ -15,6 +15,7 @@ a full closure, such as the tongue tip at the alveolar ridge; reported per frame
 keeps it inside. Length = its arc length (cm).
 Args: ground-truth json dir, subjects tsv (id, sex, age, height cm), out dir [n overlay plots]."""
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -29,6 +30,7 @@ N_PLOTS = int(sys.argv[4]) if len(sys.argv) > 4 else 0
 MM = 2.4  # mm per pixel (200 mm FOV, 84 x 84)
 UP = 4  # grid cells per pixel
 OUTSIDE = 200.0
+GLOTTIS = os.environ.get("VA_GLOTTIS", "lowest")  # "lowest": midpoint of the lowest points; "level": see airway()
 OUT.mkdir(parents=True, exist_ok=True)
 
 
@@ -72,12 +74,18 @@ def airway(d):
     pw = pw[pw[:, 1] >= vel[-1][1]]
     if len(pw):
         outer.append(pw)
-    ar = to_lowest(oriented(c["arytenoid"], outer[-1][-1]))
-    outer.append(ar)
     lo = from_point(ll, il, c["tongue"].mean(0))
     tg = oriented(c["tongue"], lo[-1])
     ep = to_lowest(oriented(c["epiglottis"], tg[-1]))
     inner = [lo, tg, ep]
+    ar = to_lowest(oriented(c["arytenoid"], outer[-1][-1]))
+    if GLOTTIS == "level":  # cut the back wall where it reaches the epiglottis bottom's height: a level glottal line
+        k = np.flatnonzero(ar[:, 1] >= ep[-1][1])
+        if len(k) and k[0] > 0:
+            j = k[0]
+            t = (ep[-1][1] - ar[j - 1, 1]) / (ar[j, 1] - ar[j - 1, 1])
+            ar = np.r_[ar[:j], [ar[j - 1] + t * (ar[j] - ar[j - 1])]]
+    outer.append(ar)
     glottis = (ep[-1] + ar[-1]) / 2
     poly = np.r_[[lip], np.concatenate(outer), [glottis], np.concatenate(inner)[::-1], [lip]]
     return lip, glottis, poly
