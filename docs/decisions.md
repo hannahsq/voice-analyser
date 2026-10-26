@@ -1235,3 +1235,8 @@ Hannah's question: how much of what our models learn can a large pretrained spee
      - Parakeet's layer 5 on the segment's encoder frames inside windows of 4, 8, 16 and 30 s centred on it. Window starts stay on the segment's 80 ms grid, so the frames are the same; the window is clamped inside the stream.
      - *Measure*: R² of each window's frames against the 30 s window's (per-dimension variance over the 30 s frames), for the middle 2 s of the segment and for its first and last 0.5 s.
      - Reported only, no reading. It says how far Parakeet's layer 5 on 4 s crops (the students' and H5's training targets) is from Parakeet on long audio.
+  - *Amendment before any follow-up result (Hannah, 2026-10-26: aperiodic voices).* Two more arms for follow-up 1, built like the jitter arms:
+    - **hnr0**: aspiration noise fixed at 0 dB HNR. Fixing `hnr_db` at the drawn value reproduces a clip exactly (checked), so this changes only the noise level. *Reading*: hnr0 / regen, thresholds as for jit2 / jit0 ("aspiration removes it" / "not aspiration" / "partly").
+    - **whisper**: the whole clip whispered (`p_whisper_clip` = 1, no glottal periods). This changes the rest of the generator's draws (different formants), so it is not paired. Reported as P on all crops against regen, with unpaired bootstrap intervals, and no reading.
+    - The synthesiser has no creak, diplophonia or subharmonic source.
+    - Also added to the tests: clips regenerate exactly from the flat store, and fixing jitter keeps the random stream.
