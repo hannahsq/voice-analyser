@@ -19,4 +19,5 @@ Ideas worth keeping in mind, without a place in the plan. Nothing here is schedu
 
 ## Heads
 
+- **DAC heads on 80 ms means** (2026-10-26). The claim that "acoustic encoders let heads learn the synthetic F1 shortcut" (D-033 part 5, logged as untested) rests on one ASR encoder (Parakeet, 80 ms frames) against one codec (DAC, about 12 ms). Frame rate is confounded with the objective. Training DAC heads on DAC features averaged to 80 ms (six seeds, the existing DAC caches, about 1 h) would separate them. If the overread mostly goes away, frame rate explains much of it, and acoustic-target techniques (codec codes, spectral reconstruction) become less suspect. This matters before relying on the claim when choosing encoders or pretraining objectives.
 - **H5 initialised, fine-tuned on a student's 10 ms frames with random offsets** (2026-10-26; Hannah, idle curiosity). Expected to land near the matched-noise control, since the H5 sweep found the students carry no more of H5's correction than noise does. If tried, it needs the same fine-tune on Parakeet plus matched noise as its control.
