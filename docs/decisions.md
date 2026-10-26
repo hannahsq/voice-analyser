@@ -1474,3 +1474,41 @@ Roadmap Next 4; D-021 item 4; plan §8.4's divergence from principle 1. **Questi
   - T's observed 24.3 is still beyond its null (p = 0.004): a real f0 dependence of roughly 9 c/oct above noise, about 0.1 cm per octave at 17 cm. Tc's 20.1 is not distinguishable from noise (p = 0.10). P's per-clip noise is 116 cents, so its slope says little; its length bias is the problem.
   - The registered decision stands. Whether to register a noise-calibrated guard (excess over the shuffle null, or more and longer probe clips), and re-decide in a new entry, is Hannah's call.
 - *Disclosure*: before the run, a code check of the scoring script used real P head seed 0 (copied three times) and fake T features, so P's scores were previewed. P decides nothing, and the rule was fixed before.
+
+## D-036 (2026-10-27, pre-registered): the VTL head trained jointly, in a decay branch
+
+Registered with Hannah's agreement, including the noise-calibrated f0 guard at the bound proposed before the code check's value was seen (her call: keep the original plan regardless). Code `c0a23a7`; weight default in `losses.py`; chain `chains/d036_chain.sh`; rule `decide_d036.py`. Follows D-035, whose frozen-feature head beat the formant-derived length on Hillenbrand reliability but whose f0 guard sat below a learnt head's noise floor. Designed with Hannah. **Question**: trained jointly with the teacher in a decay branch, keeping every existing head and loss, does a VTL head read length better than D-035's frozen readout, without costing the formants, f0 or bandwidths? Ablations separate the schedule, the readout and the head's starting point.
+
+- *Common to every arm*:
+  - Branch from teacher v3's constant-phase checkpoint `conformer_v2r2_s1/ckpt_016000`: the whole model, every head and the optimiser state; teacher v3's command, data, channel and seed; 4,000 steps.
+  - Every existing head and loss stays on with teacher v3's weights.
+  - Evaluation is windowed (the new default) against the windowed references.
+- *VTL head* (when present): D-035's per-frame design (LayerNorm → 256 → 256 → 2; mean and log variance of log2 length) on the formant trunk.
+  - *Labels*: train_v2 tube clips whose length was not drawn from f0, sonorant frames; everything else masked, including resynthesised and cascade clips (Hannah: no well-defined anatomical length; D-035).
+  - *Loss*: Gaussian NLL, weight **0.0125**.
+  - *Own parameter group*: AdamW 1e-3, weight decay 0.01, linear warm-up over 300 steps, then cosine to 0 at the branch's end (D-035's head schedule).
+  - *Gradient into the trunk*: gated, 0 for the first 300 steps (the head learns on live features but cannot move them), then a linear ramp to 1 over 700 steps, full from step 1,000 of the branch.
+- *Arms*:
+  - **0, control**: no VTL head; the model's rate held at 1e-3 for 300 steps, then 1 − √ decay over 3,700. Against teacher v3 it isolates the schedule.
+  - **1, main**: arm 0's schedule plus a VTL head, randomly initialised (seed 0).
+  - **2, frozen readout**: as 1, with D-035's teacher-arm head (seed 0) attached frozen. Can the trunk reshape itself for a fixed readout?
+  - **3, standard schedule**: as 1 (same head seed), but the model decays from the branch with no hold, as teacher v3 did. Against 1 it isolates the hold.
+  - **4, tepid start**: as 1, with the head starting at 0.5 × D-035's head plus 0.1 × the seed-0 fresh initialisation (shrink and perturb, Ash & Adams 2020).
+- *Measures*:
+  - *Formants, f0, bandwidths*: D-031's set on the branch's last evaluation and on dev.
+    - Synthetic validation in SE units from the six full-size runs (F1–F4 0.71 / 0.92 / 1.58 / 2.55 Hz; RPA worse only below −0.1 point).
+    - Dev guard-rails: Hillenbrand F1 ≤ +4, F2 ≤ +9, F3 ≤ +20 Hz; PTDB-TUG RPA ≥ −1.0 point; women's closed-phase |error| ≤ +5 Hz.
+  - *Length*: D-035's measures from the model's own VTL output (`vtl_score_joint.py`): Hillenbrand dev reliability (primary), women / men ratio, within-speaker SD, group medians, within-sex r(length, f0); the invariance probe with its shuffle null; synthetic error and σ coverage. Paired speaker bootstrap against A (apparent length from labeller v3's formants) and between arms.
+- *Decision rule*: **the joint head (with this branch's schedule, gate and weight) goes into item 5's retrain** if arm 1 passes all three:
+  1. *No formant cost*: against arm 0, no F1–F4 synthetic difference beyond +2 SE, RPA not below −0.1, and every dev guard-rail held.
+  2. *Length beats A*: reliability above A's (paired interval excluding 0) and women / men ratio in [0.85, 0.92].
+  3. *f0 guard, now noise-calibrated*: on the probe, the median |slope| at f0 ≤ 250 Hz exceeds its shuffle null's median by at most 10 cents per octave (about 0.1 cm per octave at 17 cm). The null's p-value is reported. Excess over the null, not detectability, bounds the size of an f0 dependence, so a noisier head is not rewarded.
+  - Otherwise item 5 goes without a VTL head, and A stays the length output.
+  - Arm 1 against D-035's frozen teacher head is reported (does joint training improve length?).
+  - Arms 0, 2, 3 and 4 are reported with paired intervals and decide nothing. D-035 stays decided as registered; the new guard applies to this entry's arms only.
+- *Checked before registering* (AGENTS.md):
+  - *Gradient share* (`vtl_grad_check.py`, 20 training batches at the 16k checkpoint, with D-035's fitted head as a stand-in for a trained joint head): at weight 1, the VTL loss's gradient into the trunk is 8.1× the existing losses' (IQR 6.7–12.0), because a Gaussian NLL's gradient grows as 1/σ² and the head is confident. Weight 0.0125 gives about a 10 % share. The two gradients are nearly orthogonal (median cosine +0.02), so little interference is expected. As the joint head's σ shrinks its share can grow; the global gradient clip (1.0) bounds the step.
+  - *Feature drift*: D-035's head reaches an NLL of −2.94 on the 16k encoder against −3.18 on the decayed one it was trained on, so the decay changes the trunk's length-relevant features only a little. That bears on arms 2 and 4.
+  - *Noise floor of the f0 guard*: D-035's shuffle null (15 c/oct for a frozen teacher head) is the reason for the new form. Its per-arm null is computed with each arm's own estimates.
+  - *Code check*: the scoring script ran on a stand-in (the 16k checkpoint with D-035's head attached, i.e. arm 2 before any training). It decides nothing. *Seen before registering*: its probe excess over the shuffle null was +10.7 c/oct (observed 25.5, null median 14.8, p = 0.002). The bound of 10 was proposed before this was seen and is kept; the stand-in shows it sits near where a frozen teacher head lands.
+- *Cost*: about 1.5 h per arm with evaluations, so 7–8 h. Order: 0 and 1 (decisive), then 2, 3 and 4.
