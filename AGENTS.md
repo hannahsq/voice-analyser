@@ -5,7 +5,7 @@ A voice analyser: f0, voicing, formants F1–F4 with bandwidths, and related mea
 ## Layout
 
 - `vocal_analysis/`: `synth/` (synthesiser, channel model, codecs), `resynth/` (resynthesis of real recordings), `train/` (teacher training, data loading), `models/` (teacher, inference), `eval/` (metrics, gold-set loaders, tiers), `baselines/`, `backend/`, `features/` (VQT), `cli.py`.
-- `docs/decisions.md`: the decision log (D-xxx). **Read the relevant entries before changing anything they cover.** `docs/roadmap.md` lists what's next; `docs/models.md` is the model register.
+- `docs/decisions.md`: the decision log (D-xxx). **Read the relevant entries before changing anything they cover.** `docs/roadmap.md` lists what's next; `docs/considering.md` holds unscheduled ideas; `docs/models.md` is the model register.
 - `scripts/analysis/`: one-off analyses and decision scripts; `scripts/analysis/chains/` holds the GPU job chains.
 - `reports/`: committed results (`reports/suite/` for whole-suite reports, `reports/analysis/` per study). `runs/`, `data/` and caches are not committed.
 - `external/`: submodules. `voice-dataset-labeler` (TVLP tracker, pinned); `random-cafe` (background-scene augmentation, optional: `update = none`).
