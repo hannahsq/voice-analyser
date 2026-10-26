@@ -52,11 +52,14 @@ def eval_bf16() -> bool:
     return os.environ.get("VA_EVAL_BF16") == "1"
 
 
-def analyse(model, audio: np.ndarray, device, sr: int = 16000, window_frames: int | None = None) -> dict[str, np.ndarray]:
-    """Whole-file offline analysis; frame i at t = i * 10 ms. fp32 unless $VA_EVAL_BF16=1 (`eval_bf16`).
+DEFAULT_WINDOW = 400  # D-028 "windows", the default from 2026-10-27 (roadmap 3)
+
+
+def analyse(model, audio: np.ndarray, device, sr: int = 16000, window_frames: int | None = DEFAULT_WINDOW) -> dict[str, np.ndarray]:
+    """Offline analysis of a file; frame i at t = i * 10 ms. fp32 unless $VA_EVAL_BF16=1 (`eval_bf16`).
     window_frames: files longer than this run in windows of that many frames (hop half a window), each frame taken from
     the window where it is most central (D-028: the models train on clips of at most 400 frames, and longer context
-    carries one speaker's tract into another's frames). None = the whole file at once."""
+    carries one speaker's tract into another's frames). The default since 2026-10-27; None or 0 = the whole file at once."""
     assert sr == 16000
     n_frames = len(audio) // HOP + 1
     if not window_frames or n_frames <= window_frames:

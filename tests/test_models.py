@@ -205,13 +205,31 @@ def test_windowed_analysis_stitches_windows():
     torch.manual_seed(0)
     m = Teacher(TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16)).eval()
     x = np.random.default_rng(0).normal(0, 0.1, 249 * vqt.HOP + 1).astype(np.float32)  # 250 frames
-    whole = analyse(m, x, torch.device("cpu"))
+    whole = analyse(m, x, torch.device("cpu"), window_frames=None)
     assert all(np.array_equal(whole[k], v, equal_nan=True) for k, v in analyse(m, x, torch.device("cpu"), window_frames=400).items())
     w = analyse(m, x, torch.device("cpu"), window_frames=100)
     assert np.isfinite(w["formants"]).all() and len(w["formants"]) == 250
-    first = analyse(m, x[: 99 * vqt.HOP + 1], torch.device("cpu"))
+    first = analyse(m, x[: 99 * vqt.HOP + 1], torch.device("cpu"), window_frames=None)
     assert np.allclose(w["formants"][:50], first["formants"][:50])  # frames 0-49: window 0 is the most central
     assert not np.allclose(w["formants"], whole["formants"])
+
+
+def test_analysis_windows_by_default():
+    """D-028 / roadmap 3: analyse() runs files longer than 400 frames in 400-frame windows unless told otherwise, and
+    teacher evaluation follows it ("<ckpt>@w0" asks for the whole file and keeps the old cache key)."""
+    from vocal_analysis.eval.teacher_eval import _split_window
+    from vocal_analysis.models.infer import DEFAULT_WINDOW, analyse
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+
+    torch.manual_seed(0)
+    m = Teacher(TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16)).eval()
+    x = np.random.default_rng(1).normal(0, 0.1, 599 * vqt.HOP + 1).astype(np.float32)  # 600 frames
+    d, w = analyse(m, x, torch.device("cpu")), analyse(m, x, torch.device("cpu"), window_frames=DEFAULT_WINDOW)
+    assert DEFAULT_WINDOW == 400 and all(np.array_equal(d[k], v, equal_nan=True) for k, v in w.items())
+    assert not np.allclose(d["formants"], analyse(m, x, torch.device("cpu"), window_frames=None)["formants"])
+    assert _split_window("runs/x/ckpt_last.pt") == ("runs/x/ckpt_last.pt", 400)
+    assert _split_window("runs/x/ckpt_last.pt@w0") == ("runs/x/ckpt_last.pt", None)
+    assert _split_window("runs/x/ckpt_last.pt@w200") == ("runs/x/ckpt_last.pt", 200)
 
 
 @pytest.mark.parametrize("optimizer", ["adan", "muon", "muon_adan"])

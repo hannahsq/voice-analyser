@@ -206,7 +206,10 @@ def cmd_resynth(cfg: Config, args: argparse.Namespace) -> int:
     log = lambda m: print(m, flush=True)  # noqa: E731
     teacher_sha = corpus.file_sha256(args.teacher)
     root = Path(cfg.data.root) / args.corpus
-    adir = Path(cfg.data.root) / "resynth" / "analysis" / args.corpus / teacher_sha
+    from .models.infer import DEFAULT_WINDOW
+
+    # windowed analyses (D-028, from 2026-10-27) apart from the whole-file ones made before
+    adir = Path(cfg.data.root) / "resynth" / "analysis" / args.corpus / f"{teacher_sha}-w{DEFAULT_WINDOW}"
     from dataclasses import replace
 
     from .device import setup_device

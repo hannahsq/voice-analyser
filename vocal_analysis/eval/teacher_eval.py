@@ -22,11 +22,14 @@ TOL = (0.20, 200.0)
 
 
 def _split_window(path: str) -> tuple[str, int | None]:
-    """"<ckpt>@w400": analyse files longer than 400 frames in windows (`infer.analyse`, D-028)."""
+    """Windows as `infer.analyse` (D-028; 400 frames by default since 2026-10-27). "<ckpt>@w200" sets another window,
+    "<ckpt>@w0" the whole file (cached under the pre-2026-10-27 key, so whole-file results are reused, never mixed)."""
+    from ..models.infer import DEFAULT_WINDOW
+
     if "@w" in path:
         base, w = path.rsplit("@w", 1)
-        return base, int(w)
-    return path, None
+        return base, int(w) or None
+    return path, DEFAULT_WINDOW
 
 
 def _ckpt_id(path: str) -> str:

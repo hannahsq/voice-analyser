@@ -6,7 +6,9 @@ On the CPU by default (it can run alongside training); VA_DEVICE=cuda runs on th
 with the same frame count batched together: results identical to the CPU's (2026-10-11: v2_s0 on ARCTIC, 99th
 percentile difference 0.00 Hz), about 2.5x faster. bf16, as analyse() uses on the GPU, is not: it moves the median
 closed-phase F1 bias by about 1.7 Hz. MIOpen's fast find mode (heuristic kernel choice, set below unless already
-set) matters on the GPU: by default it benchmarks kernels for every new batch shape, 966 s against 111 s."""
+set) matters on the GPU: by default it benchmarks kernels for every new batch shape, 966 s against 111 s.
+Files run in 400-frame windows (D-028, the default from 2026-10-27; VA_WINDOW=0 for the whole file): longer files one
+at a time through analyse(), shorter ones batched. A scratch dir holds one kind only: windowed columns go in a new one."""
 import os
 import sys
 from pathlib import Path
@@ -20,12 +22,13 @@ from scipy.signal import resample_poly
 
 sys.stdout.reconfigure(encoding="utf-8")
 from vocal_analysis.features.vqt import HOP
-from vocal_analysis.models.infer import _vqt, analyse, decode_outputs, load_teacher
+from vocal_analysis.models.infer import DEFAULT_WINDOW, _vqt, analyse, decode_outputs, load_teacher
 
 S, NAME, CK = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
 SUF = sys.argv[4] if len(sys.argv) > 4 else ""  # "_sub": every 3rd utterance per speaker
 torch.set_num_threads(int(os.environ.get("VA_THREADS", "8")))  # fewer alongside training
 dev = torch.device(os.environ.get("VA_DEVICE", "cpu"))
+WINDOW = int(os.environ.get("VA_WINDOW", DEFAULT_WINDOW)) or None
 model = load_teacher(CK, dev)[0]
 D = Path("../voice-analyser/data")
 
@@ -65,13 +68,17 @@ for f, wav in (("arctic_egg", arctic_wav), ("ptdb_egg", ptdb_wav)):
 
     if dev.type == "cpu":
         for n, (idx, x16) in enumerate(zip(groups, audio)):
-            put(idx, analyse(model, x16, dev))
+            put(idx, analyse(model, x16, dev, window_frames=WINDOW))
             if (n + 1) % 250 == 0:
                 print(f"  {f}: {n + 1}/{len(groups)}", flush=True)
     else:  # files with the same frame count in one batch: zero padding to a common length is what the VQT does anyway
         vq, by_frames = _vqt(dev), {}
         for k, x16 in enumerate(audio):
-            by_frames.setdefault(len(x16) // HOP + 1, []).append(k)
+            nf = len(x16) // HOP + 1
+            if WINDOW and nf > WINDOW:
+                put(groups[k], analyse(model, x16, dev, window_frames=WINDOW))
+            else:
+                by_frames.setdefault(nf, []).append(k)
         for nf, ks in by_frames.items():
             length = max(len(audio[k]) for k in ks)
             xb = torch.from_numpy(np.stack([np.pad(audio[k], (0, length - len(audio[k]))) for k in ks])).to(dev)
