@@ -22,5 +22,6 @@ The scripts behind `reports/analysis/`, which `docs/decisions.md` (D-019 onwards
 | `birkholz_eval.py` | `external/`: Birkholz et al. (2019) audio, evaluation only | D-023 |
 | `listen.py` | listening WAVs (`runs/listening/`) | D-023 |
 | `bench_loader.py`, `bench_infer.py` | data-loader and inference speed (`bench_small.txt`) | small-model proxy |
+| `student_speed.py` | training and inference speed of scaled-up teacher architectures (printed) | D-034 student size |
 
 `chains/` holds the shell queues that ran training and measures one after another on a single machine. They are kept as a record of exactly what was run, in what order. They hard-code that machine's paths and take the scratch directory as their argument.

@@ -33,6 +33,7 @@ A voice analyser: f0, voicing, formants F1–F4 with bandwidths, and related mea
 
 - **GPU jobs run as chains** (`scripts/analysis/chains/`), copied before running so edits don't affect a running queue. They log to `runs/orchestrator.log` ("FAILED: ..." on failure). Every step skips if its output exists.
 - **Stop whole process trees.** Orphaned loader workers can hold tens of GB.
+- **Every script gets a main guard (`if __name__ == "__main__":`), throwaway ones included.** DataLoader workers and other multiprocessing re-import the script on Windows (spawn), so top-level code runs again in every worker: it has crashed loaders and hung a GPU check.
 - **The iGPU drives the display.** Keep single GPU operations short: chunk big matmuls.
 - **Prefer seed means over single seeds** (seed-to-seed variation on real voices is large), and paired comparisons with bootstrap intervals.
 - **Check a hypothesis can hold before pre-registering it**: estimate the measure's noise floor (e.g. a shuffle null; a small effect seen once may be sampling noise), and trace the code path to confirm the proposed cause can reach what is measured.
