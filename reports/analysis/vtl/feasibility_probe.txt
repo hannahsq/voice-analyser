@@ -1,0 +1,9 @@
+Probe: 144 clips; calibration slope 0.972 on 8263 tube crops
+
+labeller v3 formants: slope vs log2 f0, median -0 c/oct, median |slope| 2; f0 <= 250 Hz: median -1, |slope| 1
+  vowel spread (f0 <= 250 Hz, SD across vowels) by length: 13: 108  15.5: 107  18: 106 cents
+  error vs true length, median by length (f0 <= 250 Hz): 13: +18  15.5: -3  18: -19 cents
+
+true formants: slope vs log2 f0, median -0 c/oct, median |slope| 0; f0 <= 250 Hz: median -0, |slope| 0
+  vowel spread (f0 <= 250 Hz, SD across vowels) by length: 13: 109  15.5: 108  18: 107 cents
+  error vs true length, median by length (f0 <= 250 Hz): 13: +15  15.5: -1  18: -14 cents
