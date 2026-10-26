@@ -160,6 +160,9 @@ EST = ["teacher_v3", "labeller_v3", "arm", "arm_t"] + [f"arm#{k}" for k in range
 errc = {k: 2 ** EC[k][:, 0] - RC[:, 0] for k in EST}
 errh = {k: 2 ** EH[k][:, 0] - RH[:, 0] for k in EST}
 okc, okh = np.isfinite(RC[:, 0]) & (RC[:, 0] > 0), np.isfinite(RH[:, 0]) & (RH[:, 0] > 0)
+if os.environ.get("VA_DUMP"):  # per-frame F1 errors for the pooled dev + semi-private estimate (D-033, 2026-10-26)
+    np.savez(os.environ["VA_DUMP"], sex=sex, spk_c=spk_c, okc=okc, group=g, spk_h=spk_h, okh=okh,
+             **{f"c_{k}": v for k, v in errc.items()}, **{f"h_{k}": v for k, v in errh.items()})
 stats = {k: [] for k in ("w", "m", "h")}
 for _ in range(B):
     ic = np.concatenate([np.concatenate([st[j] for j in rng.integers(0, len(st), len(st))]) for st in SC])
