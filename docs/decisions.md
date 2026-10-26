@@ -1300,3 +1300,19 @@ Hannah's question: how much of what our models learn can a large pretrained spee
     - The heads alone barely move either: women's closed-phase F1 median error, mean over seeds, whole −5.3, short −3.8, long −4.4 Hz. MAE 66–68 (whole, long) against 71–77 (short).
     - *So*: H5 reads F1 from directions of layer 5 that hardly depend on the input span, while most of layer 5's variance does. The span hypothesis for v2 against v4 is not supported: short-span Parakeet keeps H5's correction, so learning it would not by itself have cost v4 the cut.
     - *Seen in passing (post hoc)*: whole-vector R² against Parakeet, the fidelity measure used throughout D-034, is dominated by span-dependent variance that the F1 head ignores. Students can gain or lose fidelity without it bearing on head transfer (v4 against v2 on Hillenbrand: 0.47 against 0.10, with no gain in the cut). A fidelity measured in the subspace the heads read would be the better proxy.
+- *Pre-registered 2026-10-26 (Hannah), before running: head-subspace fidelity (reported only, no decision).* Context: the span test showed H5 reads F1 from a span-robust part of layer 5, while whole-vector R² is dominated by variance the heads ignore. Question: do the students reproduce Parakeet in the subspace the heads read, and is each student's error kept out of that subspace, spread like noise, or concentrated in it?
+  - *Features* (80 ms frames, the four sets `eval_heads.py` reads):
+    - **P**: Parakeet layer 5 (`emb_v1`);
+    - **v2**: student v2 at 12,000, 80 ms means; **v2n**: its matched-noise control (P plus Gaussian noise with v2's per-dimension error variance; `student_as_parakeet.py`, rebuilt from `cache/stc_v2`, and checked against the existing `stc_v2_80ms_scoring`);
+    - **v4**: the 20k branch, 80 ms means; **v4n**: its noise control (`stc_v4_80ms_scoring`).
+  - *Heads*, six seeds each: H5 (D-033, trained on P), S80 (v2's 80 ms heads, stage 1c), S4x80 (v4's 80 ms heads, the verdict's). The 10 ms heads are deferred: they would need Parakeet at all eight phases on the gold audio.
+  - *Measures*, at the reference frames: PTDB-TUG closed phase (women and men separately), Hillenbrand, and synthetic v2 and v2s.
+    - **Subspace fidelity**: R² of the head's input projection (LayerNorm, then the 1024→128 linear map, interpolated to the frame as the head does) on the features against the same on P. Per-dimension R² with P's variance, averaged over the 128 dimensions.
+    - **Whole-vector R²** at the same frames, for comparison.
+    - **F1 read-out agreement**: median |F1 on the features − F1 on P| in cents, head alone.
+    - **Bias**: `eval_heads.py`'s full report for every features × heads cell (15 cells; ensemble (c) with teacher v3, as always).
+  - *Checked before registering (AGENTS.md)*: six seeds per head family, compared paired by seed between each student and its noise control. The projection is exactly what each head applies to its input, so features reach the head only through it (and the LayerNorm's per-frame scaling).
+  - *Readings*:
+    1. Per student (v2, v4) and head family, on PTDB-TUG women's closed-phase frames: Δ = subspace R²(student) − subspace R²(its noise), six-seed mean with a 95 % t-interval. Above 0 → "error kept out of the head's subspace"; below 0 → "error concentrated in it"; otherwise "like noise".
+    2. Student heads on P: S80 and S4x80 on Parakeet under the part-2 rule on six-seed means. "Pass" → "the heads learned a mapping that works on Parakeet (the student's features are what's off)"; "fail" → "the heads learned something else".
+    - Everything else is reported without a reading.
