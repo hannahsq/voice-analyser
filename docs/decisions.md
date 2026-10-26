@@ -1291,3 +1291,12 @@ Hannah's question: how much of what our models learn can a large pretrained spee
     - |mean| < 1.5 Hz with the interval inside ±3 → "span-independent";
     - otherwise "unclear".
   - long − whole is reported the same way, without a reading.
+  - *Result (2026-10-26, `d034_spans_{whole,short,long}.txt`, `d034_spans_build.txt`): **"span-independent"**.*
+    - whole reproduces `emb_v1` (layer 5 R² 1.0000, max |difference| 0.06) and its numbers (+5.3 ± 1.1).
+    - Six-seed women's cut: short +5.1 ± 1.1, long +5.4 ± 0.7.
+    - Paired by seed: short − whole −0.2 Hz [−1.7, +1.2] (95 % t-interval); long − whole +0.1 Hz [−0.8, +1.0].
+    - Men's rise −1.8 (short) and −2.1 (long), against −2.8.
+    - This holds although layer 5 itself changes a great deal: R² against whole is −0.59 for short and 0.67 for long.
+    - The heads alone barely move either: women's closed-phase F1 median error, mean over seeds, whole −5.3, short −3.8, long −4.4 Hz. MAE 66–68 (whole, long) against 71–77 (short).
+    - *So*: H5 reads F1 from directions of layer 5 that hardly depend on the input span, while most of layer 5's variance does. The span hypothesis for v2 against v4 is not supported: short-span Parakeet keeps H5's correction, so learning it would not by itself have cost v4 the cut.
+    - *Seen in passing (post hoc)*: whole-vector R² against Parakeet, the fidelity measure used throughout D-034, is dominated by span-dependent variance that the F1 head ignores. Students can gain or lose fidelity without it bearing on head transfer (v4 against v2 on Hillenbrand: 0.47 against 0.10, with no gain in the cut). A fidelity measured in the subspace the heads read would be the better proxy.
