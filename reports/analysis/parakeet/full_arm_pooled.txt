@@ -1,0 +1,25 @@
+D-033 full arm, dev + semi-private pooled (reported only): PTDB-TUG 20 speakers (10 women), Hillenbrand 139 speakers
+
+Point estimates: women's |F1 bias| / men's |F1 bias| / Hillenbrand F1 MAE (Hz)
+  teacher_v3            8.5 /    5.8 /   37.9
+  labeller_v3           9.1 /    5.8 /   36.0
+  arm                   2.3 /    2.8 /   31.9
+  arm_t                 1.3 /    2.6 /   32.4
+  single-seed mean      2.5 /    3.0 /   33.3
+
+Paired speaker bootstrap (2000 resamples within tier and sex / group): mean [95 % interval], Hz
+  women's closed-phase |F1 median signed error|
+    arm - labeller_v3                -6.2 [  -7.8,   -2.2]
+    arm - teacher_v3                 -5.4 [  -7.3,   -1.7]
+    arm - single-seed mean           -0.6 [  -1.9,    0.2]
+    arm_t - teacher_v3               -5.8 [  -7.9,   -1.0]
+  men's closed-phase |F1 median signed error|
+    arm - labeller_v3                -2.8 [  -4.7,   -0.1]
+    arm - teacher_v3                 -2.7 [  -4.7,   -0.1]
+    arm - single-seed mean           -0.5 [  -1.5,   -0.1]
+    arm_t - teacher_v3               -2.8 [  -4.6,   -0.1]
+  Hillenbrand F1 MAE (all)
+    arm - labeller_v3                -4.1 [  -5.1,   -3.0]
+    arm - teacher_v3                 -6.0 [  -7.1,   -4.9]
+    arm - single-seed mean           -1.3 [  -1.5,   -1.2]
+    arm_t - teacher_v3               -5.5 [  -6.5,   -4.4]
