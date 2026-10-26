@@ -1,0 +1,81 @@
+D-035 VTL probe. A's calibration: slope 0.972 on 8263 tube crops
+
+Synthetic validation: 512 held-out train_v2 clips (tube, not from f0 146, cascade, not from f0 108, length from f0 258)
+  per-clip median |error| (cents) by kind; coverage within 1 / 2 sigma on tube, not-from-f0 clips (frames; clips)
+  T   tube, not from f0    18  cascade, not from f0    56  length from f0    27   coverage frames 0.72 / 0.97; clips 0.02 / 0.09
+  P   tube, not from f0    28  cascade, not from f0    95  length from f0    37   coverage frames 0.54 / 0.85; clips 0.11 / 0.23
+  Tc  tube, not from f0    16  cascade, not from f0    28  length from f0    21   coverage frames 0.74 / 0.97; clips 0.05 / 0.07
+  A   tube, not from f0    27  cascade, not from f0    90  length from f0    49
+
+f0-invariance probe (144 clips; Story's vowels at 13 / 15.5 / 18 cm, f0 80-400 Hz): slope of log2 length on log2 f0
+  T   median |slope| f0 <= 250 Hz  24.3 c/oct (median +9.2); whole sweep  19.1; vowel spread   46 c; bias by length (c) 13: -37  15.5: -60  18: -59
+  P   median |slope| f0 <= 250 Hz 142.1 c/oct (median +118.1); whole sweep 140.5; vowel spread   65 c; bias by length (c) 13: -178  15.5: -432  18: -625
+  Tc  median |slope| f0 <= 250 Hz  20.1 c/oct (median +17.3); whole sweep  20.9; vowel spread   48 c; bias by length (c) 13: -24  15.5: -32  18: -33
+  A   median |slope| f0 <= 250 Hz   1.4 c/oct (median -0.8); whole sweep   1.8; vowel spread  107 c; bias by length (c) 13: +18  15.5: -3  18: -19
+
+Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
+  reliability
+    T      0.224 [   0.164,    0.270]
+    P      0.297 [   0.221,    0.357]
+    Tc     0.271 [   0.206,    0.318]
+    A      0.153 [   0.104,    0.197]
+  rel men
+    T      0.240 [   0.138,    0.329]
+    P      0.354 [   0.241,    0.449]
+    Tc     0.307 [   0.201,    0.391]
+    A      0.170 [   0.091,    0.252]
+  rel women
+    T      0.207 [   0.152,    0.244]
+    P      0.241 [   0.143,    0.311]
+    Tc     0.234 [   0.167,    0.280]
+    A      0.135 [   0.088,    0.174]
+  w/m
+    T      0.860 [   0.838,    0.886]
+    P      0.915 [   0.893,    0.940]
+    Tc     0.871 [   0.845,    0.893]
+    A      0.863 [   0.848,    0.891]
+  within SD c
+    T    117.810 [ 112.197,  123.665]
+    P    106.005 [  99.198,  112.850]
+    Tc   112.669 [ 107.233,  118.523]
+    A    155.816 [ 149.886,  161.711]
+  men cm
+    T     17.028 [  16.671,   17.196]
+    P     15.777 [  15.472,   16.202]
+    Tc    16.671 [  16.396,   17.000]
+    A     17.837 [  17.431,   18.062]
+  women cm
+    T     14.637 [  14.271,   14.927]
+    P     14.434 [  14.400,   14.633]
+    Tc    14.526 [  14.287,   14.854]
+    A     15.390 [  15.248,   15.657]
+  children cm
+    T     13.589 [  13.367,   13.850]
+    P     13.607 [  13.356,   13.946]
+    Tc    13.506 [  13.393,   13.852]
+    A     14.679 [  14.421,   15.035]
+  r(len, f0) in sex
+    T     -0.303 [  -0.566,   -0.022]
+    P     -0.185 [  -0.488,    0.114]
+    Tc    -0.368 [  -0.620,   -0.082]
+    A     -0.341 [  -0.571,   -0.080]
+
+Paired differences (speaker bootstrap)
+  T - A   reliability    +0.071 [  +0.021,   +0.117]
+  T - A   w/m            -0.003 [  -0.031,   +0.014]
+  T - A   within SD c   -38.006 [ -42.220,  -34.080]
+  P - A   reliability    +0.145 [  +0.066,   +0.212]
+  P - A   w/m            +0.052 [  +0.021,   +0.072]
+  P - A   within SD c   -49.812 [ -56.515,  -43.119]
+  P - T   reliability    +0.073 [  +0.009,   +0.133]
+  P - T   w/m            +0.055 [  +0.032,   +0.080]
+  P - T   within SD c   -11.806 [ -17.945,   -5.288]
+  Tc - T  reliability    +0.047 [  +0.021,   +0.071]
+  Tc - T  w/m            +0.012 [  -0.009,   +0.020]
+  Tc - T  within SD c    -5.141 [  -7.645,   -2.742]
+
+Per-seed reliability: T 0.225 0.226 0.217; P 0.288 0.294 0.293; A 0.153
+
+T: reliability above A: yes, w/m in [0.85, 0.92]: yes, probe |slope| <= 10: NO, every seed above A: yes
+P: reliability above A: yes, w/m in [0.85, 0.92]: yes, probe |slope| <= 10: NO, every seed above A: yes
+DECISION: the VTL head does not join item 5's retrain

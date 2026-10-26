@@ -1,0 +1,13 @@
+50/479
+100/479
+150/479
+200/479
+250/479
+300/479
+350/479
+400/479
+450/479
+whole  R2 against emb_v1's layer 5: 1.0000  max |diff| 0.063
+short  R2 against emb_v1's layer 5: -0.5858  max |diff| 231.418
+long   R2 against emb_v1's layer 5: 0.6701  max |diff| 174.461
+done

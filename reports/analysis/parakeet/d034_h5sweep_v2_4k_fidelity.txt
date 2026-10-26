@@ -1,0 +1,8 @@
+student  synth_train_v2     fidelity to layer 5: R2 0.531 (26112 frames)
+noise    synth_train_v2     fidelity to layer 5: R2 0.531 (26112 frames)
+student  synth_train_v2s    fidelity to layer 5: R2 0.489 (26112 frames)
+noise    synth_train_v2s    fidelity to layer 5: R2 0.489 (26112 frames)
+student  gold_hillenbrand   fidelity to layer 5: R2 -0.017 (7382 frames)
+noise    gold_hillenbrand   fidelity to layer 5: R2 -0.017 (7382 frames)
+student  gold_ptdb_cp       fidelity to layer 5: R2 0.380 (44467 frames)
+noise    gold_ptdb_cp       fidelity to layer 5: R2 0.380 (44467 frames)

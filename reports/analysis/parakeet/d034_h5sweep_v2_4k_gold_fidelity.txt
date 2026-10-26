@@ -1,0 +1,4 @@
+gold_hillenbrand: R2 0.087, cosine 0.586 (6386 encoder frames)
+  alignment, shift in encoder frames: -2: -0.786, -1: -0.537, +0: 0.087, +1: -0.523, +2: -0.886
+gold_ptdb_cp: R2 0.386, cosine 0.708 (43988 encoder frames)
+  alignment, shift in encoder frames: -2: -0.123, -1: -0.015, +0: 0.386, +1: -0.020, +2: -0.132

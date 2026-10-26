@@ -1,0 +1,21 @@
+1. spectrum of the 10 ms trajectory: peak / neighbours at 12.5, 25, 37.5, 50 Hz; energy share outside the sliding mean
+  student v2 synth_train_v2     1.03    1.03    1.01    1.11   residual share 0.151  (512 segments)
+  student v2 gold_ptdb_cp       1.07    1.02    1.02    0.97   residual share 0.195  (633 segments)
+  control R  synth_train_v2     1.03    1.01    1.00    1.19   residual share 0.083  (512 segments)
+  control R  gold_ptdb_cp       1.09    1.02    1.02    1.01   residual share 0.114  (633 segments)
+2. ridge probe for log2 F1 (fit synth_train_v2, score synth_train_v2s; R2)
+  whole frame                        0.762   (123932 / 123932 frames)
+  smooth part (sliding mean of 8)    0.772   (123932 / 123932 frames)
+  residual (frame - mean)            0.090   (123932 / 123932 frames)
+3. filtered scoring cache -> cache\stc_v2_box8
+Traceback (most recent call last):
+  File "C:\github\voice-analyser-parakeet\scripts\parakeet\free_part.py", line 85, in <module>
+    np.save(OUT / d.name / "emb.npy", np.concatenate([box8(x) for x in items(SC, d.name)]).astype(np.float16))
+                                                                       ~~~~~^^^^^^^^^^^^
+  File "C:\github\voice-analyser-parakeet\scripts\parakeet\free_part.py", line 29, in items
+    e, o = np.load(cache / name / "emb.npy", mmap_mode="r"), np.load(cache / name / "emb_off.npy")
+                                                             ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\github\voice-analyser\.venv\Lib\site-packages\numpy\lib\_npyio_impl.py", line 454, in load
+    fid = stack.enter_context(open(os.fspath(file), "rb"))
+                              ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'cache\\stc_v2\\heads\\emb_off.npy'

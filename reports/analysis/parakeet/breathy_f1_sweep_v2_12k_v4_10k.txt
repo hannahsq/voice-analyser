@@ -1,0 +1,16 @@
+D-034 F1 sweep, breathy arms against modal: teacher v3's F1 tracking (reported only; pre-registered 2026-10-24)
+
+tracking slope (1 follows F1, 0 flat) / mean |F1 error| in cents
+  arm            f0 220 Hz        f0 300 Hz        f0 450 Hz        f0 600 Hz      
+  modal          +0.28 /   494    +0.54 /   362    +0.04 /   744    +0.54 /   317  
+  B1             +0.76 /   249    +0.60 /   318    -0.19 /  1052    -0.01 /   785  
+  B2             -0.61 /   856    +0.05 /   483    +0.55 /   224    +0.96 /    38  
+
+B1 against modal: slope change +0.49, +0.05, -0.23, -0.56 -> READING: no clear change
+
+B2 against modal: slope change -0.88, -0.50, +0.51, +0.42 -> READING: no clear change
+
+means over the sweep (students' normalised error against Parakeet; Parakeet's own variation)
+  modal          v2 1.179  v4 1.304  parakeet_variation 0.417
+  B1             v2 1.120  v4 1.231  parakeet_variation 0.390
+  B2             v2 1.367  v4 1.218  parakeet_variation 0.640

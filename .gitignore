@@ -10,5 +10,13 @@ runs/
 # Local clone of hannahsq/tcn-formants for the architecture bake-off (roadmap "Later"); not part of this repo
 external/tcn-formants/
 
+# Parakeet weights (CC-BY-4.0, fetched over HTTPS; see scripts/parakeet/load.py), not committed
+external_models/
+cache/
+
+# probe and combination statistics and coefficients (GBs; rebuilt by the scripts), run logs
+reports/analysis/parakeet/**/*.pt
+reports/analysis/parakeet/**/*.out
+
 # Montreal Forced Aligner environment: a junction to C:\github\.conda (shared with minimal-pairs)
 .conda

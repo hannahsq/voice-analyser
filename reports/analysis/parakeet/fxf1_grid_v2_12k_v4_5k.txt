@@ -1,0 +1,35 @@
+D-034 controlled f0 x F1 grid (reported only; pre-registered 2026-10-24). NE = squared error / held_synth_v2's target variance
+
+v2: rows f0, columns F1    300    450    600    800   1000
+  f0  150 Hz                     0.880  0.830  0.810  0.794  0.813
+  f0  250 Hz                     0.920  1.128  1.092  0.932  0.902
+  f0  400 Hz                     1.307  1.244  1.340  1.481  1.333
+  f0  600 Hz                     1.450  1.435  1.592  1.354  1.306
+  f0  800 Hz                     1.315  1.267  1.301  1.432  1.321
+
+v4: rows f0, columns F1    300    450    600    800   1000
+  f0  150 Hz                     1.485  1.386  1.219  1.148  1.253
+  f0  250 Hz                     1.252  1.415  1.299  1.137  1.218
+  f0  400 Hz                     1.311  1.256  1.324  1.393  1.359
+  f0  600 Hz                     1.686  1.696  1.809  1.609  1.531
+  f0  800 Hz                     1.476  1.421  1.476  1.582  1.513
+
+parakeet_variation: rows f0, columns F1    300    450    600    800   1000
+  f0  150 Hz                     0.137  0.113  0.097  0.092  0.093
+  f0  250 Hz                     0.164  0.154  0.182  0.181  0.155
+  f0  400 Hz                     0.319  0.363  0.358  0.480  0.473
+  f0  600 Hz                     0.338  0.308  0.255  0.361  0.465
+  f0  800 Hz                     0.508  0.501  0.466  0.372  0.468
+
+parakeet_grid_share: rows f0, columns F1    300    450    600    800   1000
+  f0  150 Hz                     0.123  0.108  0.074  0.098  0.050
+  f0  250 Hz                     0.119  0.106  0.044  0.038  0.037
+  f0  400 Hz                     0.073  0.052  0.091  0.076  0.065
+  f0  600 Hz                     0.078  0.062  0.059  0.070  0.049
+  f0  800 Hz                     0.031  0.023  0.028  0.020  0.032
+
+Rule: NE = a + b_f log2 f0 + b_1 log2 F1 on the 25 cell means; rho = -b_1 / b_f
+  v2: NE range 0.798; b_f +0.245 per octave of f0, b_1 -0.010 per octave of F1 (fit R2 0.76); rho +0.04 [-0.01, +0.09] -> f0 drives it
+  v4: NE range 0.673; b_f +0.131 per octave of f0, b_1 -0.044 per octave of F1 (fit R2 0.45); rho +0.34 [+0.26, +0.42] -> both
+
+READING: students disagree

@@ -1,0 +1,41 @@
+Fitted on 13895 labelled crops: ridge on 111160 sonorant L5 frames (lambda 1000); calibrations on 8263 tube crops: F1-F4 slope 0.972, F1-F3 slope 0.979
+
+Hillenbrand dev: m 27, w 29, b 16, g 11 speakers, 996 files
+
+apparent (labeller v3)
+  men          17.837 [  17.431,   18.062]
+  women        15.390 [  15.248,   15.657]
+  children     14.679 [  14.462,   15.035]
+  w/m           0.863 [   0.849,    0.891]
+  within SD   155.816 [ 149.827,  161.608]
+  rel men       0.170 [   0.092,    0.250]
+  rel women     0.135 [   0.087,    0.175]
+
+apparent (reference F1-F3)
+  men          17.867 [  17.587,   18.077]
+  women        15.507 [  15.282,   15.811]
+  children     14.589 [  14.127,   14.957]
+  w/m           0.868 [   0.851,    0.890]
+  within SD   257.124 [ 247.797,  266.633]
+  rel men       0.041 [   0.018,    0.063]
+  rel women     0.068 [   0.035,    0.105]
+
+L5 ridge
+  men          16.801 [  16.465,   17.294]
+  women        15.834 [  15.508,   16.081]
+  children     14.380 [  14.060,   14.834]
+  w/m           0.942 [   0.912,    0.970]
+  within SD   118.360 [ 112.920,  123.901]
+  rel men       0.395 [   0.247,    0.501]
+  rel women     0.219 [   0.137,    0.298]
+
+Paired differences (speaker bootstrap): L5 ridge - apparent (labeller v3)
+  men          -1.036 [  -1.376,   -0.403]
+  women        +0.443 [  +0.126,   +0.691]
+  children     -0.299 [  -0.846,   +0.144]
+  w/m          +0.080 [  +0.042,   +0.101]
+  within SD   -37.456 [ -43.239,  -31.541]
+  rel men      +0.225 [  +0.097,   +0.346]
+  rel women    +0.083 [  -0.006,   +0.169]
+
+Anatomy for orientation (Vorperian et al. 2018, ages 18-25): men 17.6, women 15.6 cm, w/m 0.886; children 4-12 11.4-14.5 cm

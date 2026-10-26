@@ -1,0 +1,22 @@
+== v4 on held_synth_v2 (256 crops, 127 with median f0 >= 250 Hz)
+  regen reproduces base: max |R2 difference| 0.00000
+  f0 >= 250 Hz: P regen 0.0060, jit0 0.0038, jit2 0.0078, hnr0 0.0025, whisper (all crops) 0.0035
+    jit2 / jit0: 2.06 [0.58, 3.83] -> partly
+    hnr0 / regen: 0.41 [0.16, 2.14] -> partly
+  all crops: P regen 0.0037, jit0 0.0025, jit2 0.0051, hnr0 0.0012, whisper (all crops) 0.0035
+    jit2 / jit0: 2.04 [0.79, 4.02] -> not jitter
+    hnr0 / regen: 0.31 [0.15, 1.67] -> partly
+  whisper / regen, all crops, unpaired: 0.94 [0.28, 4.17] (reported, no reading)
+  Spearman(own P, drawn jitter), f0 >= 250 Hz: -0.03 [-0.20, +0.15]
+  Spearman(own P, drawn jitter), all crops: -0.02 [-0.13, +0.10]
+== v4 on held_synth_v2s (256 crops, 127 with median f0 >= 250 Hz)
+  regen reproduces base: max |R2 difference| 0.00000
+  f0 >= 250 Hz: P regen 0.0068, jit0 0.0028, jit2 0.0069, hnr0 0.0038, whisper (all crops) 0.0036
+    jit2 / jit0: 2.51 [0.48, 4.71] -> partly
+    hnr0 / regen: 0.56 [0.14, 2.49] -> partly
+  all crops: P regen 0.0045, jit0 0.0034, jit2 0.0051, hnr0 0.0054, whisper (all crops) 0.0036
+    jit2 / jit0: 1.48 [0.74, 3.31] -> partly
+    hnr0 / regen: 1.20 [0.40, 3.30] -> partly
+  whisper / regen, all crops, unpaired: 0.80 [0.24, 3.83] (reported, no reading)
+  Spearman(own P, drawn jitter), f0 >= 250 Hz: +0.02 [-0.16, +0.19]
+  Spearman(own P, drawn jitter), all crops: +0.02 [-0.10, +0.13]

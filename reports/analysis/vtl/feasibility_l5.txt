@@ -1,0 +1,8 @@
+VTL feasibility on heads_l3_6: 13895 crops (length not from f0; tube 8263, cascade 5632), held out 2794 by clip
+
+Parakeet L5 crop mean -> ridge (lambda 1000): held-out R^2 0.807 (tube 0.864, cascade 0.725); error SD 149 cents (label SD 339)
+  shuffle null (5 permutations): held-out R^2 -0.031 (max -0.008)
+
+True F1-F4, uniform-tube apparent length (median over sonorant frames), calibrated: held-out R^2 0.955 (tube 0.970, cascade 0.933); slope 0.957
+  calibrated on tube only: held-out R^2 on tube 0.985, on the other 0.872
+  calibrated on cascade only: held-out R^2 on cascade 0.971, on the other 0.888
