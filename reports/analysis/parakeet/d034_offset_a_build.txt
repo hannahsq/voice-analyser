@@ -1,0 +1,12 @@
+50/479
+100/479
+150/479
+200/479
+250/479
+300/479
+350/479
+400/479
+450/479
+q = 0 against emb_v1: max |diff| 0.063
+phase-averaged R2 against emb_v1's layer 5: 0.9158
+done
