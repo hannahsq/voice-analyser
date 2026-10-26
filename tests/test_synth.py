@@ -130,6 +130,43 @@ def test_generate_is_deterministic():
     assert not np.array_equal(a.audio, generate(12, seed=3).audio)
 
 
+def test_flat_store_regenerates_from_index_and_seed(tmp_path):
+    """a stored clip is generate(index, the set's config, its seed) stored as int16: analyses regenerate clips this way
+    (D-034's jitter arms) instead of keeping the shards' metadata"""
+    import json
+
+    from vocal_analysis.synth.shards import INT16_SCALE, write_set
+    from vocal_analysis.train.data import LABEL_KEYS, consolidate
+
+    cfg = SynthConfig(duration_s=(1.0, 1.0))
+    flat = consolidate(write_set(tmp_path / "s", 3, cfg, seed=5, shard_size=2, workers=1, log=lambda m: None), log=lambda m: None)
+    ix = json.loads((flat.parent / "index.json").read_text())
+    cfg2 = SynthConfig(**{k: tuple(v) if isinstance(v, list) else v for k, v in ix["synth_config"].items()})
+    audio, a_off, f_off = (np.load(flat / f) for f in ("audio.npy", "audio_offsets.npy", "frame_offsets.npy"))
+    for i in range(3):
+        c = generate(i, cfg2, ix["seed"])
+        stored = np.clip(np.round(c.audio * INT16_SCALE), -32768, 32767).astype(np.int16)
+        assert np.array_equal(stored, audio[a_off[i]:a_off[i + 1]])
+        for k in LABEL_KEYS:
+            assert np.array_equal(np.load(flat / f"label_{k}.npy")[f_off[i]:f_off[i + 1]], c.labels[k], equal_nan=True)
+
+
+def test_fixed_jitter_keeps_the_random_stream():
+    """fixing jitter to the value a clip drew reproduces it exactly, so a fixed-jitter arm changes only the period
+    perturbations (D-034); a different value changes the audio but not the labels"""
+    from dataclasses import replace
+
+    cfg = SynthConfig(duration_s=(1.0, 1.0))
+    i = next(i for i in range(20) if generate(i, cfg, seed=2).labels["voiced"].mean() > 0.5)  # whispered clips have no periods
+    a = generate(i, cfg, seed=2)
+    j = a.meta["jitter"]
+    b = generate(i, replace(cfg, jitter=(j, j)), seed=2)
+    assert np.array_equal(a.audio, b.audio)
+    c = generate(i, replace(cfg, jitter=(0.02, 0.02)), seed=2)
+    assert len(c.audio) == len(a.audio) and not np.array_equal(c.audio, a.audio)
+    assert all(np.array_equal(a.labels[k], c.labels[k], equal_nan=True) for k in a.labels)
+
+
 @pytest.mark.parametrize("how", ["f1_near_h1", "f1_near_h2", "f2_f3_close"])
 def test_constraints_keep_formants_ordered(how):
     clip = generate(5, SynthConfig(formant_constraint=how, p_register_step=0))
