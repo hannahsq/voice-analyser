@@ -1,0 +1,4 @@
+Probe guard noise floor (f0 <= 250 Hz; median |slope|, cents per octave)
+  T   observed  24.3; shuffle null median  15.2 [95 %  21.1]; P(null >= observed) 0.004; seeds 24.7 25.4 22.7; per-clip residual SD 15 c
+  P   observed 142.1; shuffle null median 104.1 [95 % 146.0]; P(null >= observed) 0.072; seeds 160.7 138.9 144.6; per-clip residual SD 116 c
+  Tc  observed  20.1; shuffle null median  14.9 [95 %  21.8]; P(null >= observed) 0.104; seeds 21.6 27.6 18.3; per-clip residual SD 15 c
