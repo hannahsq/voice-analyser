@@ -338,10 +338,22 @@ def _interactive_tract(spk, drawn, tt, widths, n, glottis, sub_gain):
 # ----------------------------------------------------------------------------- clip
 
 
-def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_components: bool = False) -> SynthClip:
-    """Clip `index` of a set. keep_components: also return the rendered components (voiced, aspiration, whisper,
-    frication, total; scale before the clip's normalisation, meta["gain"]) for observability (D-027); no extra draws."""
-    cfg = cfg or SynthConfig()
+@dataclass
+class _Voice:
+    """The first draws of a clip: its source contour and tract length. `rng` continues the clip's stream after them."""
+    rng: np.random.Generator
+    n: int
+    centre: float
+    contour: dict
+    rd: np.ndarray
+    register_steps: list
+    f0: np.ndarray
+    length: float
+    length_group: str | None
+    length_from_f0: bool
+
+
+def _voice_and_length(index: int, cfg: SynthConfig, seed: int) -> _Voice:
     rng = np.random.default_rng([seed, index])
     dur = rng.uniform(*cfg.duration_s)
     n = int(round(dur * 1000)) + 1  # control points (1 ms)
@@ -365,14 +377,19 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
     f0 = 2.0 ** log2f0
 
     length_group = None
-    if rng.random() < cfg.p_length_from_f0:
+    from_f0 = bool(rng.random() < cfg.p_length_from_f0)
+    if from_f0:
         length = _coupled_length(rng, cfg, centre)
     elif cfg.length_dist == "population":
         length, length_group = _population_length(rng)
     else:
         length = rng.uniform(*cfg.length_cm)
+    return _Voice(rng, n, centre, contour, rd, register_steps, f0, float(length), length_group, from_f0)
 
-    # Phrasing: voiced segments separated by gaps of different kinds
+
+def _phrasing(rng: np.random.Generator, cfg: SynthConfig, n: int):
+    """Phrasing (voiced segments separated by gaps of different kinds), loudness and articulation target times: the
+    draws `generate` makes after the source and before the tract kind, none of them rendering."""
     voice_env = np.zeros(n)
     whisper = np.zeros(n)
     fric = np.zeros(n)
@@ -416,6 +433,29 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
     while pos < n:
         pos += rng.uniform(*cfg.target_every_s) * 1000
         tt.append(pos)
+    return voice_env, whisper, fric, h_env, segments, whisper_clip, loud, tt
+
+
+def clip_tract(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> tuple[float, bool, bool]:
+    """Clip `index`'s anatomical tract length (cm), whether it was drawn from the clip's f0 (`p_length_from_f0`), and
+    whether the clip uses the tube (else the cascade), without rendering: the draws `generate` makes before the tract
+    (D-021's VTL labels for sets whose shards are gone)."""
+    cfg = cfg or SynthConfig()
+    v = _voice_and_length(index, cfg, seed)
+    _phrasing(v.rng, cfg, v.n)
+    use_tube = cfg.p_tube > 0 and v.rng.random() < cfg.p_tube
+    return v.length, v.length_from_f0, bool(use_tube)
+
+
+def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_components: bool = False) -> SynthClip:
+    """Clip `index` of a set. keep_components: also return the rendered components (voiced, aspiration, whisper,
+    frication, total; scale before the clip's normalisation, meta["gain"]) for observability (D-027); no extra draws."""
+    cfg = cfg or SynthConfig()
+    v = _voice_and_length(index, cfg, seed)
+    rng, n, centre, contour, rd, register_steps, f0 = v.rng, v.n, v.centre, v.contour, v.rd, v.register_steps, v.f0
+    length, length_group = v.length, v.length_group
+
+    voice_env, whisper, fric, h_env, segments, whisper_clip, loud, tt = _phrasing(rng, cfg, n)
     use_tube = cfg.p_tube > 0 and rng.random() < cfg.p_tube  # no draw at p_tube = 0, so cascade-only seeds reproduce
     tube_info, glottis, c_scale = None, None, None
     interactive, area_sq, sub_gain, feedback, closure = False, None, None, None, 1.0
@@ -528,6 +568,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
     }
     meta = {
         "index": index, "seed": seed, "fs": FS, "duration_s": len(audio) / FS, "length_cm": length, "length_group": length_group,
+        "length_from_f0": v.length_from_f0,
         "contour": contour, "register_steps": register_steps, "segments": segments,
         "jitter": jitter, "shimmer_db": shimmer, "hnr_db": hnr, "gain": gain,
         "tract": "tube" if use_tube else "cascade", "tube": tube_info,

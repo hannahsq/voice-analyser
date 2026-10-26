@@ -151,6 +151,26 @@ def test_flat_store_regenerates_from_index_and_seed(tmp_path):
             assert np.array_equal(np.load(flat / f"label_{k}.npy")[f_off[i]:f_off[i + 1]], c.labels[k], equal_nan=True)
 
 
+@pytest.mark.parametrize("settings", [{}, {"p_length_from_f0": 0.0, "length_dist": "population"}, {"p_length_from_f0": 1.0}])
+def test_clip_tract_matches_generate(settings):
+    """clip_tract makes only the draws generate makes before the tract, so it recovers a stored clip's tract length,
+    whether it came from the f0, and tube or cascade (D-021's VTL labels for train_v2, whose shards are gone)"""
+    from vocal_analysis.synth.sampler import clip_tract
+
+    cfg = SynthConfig(duration_s=(1.0, 1.5), **settings)
+    kinds = set()
+    for i in range(8):
+        c = generate(i, cfg, seed=11)
+        length, from_f0, use_tube = clip_tract(i, cfg, seed=11)
+        assert length == c.meta["length_cm"] and np.all(c.labels["length_cm"] == length)
+        assert from_f0 == c.meta["length_from_f0"]
+        assert use_tube == (c.meta["tract"] == "tube")
+        kinds.add(use_tube)
+        if "p_length_from_f0" in settings:
+            assert from_f0 == (settings["p_length_from_f0"] == 1.0)
+    assert kinds == {True, False}  # both kinds checked
+
+
 def test_fixed_jitter_keeps_the_random_stream():
     """fixing jitter to the value a clip drew reproduces it exactly, so a fixed-jitter arm changes only the period
     perturbations (D-034); a different value changes the audio but not the labels"""
