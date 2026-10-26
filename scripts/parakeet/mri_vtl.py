@@ -8,7 +8,11 @@ Per frame, the airway is closed into a polygon so the midline cannot cross a wal
   -> the pharyngeal wall below the tip's height (sealing off the nasopharynx) -> arytenoid to its lowest point;
 - inner wall: lower lip from the aperture -> tongue (front to root; the line from the lower lip to the tongue tip seals
   off the space under the tongue) -> epiglottis to its lowest point;
-- glottis end: the midpoint of the epiglottis's and arytenoid's lowest points.
+- glottis end (VA_GLOTTIS): "lowest", the midpoint of the epiglottis's and arytenoid's lowest points (A); "level", the
+  same with the back wall cut at the epiglottis bottom's height, a level glottal line (B); "curv", the back wall's
+  sharpest bend joined to the epiglottis at a set angle (tried, fits worse); "mix" (default, D-035), the frame's length
+  is (A + 2 B) / 3: Annot-16's back wall runs below the glottis (its glottal line slopes 30-40 degrees down at the back,
+  an annotator's 4-31 degrees up), and 1:2 is the maximum-likelihood mix on 10 annotated frames (pooled w = 0.33-0.35).
 Midline: the cheapest 8-connected path on a 4x grid from lip end to glottis end, costing 1 + 1 / (d + 0.25)^2 per pixel
 inside the polygon (d: distance to its edge, px), so it keeps to the middle, and 200 per pixel outside (crossed only at
 a full closure, such as the tongue tip at the alveolar ridge; reported per frame). Smoothed over about 2 px where that
@@ -30,7 +34,10 @@ N_PLOTS = int(sys.argv[4]) if len(sys.argv) > 4 else 0
 MM = 2.4  # mm per pixel (200 mm FOV, 84 x 84)
 UP = 4  # grid cells per pixel
 OUTSIDE = 200.0
-GLOTTIS = os.environ.get("VA_GLOTTIS", "lowest")  # "lowest": midpoint of the lowest points; "level": see airway()
+GLOTTIS = os.environ.get("VA_GLOTTIS", "mix")  # see the docstring
+W_LOWEST = 1 / 3  # "mix": weight of A (lowest) against B (level)
+ANGLE = float(os.environ.get("VA_GLOTTAL_ANGLE", "16"))  # "curv": glottal line, degrees, back end higher
+PICK = os.environ.get("VA_CURV_PICK", "lowest")  # "curv": which bend of the back wall is the glottis's back end
 OUT.mkdir(parents=True, exist_ok=True)
 
 
@@ -60,6 +67,45 @@ def to_lowest(c):
     return c[: np.argmax(c[:, 1]) + 1]  # image y grows downwards
 
 
+LAST = {}  # the last airway()'s glottal line ends, for plots
+
+
+def curv_glottis(ar, ep_full, ep_low):
+    """Back of the glottis at the back wall's lowest sharp bend (curvature peak); front where a line from it at
+    ANGLE degrees (back end higher) meets the epiglottis, or the straight extension of its last segment.
+    Returns the back wall and epiglottis cut at those points."""
+    from scipy.signal import find_peaks
+    r = smooth(resample(ar), 9)
+    th = np.unwrap(np.arctan2(*np.diff(r, axis=0).T[::-1]))
+    k = np.abs(np.gradient(th)) / 0.25  # rad per px
+    pk, _ = find_peaks(k, prominence=0.15)
+    pk = pk[(pk > 4) & (pk < len(r) - 5)]
+    if PICK == "bump":  # the sharpest bend below the bump's most forward point (the bump's lower turn)
+        pk = pk[pk > np.argmin(r[:, 0])]
+        i = pk[np.argmax(k[pk])] if len(pk) else int(np.argmax(r[:, 1]))
+    else:  # the lowest bend
+        i = pk[np.argmax(r[pk, 1])] if len(pk) else int(np.argmax(r[:, 1]))
+    P = r[i]
+    u = np.array([-np.cos(np.radians(ANGLE)), np.sin(np.radians(ANGLE))])  # forward and down
+
+    def hit(a, b, seg_only=True):  # P + t u = a + s (b - a)
+        M = np.c_[u, a - b]
+        if abs(np.linalg.det(M)) < 1e-9:
+            return None
+        t, s = np.linalg.solve(M, a - P)
+        return (t, s) if t > 0 and (0 <= s <= 1 or not seg_only) else None
+
+    e = ep_full
+    for j in range(len(e) - 1):
+        h = hit(e[j], e[j + 1])
+        if h:
+            return r[: i + 1], np.r_[e[: j + 1], [P + h[0] * u]]
+    h = hit(ep_low[-2], ep_low[-1], seg_only=False)
+    if h and h[1] >= 1 and h[0] < 15:  # beyond the epiglottis's end, within 15 px
+        return r[: i + 1], np.r_[ep_low, [P + h[0] * u]]
+    return r[: i + 1], ep_low
+
+
 def airway(d):
     c = {k: np.asarray(v, float) for k, v in d.items()}
     ul, ll = c["upper_lip"], c["lower_lip"]
@@ -85,7 +131,11 @@ def airway(d):
             j = k[0]
             t = (ep[-1][1] - ar[j - 1, 1]) / (ar[j, 1] - ar[j - 1, 1])
             ar = np.r_[ar[:j], [ar[j - 1] + t * (ar[j] - ar[j - 1])]]
+    if GLOTTIS == "curv":
+        ar, ep = curv_glottis(oriented(c["arytenoid"], outer[-1][-1]), oriented(c["epiglottis"], tg[-1]), ep)
+        inner[-1] = ep
     outer.append(ar)
+    LAST.update(front=ep[-1], back=ar[-1])
     glottis = (ep[-1] + ar[-1]) / 2
     poly = np.r_[[lip], np.concatenate(outer), [glottis], np.concatenate(inner)[::-1], [lip]]
     return lip, glottis, poly
@@ -132,7 +182,15 @@ subj = {r[0]: (r[1], float(r[2]) if r[2] != "None" else np.nan, float(r[3])) for
 rows, plots = [], 0
 for f in sorted(GT.glob("*.json")):
     d = json.loads(f.read_text())
-    path, L, poly, outside = midline(d)
+    if GLOTTIS == "mix":
+        GLOTTIS = "lowest"
+        L_a = midline(d)[1]
+        GLOTTIS = "level"
+        path, L_b, poly, outside = midline(d)
+        GLOTTIS = "mix"
+        L = W_LOWEST * L_a + (1 - W_LOWEST) * L_b  # the plotted path is B's
+    else:
+        path, L, poly, outside = midline(d)
     spk = f.name.split("_")[0]
     rows.append((spk, f.stem, L, outside))
     if plots < N_PLOTS:
