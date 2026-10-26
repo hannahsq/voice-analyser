@@ -1,6 +1,6 @@
 """D-033 part 4: train a ParakeetHead on cached Parakeet layers (cache_heads.py), so heads on different layer sets see
 exactly the same crops. AdamW 1e-3, weight decay 0.01, 500 warm-up steps, cosine over STEPS, batch 32, seed 0.
-Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/train_cached.py <cache dir> <out dir> <layers, e.g. 5 or 3,4,5,6> [steps]"""
+Run from the main checkout: VA_DEVICE=cuda python scripts/parakeet/train_cached.py <cache dir> <out dir> <layers, e.g. 5 or 3,4,5,6> [steps]"""
 import json
 import math
 import os

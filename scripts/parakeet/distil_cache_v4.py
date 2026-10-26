@@ -8,7 +8,7 @@ Words: Parakeet sees the word file (its first phi * 160 samples dropped), frame 
 frame 8e + phi (the student gets the file with N_MAX / 2 zeros either side, as log_power pads it at inference);
 targets for e with 8e + phi < L and e inside Parakeet's output, masked.
 -> <out>/<set>/audio.npy, target.npy, phase.npy (and length.npy, mask.npy for words); stats.npz from the training crops'
-targets; done. Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/distil_cache_v4.py <out dir> <mfa dir>
+targets; done. Run from the main checkout: VA_DEVICE=cuda python scripts/parakeet/distil_cache_v4.py <out dir> <mfa dir>
 VA_PART=korean builds only held_words_zeroth (Zeroth-Korean val words, from minimal-pairs' alignment cache given as
 <mfa dir>; a pause on at least one side, as speechocean762's) into <out dir>, kept apart from the training cache."""
 import json

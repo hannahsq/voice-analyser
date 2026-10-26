@@ -24,6 +24,7 @@ dependencies = [
 dev = ["pytest>=8", "matplotlib>=3.8"]  # matplotlib: diagnostic plots
 baselines = ["praat-parselmouth>=0.4"]
 train = ["schedulefree>=1.4"]  # --optimizer schedulefree (D-018); torch itself comes from the ROCm index (D-001)
+parakeet = ["safetensors>=0.4"]  # scripts/parakeet: Parakeet weights (external_models/); DAC runs in its own .venv-dac (descript-audio-codec)
 
 [project.scripts]
 va = "vocal_analysis.cli:main"

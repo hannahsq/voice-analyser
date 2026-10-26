@@ -4,7 +4,7 @@
 train_v2 clip (2-4 s) is shorter than the 400-frame crop, so a crop starts at the clip's first frame.
 Resynthesised crops get NaN (their tract length is unknown).
 Writes <cache>/vtl.npz: length_cm (N,) float32, from_f0, tube (bool), clip (int, -1 for resynthesised crops).
-Run from the main checkout: python <worktree>/scripts/parakeet/vtl_cache_labels.py <cache dir>"""
+Run from the main checkout: python scripts/parakeet/vtl_cache_labels.py <cache dir>"""
 import json
 import sys
 from pathlib import Path

@@ -2,7 +2,7 @@
 same seeds as cache.py (train_v2 / train_v2s validation, 512 crops, seed 12345), Hillenbrand dev and the PTDB-TUG dev
 closed-phase files whole, in cache.py's item order. Writes <cache>/<set>/m_<name>_log2F.npy and m_<name>_sigma.npy
 (per reference frame), which eval_heads.py reads with `col:<name>`. Checks the regenerated crops' labels against the cache.
-Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/s2_score.py <scratch dir> <cache dir> name=ckpt ..."""
+Run from the main checkout: VA_DEVICE=cuda python scripts/parakeet/s2_score.py <scratch dir> <cache dir> name=ckpt ..."""
 import json
 import os
 import sys

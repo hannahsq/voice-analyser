@@ -10,7 +10,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-R = Path("C:/github/voice-analyser-parakeet/reports/analysis/parakeet")
+R = Path("reports/analysis/parakeet")
 OUT = Path(sys.argv[1])
 
 

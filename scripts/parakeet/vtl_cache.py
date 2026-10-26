@@ -7,7 +7,7 @@ Parts (argv[2:], default all; each skipped if done):
   against that cache's labels; clip ids for the length labels;
 - probe: the f0-invariance probe's 144 clips (eval.invariance), whole clips, teacher and Parakeet layer 5;
 - hb: Hillenbrand dev files, whole files, teacher features at the reference frames (cache.py's order, checked).
-Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/vtl_cache.py <out dir> [parts]"""
+Run from the main checkout: VA_DEVICE=cuda python scripts/parakeet/vtl_cache.py <out dir> [parts]"""
 import json
 import os
 import sys

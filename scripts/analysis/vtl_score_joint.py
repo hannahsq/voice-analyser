@@ -29,7 +29,7 @@ from vocal_analysis.models.infer import analyse, decode_outputs, load_teacher
 from vocal_analysis.train.data import SynthCrops, collate, split_ids
 from vocal_analysis.train.teacher import _saved_channel
 
-WT = Path("../voice-analyser-parakeet/cache")
+WT = Path("cache")
 CROP = 400
 
 

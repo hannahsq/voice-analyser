@@ -10,7 +10,7 @@ sonorant (0/1) on synthetic clips only.
 Scored on synthetic validation (512 fixed 4 s crops each, seed 12345: train_v2, train_v2s, resynthesised VocalSet /
 Zeroth-Korean val) and the baseline gold sets on dev speakers (Hillenbrand formants; PTDB-TUG, MIR-1K, MDB-stem-synth
 f0 and voicing; whole files). Teacher v3 on the same frames. Run from the main checkout (data/, runs/):
-  VA_DEVICE=cuda python <worktree>/scripts/parakeet/probe.py <out dir>"""
+  VA_DEVICE=cuda python scripts/parakeet/probe.py <out dir>"""
 import json
 import os
 import sys

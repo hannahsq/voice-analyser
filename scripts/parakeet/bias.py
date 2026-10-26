@@ -7,7 +7,7 @@
   (head only; the probe has no sigma); (c) F1 only, teacher v3's F2-F4.
 Rule (amended before any result): per member, (c) cuts women's closed-phase F1 |median signed| by >= 5 Hz, raises
 men's by <= 5 Hz, and keeps Hillenbrand dev F1 MAE (all) within +4 Hz of teacher v3: "worth a full arm", else "no".
-Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/bias.py <scratch dir> <head ckpt> <probe coef> <out>"""
+Run from the main checkout: VA_DEVICE=cuda python scripts/parakeet/bias.py <scratch dir> <head ckpt> <probe coef> <out>"""
 import json
 import os
 import sys

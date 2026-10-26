@@ -2,7 +2,7 @@
 the trainer uses. Teacher v3's training mixture (train_v2 training clips + 30 % resynthesised VocalSet / Zeroth-Korean,
 its saved channel model), N fixed 4 s crops (seed 999, so none repeats probe.py's / cache.py's fitting crops), loaded by
 8 workers. Writes <out>/emb.npy (N, E, 4, 1024) and labels (N, 400, ...) as memmaps, then "done".
-Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/cache_heads.py <out dir> [N]"""
+Run from the main checkout: VA_DEVICE=cuda python scripts/parakeet/cache_heads.py <out dir> [N]"""
 import json
 import os
 import sys

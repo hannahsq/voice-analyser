@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-sys.path.insert(0, r"C:\github\voice-analyser-parakeet\scripts\parakeet")
+sys.path.insert(0, str(Path(__file__).parent))
 import fid_breakdown as fb  # noqa: E402  (module-level setup reads argv[1] as the cache dir)
 from student import Student  # noqa: E402
 

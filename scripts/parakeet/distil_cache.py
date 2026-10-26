@@ -12,7 +12,7 @@ Sets (training pools only; no evaluation corpus):
   held out: 512 each from Zeroth-Korean val, VocalSet val, train_v2 and train_v2s synthetic validation (seed 12345)
 -> <out>/<set>/audio.npy (n, samples) fp16, target.npy (n, 50, 1024) fp16; <out>/stats.npz (per-dimension mean, std of
 the training targets); <out>/done. Run from the main checkout:
-VA_DEVICE=cuda python <worktree>/scripts/parakeet/distil_cache.py <out dir>"""
+VA_DEVICE=cuda python scripts/parakeet/distil_cache.py <out dir>"""
 import csv
 import json
 import os

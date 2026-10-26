@@ -18,7 +18,7 @@ A=reports/analysis
 F=$A/paired/w400
 mkdir -p $F $A/d036
 PARENT=runs/conformer_v2r2_s1/ckpt_016000.pt
-HEAD=../voice-analyser-parakeet/cache/vtl/heads/T_s0/head.pt
+HEAD=cache/vtl/heads/T_s0/head.pt
 REF=d036_arm0
 
 arm() {  # name, train-set arguments...

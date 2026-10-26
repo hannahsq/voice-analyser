@@ -16,8 +16,8 @@ import numpy as np
 import torch
 from torch import nn
 
-HEADS = Path(os.environ.get("VA_HEADS", "../voice-analyser-parakeet/cache/heads_l3_6"))
-VTL = Path(os.environ.get("VA_VTL", "../voice-analyser-parakeet/cache/vtl"))
+HEADS = Path(os.environ.get("VA_HEADS", "cache/heads_l3_6"))
+VTL = Path(os.environ.get("VA_VTL", "cache/vtl"))
 STEPS, WARM, BATCH = int(os.environ.get("VA_STEPS", 4000)), 300, 32  # VA_STEPS: code checks only
 
 

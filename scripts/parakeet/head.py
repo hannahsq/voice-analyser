@@ -1,6 +1,6 @@
 """D-033 part 2: a trained head on Parakeet TDT 0.6B v3's layer 5 (frozen, truncated after it), with teacher v3's own
 output heads and loss, so `decode_outputs` reads it like any teacher. Train (run from the main checkout):
-  VA_DEVICE=cuda python <worktree>/scripts/parakeet/head.py <out dir> [steps]"""
+  VA_DEVICE=cuda python scripts/parakeet/head.py <out dir> [steps]"""
 import json
 import math
 import os

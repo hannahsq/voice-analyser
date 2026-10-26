@@ -7,7 +7,7 @@ Hillenbrand (formants at the reference times), PTDB-TUG / MIR-1K / MDB-stem-synt
 PTDB-TUG dev closed-phase frames (ptdb_egg_sub.npz).
 Each set -> <out>/<set>/: emb.npy (frames, 7, 1024) fp16, emb_off.npy (item offsets into emb), and per-frame arrays
 (10 ms label frames or reference frames) with ref_off.npy offsets and mel positions (mel.npy). Run from the main
-checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/cache.py <scratch dir> <out dir>"""
+checkout: VA_DEVICE=cuda python scripts/parakeet/cache.py <scratch dir> <out dir>"""
 import json
 import os
 import sys

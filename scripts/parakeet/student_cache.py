@@ -7,7 +7,7 @@ frames 4.. are stored, so stored frame k is file frame k + 4 and the same head o
 file clamp to its frame 4). bf16 autocast, as the student trained; fp16 storage.
 Writes <out>/<set>/emb.npy (frames, 1024), emb_off.npy and <out>/meta.json; with --heads N, <out>/heads/emb.npy
 (N, 400, 1024) and labels, then heads/done. NAME labels the encoder in head checkpoints (eval_heads.py --feat=NAME=<out>).
-Run from the main checkout: VA_DEVICE=cuda python <worktree>/scripts/parakeet/student_cache.py <scratch dir> <student ckpt> <out dir> NAME [--heads N]"""
+Run from the main checkout: VA_DEVICE=cuda python scripts/parakeet/student_cache.py <scratch dir> <student ckpt> <out dir> NAME [--heads N]"""
 import json
 import os
 import sys
@@ -30,7 +30,7 @@ from vocal_analysis.synth.channel import ChannelConfig  # noqa: E402
 from vocal_analysis.train.data import MixedCrops, SynthCrops, collate, consolidate, split_ids  # noqa: E402
 
 CROP, OFFSET = 400, 4
-REF = Path(r"C:\github\voice-analyser-parakeet\cache\emb_v1")  # the scoring cache whose items are mirrored
+REF = Path("cache/emb_v1")  # the scoring cache whose items are mirrored
 
 # all work under the main guard: DataLoader workers re-import this file on Windows (spawn)
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ blocks' outputs (128 / 256 / 512 channels at 8 kHz / 2 kHz / 400 Hz, averaged ov
 block (1024), T5 the encoder's output latent (1024, before quantisation), T6 the quantised latent (1024).
 Writes <out>/<set>/emb.npy (frames, 3968) fp16 and emb_off.npy, and <out>/meta.json. Also a 40,000-crop head cache of
 chosen taps with `--heads TAPS N` (part 4's crops: cache_heads.py's seed 999 mixture).
-Run from the main checkout with .venv-dac: python <worktree>/scripts/parakeet/dac_cache.py <scratch dir> <out dir> [--heads 4,5 40000]"""
+Run from the main checkout with .venv-dac: python scripts/parakeet/dac_cache.py <scratch dir> <out dir> [--heads 4,5 40000]"""
 import json
 import os
 import sys
