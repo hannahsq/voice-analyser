@@ -1016,6 +1016,7 @@ Hannah's question: how much of what our models learn can a large pretrained spee
     - Paired speaker bootstrap (2,000 resamples): arm − labeller v3, women's |bias| −5.0 [−7.2, −2.9] (on dev −4.7 [−8.3, +5.3], unresolved), men's +0.2 [−4.0, +8.0], Hillenbrand F1 MAE −3.8 [−5.0, −2.6]. Against the mean of the single-seed (c)s: women −0.3 [−1.8, +0.7].
     - Reported: teacher v3 with H5×6 (arm_t) against teacher v3, women 9.6 → 5.3 in the bootstrap means; the three-seed median against labeller v3, women 10.4 → 11.3, Hillenbrand 34.4 → 35.5.
     - *So*: labeller v3 + H5×6 is the F1 labeller candidate for M3's acceptance. Semi-private's women read higher than dev's under every model (labeller v3 10.4 against 8.0), and the arm halves it there rather than removing it.
+  - *Pooled estimate (as pre-registered: reported only, decides nothing; `full_arm_pooled.txt`, from reruns of `full_arm.py` on both tiers that reproduce their reports exactly)*. PTDB-TUG 20 speakers (10 women), Hillenbrand 139. Labeller v3 → arm: women's |F1 bias| 9.1 → 2.3, men's 5.8 → 2.8, Hillenbrand F1 MAE 36.0 → 31.9. Bootstrap (within tier and sex / group), arm − labeller v3: women −6.2 [−7.8, −2.2], men −2.8 [−4.7, −0.1], Hillenbrand −4.1 [−5.1, −3.0]. Dev was used to choose the arm, so these are a little optimistic; semi-private alone (above) is the unbiased figure.
 
 ## D-034 (2026-10-23, stage 1 pre-registered): distilling Parakeet's layer 5 into a small student
 
