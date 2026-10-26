@@ -28,6 +28,9 @@ DEV_FRAC = 0.6
 SEED = 20261011
 DEV_ONLY = ("cmu_arctic", "openglot", "birkholz2019")  # too few speakers to split, or analysis tools
 LOCKBOX = ("mocha_timit",)  # not yet looked at, too small to split
+# Single speakers kept in the lockbox whatever their corpus's split (D-035): the USC 75-speaker MRI set's 16 speakers
+# with hand-drawn contours in 75-Speaker Annot-16, its best anatomical (MRI midline) VTL references
+LOCKBOX_SPEAKERS = frozenset(f"usc75:sub{n:03d}" for n in (9, 13, 22, 23, 28, 30, 34, 43, 47, 61, 64, 68, 70, 71, 72, 74))
 
 
 def _group(speaker_id: str) -> str:
@@ -41,11 +44,14 @@ def _group(speaker_id: str) -> str:
 
 def assign(speakers: Iterable[str], dev_frac: float = DEV_FRAC, seed: int = SEED) -> dict[str, str]:
     """Gold speakers -> tier. Within each corpus and group, a seeded shuffle; the first round(dev_frac * n) are dev,
-    the rest semi. DEV_ONLY corpora are all dev, LOCKBOX corpora all lockbox."""
+    the rest semi. DEV_ONLY corpora are all dev, LOCKBOX corpora and LOCKBOX_SPEAKERS all lockbox."""
     groups: dict[tuple[str, str], list[str]] = defaultdict(list)
-    for s in sorted(set(speakers)):
-        groups[(s.split(":", 1)[0], _group(s))].append(s)
     out: dict[str, str] = {}
+    for s in sorted(set(speakers)):
+        if s in LOCKBOX_SPEAKERS:
+            out[s] = "lockbox"
+            continue
+        groups[(s.split(":", 1)[0], _group(s))].append(s)
     for (corpus, grp), members in sorted(groups.items()):
         if corpus in DEV_ONLY or corpus in LOCKBOX:
             out.update({s: "dev" if corpus in DEV_ONLY else "lockbox" for s in members})
@@ -63,8 +69,11 @@ def load(path: str | Path = TIER_FILE) -> dict[str, str]:
 
 
 def tier_of(speaker_id: str, tiers: dict[str, str] | None = None) -> str:
-    """A gold speaker's tier. Corpora missing from the file are an error, except DEV_ONLY and LOCKBOX corpora."""
+    """A gold speaker's tier. Corpora missing from the file are an error, except DEV_ONLY and LOCKBOX corpora;
+    LOCKBOX_SPEAKERS are lockbox whatever the file says."""
     tiers = load() if tiers is None else tiers
+    if speaker_id in LOCKBOX_SPEAKERS:
+        return "lockbox"
     if speaker_id in tiers:
         return tiers[speaker_id]
     corpus = speaker_id.split(":", 1)[0]

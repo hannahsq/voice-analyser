@@ -22,6 +22,12 @@ def test_dev_only_and_lockbox_corpora():
     assert a == {"cmu_arctic:bdl": "dev", "cmu_arctic:slt": "dev", "mocha_timit:fsew0": "lockbox"}
 
 
+def test_lockbox_speakers_override_their_corpus():
+    a = tiers.assign(["usc75:sub009", "usc75:sub001"])
+    assert a["usc75:sub009"] == "lockbox" and a["usc75:sub001"] in ("dev", "semi")
+    assert tiers.tier_of("usc75:sub074", {"usc75:sub074": "dev"}) == "lockbox"
+
+
 def test_filter_keeps_training_rows_and_drops_other_tiers():
     t = {"hillenbrand:w01": "dev", "hillenbrand:w02": "semi"}
     rows = _rows(["hillenbrand:w01", "hillenbrand:w02"]) + _rows(["vocalset:female1"], split="train")
