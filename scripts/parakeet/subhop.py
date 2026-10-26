@@ -9,7 +9,11 @@ Alignment: Parakeet frame e at offset 2k ms against student frame 8e + q - 4 at 
                         students: 5 sub-offsets interleaved), 1960 points, 0-250 Hz, dB relative to Parakeet's peak.
 Students trained against another cache's statistics are restandardised to v4's (as fid_v4_on.py).
 Args: v4 cache dir, out prefix, then LABEL=CKPT=STATS_DIR per student. Run from the main checkout (VA_DEVICE=cuda).
-VA_CROPS=<csv with set,crop columns>: only those crops of those sets, in place of the first N (e.g. one f0 range)."""
+VA_CROPS=<csv with set,crop columns>: only those crops of those sets, in place of the first N (e.g. one f0 range).
+VA_ARM=base|edge|clock (D-034's ripple check): the synthetic sets only, drawn with three extra frames (30 ms) of clip audio
+after the crop. base: the crop alone, zero-padded (as without VA_ARM); edge: the real audio after it in place of the
+padding; clock: as edge, the crop's start moved by 0-9 ms (seeded per crop). Parakeet sees the same span in every arm
+(no context outside the crop). Also writes <prefix>_f0.csv (set,crop,f0_hz: median voiced f0)."""
 import csv
 import json
 import os
@@ -29,6 +33,7 @@ from vocal_analysis.features.vqt import TorchVQT  # noqa: E402
 from vocal_analysis.synth.channel import ChannelConfig  # noqa: E402
 from vocal_analysis.train.data import SynthCrops, split_ids  # noqa: E402
 
+ARM = os.environ.get("VA_ARM")
 N, K, S, E4, OFF = int(os.environ.get("VA_N", 256)), 40, 5, 49, 32  # crops, Parakeet offsets, student sub-offsets, encoder frames, samples per 2 ms
 T2 = E4 * K  # 2 ms trajectory length
 
@@ -43,6 +48,16 @@ class SubHop(torch.utils.data.Dataset):
         return len(self.idx)
 
     def __getitem__(self, i):
+        if ARM:
+            x, lab = self.p.ds.ds[self.idx[i]]
+            x, v = np.asarray(x, np.float32), lab["voiced"][:D.CROP].astype(bool)
+            f0 = float(np.median(lab["f0"][:D.CROP][v])) if v.any() else float("nan")
+            if ARM == "base":
+                x = x[:D.NS]
+                pad = np.concatenate([x, np.zeros(S * OFF, np.float32)])
+                return [pad[OFF * j:OFF * j + D.NS] for j in range(S)], [(x[OFF * k:], 0) for k in range(K)], f0
+            u = 16 * int(np.random.default_rng([4242, self.idx[i]]).integers(0, 10)) if ARM == "clock" else 0
+            return [x[u + OFF * j:u + OFF * j + D.NS] for j in range(S)], [(x[u + OFF * k:u + D.NS], 0) for k in range(K)], f0
         x, s = self.p.source(self.idx[i])
         if s is None:  # synthetic: the crop alone
             pad = np.concatenate([x, np.zeros(S * OFF, np.float32)])
@@ -86,14 +101,23 @@ def main():
     flat = Path(cfg3["train"]["data"]) / "flat"
     _, val_ids = split_ids(json.loads((Path(cfg3["train"]["data"]) / "index.json").read_text())["n_clips"])
     v2s = Path("data/synth/train_v2s")
-    pools = D.real_files()
+    pools = D.real_files() if not ARM else None
     SETS = {
         "held_synth_v2": D.SynthWrap(SynthCrops(flat, val_ids[:512], D.CROP, channel, seed=12345, fixed=True), 512),
         "held_synth_v2s": D.SynthWrap(SynthCrops(v2s / "flat", split_ids(json.loads((v2s / "index.json").read_text())["n_clips"])[1][:512],
                                                  D.CROP, channel, seed=12345, fixed=True), 512),
         "held_vocalset": D.RealCrops(pools["vocalset_val"], 512, 12345),
         "held_zeroth": D.RealCrops(pools["zeroth_korean_val"], 512, 12345),
-    }
+    } if not ARM else {}
+    if ARM:  # the synthetic sets, with 30 ms of clip audio after each crop
+        SETS = {
+            "held_synth_v2": D.SynthWrap(SynthCrops(flat, val_ids[:512], D.CROP + 3, channel, seed=12345, fixed=True), 512),
+            "held_synth_v2s": D.SynthWrap(SynthCrops(v2s / "flat", split_ids(json.loads((v2s / "index.json").read_text())["n_clips"])[1][:512],
+                                                     D.CROP + 3, channel, seed=12345, fixed=True), 512),
+        }
+        ff = open(f"{PRE}_f0.csv", "w", newline="")
+        wf = csv.writer(ff)
+        wf.writerow(["set", "crop", "f0_hz"])
     IDX = {}  # set -> crop indices (the first N when VA_CROPS is unset)
     if os.environ.get("VA_CROPS"):
         for r in csv.DictReader(open(os.environ["VA_CROPS"], encoding="utf-8")):
@@ -127,7 +151,10 @@ def main():
                 for r, it in enumerate(b):
                     pre = it[1][k][1]
                     tg[r, k] = h[r, pre + 1:pre + 1 + E4]
-            for q in range(8):  # k = 5q is v4's phase q
+            if ARM:
+                for r, it in enumerate(b):
+                    wf.writerow([name, idx[i0 + r], round(it[2], 2)])
+            for q in range(8 if not ARM else 0):  # k = 5q is v4's phase q (the arms' draws are not the cached ones)
                 worst = max(worst, float((tg[:, 5 * q] - torch.from_numpy(np.stack([np.asarray(cached[j, q], np.float32) for j in idx[i0:i0 + B]])).to(dev)).abs().max()))
             tg = (tg - MU4) / SD4
             s1 += tg.sum((0, 2)).double()
@@ -159,7 +186,7 @@ def main():
         D.log(f"[{name}] Parakeet at k = 5q against v4's cached targets: max |difference| {worst:.4f}")
         for f in (fr, fc, fs):
             f.flush()
-    for f in (fr, fc, fs):
+    for f in (fr, fc, fs) + ((ff,) if ARM else ()):
         f.close()
 
 

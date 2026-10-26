@@ -1,0 +1,40 @@
+== v2 on held_synth_v2 (256 crops)
+  base  P 0.0038  10 ms share 0.12  by sub-offset 0,2,4,6,8 ms: -0.0000 +0.0014 +0.0017 -0.0009 -0.0021
+  edge  P 0.0038  10 ms share 0.12  by sub-offset 0,2,4,6,8 ms: -0.0000 +0.0014 +0.0017 -0.0009 -0.0021
+  clock P 0.0031  10 ms share 0.07  by sub-offset 0,2,4,6,8 ms: -0.0013 -0.0009 +0.0007 +0.0018 -0.0003
+  edge / base: 1.00 [1.00, 1.00] -> not the padding
+  clock / edge: 0.82 [0.23, 3.02] -> partly
+  f0 0-250 Hz (114 crops): P base 0.0012, edge 0.0012, clock 0.0030
+  f0 250-400 Hz (45 crops): P base 0.0007, edge 0.0007, clock 0.0019
+  f0 400- Hz (82 crops): P base 0.0110, edge 0.0110, clock 0.0136
+== v2 on held_synth_v2s (256 crops)
+  base  P 0.0046  10 ms share 0.17  by sub-offset 0,2,4,6,8 ms: +0.0018 +0.0021 +0.0011 -0.0025 -0.0025
+  edge  P 0.0046  10 ms share 0.17  by sub-offset 0,2,4,6,8 ms: +0.0018 +0.0021 +0.0011 -0.0025 -0.0025
+  clock P 0.0044  10 ms share 0.12  by sub-offset 0,2,4,6,8 ms: -0.0020 +0.0012 +0.0024 +0.0000 -0.0016
+  edge / base: 1.00 [1.00, 1.00] -> not the padding
+  clock / edge: 0.94 [0.27, 2.46] -> partly
+  f0 0-250 Hz (114 crops): P base 0.0017, edge 0.0017, clock 0.0042
+  f0 250-400 Hz (45 crops): P base 0.0149, edge 0.0149, clock 0.0110
+  f0 400- Hz (82 crops): P base 0.0046, edge 0.0046, clock 0.0109
+== v4 on held_synth_v2 (256 crops)
+  base  P 0.0037  10 ms share 0.13  by sub-offset 0,2,4,6,8 ms: +0.0003 +0.0012 +0.0017 -0.0012 -0.0020
+  edge  P 0.0037  10 ms share 0.13  by sub-offset 0,2,4,6,8 ms: +0.0003 +0.0012 +0.0017 -0.0012 -0.0020
+  clock P 0.0029  10 ms share 0.08  by sub-offset 0,2,4,6,8 ms: -0.0012 -0.0007 +0.0004 +0.0017 -0.0001
+  edge / base: 1.00 [1.00, 1.00] -> not the padding
+  clock / edge: 0.80 [0.32, 2.34] -> partly
+  f0 0-250 Hz (114 crops): P base 0.0022, edge 0.0022, clock 0.0024
+  f0 250-400 Hz (45 crops): P base 0.0016, edge 0.0016, clock 0.0012
+  f0 400- Hz (82 crops): P base 0.0096, edge 0.0096, clock 0.0137
+== v4 on held_synth_v2s (256 crops)
+  base  P 0.0045  10 ms share 0.20  by sub-offset 0,2,4,6,8 ms: +0.0014 +0.0019 +0.0016 -0.0022 -0.0027
+  edge  P 0.0045  10 ms share 0.20  by sub-offset 0,2,4,6,8 ms: +0.0014 +0.0019 +0.0016 -0.0022 -0.0027
+  clock P 0.0040  10 ms share 0.13  by sub-offset 0,2,4,6,8 ms: -0.0019 +0.0010 +0.0021 +0.0002 -0.0014
+  edge / base: 1.00 [1.00, 1.00] -> not the padding
+  clock / edge: 0.89 [0.27, 2.61] -> partly
+  f0 0-250 Hz (114 crops): P base 0.0017, edge 0.0017, clock 0.0043
+  f0 250-400 Hz (45 crops): P base 0.0129, edge 0.0129, clock 0.0101
+  f0 400- Hz (82 crops): P base 0.0035, edge 0.0035, clock 0.0088
+
+== Overall
+  edge / base: ['not the padding']; clock / edge: ['partly']
+  -> (3) neither ratio falls below 0.5 anywhere
