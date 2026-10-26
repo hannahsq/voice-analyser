@@ -7,6 +7,7 @@ per dimension, random direction; seeded).
 Writes two scoring caches mirroring `emb_v1` for the four sets eval_heads.py reads (layer 5 replaced; other layers zero;
 labels and teacher columns copied): <out>/student and <out>/noise. Then: eval_heads.py <out>/student ... H5#k=...
 Args: emb_v1 dir, student scoring cache dir (student_cache.py), distillation cache dir (stats.npz), out dir. CPU only."""
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -29,6 +30,16 @@ def pooled(s: np.ndarray, n_enc: int) -> np.ndarray:
             a, b = (0, min(4, len(s))) if e == 0 else (max(len(s) - 8, 0), len(s))
         out[e] = s[a:b].mean(0)
     return out
+
+
+def aligned(s: np.ndarray, n_enc: int) -> np.ndarray:
+    """VA_POOL=aligned (D-034): encoder frame e takes the single stored frame 8e - 4 (mel 8e, the phase-0 output that
+    matches Parakeet's own frame), clamped to the item."""
+    return s[np.clip(8 * np.arange(n_enc) - 4, 0, len(s) - 1)].astype(np.float32)
+
+
+if os.environ.get("VA_POOL", "mean") == "aligned":
+    pooled = aligned  # noqa: F811
 
 
 rng = np.random.default_rng(20261024)
