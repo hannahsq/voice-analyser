@@ -325,6 +325,8 @@ Loss weights are configurable. Every new loss lands together with an ablation (�
 
 AST tokenises 16 × 16 mel patches with a 10-frame stride, so tokens are ~100 ms apart and each one merges 16 mel bins. AudioSet classification also never rewards resolving a resonance to within tens of Hz. Small from-scratch models on a log-frequency representation have the right inductive bias and are cheap enough for real time.
 
+*Revised by evidence (decisions D-033, D-034; 2026-10-26).* The resolution argument holds: heads on a frozen ASR encoder (Parakeet, 80 ms frames) read F2–F4 1.5–2.5× worse than teacher v3. But on F1 the frozen encoder helps where training on our data hurts. Every model trained on our synthetic and resynthesised data shares a women's F1 overread on real voices (D-024). A small head on frozen Parakeet layer 5, trained on the same labels, carries almost none of it, and averaging its F1 with the teacher's removed it on dev (labeller v3 + H5×6, D-033; semi-private confirmation pending). A frozen codec (DAC) did not help, and distilling layer 5 into a small model of our own didn't keep the correction (D-034). So a frozen pretrained encoder is a candidate *ensemble member for F1 in the offline labeller*, where its size doesn't matter, not a replacement for the from-scratch teacher or the real-time student.
+
 ## 8. Deterministic back end
 
 ### 8.1 Harmonic amplitudes
@@ -374,6 +376,7 @@ L [cm] = c / (2 * dF),  c ~= 35000 cm/s   =>   L ~= 17500 / dF[Hz]
 - **Calibration:** fit a correction from formant-derived estimates to MRI-measured lengths. Uniform-tube estimates are biased; side branches such as the piriform sinuses pull the upper formants down. Start from Lammert & Narayanan's work on short-time VTL estimation.
 - **Check that needs no labels:** within-speaker SD of anatomical VTL across utterances.
 - Classical technique typically lowers the larynx, so apparent VTL changes during singing. Expose that rather than smoothing it away.
+- *Divergence from principle 1 (decisions D-021, roadmap 2026-10-26).* Apparent VTL stays deterministic, as above (its formants-to-length mapping fitted on tube clips instead of assuming a uniform tube). But **anatomical VTL gets a learnt per-frame head** with uncertainty, trained on the synthesiser's exact `length_cm`: the uniform-tube fit can't separate anatomy from articulation (larynx height, lip protrusion) or from the formants' own synthetic-to-real bias, and the synthesiser knows all three lengths exactly. The back end still does the aggregation: the per-stream anatomical estimate combines the head's per-frame estimates weighted by precision, rather than a running estimate inside the bidirectional model, which carries one speaker's tract into another's frames (D-028). Instantaneous acoustic length (anatomy plus larynx height and lip protrusion) is the quantity voice training and laryngoplasty change; it is planned as a separate label.
 
 ### 8.5 Causal smoothing for display
 
