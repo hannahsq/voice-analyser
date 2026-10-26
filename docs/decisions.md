@@ -1209,3 +1209,12 @@ Hannah's question: how much of what our models learn can a large pretrained spee
     - clock / edge: upper bound < 0.5 → "locked to the clip's clock"; lower bound > 0.75 → "not clip-locked"; otherwise "partly".
     - Overall, if both students and both sets agree: (1), (2), or (3) if neither ratio falls below 0.5. Otherwise "mixed".
   - *Expectation written beforehand*: "partly" for edge (the padding can't explain why the 0 ms position isn't best), and clip-locked for whatever remains, more on v2s.
+  - *Result (2026-10-26, `ripple_v2_12k_v4_10k.txt`): **(3) neither** under the rule.*
+    - *edge / base*: 1.00 [1.00, 1.00] for both students on both sets, "not the padding". The arms are identical to the last digit. The padding can't reach the measured frames: the student frames compared (up to 395) have VQT windows inside the crop at every sub-offset, so (1) was ruled out by construction. That should have been checked before registering it.
+    - *clock / edge*: 0.80–0.94, with intervals of about [0.25, 3.0] in every case, "partly". Ripple P on base is 0.0037–0.0046.
+    - *Seen after the readings (post hoc)*:
+      - Moving the crop starts changes the ripple's shape (lowest at 6–8 ms on base, at 0–2 ms under clock) without shrinking it. So it is tied to each crop's content, not to the clip's clock and not to the crop's edges.
+      - It sits in the high-f0 crops. P on base is 0.010–0.011 for crops with median f0 ≥ 400 Hz on synthetic v2, against 0.001–0.002 below 400 Hz. On v2s it is 0.013–0.015 at 250–400 Hz.
+      - A few crops carry it, which is why the intervals are wide.
+      - One reading that fits: a steady synthetic f0 keeps a fixed relation between the glottal pulses and the 10 ms hop across a crop. R² then depends on where the hop lands relative to the pulses, differently per crop. Real voices' jitter and vibrato break that relation. This is a hypothesis and wasn't tested here.
+    - *Not covered by these arms*: the step between the 60 and 62 ms offsets (synthetic sets and VocalSet, both students, not Zeroth-Korean). Parakeet sees the same span in every arm.
