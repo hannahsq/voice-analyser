@@ -202,6 +202,12 @@ if any(len(v) > 1 for v in groups.values()):
         p(f"  {gname} ({len(members)} seeds): women's bias cut {mu[0]:+.1f} ± {sd[0]:.1f}; men's bias rise {mu[1]:+.1f} ± {sd[1]:.1f};"
           f" Hillenbrand F1 MAE cut {mu[2]:+.1f} ± {sd[2]:.1f}; head alone Hillenbrand F1 {mu[3]:+.1f} / {mu[4]:.1f}"
           f"  part-2 rule on means: {'worth a full arm' if ok else 'no'}")
+        # the cut scores |bias|, so an overshoot below zero reads like no correction: report the signed medians too
+        sg = np.array([(cp[(f"c:{n}", "women", 0)][0], cp[(f"c:{n}", "men", 0)][0], cp[(n, "women", 0)][0], cp[(n, "men", 0)][0]) for n in members])
+        smu, ssd = sg.mean(0), sg.std(0, ddof=1) if len(sg) > 1 else np.zeros(4)
+        p(f"    {gname} signed PTDB-TUG closed-phase F1 bias (Hz): (c) women {smu[0]:+.1f} ± {ssd[0]:.1f}, men {smu[1]:+.1f} ± {ssd[1]:.1f};"
+          f" head alone women {smu[2]:+.1f} ± {ssd[2]:.1f}, men {smu[3]:+.1f} ± {ssd[3]:.1f}"
+          f" (teacher v3 women {cp[('teacher_v3', 'women', 0)][0]:+.1f}, men {cp[('teacher_v3', 'men', 0)][0]:+.1f})")
     if {"H5", "H3456"} <= stat.keys():
         db, dh = stat["H3456"][0] - stat["H5"][0], stat["H3456"][2] - stat["H5"][2]
         better = (db >= 2 and dh > -2) or (dh >= 2 and db > -2)

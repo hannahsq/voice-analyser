@@ -44,6 +44,7 @@ if __name__ == "__main__":
     channel = ChannelConfig(**{k: tuple(v) if isinstance(v, list) else v for k, v in cfg3["channel"].items()})
     tlw = tuple(cfg3["train"]["tract_left_weight"])
     QUICK = os.environ.get("VA_QUICK") == "1"
+    GAIN = 10 ** (float(os.environ.get("VA_GAIN_DB", 0)) / 20)
 
     def log(msg):
         print(time.strftime("%H:%M:%S"), msg, flush=True)
@@ -60,6 +61,7 @@ if __name__ == "__main__":
         """one file -> (frames, 1024), stored frame k = file frame k + OFFSET"""
         n = len(x) // HOP + 1
         assert n <= 6000, f"{n} frames: too long for one GPU pass"
+        x = x * GAIN  # VA_GAIN_DB (D-034's level test): gold files only
         xp = np.concatenate([x, np.zeros(OFFSET * HOP, np.float32)]).astype(np.float32)
         return feats(vq.log_power(torch.from_numpy(xp)[None].to(dev), n + OFFSET))[0][OFFSET:]
 
