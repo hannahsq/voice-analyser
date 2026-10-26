@@ -1,0 +1,91 @@
+
+######## ptdb
+
+## women: 3867 frames
+signed median bias (Hz) / MAE (Hz):
+  teacher_v3     +7.6 /  51.7
+  tv3_s0         +9.8 /  52.7
+  tv3_s2         +8.8 /  51.2
+  tv2           +18.3 /  62.5
+  H5/P           -7.0 /  64.7
+  H5/v2          -6.1 /  62.4
+  H5/v4         -15.1 /  65.7
+error correlations, single members (H5 as six-seed means):
+              teacher_v3     tv3_s0     tv3_s2        tv2       H5/P      H5/v2      H5/v4
+  teacher_v3        1.00       0.92       0.94       0.84       0.81       0.82       0.82
+  tv3_s0            0.92       1.00       0.94       0.84       0.82       0.83       0.83
+  tv3_s2            0.94       0.94       1.00       0.85       0.82       0.83       0.83
+  tv2               0.84       0.84       0.85       1.00       0.75       0.76       0.76
+  H5/P              0.81       0.82       0.82       0.75       1.00       0.98       0.98
+  H5/v2             0.82       0.83       0.83       0.76       0.98       1.00       0.99
+  H5/v4             0.82       0.83       0.83       0.76       0.98       0.99       1.00
+noise floor and groups (mean pairwise r):
+  teacher v3 seeds          0.93
+  teacher v2 vs v3 seeds    0.84
+  H5 seeds on P             0.91
+  H5 seeds on v2            0.91
+  H5 seeds on v4            0.92
+  H5 P vs v2 (same seed)   0.96
+  H5 P vs v4 (same seed)   0.96
+  H5 v2 vs v4 (same seed)   0.97
+  teacher vs H5 seed        0.78 (range 0.70 to 0.83)
+
+## men: 3876 frames
+signed median bias (Hz) / MAE (Hz):
+  teacher_v3     +6.7 /  23.6
+  tv3_s0         +7.4 /  23.2
+  tv3_s2         +7.0 /  22.4
+  tv2           +16.0 /  34.0
+  H5/P           +1.1 /  35.0
+  H5/v2          -2.3 /  36.8
+  H5/v4          -3.8 /  36.3
+error correlations, single members (H5 as six-seed means):
+              teacher_v3     tv3_s0     tv3_s2        tv2       H5/P      H5/v2      H5/v4
+  teacher_v3        1.00       0.82       0.82       0.58       0.53       0.54       0.53
+  tv3_s0            0.82       1.00       0.82       0.55       0.46       0.47       0.47
+  tv3_s2            0.82       0.82       1.00       0.55       0.52       0.52       0.52
+  tv2               0.58       0.55       0.55       1.00       0.41       0.45       0.42
+  H5/P              0.53       0.46       0.52       0.41       1.00       0.93       0.95
+  H5/v2             0.54       0.47       0.52       0.45       0.93       1.00       0.96
+  H5/v4             0.53       0.47       0.52       0.42       0.95       0.96       1.00
+noise floor and groups (mean pairwise r):
+  teacher v3 seeds          0.82
+  teacher v2 vs v3 seeds    0.56
+  H5 seeds on P             0.79
+  H5 seeds on v2            0.85
+  H5 seeds on v4            0.83
+  H5 P vs v2 (same seed)   0.90
+  H5 P vs v4 (same seed)   0.91
+  H5 v2 vs v4 (same seed)   0.94
+  teacher vs H5 seed        0.45 (range 0.33 to 0.52)
+
+######## hillenbrand
+
+## all: 3984 frames
+signed median bias (Hz) / MAE (Hz):
+  teacher_v3    +19.9 /  38.9
+  tv3_s0        +21.3 /  40.0
+  tv3_s2        +17.4 /  37.0
+  tv2           +27.5 /  42.9
+  H5/P           +3.1 /  39.4
+  H5/v2         +19.7 /  40.5
+  H5/v4          +1.3 /  37.1
+error correlations, single members (H5 as six-seed means):
+              teacher_v3     tv3_s0     tv3_s2        tv2       H5/P      H5/v2      H5/v4
+  teacher_v3        1.00       0.89       0.87       0.69       0.58       0.65       0.66
+  tv3_s0            0.89       1.00       0.90       0.67       0.58       0.67       0.67
+  tv3_s2            0.87       0.90       1.00       0.70       0.58       0.66       0.66
+  tv2               0.69       0.67       0.70       1.00       0.58       0.60       0.60
+  H5/P              0.58       0.58       0.58       0.58       1.00       0.84       0.89
+  H5/v2             0.65       0.67       0.66       0.60       0.84       1.00       0.90
+  H5/v4             0.66       0.67       0.66       0.60       0.89       0.90       1.00
+noise floor and groups (mean pairwise r):
+  teacher v3 seeds          0.88
+  teacher v2 vs v3 seeds    0.68
+  H5 seeds on P             0.82
+  H5 seeds on v2            0.85
+  H5 seeds on v4            0.83
+  H5 P vs v2 (same seed)   0.81
+  H5 P vs v4 (same seed)   0.87
+  H5 v2 vs v4 (same seed)   0.87
+  teacher vs H5 seed        0.58 (range 0.37 to 0.70)
