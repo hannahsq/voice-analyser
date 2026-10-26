@@ -25,6 +25,7 @@ from vocal_analysis.train.data import SynthCrops, consolidate, split_ids
 
 sys.stdout.reconfigure(encoding="utf-8")
 S, C = Path(sys.argv[1]), Path(sys.argv[2])
+TIER = os.environ.get("VA_TIER", "dev")  # as cache.py: "semi" scores the semi-private gold sets only
 dev = setup_device(DeviceConfig(device=os.environ.get("VA_DEVICE", "cuda")))
 vq = TorchVQT(dev)
 cfg3 = json.load(open("runs/conformer_v2r2_s1/config.json"))
@@ -45,7 +46,7 @@ mods = registry()
 
 
 def hillenbrand():
-    for row in TI.filter_rows(read_manifest("data/manifests/hillenbrand.csv"), ("dev",)):
+    for row in TI.filter_rows(read_manifest("data/manifests/hillenbrand.csv"), (TIER,)):
         item = mods["hillenbrand"].load(Path("data/hillenbrand"), row)
         ok = np.isfinite(item.times)
         if ok.any():
@@ -55,7 +56,7 @@ def hillenbrand():
 def closed_phase():
     d = dict(np.load(S / "ptdb_egg_sub.npz", allow_pickle=True))
     tmap = TI.load()
-    devm = np.array([TI.tier_of(f"ptdb_tug:{s}", tmap) == "dev" for s in d["speaker"]])
+    devm = np.array([TI.tier_of(f"ptdb_tug:{s}", tmap) == TIER for s in d["speaker"]])
     for s, u in sorted({(str(a), str(b)) for a, b in zip(d["speaker"][devm], d["utt"][devm])}):
         x, sr = sf.read(Path("data/ptdb_tug") / ("FEMALE" if s[0] == "F" else "MALE") / "MIC" / s / f"{u}.wav")
         x = resample_poly(x[:, 0] if x.ndim == 2 else x, 16000, sr).astype(np.float32)
@@ -65,7 +66,7 @@ def closed_phase():
 
 for name, ck in (a.split("=", 1) for a in sys.argv[3:]):
     m = load_teacher(ck, dev)[0]
-    for sname, ds in synth.items():
+    for sname, ds in (synth.items() if TIER == "dev" else ()):
         if (C / sname / f"m_{name}_log2F.npy").exists():
             continue
         F, Sg, chk = [], [], []

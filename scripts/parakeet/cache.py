@@ -47,6 +47,7 @@ channel = ChannelConfig(**{k: tuple(v) if isinstance(v, list) else v for k, v in
 tlw = tuple(cfg3["train"]["tract_left_weight"])
 CROP = 400
 QUICK = os.environ.get("VA_QUICK") == "1"  # code check: a few items per set
+TIER = os.environ.get("VA_TIER", "dev")  # D-033: "semi" builds the semi-private speakers' gold sets only (a logged use)
 
 
 def log(msg):
@@ -80,6 +81,8 @@ def save(name, embs, cols):
 
 def crop_set(name, ds, n):
     """fixed crops: labels and teacher v3 at all 400 frames (mel position j + 4)."""
+    if TIER != "dev":
+        return
     if (OUT / name / "emb.npy").exists():
         log(f"[{name}] cached")
         return
@@ -159,7 +162,7 @@ mods = registry()
 
 
 def hillenbrand():
-    for row in TI.filter_rows(read_manifest("data/manifests/hillenbrand.csv"), ("dev",)):
+    for row in TI.filter_rows(read_manifest("data/manifests/hillenbrand.csv"), (TIER,)):
         item = mods["hillenbrand"].load(Path("data/hillenbrand"), row)
         ok = np.isfinite(item.times)
         if ok.any():
@@ -169,7 +172,7 @@ def hillenbrand():
 
 def f0_corpus(corpus):
     def gen():
-        for row in TI.filter_rows(read_manifest(f"data/manifests/{corpus}.csv"), ("dev",)):
+        for row in TI.filter_rows(read_manifest(f"data/manifests/{corpus}.csv"), (TIER,)):
             item = mods[corpus].load(Path("data") / corpus, row)
             yield load_audio(item, 16000), np.asarray(item.times, float), {"ref_f0": item.f0.astype(float)}
     return gen()
@@ -178,7 +181,7 @@ def f0_corpus(corpus):
 def closed_phase():
     d = dict(np.load(S / "ptdb_egg_sub.npz", allow_pickle=True))
     tmap = TI.load()
-    devm = np.array([TI.tier_of(f"ptdb_tug:{s}", tmap) == "dev" for s in d["speaker"]])
+    devm = np.array([TI.tier_of(f"ptdb_tug:{s}", tmap) == TIER for s in d["speaker"]])
     for s, u in sorted({(str(a), str(b)) for a, b in zip(d["speaker"][devm], d["utt"][devm])}):
         x, sr = sf.read(Path("data/ptdb_tug") / ("FEMALE" if s[0] == "F" else "MALE") / "MIC" / s / f"{u}.wav")
         x = resample_poly(x[:, 0] if x.ndim == 2 else x, 16000, sr).astype(np.float32)
@@ -188,7 +191,7 @@ def closed_phase():
 
 gold_set("gold_hillenbrand", hillenbrand())
 gold_set("gold_ptdb_cp", closed_phase())
-for c in ("ptdb_tug", "mir1k", "mdb_stem_synth"):
+for c in ("ptdb_tug", "mir1k", "mdb_stem_synth") if TIER == "dev" else ():
     # MDB-stem-synth's tracks run for minutes: teacher v3's whole-file attention needed > 10 GB per matrix and took the
     # machine to 7 GB free, so its teacher columns come from D-028's windowed analysis (400 frames, hop 200)
     gold_set(f"gold_{c}", f0_corpus(c), window=400 if c == "mdb_stem_synth" else None)
