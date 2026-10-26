@@ -1,6 +1,7 @@
 """Speaker id per reference frame for the scoring cache's gold_hillenbrand and gold_ptdb_cp (D-033 cross-fitted seed-pair
 selection): the same items in the same order as cache.py, checked against each item's reference-frame count.
 Args: scoring cache dir, scratch dir with ptdb_egg_sub.npz."""
+import os
 import sys
 from pathlib import Path
 
@@ -12,9 +13,10 @@ from vocal_analysis.eval.datasets import registry
 
 C, S = Path(sys.argv[1]), Path(sys.argv[2])
 mods = registry()
+TIER = os.environ.get("VA_TIER", "dev")  # as cache.py
 
 spk = []
-for row in TI.filter_rows(read_manifest("data/manifests/hillenbrand.csv"), ("dev",)):
+for row in TI.filter_rows(read_manifest("data/manifests/hillenbrand.csv"), (TIER,)):
     item = mods["hillenbrand"].load(Path("data/hillenbrand"), row)
     ok = np.isfinite(item.times)
     if ok.any():
@@ -25,7 +27,7 @@ np.save(C / "gold_hillenbrand" / "speaker.npy", np.array(sum(spk, []), dtype=str
 
 d = dict(np.load(S / "ptdb_egg_sub.npz", allow_pickle=True))
 tmap = TI.load()
-devm = np.array([TI.tier_of(f"ptdb_tug:{s}", tmap) == "dev" for s in d["speaker"]])
+devm = np.array([TI.tier_of(f"ptdb_tug:{s}", tmap) == TIER for s in d["speaker"]])
 spk = []
 for s, u in sorted({(str(a), str(b)) for a, b in zip(d["speaker"][devm], d["utt"][devm])}):
     spk.append([f"ptdb_tug:{s}"] * int(((d["speaker"] == s) & (d["utt"] == u)).sum()))
