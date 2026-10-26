@@ -1527,3 +1527,52 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
   - *Other arms (decide nothing)*: all four head arms are alike. Reliability against A +0.074 to +0.083, w/m 0.868–0.876, probe excess +4.8 to +7.3. Arm 3 (no hold) is slightly more reliable than arm 1 (+0.009 [+0.003, +0.015]), so the hold does not help. Arm 2 (D-035's head, frozen) has the lowest f0 excess (+4.8) and within-speaker SD, and the largest probe bias for long tracts (18 cm: −33 c). Arm 4 (tepid) is indistinguishable from arm 1.
   - *Group medians (reported, not a measure)*: men 16.8, women 14.6, children 13.7 cm (A: 17.8 / 15.4 / 14.7). No anatomical comparison: the MRI lengths are lockbox speakers' (D-035).
   - *So*: item 5 takes the VTL head with this entry's gate, weight 0.0125 and its own warm-up. Arm 3 suggests a plain decay (no hold) is at least as good; the training NLL suggests the head is slightly under-trained (about 0.8 dB SNR short of D-035's head on synthetic data). D-037's refits (roadmap item 4) test that before item 5 is set up.
+
+## D-037 (DRAFT 2026-10-27, not registered): refitting the VTL head on frozen trunks, and a formants → VTL cascade
+
+*Status*: written after D-036's result, to settle before item 5's retrain (roadmap 5) is set up. Nothing has run. Choices agreed with Hannah (2026-10-27): arm 3's trunk decides (the no-hold schedule item 5 would use); every under-training measure reported; a fixed 20,000-step head schedule (a realistic end-to-end length), no early stopping; vowel classification reported only; the reverse cascade (VTL → formants) split into D-038; thresholds left to me where noted.
+
+- *Questions*:
+  1. **Is D-036's joint head under-trained?** Its training NLL was still falling at the end, about 0.8 dB SNR short of D-035's frozen head. A head refitted for much longer on the same frozen trunk, against the trunk's own joint head, answers it on identical features.
+  2. **Did joint training make better length features?** The same refit on teacher v3's trunk (no VTL training) and on each joint trunk.
+  3. **Formants → VTL**: does the VTL head gain from the trunk's own F1–F4 as inputs?
+- *Trunks* (the formant encoder's output `h`, 128-d, 10 ms, fp32 as `analyse()`): teacher v3 (`conformer_v2r2_s1_d16k`, D-035's cached features reused); `d036_arm3` (joint, fresh head, no hold; **decides**); `d036_arm1` (joint, fresh head, held schedule; reported, as a check that the answers agree); `d036_arm2` (joint, D-035's head frozen; reported).
+- *Features* (`vtl_cache.py` gains a checkpoint argument): per trunk, D-035's four parts (train_T, val, probe, hb), each frame with `h`, the trunk's own F1–F4 (expected position, log2 Hz) and, for the joint trunks, the joint VTL head's mean and log σ. Teacher v3's existing parts get only the new columns, checked against the cached `h`.
+- *Heads*: D-035's MLP and recipe (AdamW 1e-3, wd 0.01, 300 warm-up steps, cosine, batch 32 crops, Gaussian NLL on sonorant frames, tube crops with length not drawn from f0), three seeds each, with one change: **20,000 steps** instead of 4,000. Validation NLL is logged every 500 steps for the curves; it stops nothing.
+- *Arms*:
+  - **RT** (teacher v3's trunk), **R3** (arm 3's), **R1** (arm 1's), **R2** (arm 2's): `h` alone.
+  - **R3c**, **R1c**: as R3, R1 with the trunk's own F1–F4 (log2 Hz, detached, standardised with training-set statistics) appended to `h`.
+- *Measures*:
+  - *Under-training (question 1; all reported)*: on train_v2's held-out crops, validation NLL, **SNR** (dB: 20 log10 of the labels' log2 SD over the head's σ), per-clip |error| by clip kind and σ coverage, for each refit and for its trunk's own joint head; the validation curves; RT against D-035's T (4,000 steps, same trunk): does longer training help a frozen-feature head at all?
+  - *Length (questions 1–3)*: D-036's set from `vtl_score.py`. Probe median |slope| at f0 ≤ 250 Hz, shuffle null, excess; vowel spread; bias by length. Hillenbrand dev reliability (primary), w/m, within-speaker SD, group medians, r(length, f0) within sex. Seed means, paired speaker bootstrap.
+  - *Vowel classification (reported only; first use, noise floor unknown)*: Hillenbrand dev's 12 vowels from the trunk's own F1–F3 at the reference frames (log Hz), four ways: raw; minus log2 of the speaker's length from a given estimate (median over the speaker's *other* files, so a token's own vowel cannot enter); the same with A; Lobanov (per speaker and formant z-score) as the reference. Linear discriminant analysis with speakers held out (5 folds grouped by speaker); accuracy with a speaker bootstrap. The classifier never touches a model.
+- *Decision rules* (arm 3's trunk):
+  - *Q1 → item 5's head schedule*: the joint head is **under-trained** if R3's seed mean beats arm 3's own head on validation SNR by at least **max(1 dB, twice the head-seed SD of R3's validation SNR)** **and** on Hillenbrand reliability (paired interval excluding 0). Then item 5 holds the VTL head's rate at its peak until the model's last 25 %, then decays it. Otherwise item 5 keeps D-036's setup.
+  - *Q3 → the VTL head's inputs*: R3c joins item 5's design if, against R3: reliability improves (paired interval excluding 0); probe excess ≤ 10 c/oct and rises by at most 3 (so the cascade cannot nearly double the f0 drift and still pass); w/m in [0.85, 0.92]; vowel spread rises by at most 10 c.
+  - *Q2, and every arm 1 / arm 2 comparison*: reported only. If arm 1's answer to Q1 or Q3 differs from arm 3's, that is noted beside the decision.
+  - *If both Q3 and D-038's rule pass*, the two cascades would form a loop (each head reading the other). Item 5 then takes only the one with the larger gain against its own control, in units of its paired interval's half-width; a two-pass design would need its own entry.
+- *To check before registering* (AGENTS.md):
+  - *Noise floors*: the head-seed spread of validation SNR and reliability (D-035's T seeds 0.225 / 0.226 / 0.217; D-036's 1s1 / 1s2 for the joint head). The Q1 bound adapts to it by construction; the reliability intervals already carry it.
+  - *Code paths*: the cached F1–F4 are the trunk's own predictions at the same frames (checked against `analyse()` on a few Hillenbrand files); standardisation uses training statistics only; the joint head's cached outputs reproduce `vtl_score_joint.py`'s numbers for arm 3.
+- *Considered, not included (one change at a time)*: early stopping (dropped, Hannah: a fixed realistic length is simpler and matches an end-to-end run); f0 as an explicit head input; a larger head; an adversarial f0 penalty (D-036's f0 guard passed).
+- *Cost (estimate)*: feature caching about 45 min of GPU per joint trunk (three) plus a short pass for teacher v3's formant columns; 6 arms × 3 seeds × 20,000 steps of a small MLP, in short GPU bursts or on the CPU.
+
+## D-038 (DRAFT 2026-10-27, not registered): a VTL → formants cascade
+
+*Status*: split from D-037 (Hannah, 2026-10-27); shares its feature caches. Nothing has run.
+
+- *Question*: do the formant heads gain from the joint VTL head's length and σ as inputs: a speaker-size prior, expected to help most where formants are weakly observed (F3 / F4)? And is the length easier to use as a log or as an inverse?
+- *Trunk*: `d036_arm3` (decides); `d036_arm1` reported.
+- *Features*: D-037's caches, plus a fifth part, **cp**: the closed-phase frames of `ptdb_egg_sub` / `arctic_egg_sub` (dev), for the closed-phase measures.
+- *Heads*: the trunk's trained formant heads (the F1–F4 cascade with its masks), fine-tuned with the formant loss on the cached crops for 20,000 steps (D-037's schedule shape: 300 warm-up steps, cosine), three seeds each.
+- *Arms*:
+  - **F**: `h` alone, fine-tuned the same way (the control: what fine-tuning on these crops does by itself).
+  - **Fv**: with the joint VTL head's **log2 length** and log σ (detached, standardised) appended to each formant head's input, the new weights initialised to 0, so F and Fv start from the same function. Log length is the natural form: the formant axis is logarithmic, and log F = constant − log L, so a linear head can shift its estimate in proportion to log L. (log 1/L = −log L is the same input with its sign flipped, so it is not a separate arm.)
+  - **Fi**: as Fv, with **1/L** (cm⁻¹, standardised) in place of log2 length, a scale that is curved against the formant axis. The ablation Hannah asked for: is one form easier to learn?
+- *Measures* (every one reported for every formant; paired against F, speaker bootstrap):
+  - Hillenbrand dev F1–F4 MAE at the reference frames;
+  - closed-phase F1–F3 bias and |error| by sex (cp part);
+  - synthetic F1–F4 MAE on train_v2's held-out crops;
+  - the invariance probe's formant slopes against f0.
+- *Decision rule*: **Fv joins item 5's design** if, against F, the mean of Hillenbrand's F3 and F4 MAE improves (paired interval excluding 0), no formant's Hillenbrand MAE is worse beyond D-036's guard-rails (F1 +4, F2 +9, F3 +20 Hz), and women's closed-phase F1 |error| is not worse by more than 5 Hz. **Fi** is reported against Fv (and against F) and decides only the input's form: if Fi passes and beats Fv on the F3 / F4 mean (paired interval excluding 0), item 5 takes 1/L instead. If both D-037's Q3 and this pass, D-037's loop rule applies.
+- *To check before registering*: that Fv's and Fi's predictions equal F's at step 0 (zero-initialised inputs); the fine-tuning seed spread of the F3 / F4 mean on F's three seeds (the interval must be able to exclude 0 at a plausible effect); that the closed-phase features match `add_model.py`'s frames.
