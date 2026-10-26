@@ -1,0 +1,15 @@
+Formants, f0 (against arm 0 unless stated)
+  d036_arm0 vs conformer_v2r2_s1_d16k: synthetic F1-F4 +0.0 +0.1 -0.0 -0.1 SE, RPA +0.01 | dev Hillenbrand F1/F2/F3 -0.1/-0.0/-0.0  RPA -0.0  cp women F1 +0.1 | synthetic ok, guard-rails ok
+  d036_arm1 vs d036_arm0: synthetic F1-F4 +0.3 -0.6 +0.8 -0.5 SE, RPA -0.02 | dev Hillenbrand F1/F2/F3 +0.6/-0.5/+0.5  RPA +0.2  cp women F1 -0.1 | synthetic ok, guard-rails ok
+  d036_arm2 vs d036_arm0: synthetic F1-F4 +0.2 -1.1 +0.6 -0.5 SE, RPA -0.03 | dev Hillenbrand F1/F2/F3 +0.5/-0.5/+0.3  RPA +0.2  cp women F1 -0.1 | synthetic ok, guard-rails ok
+  d036_arm3 vs d036_arm0: synthetic F1-F4 +0.3 -0.8 +0.9 -0.4 SE, RPA -0.03 | dev Hillenbrand F1/F2/F3 +0.4/-0.5/+0.1  RPA +0.2  cp women F1 +0.0 | synthetic ok, guard-rails ok
+  d036_arm4 vs d036_arm0: synthetic F1-F4 +0.3 -0.7 +1.1 -0.4 SE, RPA -0.01 | dev Hillenbrand F1/F2/F3 +0.4/-0.5/-0.0  RPA +0.1  cp women F1 +0.0 | synthetic ok, guard-rails ok
+
+Length (vtl_score_joint.py)
+  d036_arm1: reliability - A [+0.025, +0.123]; w/m 0.868; probe 18.3 c/oct, excess over null +7.3
+  d036_arm2: reliability - A [+0.025, +0.128]; w/m 0.876; probe 15.2 c/oct, excess over null +4.8
+  d036_arm3: reliability - A [+0.032, +0.133]; w/m 0.868; probe 17.9 c/oct, excess over null +6.4
+  d036_arm4: reliability - A [+0.024, +0.121]; w/m 0.870; probe 17.9 c/oct, excess over null +6.1
+
+arm 1: no formant cost yes; length beats A yes; f0 guard yes
+DECISION: the joint VTL head joins item 5's retrain
