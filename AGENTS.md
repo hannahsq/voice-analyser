@@ -35,5 +35,5 @@ A voice analyser: f0, voicing, formants F1–F4 with bandwidths, and related mea
 - **Stop whole process trees.** Orphaned loader workers can hold tens of GB.
 - **The iGPU drives the display.** Keep single GPU operations short: chunk big matmuls.
 - **Prefer seed means over single seeds** (seed-to-seed variation on real voices is large), and paired comparisons with bootstrap intervals.
-- **Estimate a measure's noise floor before pre-registering a test on it** (e.g. a shuffle null): a small effect seen once may be sampling noise.
+- **Check a hypothesis can hold before pre-registering it**: estimate the measure's noise floor (e.g. a shuffle null; a small effect seen once may be sampling noise), and trace the code path to confirm the proposed cause can reach what is measured.
 - **Commit messages** say what changed and why, referencing D-xxx.
