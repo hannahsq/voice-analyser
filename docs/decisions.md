@@ -1218,3 +1218,20 @@ Hannah's question: how much of what our models learn can a large pretrained spee
       - A few crops carry it, which is why the intervals are wide.
       - One reading that fits: a steady synthetic f0 keeps a fixed relation between the glottal pulses and the 10 ms hop across a crop. R² then depends on where the hop lands relative to the pulses, differently per crop. Real voices' jitter and vibrato break that relation. This is a hypothesis and wasn't tested here.
     - *Not covered by these arms*: the step between the 60 and 62 ms offsets (synthetic sets and VocalSet, both students, not Zeroth-Korean). Parakeet sees the same span in every arm.
+- *Pre-registered 2026-10-26 (Hannah: jitter first, then the step and context length, v4 only to halve the compute), before running: three follow-ups to the ripple check (reported only, no decision).* Student: v4's 10k branch, as the ripple check (the effects are clearer on v4). Sets: the first 256 crops of synthetic held-out v2 and v2s, drawn as in the ripple check unless stated.
+  1. *Jitter (hop–pulse locking)*. The synthesiser draws each clip's jitter uniformly from 0–2 % (SD of the per-period relative period perturbation), and clips regenerate exactly from their index and seed (labels match). Arms (`subhop.py`, `VA_ARM`, as base: the crop alone, zero-padded):
+     - **regen**: the clip regenerated as drawn, a check that it reproduces base;
+     - **jit0**: regenerated with jitter fixed at 1e-6 (none; the random stream is unchanged, so only the period perturbations differ);
+     - **jit2**: fixed at 0.02.
+     - *Measure*: ripple P as in the ripple check, on crops with median voiced f0 ≥ 250 Hz (where the ripple sits) and on all crops.
+     - *Reading*, per set, on jit2 / jit0 with a 95 % paired bootstrap interval over crops: upper bound < 0.5 → "jitter removes it (hop–pulse locking)"; lower bound > 0.75 → "not jitter"; otherwise "partly".
+     - *Also reported*: Spearman correlation between each crop's ripple (its own P) and its clip's drawn jitter on base, with a bootstrap interval.
+     - *Expectation*: P jit0 > regen > jit2.
+  2. *The step between the 60 and 62 ms offsets (Parakeet's input length)*. Hypothesis: Parakeet's layer 5 changes where its input length crosses an encoder-frame (80 ms) boundary as the offset grows. A sharp step needs most crops to share one input length: true of synthetic crops (used alone) and of VocalSet (long files, so nearly every crop gets the full 0.96 s after it), not of Zeroth-Korean (short utterances, varying context).
+     - *Arms*: synthetic crops drawn with 80 ms of extra clip audio (`n_frames` = 408; zeros where the clip ends). The student input is as base. Parakeet's input ends at the crop's end (**end0**), 40 ms later (**end40**), or a random 0–78 ms later, in 2 ms steps seeded per crop (**endR**).
+     - *Measure*: R² by offset with each line's 10 ms pattern removed; the step at offset o is the mean over the four offsets from o minus the mean over the four before; o* is the most negative.
+     - *Reading*, per set: end40's o* within ±4 ms of (end0's o* + 40) mod 80 → "tied to the input length"; within ±4 ms of end0's o* → "not the input length"; otherwise "unclear". endR's largest step is reported against end0's (it should shrink if the step is tied to length).
+  3. *Context length (Parakeet only, real audio)*. Long streams: Zeroth-Korean val, VocalSet val and LibriTTS-R dev-clean, each speaker's or singer's files joined in order; 64 segments of 4 s per corpus from streams of at least 30 s, seeded.
+     - Parakeet's layer 5 on the segment's encoder frames inside windows of 4, 8, 16 and 30 s centred on it. Window starts stay on the segment's 80 ms grid, so the frames are the same; the window is clamped inside the stream.
+     - *Measure*: R² of each window's frames against the 30 s window's (per-dimension variance over the 30 s frames), for the middle 2 s of the segment and for its first and last 0.5 s.
+     - Reported only, no reading. It says how far Parakeet's layer 5 on 4 s crops (the students' and H5's training targets) is from Parakeet on long audio.
