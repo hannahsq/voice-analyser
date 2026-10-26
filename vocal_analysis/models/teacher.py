@@ -50,6 +50,27 @@ class TeacherConfig:
     # D-027: per-formant observability head (logit of o, the evidence-only precision label): reads the formant
     # trunk and the formant heads' expected positions (no gradient into those heads). Off = earlier models.
     obs_head: bool = False
+    # D-036: anatomical vocal-tract-length head (D-035's per-frame design): mean and log variance of log2 length (cm)
+    # from the formant trunk, behind a gradient gate (Teacher.vtl_gate: 0 = no gradient into the trunk, 1 = full).
+    vtl_head: bool = False
+
+
+class _GradGate(torch.autograd.Function):
+    """Identity forward; the backward gradient multiplied by `alpha`."""
+
+    @staticmethod
+    def forward(ctx, x, alpha):
+        ctx.alpha = alpha
+        return x.view_as(x)
+
+    @staticmethod
+    def backward(ctx, g):
+        return g * ctx.alpha, None
+
+
+def vtl_head_module(d: int) -> nn.Module:
+    """D-035's head: LayerNorm -> 256 -> GELU -> 256 -> GELU -> 2 (index-compatible with its saved `net.*` weights)."""
+    return nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 256), nn.GELU(), nn.Linear(256, 256), nn.GELU(), nn.Linear(256, 2))
 
 
 def normalise(logpow: torch.Tensor) -> torch.Tensor:
@@ -214,6 +235,9 @@ class Teacher(nn.Module):
         self.sonorant_head = nn.Linear(d, 1)
         if cfg.obs_head:
             self.obs_head = nn.Linear(d + N_FORMANTS, N_FORMANTS)
+        if cfg.vtl_head:
+            self.vtl_head = vtl_head_module(d)
+            self.vtl_gate = 1.0  # set by the trainer each step
         self.register_buffer("log2_vqt", LOG2_VQT.clone(), persistent=False)
         self.register_buffer("f0_log2", torch.log2(torch.tensor(F0_AXIS.centres_hz, dtype=torch.float32)), persistent=False)
         self.register_buffer("fm_bins", torch.arange(FORMANT_AXIS.n_bins, dtype=torch.float32), persistent=False)
@@ -256,6 +280,11 @@ class Teacher(nn.Module):
         if self.cfg.obs_head:
             pos = torch.stack(means, -1).detach() / FORMANT_AXIS.n_bins
             out["obs_logit"] = self.obs_head(torch.cat([h, pos.to(h.dtype)], -1)).float()  # (B, T, N)
+        if self.cfg.vtl_head:
+            g = self.vtl_gate
+            hv = h.detach() if g == 0 else h if g == 1 else _GradGate.apply(h, float(g))
+            v = self.vtl_head(hv).float()
+            out["vtl_mu"], out["vtl_logvar"] = v[..., 0], v[..., 1]
         return out
 
 

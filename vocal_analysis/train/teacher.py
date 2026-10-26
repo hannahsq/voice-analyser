@@ -51,6 +51,7 @@ class TrainConfig:
     schedule: str = "wsd"
     decay_start: int | None = None
     decay_steps: int = 4000
+    decay_hold: int = 0  # D-036: a branch holds the rate constant this many steps before its decay (within decay_steps)
     branch_from: str | None = None  # checkpoint a decay branch starts from (recorded, not read)
     comb_truth_until: float = 0.3  # P(comb from true f0) decays 1 -> 0 over this fraction of `steps` (v1)...
     comb_truth_steps: int | None = 4000  # ...or over this many steps (wsd runs have no fixed length)
@@ -71,6 +72,16 @@ class TrainConfig:
     resynth_frac: float = 0.3
     resynth_val: tuple[str, ...] = ()  # held-out resynthesised sets, scored on their (exact) formants
     tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT
+    # D-036: an anatomical vocal-tract-length head added at a branch. None = none; "new" (initialised with vtl_seed);
+    # "frozen:<head.pt>" (D-035's trained head, not updated); "tepid:<head.pt>" (shrink and perturb: 0.5 x D-035's
+    # weights + 0.1 x a fresh initialisation). Its own parameter group: linear warmup over vtl_warmup steps from the
+    # branch, then cosine to 0 at `steps`. Gradient into the trunk gated: 0 for vtl_detach steps, then a linear ramp to
+    # 1 over vtl_gate_ramp steps. Labels: train.data's "vtl"; loss weight loss_weights["vtl"].
+    vtl: str | None = None
+    vtl_seed: int = 0
+    vtl_warmup: int = 300
+    vtl_detach: int = 300
+    vtl_gate_ramp: int = 700
 
 
 def _git() -> dict:
@@ -146,8 +157,8 @@ def _optimizer(model, cfg: "TrainConfig"):
             return Adan(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
         return torch.optim.AdamW(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
 
-    if cfg.optimizer in ("adamw", "adan"):
-        return rest(model.parameters())
+    if cfg.optimizer in ("adamw", "adan"):  # the VTL head (D-036) gets its own group, added by the trainer
+        return rest([p for n, p in model.named_parameters() if not n.startswith("vtl_head.")])
     if cfg.optimizer in ("muon", "muon_adan"):
         mu, other = muon_split(model)
         other_opt = rest(other)
@@ -163,11 +174,50 @@ def _lr(step: int, cfg: TrainConfig) -> float:
     if cfg.schedule == "wsd":
         if cfg.decay_start is None or step < cfg.decay_start:
             return cfg.lr
-        return cfg.lr * (1.0 - math.sqrt(min((step - cfg.decay_start) / cfg.decay_steps, 1.0)))
+        into = step - cfg.decay_start - cfg.decay_hold
+        if into < 0:
+            return cfg.lr
+        return cfg.lr * (1.0 - math.sqrt(min(into / max(1, cfg.decay_steps - cfg.decay_hold), 1.0)))
     if cfg.schedule == "cosine":
         p = (step - cfg.warmup) / max(1, cfg.steps - cfg.warmup)
         return cfg.lr * 0.5 * (1 + math.cos(math.pi * min(p, 1.0)))
     raise ValueError(f"unknown schedule {cfg.schedule!r}")
+
+
+def _vtl_lr(step: int, cfg: TrainConfig) -> float:
+    """D-036: the VTL head's rate: linear warmup from the branch, then cosine to 0 at the run's end."""
+    rel, span = step - (cfg.decay_start or 0), cfg.steps - (cfg.decay_start or 0)
+    if rel < cfg.vtl_warmup:
+        return cfg.lr * (rel + 1) / cfg.vtl_warmup
+    return cfg.lr * 0.5 * (1 + math.cos(math.pi * min((rel - cfg.vtl_warmup) / max(1, span - cfg.vtl_warmup), 1.0)))
+
+
+def _vtl_gate(step: int, cfg: TrainConfig) -> float:
+    rel = step - (cfg.decay_start or 0) - cfg.vtl_detach
+    return 0.0 if rel < 0 else min(1.0, rel / max(1, cfg.vtl_gate_ramp))
+
+
+def _add_vtl_head(model, cfg: TrainConfig, log) -> None:
+    """Initialise the VTL head per cfg.vtl (see TrainConfig)."""
+    import torch
+
+    torch.manual_seed(cfg.vtl_seed)
+    for m in model.vtl_head:
+        if hasattr(m, "reset_parameters"):
+            m.reset_parameters()
+    kind, _, path = cfg.vtl.partition(":")
+    if kind == "new":
+        return
+    old = {k.removeprefix("net."): v for k, v in torch.load(path, map_location="cpu", weights_only=False)["state"].items()}
+    if kind == "frozen":
+        model.vtl_head.load_state_dict(old)
+        model.vtl_head.requires_grad_(False)
+    elif kind == "tepid":
+        fresh = {k: v.detach().cpu().clone() for k, v in model.vtl_head.state_dict().items()}
+        model.vtl_head.load_state_dict({k: 0.5 * old[k] + 0.1 * fresh[k] for k in old})
+    else:
+        raise ValueError(f"unknown vtl {cfg.vtl!r}")
+    log(f"VTL head: {kind} from {path}")
 
 
 def _p_comb_truth(step: int, cfg: TrainConfig) -> float:
@@ -315,6 +365,11 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     if ck is not None:
         model_cfg = TeacherConfig(**ck["teacher_config"])  # the checkpoint's architecture, whatever was passed
     model_cfg = model_cfg or TeacherConfig()
+    new_vtl = bool(cfg.vtl) and not model_cfg.vtl_head  # D-036: the head is added at this branch
+    if cfg.vtl:
+        if cfg.optimizer not in ("adamw", "adan"):
+            raise ValueError("a VTL head needs adamw or adan (its own parameter group)")
+        model_cfg = replace(model_cfg, vtl_head=True)
     model = Teacher(model_cfg).to(device)
     sf = cfg.optimizer == "schedulefree"
     if sf:
@@ -328,12 +383,31 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     sf_mode = lambda mode: getattr(opt, mode)() if sf else None  # noqa: E731
     step = 0
     ema = None
+    vtl_params = [p for p in model.vtl_head.parameters() if p.requires_grad] if cfg.vtl else []
+
+    def add_vtl_group():
+        if vtl_params:
+            opt.add_param_group({"params": vtl_params, "lr": 0.0, "weight_decay": cfg.weight_decay, "vtl": True})
+
+    if cfg.vtl and not new_vtl:
+        if cfg.vtl.startswith("frozen"):
+            model.vtl_head.requires_grad_(False)
+            vtl_params = []
+        add_vtl_group()  # resuming: the saved optimiser state already has the group
     if ck is not None:
-        model.load_state_dict(ck["model"])
+        if new_vtl:
+            missing, unexpected = model.load_state_dict(ck["model"], strict=False)
+            assert not unexpected and all(k.startswith("vtl_head.") for k in missing), (missing, unexpected)
+        else:
+            model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
         step = ck["step"]
         torch.manual_seed(cfg.seed + 7919 * step)  # a resumed run or branch must not replay the data from step 0
         log(f"{'resumed' if start == last else f'branched from {start}'} at step {step}")
+    if new_vtl:
+        _add_vtl_head(model, cfg, log)
+        vtl_params = [p for p in model.vtl_head.parameters() if p.requires_grad]
+        add_vtl_group()
     if cfg.ema_decay > 0:  # from the checkpoint's average if it has one, else from the current weights
         import copy
 
@@ -360,14 +434,15 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     obs = model_cfg.obs_head  # D-027: the loaders add observability labels (NaN where a set has no store)
     if obs and not (flat / "obs_sig.npy").exists():
         raise FileNotFoundError(f"obs_head needs {flat}'s observability store (obs_store.write_store)")
-    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs)
+    vtl = bool(cfg.vtl)
+    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs, vtl=vtl)
     if cfg.resynth:
         parts, sizes = [], []
         for d in cfg.resynth:
             rflat = consolidate(d, log=log)
             n = json.loads((rflat / "done").read_text())["n_clips"]
             parts.append(SynthCrops(rflat, np.arange(n), cfg.n_frames, channel, seed=cfg.seed + 1 + len(parts),
-                                    epoch_size=epoch, tract_left_weight=cfg.tract_left_weight, observability=obs))
+                                    epoch_size=epoch, tract_left_weight=cfg.tract_left_weight, observability=obs, vtl=vtl))
             sizes.append(n)
         weights = [1.0 - cfg.resynth_frac] + [cfg.resynth_frac * n / sum(sizes) for n in sizes]
         ds = MixedCrops([ds, *parts], weights, epoch, seed=cfg.seed)
@@ -419,7 +494,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 break
             if not sf:
                 for g in opt.param_groups:
-                    g["lr"] = _lr(step, cfg) * g.get("lr_scale", 1.0)
+                    g["lr"] = (_vtl_lr if g.get("vtl") else _lr)(step, cfg) * g.get("lr_scale", 1.0)
+            if cfg.vtl:
+                model.vtl_gate = _vtl_gate(step, cfg)
             audio, lab = audio.to(device, non_blocking=True), _to(lab, device)
             p_truth = _p_comb_truth(step, cfg)
             truth = rng.random() < p_truth

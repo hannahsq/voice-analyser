@@ -258,6 +258,56 @@ def test_muon_and_adan_train_and_branch(tmp_path, optimizer):
     assert recs and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
 
 
+@pytest.mark.parametrize("vtl", ["new", "frozen", "tepid"])
+def test_vtl_head_branch(tmp_path, vtl):
+    """D-036: a branch adds a VTL head (new, frozen or tepid from a D-035-style head), trains it in its own group with
+    the trunk's gradient gated, holds the rate before decaying; a frozen head doesn't move; labels are masked off
+    clips whose length came from f0."""
+    import json
+
+    import torch
+
+    from vocal_analysis.models.teacher import TeacherConfig, vtl_head_module
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.data import SynthCrops, consolidate
+    from vocal_analysis.train.teacher import TrainConfig, _lr, _vtl_gate, _vtl_lr, branch_config, train
+
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16,
+                          temporal="conformer", conformer_dim=32)
+    data = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    flat = consolidate(data, log=lambda m: None)
+    fo = np.load(flat / "frame_offsets.npy")
+    L = np.linspace(12, 18, len(fo) - 1).astype(np.float32)
+    np.save(flat / "label_length_cm.npy", np.repeat(L, np.diff(fo)))
+    np.save(flat / "clip_tube.npy", np.ones(len(L), bool))
+    np.save(flat / "clip_length_from_f0.npy", np.arange(len(L)) % 2 == 1)
+    ds = SynthCrops(flat, np.arange(len(L)), 50, None, vtl=True)
+    _, lab0 = ds[0]
+    _, lab1 = ds[1]
+    assert np.allclose(lab0["vtl"], np.log2(L[0])) and np.isnan(lab1["vtl"]).all()
+    head = vtl_head_module(32)
+    torch.save({"state": {f"net.{k}": v for k, v in head.state_dict().items()}}, tmp_path / "head.pt")
+    cfg = TrainConfig(data=str(data), out=str(tmp_path / "run"), steps=4, batch=4, n_frames=50, workers=1, log_every=2,
+                      eval_every=4, ckpt_every=2, val_clips=4, warmup=2)
+    out = train(cfg, small, log=lambda *a: None)
+    b = branch_config(out, 4, str(tmp_path / "branch"), decay_steps=6)
+    b.branch_from = str(out / "ckpt_000004.pt")
+    b.vtl = "new" if vtl == "new" else f"{vtl}:{tmp_path / 'head.pt'}"
+    b.decay_hold, b.vtl_warmup, b.vtl_detach, b.vtl_gate_ramp = 2, 2, 2, 2
+    assert [_lr(s, b) for s in (4, 5)] == [b.lr, b.lr] and _lr(6, b) == b.lr and _lr(7, b) < b.lr and _lr(10, b) == 0.0
+    assert [_vtl_gate(s, b) for s in (4, 5, 6, 7, 8)] == [0.0, 0.0, 0.0, 0.5, 1.0]
+    assert _vtl_lr(4, b) == b.lr / 2 and _vtl_lr(5, b) == b.lr and _vtl_lr(10, b) < 1e-9
+    out2 = train(b, None, log=lambda *a: None)
+    recs = [json.loads(line) for line in (out2 / "log.jsonl").read_text().splitlines()]
+    assert any("vtl" in r for r in recs) and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
+    ck = torch.load(out2 / "ckpt_last.pt", map_location="cpu", weights_only=False)
+    assert ck["teacher_config"]["vtl_head"] and ck["step"] == 10
+    w = ck["model"]["vtl_head.1.weight"]
+    same = torch.allclose(w, head.state_dict()["1.weight"])
+    assert same if vtl == "frozen" else not same
+
+
 def test_hybrid_rest_lr_scale():
     """D-030: in the hybrid, the non-Muon groups run at rest_lr_scale x the scheduled rate."""
     from vocal_analysis.models.teacher import Teacher, TeacherConfig

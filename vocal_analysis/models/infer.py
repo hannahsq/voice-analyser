@@ -38,6 +38,8 @@ def decode_outputs(out: dict) -> dict[str, np.ndarray]:
            "bandwidth_log_sd": np.exp(0.5 * out["logb_logvar"]), "sonorant_p": sig(out["sonorant_logit"])}
     if "obs_logit" in out:  # D-027: per-formant observability (the evidence-only precision label's estimate)
         res["observability"] = sig(out["obs_logit"])
+    if "vtl_mu" in out:  # D-036: anatomical tract length, log2 cm, and its sigma (log2 units)
+        res["vtl_log2cm"], res["vtl_sigma"] = out["vtl_mu"], np.exp(0.5 * out["vtl_logvar"])
     return res
 
 
