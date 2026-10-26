@@ -1379,3 +1379,54 @@ Hannah's question: how much of what our models learn can a large pretrained spee
     - *v4*: (c̄) −4.8 / +0.5, fails (cut +2.9). (w) (w = 0.72; folds 0.63–0.82) −0.2 / +3.2, passes (cut +7.4, rise −3.6, MAE cut +4.1); against (c̄) −0.9 [−2.1, +4.2]. (m) −1.7 / +3.5, passes; −0.1 [−1.8, +2.9].
     - The squared-error term never moved w by more than 0.02. The three-seed teacher (reported) behaves like teacher v3 alone.
     - *So*: on v4 a fitted weight (about 0.7 on the teacher) makes up for v4's remaining downward offset and passes the rule where an equal mix doesn't. On P the equal mix with H5's seed mean already passes. Neither gain over (c̄) is resolved: with six speakers per sex, the speaker bootstrap spans several Hz on each sex's bias (e.g. v4 women −4.5 [−5.0, +6.0]). *Post hoc, worth carrying forward*: the same speaker noise applies to every women's-cut comparison in D-033 and D-034. Their rules were taken on seed means; only D-033's full arm also ran the speaker bootstrap, which found the women's cut unresolved on dev's six women (−4.7 [−8.3, +5.3]). A cut of 5 Hz is about the width of the speaker interval. *(Corrected 2026-10-26, same day: this note first said no comparison had used a speaker bootstrap.)*
+
+## D-035 (2026-10-26, pre-registered): anatomical vocal-tract-length head, frozen-encoder probe
+
+Roadmap Next 4; D-021 item 4; plan §8.4's divergence from principle 1. **Question**: does a learnt per-frame anatomical-length head on frozen features give a more consistent per-speaker length on real voices than the formant-derived apparent length, without reading length from f0? And which base, teacher v3's encoder or Parakeet's layer 5, carries more of it? Code and reports on branch `vtl-probe` (parakeet worktree).
+
+- *Labels*: the synthesiser's `length_cm` per clip (`clip_tract`, `vtl_labels.py`), attached to `cache_heads.py`'s 40,000 crops by recovering their clip ids from the seeded draws (`vtl_cache_labels.py`; 1,390 checked crops all match the cached formant labels). Only clips whose length was **not** drawn from f0 (D-020). Resynthesised crops have no label.
+- *Main arms: tube clips only* (8,263 crops). One thing differs between them, the features:
+  - **T**: teacher v3's (`conformer_v2r2_s1_d16k`) formant-encoder output (`Teacher.enc`, 10 ms), on the same crops regenerated from the fixed seeds (checked against the cached labels).
+  - **P**: Parakeet layer 5 (80 ms; labels read at mel 8e), from the existing cache.
+- *Secondary arm* **T+c, reported only**: T's features, tube and cascade clips (13,895 crops). Cascade clips have no well-defined anatomical length: their F1–F3 are the men's Peterson & Barney table scaled uniformly by 17.5 / L, the uniform scaling D-022 found wrong for women and children. So they are kept separate (Hannah, 2026-10-26): never mixed into the main arms' labels, and given no anatomical-length label in item 5. The arm only shows what mixing them would do.
+- *Head*: per frame, with no context of its own (both encoders already have it): LayerNorm → Linear(in, 256) → GELU → Linear(256, 256) → GELU → Linear(256, 2), the mean and log variance of log2 length. Gaussian NLL on sonorant frames. AdamW 1e-3, weight decay 0.01, 300 warm-up steps, cosine over 4,000 steps, batch 32 crops. Three seeds per arm; the arm's estimate is the seed mean (σ² = mean of σ² + variance of the means).
+- *Aggregation* (back end, plan §8.4): per file, the precision-weighted mean of log2 length over frames. On Hillenbrand, the reference frames; on synthetic clips, sonorant frames; on the probe, 0.3–0.7 s.
+- *Baseline* **A**: apparent length from labeller v3's F1–F4 (`backend.vtl`, uniform tube, equal weights), calibrated linearly in log2 on the tube crops' true F1–F4 (slope 0.972), per-file median.
+- *Measures* (dev speakers only):
+  1. *Primary, real*: reliability on Hillenbrand dev (27 men, 29 women): per adult group, the between-speaker variance of speaker means over that plus the within-speaker variance across files; the mean of men and women. Scale-free, so shrinking every estimate towards a constant doesn't win it. Paired speaker bootstrap within group, 2,000 resamples.
+  2. *Guard, real*: the women / men ratio of speaker medians in [0.85, 0.92] (anatomy 0.886, Vorperian et al. 2018). This catches a head that collapses the sexes towards its training prior.
+  3. *Guard, synthetic*: the f0-invariance probe's median |slope| of log2 length against log2 f0, f0 ≤ 250 Hz, ≤ 10 cents per octave (A: 1). The whole sweep is reported.
+  4. *Reported*:
+     - synthetic validation (train_v2's held-out val clips, which teacher v3 never trained on): per-clip median |error| in cents, and σ coverage within 1σ and 2σ, per frame and per clip;
+     - on the probe: the vowel spread (A: 107 cents) and bias by length;
+     - on Hillenbrand: within-speaker SD in cents, group medians (children included), and the within-group correlation of speaker length with speaker median f0 (leakage on real voices).
+- *Decision rule*:
+  - **The VTL head joins item 5's retrain** if T's reliability exceeds A's with the paired interval excluding 0, T passes both guards, and its seeds agree in direction. Otherwise item 5 goes without it, and A stays the length output.
+  - If T fails but P passes, that is recorded as the teacher's features limiting VTL (a case for VTL on the D-034 student), not as a change to item 5.
+  - P against T is reported with paired intervals.
+  - T+c against T is reported with paired intervals and decides nothing (see the secondary arm).
+  - If T passes, it gets one logged semi-private confirmation on the same measures.
+- *MRI reference (lockbox; not part of this decision)*:
+  - **Speakers**: the USC 75-speaker real-time MRI set's 16 speakers with hand-drawn midsagittal contours in 75-Speaker Annot-16 (9 men, 7 women; 10 frames each). They have the most direct anatomical lengths of any set here, so they go to the lockbox (`tiers.LOCKBOX_SPEAKERS`, Hannah 2026-10-26) and open only at the milestone acceptance that would ship a VTL output.
+  - **Reference length**: per speaker, the median over its 10 frames of the glottis-to-lips midline (`mri_vtl.py`). The airway is closed into a polygon: the lip aperture; palate; the velum's oral surface to the uvula tip; the pharyngeal wall below it; the arytenoid; back along the epiglottis, tongue and lower lip. The midline is the cheapest path from the lip aperture to the glottis (midpoint of the epiglottis's and arytenoid's lowest points) that keeps away from the walls, crossing one only where articulators touch (57 of 160 frames, median 0.8 px). *Revision before any model was run (2026-10-26)*: the first version, a nearest-wall midline, cut through the soft palate and tongue and mis-placed the lip end. Hannah flagged examples by eye; the polygon version was checked on those examples and the worst crossings.
+  - **Seen while building it** (reference labels only, no model run on these speakers' audio): men 17.25 cm (15.0–18.0), women 15.59 (14.0–15.9), women / men 0.904; within-speaker IQR 0.47 cm; correlation with height +0.79 (+0.63 within sex). Close to CT figures (Vorperian et al. 2018: 17.6, 15.6 cm), but the end points are a convention, so the measures are speaker ordering and the women / men ratio, with absolute cm reported.
+  - **Measures at that opening**:
+    - Spearman correlation across the 16 speakers between each estimator's per-speaker length and the MRI length (all, and within sex pooled after centring), with a speaker bootstrap;
+    - the women / men ratio against the MRI's;
+    - the adopted head against apparent length A, paired.
+  - **Audio**: the speakers' 2D real-time MRI recordings (AAC, 22.05 kHz mono in the MP4s, scanner noise cancelled, so a hard domain; downloaded 2026-10-26, MD5 checked, kept zipped), from the main set's video archive (CC BY 4.0).
+  - **Not used before that opening**: no model is run on them, no model is tuned against them, and they don't feed calibration.
+  - **Scaling to the other 59 speakers** (a segmentation model trained on Annot-16's labels) is a separate roadmap item. Their tiers are set before any of them is measured.
+- *Checked before registering* (AGENTS.md; `reports/analysis/vtl/feasibility_*.txt` on `vtl-probe`):
+  - *Synthetic*: length is decodable from L5. A crop-mean ridge gets held-out R² 0.81 (tube 0.86, cascade 0.73), against a shuffle null of −0.03. True F1–F4 through the calibrated uniform tube reach 0.96, so on synthetic data the formant baseline is strong, and the head's case rests on real voices and on vowel invariance.
+  - *Real noise floors* (Hillenbrand dev):
+
+    | | A | Per-frame L5 ridge |
+    |---|---|---|
+    | Reliability, men / women | 0.17 / 0.14 (intervals about ±0.08) | 0.40 / 0.22 |
+    | Within-speaker SD | 156 cents | 118 cents |
+    | Women / men ratio | 0.863 [0.849, 0.891] | 0.942 |
+
+    The ridge's men's reliability beats A's by +0.23 [+0.10, +0.35]. Its ratio of 0.942 would fail the guard (shrinkage, or an ASR encoder discarding speaker differences), so the guard bites.
+  - *Probe*: A's f0 slope is 1–2 cents per octave (labeller v3's formants are f0-invariant on clean probe clips), and its vowel spread of 107 cents equals the true formants' own. That spread is the uniform tube's limit, not formant error, and it is where a learnt head can gain.
+  - *Code path*: the head reads only frozen features, and the label is a pure tract quantity drawn independently of the source on the clips used.
