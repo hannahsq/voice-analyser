@@ -1249,3 +1249,11 @@ Hannah's question: how much of what our models learn can a large pretrained spee
       - The arms: within the null's 95 % everywhere except jit2 on synthetic v2 (0.0051 against 0.0039) and hnr0 on v2s (0.0054 against 0.0047). Split-half agreement of the five-point pattern is weak (r −0.35 to +0.74).
       - So the 10 ms ripple across crops is not distinguishable from sampling noise. The ripple check and these arms were testing noise. The noise floor should have been estimated before either was registered.
     - *What is real*: how much one crop's R² moves between neighbouring 2 ms offsets. The SD within a hop, per crop, is 0.011 (synthetic v2), 0.014 (v2s) and 0.013 (VocalSet) against 0.0024 (Zeroth-Korean), and 0.018–0.020 at f0 500–700 Hz. Individual crops are sensitive to small shifts, more so at high f0 and with singing, but not in a pattern shared across crops. This is what made the synthetic lines look rough.
+  - *Follow-up 2 result (2026-10-26, `ripple_v2_12k_v4_10k_follow2.txt`; v4): **"unclear"** on both sets under the rule.* end0 reproduces the step on a fresh crop draw at the same offset (o* 62 ms; −7.4 and −6.3 × 10⁻³). end40's largest step is at 70 ms (synthetic v2) and 28 ms (v2s), against 22 ms predicted. endR's largest step is about half of end0's (−3.6 and −3.2 × 10⁻³).
+    - *Seen after the readings (post hoc; the noise check the new AGENTS.md rule asks for, done late)*: the step at 62 ms, with 95 % bootstrap intervals over crops:
+      - end0: −7.4 [−11.6, −3.1] and −6.3 [−11.3, −0.4] × 10⁻³;
+      - end40: +1.0 [−2.3, +4.2] and +2.0 [−2.1, +6.4];
+      - endR: +0.0 [−4.0, +4.0] and −0.1 [−4.0, +4.2];
+      - paired, end40 − end0: +8.4 [+5.7, +11.4] and +8.2 [+5.1, +11.6]; endR − end0: +7.5 [+5.2, +10.1] and +6.1 [+2.8, +9.3].
+    - So the step is real, replicates across crop draws, and vanishes when Parakeet's input ends anywhere else: it depends on where Parakeet's input ends. It does not simply move 40 ms with a 40 ms longer input, so the registered "encoder-frame boundary" mechanism is not confirmed. The exact dependence on length is open.
+    - *Relevance*: v4's synthetic training targets are Parakeet on the crop alone, shifted by 10φ ms, so every crop shares one input length per phase. This step sits between phases 6 and 7. It is about 0.007 in R², small next to the students' gaps to Parakeet.
