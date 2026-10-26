@@ -1444,3 +1444,25 @@ Roadmap Next 4; D-021 item 4; plan §8.4's divergence from principle 1. **Questi
     The ridge's men's reliability beats A's by +0.23 [+0.10, +0.35]. Its ratio of 0.942 would fail the guard (shrinkage, or an ASR encoder discarding speaker differences), so the guard bites.
   - *Probe*: A's f0 slope is 1–2 cents per octave (labeller v3's formants are f0-invariant on clean probe clips), and its vowel spread of 107 cents equals the true formants' own. That spread is the uniform tube's limit, not formant error, and it is where a learnt head can gain.
   - *Code path*: the head reads only frozen features, and the label is a pure tract quantity drawn independently of the source on the clips used.
+
+- *Result (2026-10-27, `reports/analysis/vtl/d035_probe.txt` on `vtl-probe`): **the VTL head does not join item 5's retrain.** T passes the primary measure, the ratio guard and seed agreement, and fails only the f0-invariance guard.*
+
+  | | T | P | Tc (reported) | A |
+  |---|---|---|---|---|
+  | Hillenbrand reliability (mean) | 0.224 | 0.297 | 0.271 | 0.153 |
+  | Women / men ratio | 0.860 | 0.915 | 0.871 | 0.863 |
+  | Within-speaker SD | 118 c | 106 c | 113 c | 156 c |
+  | Probe median \|slope\| at f0 ≤ 250 Hz | 24.3 c/oct | 142.1 | 20.1 | 1.4 |
+  | Probe vowel spread | 46 c | 65 c | 48 c | 107 c |
+  | Synthetic per-clip median \|error\|, tube | 18 c | 28 c | 16 c | 27 c |
+
+  - *Paired differences*: T − A reliability +0.071 [+0.021, +0.117]. P − T +0.073 [+0.009, +0.133]. Tc − T +0.047 [+0.021, +0.071].
+  - *Seeds*: per-seed reliability T 0.225 / 0.226 / 0.217 and P 0.288–0.294, all above A's 0.153.
+  - *P* fails the same guard, badly: the probe reads its length short by 178–625 cents, growing with length. So "P passes where T fails" does not apply.
+  - *Within-sex correlation of speaker length with speaker f0*: T −0.30, Tc −0.37, A −0.34, P −0.19. Every estimator, including the formant baseline, finds longer tracts in lower-pitched speakers of the same sex, as anatomy predicts. On real voices, then, the heads lean on f0 no more than A does.
+  - *Synthetic σ*: per frame it is roughly calibrated (T within 1σ / 2σ 0.72 / 0.97). Per clip it is far too narrow (0.02 / 0.09), because the precision-weighted mean treats correlated frames as independent. A back-end aggregate needs an effective frame count.
+- *Post hoc, decides nothing (`d035_probe_null.txt`, `vtl_probe_null.py`): the guard's threshold was never checked against a learnt head's noise floor.* AGENTS.md asks for the noise floor before registering. It was taken from A, whose per-clip noise is near zero, and not from a head.
+  - With f0 shuffled within each (vowel, length) group, per-clip noise alone gives T a median |slope| of 15.2 c/oct (95th percentile 21.1) and Tc 14.9 (21.8). Both are above the 10 c/oct threshold, so an f0-independent head would usually have failed it.
+  - T's observed 24.3 is still beyond its null (p = 0.004): a real f0 dependence of roughly 9 c/oct above noise, about 0.1 cm per octave at 17 cm. Tc's 20.1 is not distinguishable from noise (p = 0.10). P's per-clip noise is 116 cents, so its slope says little; its length bias is the problem.
+  - The registered decision stands. Whether to register a noise-calibrated guard (excess over the shuffle null, or more and longer probe clips), and re-decide in a new entry, is Hannah's call.
+- *Disclosure*: before the run, a code check of the scoring script used real P head seed 0 (copied three times) and fake T features, so P's scores were previewed. P decides nothing, and the rule was fixed before.
