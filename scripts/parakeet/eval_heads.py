@@ -147,6 +147,10 @@ sex = np.asarray(s["sex"])
 EC, RC, SPC = ensembles(s), np.asarray(s["ref_cp"]), s.get("speaker")
 cp = table("PTDB-TUG dev closed phase by sex", EC, np.column_stack([RC, np.full(len(sex), np.nan)]),
            {"women": sex == "f", "men": sex == "m"}, 3)
+if os.environ.get("VA_DUMP"):  # per-frame log2 F1 of every single model (no ensembles), for the ensemble work (D-034)
+    for tag, E, ref, grp, spk in (("ptdb", EC, RC[:, 0], sex, SPC), ("hillenbrand", EH, RH[:, 0], g, SPH)):
+        np.savez(f"{os.environ['VA_DUMP']}_{tag}.npz", ref=ref, group=grp, speaker=np.asarray(spk) if spk is not None else np.array([]),
+                 **{"m_" + k: np.asarray(v[:, 0], np.float32) for k, v in E.items() if ":" not in k})
 
 p("\nPart-2 rule per head, ensemble (c), F1 only")
 gain = {}
