@@ -1257,3 +1257,15 @@ Hannah's question: how much of what our models learn can a large pretrained spee
       - paired, end40 − end0: +8.4 [+5.7, +11.4] and +8.2 [+5.1, +11.6]; endR − end0: +7.5 [+5.2, +10.1] and +6.1 [+2.8, +9.3].
     - So the step is real, replicates across crop draws, and vanishes when Parakeet's input ends anywhere else: it depends on where Parakeet's input ends. It does not simply move 40 ms with a 40 ms longer input, so the registered "encoder-frame boundary" mechanism is not confirmed. The exact dependence on length is open.
     - *Relevance*: v4's synthetic training targets are Parakeet on the crop alone, shifted by 10φ ms, so every crop shares one input length per phase. This step sits between phases 6 and 7. It is about 0.007 in R², small next to the students' gaps to Parakeet.
+  - *Follow-up 3 result (2026-10-26, `context_length_parakeet.txt` / `.csv`; reported only; segment margin 14 s rather than the registered 13 s, so the 30 s window always fits)*. Parakeet's layer 5 on a 4 s segment, R² against the 30 s window (middle 2 s / first 0.5 s / last 0.5 s):
+
+    | Corpus | 4 s | 8 s | 16 s |
+    |---|---|---|---|
+    | LibriTTS-R dev-clean | 0.85 / 0.80 / 0.74 | 0.95 / 0.95 / 0.95 | 0.98 / 0.98 / 0.98 |
+    | Zeroth-Korean val | 0.72 / 0.65 / 0.70 | 0.90 / 0.91 / 0.92 | 0.96 / 0.97 / 0.97 |
+    | VocalSet val | 0.14 / 0.09 / 0.07 | 0.41 / 0.41 / 0.41 | 0.71 / 0.71 / 0.70 |
+
+    Intervals are within ±0.04 for speech and ±0.2 for VocalSet.
+    - Parakeet on a 4 s crop is far from Parakeet on long audio: R² 0.72–0.85 for speech and 0.14 for singing. Even 16 s is not converged for singing. Near the window's edges it is lower still (speech 0.65–0.80).
+    - The students' targets and H5's training features are Parakeet on 4 s crops, and the gold sets are scored on whole short files. All of these are a different function from Parakeet on long recordings.
+    - *Seen after the result (post hoc)*: Parakeet's feature extractor normalises every mel band by its mean and variance over the whole input (`ParakeetFeatureExtractor`, "normalize mel features, ignoring padding"). Part or most of the window dependence may therefore come from the normalisation statistics, not from attention. Singing streams (long silences, crescendi, messa di voce, changing tasks) would move those statistics most. Not yet separated.
