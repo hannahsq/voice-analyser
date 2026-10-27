@@ -1,0 +1,28 @@
+  [d036_arm1s1/hillenbrand] 400/1668
+  [d036_arm1s1/hillenbrand] 800/1668
+  [d036_arm1s1/hillenbrand] 1200/1668
+  [d036_arm1s1/hillenbrand] 1600/1668
+  [d036_arm1s1/ptdb_tug] 250/1579  (RTF 0.021)
+  [d036_arm1s1/ptdb_tug] 500/1579  (RTF 0.021)
+  [d036_arm1s1/ptdb_tug] 750/1579  (RTF 0.021)
+  [d036_arm1s1/ptdb_tug] 1000/1579  (RTF 0.021)
+  [d036_arm1s1/ptdb_tug] 1250/1579  (RTF 0.021)
+  [d036_arm1s1/ptdb_tug] 1500/1579  (RTF 0.020)
+tiers: dev
+
+Hillenbrand, d036_arm0 vs d036_arm1s1 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    42.4    43.5  diff   +1.0 [+0.3, +1.8]  WORSE
+  F1 MAE children:    51.3    50.8  diff   -0.5 [-1.5, +0.5]  within noise
+  F1 MAE men     :    22.4    21.8  diff   -0.6 [-1.1, -0.1]  better
+  F1 MAE all     :    38.8    38.8  diff   +0.0 [-0.5, +0.5]  within noise
+  F2 MAE all     :    47.3    48.2  diff   +0.9 [-0.0, +2.6]  within noise
+  F2 DR  all     :    98.2    98.2  diff   +0.0 [-0.2, +0.2]  within noise
+  F3 MAE all     :    47.6    49.9  diff   +2.3 [+0.4, +4.6]  WORSE
+  F3 DR  all     :    98.2    97.9  diff   -0.3 [-0.6, -0.1]  WORSE
+  F4 MAE all     :    98.2   102.8  diff   +4.6 [-3.1, +11.9]  within noise
+  F4 DR  all     :    91.4    91.2  diff   -0.2 [-1.3, +0.8]  within noise
+
+PTDB-TUG f0 RPA, d036_arm0 vs d036_arm1s1
+  all frames    :  87.4  87.5  diff  +0.0 [-0.1, +0.2]  within noise  (n 154653)
+  modal         :  94.2  94.2  diff  -0.0 [-0.1, +0.1]  within noise  (n 126992)
+  modal < 85 Hz :  86.0  86.5  diff  +0.5 [-0.3, +1.1]  within noise  (n 11014)

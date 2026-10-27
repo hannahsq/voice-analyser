@@ -1,0 +1,37 @@
+
+[d036_arm1s1] synthetic per-clip median |error| (c): tube, not from f0 17  cascade, not from f0 50  length from f0 26; coverage frames 0.76 / 0.98
+[d036_arm1s1] probe: median |slope| f0 <= 250 Hz 22.8 c/oct; shuffle null median 12.5 (95 % 17.4); excess +10.2; P(null >= obs) 0.000; vowel spread 34 c; bias by length 13: -11  15.5: -19  18: -23
+
+Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
+  reliability
+    d036_arm1s1                     0.222 [   0.160,    0.271]
+    A                               0.153 [   0.103,    0.199]
+  rel men
+    d036_arm1s1                     0.255 [   0.159,    0.348]
+    A                               0.170 [   0.091,    0.256]
+  rel women
+    d036_arm1s1                     0.188 [   0.133,    0.228]
+    A                               0.135 [   0.088,    0.178]
+  w/m
+    d036_arm1s1                     0.863 [   0.836,    0.884]
+    A                               0.863 [   0.849,    0.891]
+  within SD c
+    d036_arm1s1                   122.558 [ 116.867,  127.945]
+    A                             155.816 [ 149.772,  161.785]
+  men cm
+    d036_arm1s1                    16.733 [  16.550,   17.090]
+    A                              17.837 [  17.431,   18.062]
+  women cm
+    d036_arm1s1                    14.447 [  14.171,   14.746]
+    A                              15.390 [  15.248,   15.657]
+  children cm
+    d036_arm1s1                    13.398 [  13.209,   13.682]
+    A                              14.679 [  14.462,   15.035]
+  r(len, f0) in sex
+    d036_arm1s1                    -0.323 [  -0.603,   -0.048]
+    A                              -0.347 [  -0.587,   -0.098]
+
+Paired differences (speaker bootstrap)
+  d036_arm1s1 - A                              reliability    +0.069 [  +0.022,   +0.118]
+  d036_arm1s1 - A                              w/m            +0.001 [  -0.032,   +0.011]
+  d036_arm1s1 - A                              within SD c   -33.259 [ -37.212,  -29.489]
