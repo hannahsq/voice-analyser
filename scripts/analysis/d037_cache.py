@@ -19,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 
 from vocal_analysis.config import DeviceConfig
 from vocal_analysis.data.manifest import read_manifest
@@ -109,16 +109,23 @@ def main():
         ids = ids[:LIMIT] if LIMIT else ids
         N = len(ids)
         ds = SynthCrops(flat, ids, CROP, channel, seed=37037, fixed=True)
-        feats = np.lib.format.open_memmap(d / "feats.npy", "w+", np.float16, (N, CROP, 128))
-        fm = np.lib.format.open_memmap(d / "log2F.npy", "w+", np.float32, (N, CROP, 4))
-        lab_f = np.lib.format.open_memmap(d / "label_formants.npy", "w+", np.float32, (N, CROP, 4))
-        lab_s = np.lib.format.open_memmap(d / "label_sonorant.npy", "w+", np.float32, (N, CROP))
+        prog = d / "progress.json"  # resumable: crops before "k" are written and flushed
+        k0 = json.loads(prog.read_text())["k"] if prog.exists() else 0
+        mode = "r+" if k0 else "w+"
+        mm = lambda name, dt, shape: np.lib.format.open_memmap(d / name, mode, dt, None if k0 else shape)  # noqa: E731
+        feats = mm("feats.npy", np.float16, (N, CROP, 128))
+        fm = mm("log2F.npy", np.float32, (N, CROP, 4))
+        lab_f = mm("label_formants.npy", np.float32, (N, CROP, 4))
+        lab_s = mm("label_sonorant.npy", np.float32, (N, CROP))
         mu = lv = None
         if T.has_vtl:
-            mu = np.lib.format.open_memmap(d / "vtl_mu.npy", "w+", np.float32, (N, CROP))
-            lv = np.lib.format.open_memmap(d / "vtl_logvar.npy", "w+", np.float32, (N, CROP))
-        k, t0 = 0, time.time()
-        for audio, lab in DataLoader(ds, 16, num_workers=8, collate_fn=collate, prefetch_factor=4):
+            mu = mm("vtl_mu.npy", np.float32, (N, CROP))
+            lv = mm("vtl_logvar.npy", np.float32, (N, CROP))
+        arrays = [a for a in (feats, fm, lab_f, lab_s, mu, lv) if a is not None]
+        if k0:
+            log(f"  [train] resuming at {k0}/{N}")
+        k, t0 = k0, time.time()
+        for audio, lab in DataLoader(Subset(ds, range(k0, N)), 16, num_workers=8, collate_fn=collate, prefetch_factor=4):
             b = len(audio)
             h, f, m, v = T.crops(audio)
             feats[k:k + b], fm[k:k + b] = h, f
@@ -128,10 +135,12 @@ def main():
                 mu[k:k + b], lv[k:k + b] = m, v
             k += b
             if (k // 16) % 200 == 0:
-                log(f"  [train] {k}/{N} ({k / (time.time() - t0):.1f} crops/s)")
-        for a in (feats, fm, lab_f, lab_s, mu, lv):
-            if a is not None:
-                a.flush()
+                for a in arrays:
+                    a.flush()
+                prog.write_text(json.dumps({"k": k}))
+                log(f"  [train] {k}/{N} ({(k - k0) / (time.time() - t0):.1f} crops/s)")
+        for a in arrays:
+            a.flush()
         np.save(d / "clip.npy", ids)
         np.save(d / "log2_length.npy", np.log2(np.load(flat / "clip_length_cm.npy")[ids]).astype(np.float32))
         finish("train", n=int(k), clips=int(N // DRAWS), draws=DRAWS)
