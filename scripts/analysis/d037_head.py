@@ -66,7 +66,7 @@ def main():
     head = Head(in_dim).to(dev)
     opt = torch.optim.AdamW(head.parameters(), lr=1e-3, weight_decay=0.01)
     sched = torch.optim.lr_scheduler.LambdaLR(
-        opt, lambda s: (s + 1) / WARM if s < WARM else 0.5 * (1 + math.cos(math.pi * (s - WARM) / (STEPS - WARM))))
+        opt, lambda s: (s + 1) / WARM if s < WARM else 0.5 * (1 + math.cos(math.pi * min(1.0, (s - WARM) / max(1, STEPS - WARM)))))
     rng = np.random.default_rng(seed)
     curve, run, start = [], [], 0
     ck = out / "ckpt.pt"
