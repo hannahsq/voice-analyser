@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# D-037 (pre-registered 2026-10-27): the VTL head refits, on the CPU alongside the GPU caching (d037_prep.sh). Each
-# trunk's heads start once its cache is complete; three seeds at a time, 4 threads each. Order: R3 and R3c (decisive),
+# D-037 (pre-registered 2026-10-27): the VTL head refits, on the GPU alongside the caching (d037_prep.sh; small MLPs, so the two share it). Each
+# trunk's heads start once its cache is complete; three seeds at a time, 2 CPU threads each (the machine has 32). Order: R3 and R3c (decisive),
 # then RT, R1, R1c, R2. Heads resume from their checkpoints and skip when done. Then the scoring.
 set -u
 cd /c/github/voice-analyser
 LOG=runs/orchestrator.log
 say() { echo "$(date '+%F %T') $*" >> "$LOG"; }
 fail() { say "FAILED: d037 heads $*; stopping"; exit 1; }
-export VA_DEVICE=cpu OMP_NUM_THREADS=4 MKL_NUM_THREADS=4
+export VA_DEVICE=cuda OMP_NUM_THREADS=2 MKL_NUM_THREADS=2
 PY=./.venv/Scripts/python.exe
 C=cache/d037
 R=runs/d037
