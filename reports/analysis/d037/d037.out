@@ -1,0 +1,235 @@
+D-037: VTL heads refitted on frozen trunks; joint heads J*; A = apparent length
+
+[R3] validation NLL -3.3678, SNR 22.70 dB; per-clip median |error| (c): tube, not from f0 16  cascade, not from f0 49  length from f0 23; coverage frames 0.72 / 0.96
+    seeds: s0 final val 22.63 dB (min NLL -3.3634), overfit flag False; s1 final val 22.65 dB (min NLL -3.3627), overfit flag False; s2 final val 22.60 dB (min NLL -3.3566), overfit flag False
+[R3] probe: median |slope| f0 <= 250 Hz 13.2 c/oct; shuffle null median 11.7 (95 % 16.7); excess +1.5; P(null >= obs) 0.334; vowel spread 36 c; bias by length 13: -21  15.5: -28  18: -39
+
+[R3c] validation NLL -3.3707, SNR 22.72 dB; per-clip median |error| (c): tube, not from f0 16  cascade, not from f0 49  length from f0 22; coverage frames 0.73 / 0.96
+    seeds: s0 final val 22.67 dB (min NLL -3.3682), overfit flag False; s1 final val 22.61 dB (min NLL -3.3573), overfit flag False; s2 final val 22.70 dB (min NLL -3.3677), overfit flag False
+[R3c] probe: median |slope| f0 <= 250 Hz 14.1 c/oct; shuffle null median 11.6 (95 % 16.9); excess +2.5; P(null >= obs) 0.203; vowel spread 37 c; bias by length 13: -26  15.5: -29  18: -37
+
+[RT] validation NLL -3.3061, SNR 22.16 dB; per-clip median |error| (c): tube, not from f0 16  cascade, not from f0 48  length from f0 22; coverage frames 0.72 / 0.96
+    seeds: s0 final val 22.11 dB (min NLL -3.3041), overfit flag False; s1 final val 22.07 dB (min NLL -3.2950), overfit flag False; s2 final val 22.04 dB (min NLL -3.2920), overfit flag False
+[RT] probe: median |slope| f0 <= 250 Hz 17.8 c/oct; shuffle null median 12.6 (95 % 18.3); excess +5.2; P(null >= obs) 0.074; vowel spread 44 c; bias by length 13: -19  15.5: -41  18: -49
+
+[R1] validation NLL -3.3716, SNR 22.73 dB; per-clip median |error| (c): tube, not from f0 16  cascade, not from f0 48  length from f0 23; coverage frames 0.72 / 0.97
+    seeds: s0 final val 22.67 dB (min NLL -3.3677), overfit flag False; s1 final val 22.66 dB (min NLL -3.3637), overfit flag False; s2 final val 22.65 dB (min NLL -3.3622), overfit flag False
+[R1] probe: median |slope| f0 <= 250 Hz 15.6 c/oct; shuffle null median 11.9 (95 % 16.8); excess +3.7; P(null >= obs) 0.117; vowel spread 37 c; bias by length 13: -21  15.5: -27  18: -34
+
+[R1c] validation NLL -3.3718, SNR 22.73 dB; per-clip median |error| (c): tube, not from f0 16  cascade, not from f0 50  length from f0 22; coverage frames 0.72 / 0.96
+    seeds: s0 final val 22.69 dB (min NLL -3.3705), overfit flag False; s1 final val 22.61 dB (min NLL -3.3579), overfit flag False; s2 final val 22.69 dB (min NLL -3.3666), overfit flag False
+[R1c] probe: median |slope| f0 <= 250 Hz 14.1 c/oct; shuffle null median 12.2 (95 % 16.6); excess +1.8; P(null >= obs) 0.261; vowel spread 38 c; bias by length 13: -20  15.5: -24  18: -32
+
+[R2] validation NLL -3.4140, SNR 23.10 dB; per-clip median |error| (c): tube, not from f0 13  cascade, not from f0 46  length from f0 21; coverage frames 0.72 / 0.96
+    seeds: s0 final val 23.03 dB (min NLL -3.4094), overfit flag False; s1 final val 23.03 dB (min NLL -3.4055), overfit flag False; s2 final val 23.02 dB (min NLL -3.4051), overfit flag False
+[R2] probe: median |slope| f0 <= 250 Hz 9.9 c/oct; shuffle null median 11.0 (95 % 15.8); excess -1.1; P(null >= obs) 0.666; vowel spread 37 c; bias by length 13: -18  15.5: -29  18: -31
+
+[J3] validation NLL -3.1777, SNR 21.05 dB; per-clip median |error| (c): tube, not from f0 17  cascade, not from f0 50  length from f0 27; coverage frames 0.77 / 0.98
+[J3] probe: median |slope| f0 <= 250 Hz 17.9 c/oct; shuffle null median 11.4 (95 % 17.4); excess +6.5; P(null >= obs) 0.037; vowel spread 34 c; bias by length 13: +0  15.5: -7  18: -21
+
+[J1] validation NLL -3.1760, SNR 21.03 dB; per-clip median |error| (c): tube, not from f0 18  cascade, not from f0 52  length from f0 26; coverage frames 0.76 / 0.98
+[J1] probe: median |slope| f0 <= 250 Hz 18.3 c/oct; shuffle null median 10.9 (95 % 14.8); excess +7.4; P(null >= obs) 0.002; vowel spread 35 c; bias by length 13: +0  15.5: -4  18: -12
+
+[J2] validation NLL -3.2553, SNR 21.72 dB; per-clip median |error| (c): tube, not from f0 14  cascade, not from f0 63  length from f0 26; coverage frames 0.78 / 0.98
+[J2] probe: median |slope| f0 <= 250 Hz 15.2 c/oct; shuffle null median 10.5 (95 % 15.2); excess +4.6; P(null >= obs) 0.051; vowel spread 34 c; bias by length 13: -5  15.5: -27  18: -33
+
+Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
+  reliability
+    R3            0.244 [   0.177,    0.292]
+    R3c           0.238 [   0.173,    0.285]
+    RT            0.228 [   0.168,    0.274]
+    R1            0.243 [   0.176,    0.292]
+    R1c           0.235 [   0.170,    0.283]
+    R2            0.244 [   0.176,    0.293]
+    J3            0.236 [   0.172,    0.281]
+    J1            0.226 [   0.166,    0.270]
+    J2            0.229 [   0.165,    0.275]
+    A             0.153 [   0.102,    0.196]
+  rel men
+    R3            0.277 [   0.163,    0.364]
+    R3c           0.274 [   0.160,    0.360]
+    RT            0.239 [   0.137,    0.321]
+    R1            0.279 [   0.165,    0.367]
+    R1c           0.272 [   0.160,    0.358]
+    R2            0.283 [   0.165,    0.372]
+    J3            0.261 [   0.159,    0.339]
+    J1            0.246 [   0.149,    0.325]
+    J2            0.276 [   0.157,    0.362]
+    A             0.170 [   0.089,    0.251]
+  rel women
+    R3            0.211 [   0.145,    0.257]
+    R3c           0.201 [   0.141,    0.243]
+    RT            0.217 [   0.156,    0.262]
+    R1            0.207 [   0.141,    0.253]
+    R1c           0.197 [   0.136,    0.239]
+    R2            0.204 [   0.140,    0.249]
+    J3            0.211 [   0.142,    0.256]
+    J1            0.206 [   0.139,    0.253]
+    J2            0.182 [   0.127,    0.220]
+    A             0.135 [   0.089,    0.173]
+  w/m
+    R3            0.871 [   0.846,    0.897]
+    R3c           0.868 [   0.846,    0.889]
+    RT            0.867 [   0.847,    0.887]
+    R1            0.868 [   0.848,    0.893]
+    R1c           0.867 [   0.847,    0.891]
+    R2            0.858 [   0.843,    0.887]
+    J3            0.868 [   0.845,    0.891]
+    J1            0.868 [   0.845,    0.893]
+    J2            0.876 [   0.852,    0.895]
+    A             0.863 [   0.849,    0.891]
+  within SD c
+    R3          119.483 [ 114.061,  124.839]
+    R3c         118.800 [ 113.357,  124.384]
+    RT          122.889 [ 116.986,  128.878]
+    R1          120.224 [ 114.858,  125.737]
+    R1c         119.206 [ 113.859,  124.844]
+    R2          119.256 [ 113.780,  124.715]
+    J3          118.485 [ 113.174,  123.707]
+    J1          120.074 [ 114.776,  125.274]
+    J2          116.234 [ 110.762,  121.502]
+    A           155.816 [ 150.379,  161.819]
+  men cm
+    R3           16.930 [  16.538,   17.139]
+    R3c          17.105 [  16.727,   17.313]
+    RT           17.052 [  16.683,   17.218]
+    R1           16.929 [  16.547,   17.106]
+    R1c          17.056 [  16.722,   17.268]
+    R2           17.107 [  16.685,   17.173]
+    J3           16.941 [  16.697,   17.218]
+    J1           16.783 [  16.703,   17.176]
+    J2           16.937 [  16.701,   17.155]
+    A            17.837 [  17.431,   18.062]
+  women cm
+    R3           14.745 [  14.394,   15.032]
+    R3c          14.847 [  14.468,   15.046]
+    RT           14.779 [  14.445,   15.049]
+    R1           14.700 [  14.418,   14.952]
+    R1c          14.786 [  14.462,   15.076]
+    R2           14.686 [  14.399,   14.905]
+    J3           14.697 [  14.353,   15.014]
+    J1           14.573 [  14.361,   14.975]
+    J2           14.834 [  14.461,   15.042]
+    A            15.390 [  15.248,   15.657]
+  children cm
+    R3           13.635 [  13.523,   13.965]
+    R3c          13.889 [  13.608,   14.210]
+    RT           13.687 [  13.477,   13.973]
+    R1           13.598 [  13.433,   13.987]
+    R1c          13.846 [  13.550,   14.199]
+    R2           13.665 [  13.456,   13.998]
+    J3           13.765 [  13.531,   14.084]
+    J1           13.715 [  13.471,   13.970]
+    J2           13.922 [  13.629,   14.173]
+    A            14.679 [  14.462,   15.035]
+  r(len, f0) in sex
+    R3           -0.342 [  -0.628,   -0.050]
+    R3c          -0.347 [  -0.627,   -0.055]
+    RT           -0.327 [  -0.606,   -0.036]
+    R1           -0.343 [  -0.626,   -0.055]
+    R1c          -0.354 [  -0.629,   -0.063]
+    R2           -0.323 [  -0.611,   -0.023]
+    J3           -0.316 [  -0.609,   -0.019]
+    J1           -0.330 [  -0.619,   -0.033]
+    J2           -0.311 [  -0.594,   -0.010]
+    A            -0.347 [  -0.579,   -0.096]
+
+Paired differences (speaker bootstrap)
+  R3 - A       reliability    +0.091 [  +0.039,   +0.139]
+  R3 - A       w/m            +0.008 [  -0.024,   +0.022]
+  R3 - A       within SD c   -36.333 [ -40.211,  -32.527]
+  R3c - A      reliability    +0.085 [  +0.041,   +0.128]
+  R3c - A      w/m            +0.005 [  -0.024,   +0.019]
+  R3c - A      within SD c   -37.017 [ -40.591,  -33.371]
+  RT - A       reliability    +0.076 [  +0.028,   +0.122]
+  RT - A       w/m            +0.004 [  -0.026,   +0.017]
+  RT - A       within SD c   -32.927 [ -36.907,  -28.938]
+  R1 - A       reliability    +0.090 [  +0.037,   +0.139]
+  R1 - A       w/m            +0.005 [  -0.022,   +0.021]
+  R1 - A       within SD c   -35.592 [ -39.460,  -31.826]
+  R1c - A      reliability    +0.082 [  +0.038,   +0.125]
+  R1c - A      w/m            +0.004 [  -0.023,   +0.020]
+  R1c - A      within SD c   -36.610 [ -40.231,  -33.072]
+  R2 - A       reliability    +0.091 [  +0.040,   +0.140]
+  R2 - A       w/m            -0.004 [  -0.029,   +0.014]
+  R2 - A       within SD c   -36.561 [ -40.447,  -32.716]
+  J3 - A       reliability    +0.083 [  +0.032,   +0.129]
+  J3 - A       w/m            +0.005 [  -0.025,   +0.017]
+  J3 - A       within SD c   -37.331 [ -40.881,  -33.879]
+  J1 - A       reliability    +0.074 [  +0.024,   +0.118]
+  J1 - A       w/m            +0.005 [  -0.024,   +0.020]
+  J1 - A       within SD c   -35.742 [ -39.299,  -32.317]
+  J2 - A       reliability    +0.076 [  +0.026,   +0.123]
+  J2 - A       w/m            +0.013 [  -0.019,   +0.028]
+  J2 - A       within SD c   -39.582 [ -43.521,  -35.782]
+  R3 - J3      reliability    +0.008 [  -0.005,   +0.020]
+  R3 - J3      w/m            +0.003 [  -0.009,   +0.013]
+  R3 - J3      within SD c    +0.998 [  -0.248,   +2.207]
+  R1 - J1      reliability    +0.017 [  +0.002,   +0.030]
+  R1 - J1      w/m            -0.000 [  -0.015,   +0.016]
+  R1 - J1      within SD c    +0.150 [  -1.176,   +1.496]
+  R2 - J2      reliability    +0.015 [  +0.002,   +0.027]
+  R2 - J2      w/m            -0.017 [  -0.025,   +0.004]
+  R2 - J2      within SD c    +3.022 [  +1.780,   +4.296]
+  R3c - R3     reliability    -0.006 [  -0.016,   +0.006]
+  R3c - R3     w/m            -0.003 [  -0.009,   +0.005]
+  R3c - R3     within SD c    -0.683 [  -1.637,   +0.302]
+  R1c - R1     reliability    -0.008 [  -0.019,   +0.004]
+  R1c - R1     w/m            -0.001 [  -0.008,   +0.008]
+  R1c - R1     within SD c    -1.018 [  -1.957,   -0.031]
+  R3 - RT      reliability    +0.015 [  +0.001,   +0.028]
+  R3 - RT      w/m            +0.004 [  -0.010,   +0.015]
+  R3 - RT      within SD c    -3.406 [  -4.969,   -1.757]
+  R1 - RT      reliability    +0.015 [  -0.001,   +0.029]
+  R1 - RT      w/m            +0.002 [  -0.010,   +0.013]
+  R1 - RT      within SD c    -2.665 [  -4.315,   -0.911]
+  R2 - RT      reliability    +0.015 [  +0.001,   +0.028]
+  R2 - RT      w/m            -0.008 [  -0.012,   +0.007]
+  R2 - RT      within SD c    -3.633 [  -5.136,   -2.077]
+  R1 - R3      reliability    -0.001 [  -0.004,   +0.003]
+  R1 - R3      w/m            -0.003 [  -0.006,   +0.006]
+  R1 - R3      within SD c    +0.741 [  +0.274,   +1.187]
+  R2 - R3      reliability    +0.000 [  -0.008,   +0.008]
+  R2 - R3      w/m            -0.012 [  -0.016,   +0.005]
+  R2 - R3      within SD c    -0.228 [  -1.095,   +0.606]
+
+Validation SNR gain (dB), paired clip bootstrap (2000)
+  R3 - J3       +1.65 [ +1.29,  +2.00]  (146 clips)
+  R1 - J1       +1.70 [ +1.34,  +2.04]  (146 clips)
+  R2 - J2       +1.38 [ +1.01,  +1.70]  (146 clips)
+  R3c - R3      +0.02 [ -0.04,  +0.10]  (146 clips)
+  R1c - R1      +0.00 [ -0.07,  +0.07]  (146 clips)
+  RT - J3       +1.12 [ +0.68,  +1.52]  (146 clips)
+
+Vowel classification (Hillenbrand dev, 12 vowels, LDA, 5 folds grouped by speaker): accuracy [95 % speaker bootstrap]
+  trunk arm1 (its own F1-F3)
+    raw                    0.802 [0.774, 0.830]  (996 files)
+    + log2 L (A)           0.842 [0.819, 0.865]  (996 files)
+    + log2 L (R1)          0.853 [0.830, 0.876]  (996 files)
+    + log2 L (R1c)         0.855 [0.833, 0.878]  (996 files)
+    + log2 L (J1)          0.853 [0.830, 0.877]  (996 files)
+    Lobanov                0.934 [0.916, 0.950]  (996 files)
+  trunk arm2 (its own F1-F3)
+    raw                    0.803 [0.775, 0.830]  (996 files)
+    + log2 L (A)           0.842 [0.820, 0.865]  (996 files)
+    + log2 L (R2)          0.854 [0.830, 0.878]  (996 files)
+    + log2 L (J2)          0.852 [0.828, 0.875]  (996 files)
+    Lobanov                0.930 [0.911, 0.946]  (996 files)
+  trunk arm3 (its own F1-F3)
+    raw                    0.807 [0.778, 0.835]  (996 files)
+    + log2 L (A)           0.843 [0.820, 0.865]  (996 files)
+    + log2 L (R3)          0.851 [0.827, 0.873]  (996 files)
+    + log2 L (R3c)         0.860 [0.837, 0.883]  (996 files)
+    + log2 L (J3)          0.859 [0.836, 0.884]  (996 files)
+    Lobanov                0.934 [0.917, 0.951]  (996 files)
+  trunk tv3 (its own F1-F3)
+    raw                    0.804 [0.778, 0.830]  (996 files)
+    + log2 L (A)           0.844 [0.822, 0.866]  (996 files)
+    + log2 L (RT)          0.860 [0.837, 0.884]  (996 files)
+    Lobanov                0.933 [0.914, 0.949]  (996 files)
+
+Decisions (arm 3's trunk)
+  Q1: SNR gain +1.65 dB [+1.29, +2.00] (needs >= 0.5 and > 0); reliability +0.008 [-0.005, +0.020] (needs > 0)
+  DECISION Q1: not under-trained: item 5 keeps D-036's setup
+  Q3: reliability -0.006 [-0.016, +0.006] (> 0); probe excess +2.5 (<= 10), rise +1.0 (<= 3); w/m 0.868 ([0.85, 0.92]); vowel spread rise +1 c (<= 10)
+  DECISION Q3: the VTL head reads h alone
