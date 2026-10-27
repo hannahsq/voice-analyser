@@ -180,7 +180,7 @@ def main():
         d.mkdir(exist_ok=True)
         mods = registry()
         ref = np.load(EMB / "gold_hillenbrand" / "ref_formants.npy")
-        H, F, M, V, files, k = [], [], [], [], [], 0
+        H, F, M, V, paths, spk, grp, off, k = [], [], [], [], [], [], [], [0], 0
         for row in TI.filter_rows(read_manifest("data/manifests/hillenbrand.csv"), ("dev",)):
             item = mods["hillenbrand"].load(Path("data/hillenbrand"), row)
             ok = np.isfinite(item.times)
@@ -193,12 +193,13 @@ def main():
             H.append(h[j].astype(np.float16)), F.append(f[j])
             if T.has_vtl:
                 M.append(m[j]), V.append(v[j])
-            files += [row["file"] if "file" in row else str(k)] * len(t)
+            paths.append(row.path), spk.append(row.speaker_id), grp.append(item.meta.get("group", "?"))
             k += len(t)
+            off.append(k)
         assert k == len(ref), (k, len(ref))
         np.save(d / "feats.npy", np.concatenate(H))
         save_cols(d, np.concatenate(F), *((np.concatenate(M), np.concatenate(V)) if T.has_vtl else (None, None)))
-        np.save(d / "file.npy", np.array(files))
+        np.savez(d / "files.npz", path=np.array(paths), speaker=np.array(spk), group=np.array(grp), off=np.array(off))  # file j: frames off[j]:off[j+1]
         finish("hb", n_ref=int(k), n_files=len(H))
 
 
