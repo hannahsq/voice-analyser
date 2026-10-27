@@ -1613,3 +1613,22 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
 - *Measures* (D-035 / D-036's, from one script): synthetic validation per-clip |error| by kind, validation NLL and SNR on tube clips; the probe's median |slope| at f0 ≤ 250 Hz with D-036's shuffle null and the excess; vowel spread; bias by length; Hillenbrand dev reliability, w/m, within-speaker SD, group medians, r(length, f0) within sex; paired speaker bootstrap (2,000) of every arm against T, against P and against A. Also the vowel classification of D-037 (teacher v3's F1–F3, normalised by each arm's speaker length).
 - *What would be interesting* (stated now, decides nothing): a fused arm more reliable than P with w/m inside [0.85, 0.92] and a lower probe excess than either alone; whether source dropout moves the fused arms towards P's real-voice behaviour; whether a trained fusion (E, F) ends up weighting T, the better source on synthetic data, at P's expense, which W cannot do.
 - *Cost*: four trained arms × 3 seeds × 4,000 steps of a small MLP on the GPU (minutes each), alongside D-037's caching.
+- *Code check*: the scorer reproduces D-035's T and P exactly (reliability 0.224 / 0.297, probe 24.3 / 142.1 c/oct), so the alignment and seed means are right.
+- *Result (2026-10-28 02:36; `reports/analysis/d039/d039.txt`; exploratory, decides nothing)*:
+
+  | arm | reliability | − T | − P | w/m | probe excess (c/oct) | vowel spread | within-speaker SD | val SNR |
+  |---|---|---|---|---|---|---|---|---|
+  | T | 0.224 | | | 0.860 | +9.4 | 46 c | 118 c | 21.3 dB |
+  | P | 0.297 | +0.073 [+0.010, +0.140] | | 0.915 | +37.6 (slope 142) | 65 c | 106 c | 13.7 dB |
+  | E | 0.261 | +0.037 [+0.005, +0.071] | −0.036 [−0.085, +0.015] | 0.880 | +5.7 | 48 c | 107 c | 20.5 dB |
+  | ED | 0.266 | +0.042 [+0.017, +0.065] | −0.031 [−0.086, +0.022] | 0.868 | +18.1 | 46 c | 106 c | 20.8 dB |
+  | **F** | **0.281** | **+0.057 [+0.025, +0.083]** | −0.017 [−0.066, +0.028] | 0.881 | **+3.1** (P = 0.29) | **32 c** | **99 c** | 20.4 dB |
+  | FD | 0.239 | +0.015 [−0.003, +0.033] | −0.058 [−0.111, −0.009] | 0.878 | +7.5 | 40 c | 105 c | 20.5 dB |
+  | W | 0.249 | +0.025 [+0.004, +0.044] | −0.048 [−0.100, +0.001] | 0.883 | +7.7 | 50 c | 101 c | 19.9 dB |
+
+  - Every fused arm sits between T and P on reliability; none beats P (A 0.153). Every fused arm keeps w/m inside [0.85, 0.92] and an f0 excess near T's or below it, against P's +37.6 and its large level bias on the synthetic probe (−178 / −432 / −625 c at 13 / 15.5 / 18 cm).
+  - **F, Hannah's penultimate fusion, is the most interesting**: reliability within noise of P (−0.017 [−0.066, +0.028]) and well above T (+0.057), with the lowest f0 excess (+3.1, indistinguishable from its null), vowel spread (32 c) and within-speaker SD (99 c). Its level calibration on the synthetic probe is worse than T's (−47 / −117 / −152 c). For scale, D-037's joint head J3 had reliability 0.236 and excess +6.4.
+  - Source dropout did not help: ED is about E on reliability with a much larger f0 excess (+18.1); FD is below F on reliability (0.239).
+  - The trained fusions did not simply collapse onto T (all are more reliable than T), but none kept all of P's real-voice advantage.
+  - *Vowel classification* (teacher v3's F1–F3; reported): raw 0.804; normalised by A 0.844, T 0.862, P 0.836, E 0.848, ED 0.860, F 0.851, FD 0.854, W 0.847; Lobanov 0.933. Which length normalises vowels best does not follow reliability (T best, P worst).
+  - *Caution*: seven arms were compared, and F is the best of four trained fusions on one dev set, so its lead is partly selection. Anything acted on needs its own pre-registered entry with fresh seeds (e.g. F as the offline labeller's length output, as H5×6 is for F1).
