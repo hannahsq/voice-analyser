@@ -2,36 +2,57 @@
 [d036_arm1s1] synthetic per-clip median |error| (c): tube, not from f0 17  cascade, not from f0 50  length from f0 26; coverage frames 0.76 / 0.98
 [d036_arm1s1] probe: median |slope| f0 <= 250 Hz 22.8 c/oct; shuffle null median 12.5 (95 % 17.4); excess +10.2; P(null >= obs) 0.000; vowel spread 34 c; bias by length 13: -11  15.5: -19  18: -23
 
+[d036_arm1s2] synthetic per-clip median |error| (c): tube, not from f0 16  cascade, not from f0 51  length from f0 26; coverage frames 0.75 / 0.98
+[d036_arm1s2] probe: median |slope| f0 <= 250 Hz 22.4 c/oct; shuffle null median 12.3 (95 % 17.5); excess +10.1; P(null >= obs) 0.002; vowel spread 29 c; bias by length 13: -9  15.5: -31  18: -22
+
 Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
   reliability
-    d036_arm1s1                     0.222 [   0.160,    0.271]
-    A                               0.153 [   0.103,    0.199]
+    d036_arm1s1                     0.222 [   0.160,    0.267]
+    d036_arm1s2                     0.214 [   0.152,    0.258]
+    A                               0.153 [   0.104,    0.197]
   rel men
-    d036_arm1s1                     0.255 [   0.159,    0.348]
-    A                               0.170 [   0.091,    0.256]
+    d036_arm1s1                     0.255 [   0.152,    0.339]
+    d036_arm1s2                     0.245 [   0.147,    0.323]
+    A                               0.170 [   0.089,    0.257]
   rel women
-    d036_arm1s1                     0.188 [   0.133,    0.228]
-    A                               0.135 [   0.088,    0.178]
+    d036_arm1s1                     0.188 [   0.134,    0.231]
+    d036_arm1s2                     0.184 [   0.122,    0.228]
+    A                               0.135 [   0.089,    0.173]
   w/m
-    d036_arm1s1                     0.863 [   0.836,    0.884]
+    d036_arm1s1                     0.863 [   0.837,    0.884]
+    d036_arm1s2                     0.863 [   0.843,    0.882]
     A                               0.863 [   0.849,    0.891]
   within SD c
-    d036_arm1s1                   122.558 [ 116.867,  127.945]
-    A                             155.816 [ 149.772,  161.785]
+    d036_arm1s1                   122.558 [ 117.246,  128.156]
+    d036_arm1s2                   120.022 [ 114.150,  126.278]
+    A                             155.816 [ 149.790,  161.740]
   men cm
     d036_arm1s1                    16.733 [  16.550,   17.090]
+    d036_arm1s2                    16.800 [  16.541,   17.056]
     A                              17.837 [  17.431,   18.062]
   women cm
     d036_arm1s1                    14.447 [  14.171,   14.746]
+    d036_arm1s2                    14.498 [  14.258,   14.762]
     A                              15.390 [  15.248,   15.657]
   children cm
     d036_arm1s1                    13.398 [  13.209,   13.682]
-    A                              14.679 [  14.462,   15.035]
+    d036_arm1s2                    13.539 [  13.313,   13.879]
+    A                              14.679 [  14.421,   15.035]
   r(len, f0) in sex
-    d036_arm1s1                    -0.323 [  -0.603,   -0.048]
-    A                              -0.347 [  -0.587,   -0.098]
+    d036_arm1s1                    -0.323 [  -0.582,   -0.038]
+    d036_arm1s2                    -0.328 [  -0.592,   -0.031]
+    A                              -0.347 [  -0.575,   -0.090]
 
 Paired differences (speaker bootstrap)
-  d036_arm1s1 - A                              reliability    +0.069 [  +0.022,   +0.118]
-  d036_arm1s1 - A                              w/m            +0.001 [  -0.032,   +0.011]
-  d036_arm1s1 - A                              within SD c   -33.259 [ -37.212,  -29.489]
+  d036_arm1s1 - A                              reliability    +0.069 [  +0.018,   +0.118]
+  d036_arm1s1 - A                              w/m            +0.001 [  -0.031,   +0.011]
+  d036_arm1s1 - A                              within SD c   -33.259 [ -36.965,  -29.272]
+  d036_arm1s1 - d036_arm1s2                    reliability    +0.007 [  -0.010,   +0.024]
+  d036_arm1s1 - d036_arm1s2                    w/m            +0.000 [  -0.020,   +0.010]
+  d036_arm1s1 - d036_arm1s2                    within SD c    +2.536 [  +0.677,   +4.453]
+  d036_arm1s2 - A                              reliability    +0.062 [  +0.012,   +0.105]
+  d036_arm1s2 - A                              w/m            +0.000 [  -0.026,   +0.015]
+  d036_arm1s2 - A                              within SD c   -35.794 [ -39.805,  -31.630]
+  d036_arm1s2 - d036_arm1s1                    reliability    -0.007 [  -0.024,   +0.010]
+  d036_arm1s2 - d036_arm1s1                    w/m            -0.000 [  -0.010,   +0.020]
+  d036_arm1s2 - d036_arm1s1                    within SD c    -2.536 [  -4.453,   -0.677]
