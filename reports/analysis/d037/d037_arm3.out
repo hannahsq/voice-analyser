@@ -1,0 +1,95 @@
+D-037: VTL heads refitted on frozen trunks; joint heads J*; A = apparent length
+
+[R3] validation NLL -3.3678, SNR 22.70 dB; per-clip median |error| (c): tube, not from f0 16  cascade, not from f0 49  length from f0 23; coverage frames 0.72 / 0.96
+    seeds: s0 final val 22.63 dB (min NLL -3.3634), overfit flag False; s1 final val 22.65 dB (min NLL -3.3627), overfit flag False; s2 final val 22.60 dB (min NLL -3.3566), overfit flag False
+[R3] probe: median |slope| f0 <= 250 Hz 13.2 c/oct; shuffle null median 11.7 (95 % 16.7); excess +1.5; P(null >= obs) 0.334; vowel spread 36 c; bias by length 13: -21  15.5: -28  18: -39
+
+[R3c] validation NLL -3.3707, SNR 22.72 dB; per-clip median |error| (c): tube, not from f0 16  cascade, not from f0 49  length from f0 22; coverage frames 0.73 / 0.96
+    seeds: s0 final val 22.67 dB (min NLL -3.3682), overfit flag False; s1 final val 22.61 dB (min NLL -3.3573), overfit flag False; s2 final val 22.70 dB (min NLL -3.3677), overfit flag False
+[R3c] probe: median |slope| f0 <= 250 Hz 14.1 c/oct; shuffle null median 11.6 (95 % 16.9); excess +2.5; P(null >= obs) 0.203; vowel spread 37 c; bias by length 13: -26  15.5: -29  18: -37
+
+[J3] validation NLL -3.1777, SNR 21.05 dB; per-clip median |error| (c): tube, not from f0 17  cascade, not from f0 50  length from f0 27; coverage frames 0.77 / 0.98
+[J3] probe: median |slope| f0 <= 250 Hz 17.9 c/oct; shuffle null median 11.5 (95 % 17.3); excess +6.4; P(null >= obs) 0.039; vowel spread 34 c; bias by length 13: +0  15.5: -7  18: -21
+
+Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
+  reliability
+    R3            0.244 [   0.177,    0.294]
+    R3c           0.238 [   0.172,    0.286]
+    J3            0.236 [   0.173,    0.281]
+    A             0.153 [   0.103,    0.196]
+  rel men
+    R3            0.277 [   0.171,    0.368]
+    R3c           0.274 [   0.168,    0.365]
+    J3            0.261 [   0.164,    0.344]
+    A             0.170 [   0.091,    0.256]
+  rel women
+    R3            0.211 [   0.146,    0.256]
+    R3c           0.201 [   0.142,    0.243]
+    J3            0.211 [   0.145,    0.258]
+    A             0.135 [   0.089,    0.175]
+  w/m
+    R3            0.871 [   0.846,    0.893]
+    R3c           0.868 [   0.845,    0.889]
+    J3            0.868 [   0.845,    0.888]
+    A             0.863 [   0.849,    0.891]
+  within SD c
+    R3          119.483 [ 114.002,  124.783]
+    R3c         118.800 [ 113.101,  124.406]
+    J3          118.485 [ 112.925,  123.650]
+    A           155.816 [ 149.702,  161.891]
+  men cm
+    R3           16.930 [  16.538,   17.139]
+    R3c          17.105 [  16.727,   17.313]
+    J3           16.941 [  16.697,   17.218]
+    A            17.837 [  17.431,   18.062]
+  women cm
+    R3           14.745 [  14.394,   15.032]
+    R3c          14.847 [  14.468,   15.046]
+    J3           14.697 [  14.353,   15.014]
+    A            15.390 [  15.248,   15.657]
+  children cm
+    R3           13.635 [  13.523,   13.968]
+    R3c          13.889 [  13.608,   14.210]
+    J3           13.765 [  13.531,   14.084]
+    A            14.679 [  14.421,   15.035]
+  r(len, f0) in sex
+    R3           -0.342 [  -0.601,   -0.035]
+    R3c          -0.347 [  -0.605,   -0.041]
+    J3           -0.316 [  -0.587,   -0.008]
+    A            -0.347 [  -0.576,   -0.089]
+
+Paired differences (speaker bootstrap)
+  R3 - A       reliability    +0.091 [  +0.037,   +0.144]
+  R3 - A       w/m            +0.008 [  -0.023,   +0.021]
+  R3 - A       within SD c   -36.333 [ -40.142,  -32.382]
+  R3c - A      reliability    +0.085 [  +0.040,   +0.131]
+  R3c - A      w/m            +0.005 [  -0.025,   +0.019]
+  R3c - A      within SD c   -37.017 [ -40.495,  -33.306]
+  J3 - A       reliability    +0.083 [  +0.032,   +0.132]
+  J3 - A       w/m            +0.005 [  -0.025,   +0.016]
+  J3 - A       within SD c   -37.331 [ -40.821,  -33.738]
+  R3 - J3      reliability    +0.008 [  -0.005,   +0.019]
+  R3 - J3      w/m            +0.003 [  -0.010,   +0.012]
+  R3 - J3      within SD c    +0.998 [  -0.318,   +2.225]
+  R3c - R3     reliability    -0.006 [  -0.016,   +0.007]
+  R3c - R3     w/m            -0.003 [  -0.009,   +0.005]
+  R3c - R3     within SD c    -0.683 [  -1.689,   +0.343]
+
+Validation SNR gain (dB), paired clip bootstrap (2000)
+  R3 - J3       +1.65 [ +1.29,  +2.00]  (146 clips)
+  R3c - R3      +0.02 [ -0.04,  +0.10]  (146 clips)
+
+Vowel classification (Hillenbrand dev, 12 vowels, LDA, 5 folds grouped by speaker): accuracy [95 % speaker bootstrap]
+  trunk arm3 (its own F1-F3)
+    raw                    0.807 [0.778, 0.832]  (996 files)
+    + log2 L (A)           0.843 [0.819, 0.866]  (996 files)
+    + log2 L (R3)          0.851 [0.828, 0.874]  (996 files)
+    + log2 L (R3c)         0.860 [0.837, 0.883]  (996 files)
+    + log2 L (J3)          0.859 [0.837, 0.882]  (996 files)
+    Lobanov                0.934 [0.916, 0.950]  (996 files)
+
+Decisions (arm 3's trunk)
+  Q1: SNR gain +1.65 dB [+1.29, +2.00] (needs >= 0.5 and > 0); reliability +0.008 [-0.005, +0.019] (needs > 0)
+  DECISION Q1: not under-trained: item 5 keeps D-036's setup
+  Q3: reliability -0.006 [-0.016, +0.007] (> 0); probe excess +2.5 (<= 10), rise +1.0 (<= 3); w/m 0.868 ([0.85, 0.92]); vowel spread rise +1 c (<= 10)
+  DECISION Q3: the VTL head reads h alone
