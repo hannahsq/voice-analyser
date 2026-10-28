@@ -1,0 +1,137 @@
+D-038 scoring, cache cache\d037\arm1, runs runs\d038\arm1; seeds {"F": ["F_s0", "F_s1", "F_s2"], "Fv": ["Fv_s0", "Fv_s1", "Fv_s2"], "Fi": ["Fi_s0", "Fi_s1", "Fi_s2"]}
+overfit flags: {'F_s0': False, 'F_s1': False, 'F_s2': False, 'Fv_s0': False, 'Fv_s1': False, 'Fv_s2': False, 'Fi_s0': False, 'Fi_s1': False, 'Fi_s2': False}
+
+T0
+  Hillenbrand MAE F1-F4 (Hz): 39.4 / 46.8 / 48.1 / 99.3; F3/F4 mean 73.69
+  closed phase f: bias F1-F3 +7.4 / +11.0 / +15.8; |error| 28.7 / 36.6 / 42.6
+  closed phase m: bias F1-F3 +6.6 / +6.8 / +2.2; |error| 15.9 / 23.8 / 32.4
+  synthetic MAE F1-F4 (Hz), tube: 20.2 / 34.2 / 29.9 / 51.8; all: 22.1 / 44.4 / 60.3 / 92.9
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 7.7 / 7.8 / 7.7 / 8.6; error by length 13/15.5/18 cm: +8 / +5 / +1 / +2; +10 / -2 / -6 / +7; +10 / -1 / +2 / +8
+  shift probe, moved F1-F4: follow slope 0.857 / 0.983 / 0.989 / 0.927; drag (mean |slope| of the others) 0.010 / 0.022 / 0.034 / 0.028
+
+F_s0
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 48.4 / 102.3; F3/F4 mean 75.36
+  closed phase f: bias F1-F3 +7.1 / +10.4 / +16.2; |error| 28.7 / 36.5 / 42.9
+  closed phase m: bias F1-F3 +6.3 / +6.1 / +2.0; |error| 15.9 / 23.6 / 32.5
+  synthetic MAE F1-F4 (Hz), tube: 20.1 / 33.9 / 29.4 / 51.8; all: 22.0 / 44.2 / 59.4 / 91.6
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.1 / 6.6 / 7.7 / 8.1; error by length 13/15.5/18 cm: +8 / +3 / +2 / +3; +10 / -3 / -4 / +6; +8 / -2 / +3 / +9
+  shift probe, moved F1-F4: follow slope 0.825 / 0.986 / 0.990 / 0.926; drag (mean |slope| of the others) 0.011 / 0.022 / 0.034 / 0.033
+
+F_s1
+  Hillenbrand MAE F1-F4 (Hz): 39.4 / 46.8 / 47.5 / 102.1; F3/F4 mean 74.79
+  closed phase f: bias F1-F3 +7.2 / +10.4 / +16.0; |error| 28.6 / 36.7 / 43.0
+  closed phase m: bias F1-F3 +6.3 / +6.1 / +2.2; |error| 15.8 / 23.5 / 32.4
+  synthetic MAE F1-F4 (Hz), tube: 20.1 / 34.0 / 29.6 / 52.2; all: 22.0 / 44.2 / 59.4 / 91.5
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.1 / 6.7 / 7.6 / 8.4; error by length 13/15.5/18 cm: +9 / +3 / +2 / +3; +10 / -3 / -4 / +7; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.830 / 0.986 / 0.989 / 0.926; drag (mean |slope| of the others) 0.011 / 0.024 / 0.035 / 0.030
+
+F_s2
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 47.9 / 102.2; F3/F4 mean 75.05
+  closed phase f: bias F1-F3 +7.2 / +10.7 / +16.3; |error| 28.8 / 36.8 / 42.9
+  closed phase m: bias F1-F3 +6.3 / +6.2 / +1.8; |error| 15.9 / 23.5 / 32.5
+  synthetic MAE F1-F4 (Hz), tube: 20.1 / 33.9 / 29.5 / 51.9; all: 22.0 / 44.3 / 59.5 / 91.5
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 7.9 / 6.7 / 7.1 / 7.7; error by length 13/15.5/18 cm: +8 / +4 / +1 / +3; +10 / -3 / -4 / +5; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.815 / 0.984 / 0.989 / 0.926; drag (mean |slope| of the others) 0.011 / 0.024 / 0.033 / 0.032
+
+F
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 47.9 / 102.2; F3/F4 mean 75.03
+  closed phase f: bias F1-F3 +7.2 / +10.5 / +16.3; |error| 28.7 / 36.5 / 43.0
+  closed phase m: bias F1-F3 +6.3 / +6.1 / +1.9; |error| 15.9 / 23.5 / 32.3
+  synthetic MAE F1-F4 (Hz), tube: 20.0 / 33.9 / 29.4 / 51.8; all: 22.0 / 44.1 / 59.3 / 91.3
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.0 / 6.7 / 7.5 / 7.9; error by length 13/15.5/18 cm: +8 / +3 / +2 / +3; +10 / -3 / -4 / +6; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.825 / 0.985 / 0.989 / 0.926; drag (mean |slope| of the others) 0.011 / 0.022 / 0.035 / 0.032
+
+Fv_s0
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 48.1 / 102.3; F3/F4 mean 75.23
+  closed phase f: bias F1-F3 +7.2 / +10.4 / +16.1; |error| 28.7 / 36.4 / 42.9
+  closed phase m: bias F1-F3 +6.2 / +6.1 / +1.9; |error| 15.9 / 23.7 / 32.5
+  synthetic MAE F1-F4 (Hz), tube: 20.0 / 33.9 / 29.4 / 51.4; all: 22.0 / 44.2 / 59.3 / 91.4
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.1 / 6.6 / 7.7 / 8.1; error by length 13/15.5/18 cm: +8 / +3 / +2 / +4; +10 / -3 / -4 / +6; +8 / -2 / +3 / +9
+  shift probe, moved F1-F4: follow slope 0.828 / 0.986 / 0.990 / 0.925; drag (mean |slope| of the others) 0.010 / 0.021 / 0.034 / 0.033
+
+Fv_s1
+  Hillenbrand MAE F1-F4 (Hz): 39.4 / 46.8 / 47.5 / 102.1; F3/F4 mean 74.79
+  closed phase f: bias F1-F3 +7.2 / +10.4 / +15.8; |error| 28.7 / 36.7 / 43.0
+  closed phase m: bias F1-F3 +6.3 / +6.0 / +2.1; |error| 15.9 / 23.5 / 32.4
+  synthetic MAE F1-F4 (Hz), tube: 20.0 / 33.9 / 29.7 / 51.6; all: 22.0 / 44.2 / 59.3 / 91.2
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.1 / 6.7 / 7.6 / 8.4; error by length 13/15.5/18 cm: +9 / +3 / +1 / +3; +10 / -3 / -4 / +6; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.835 / 0.985 / 0.990 / 0.926; drag (mean |slope| of the others) 0.011 / 0.022 / 0.034 / 0.032
+
+Fv_s2
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 47.9 / 101.9; F3/F4 mean 74.93
+  closed phase f: bias F1-F3 +7.2 / +10.7 / +16.4; |error| 28.8 / 36.9 / 42.8
+  closed phase m: bias F1-F3 +6.3 / +6.1 / +1.9; |error| 15.9 / 23.5 / 32.4
+  synthetic MAE F1-F4 (Hz), tube: 20.0 / 33.9 / 29.7 / 51.5; all: 22.0 / 44.3 / 59.5 / 91.3
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 7.9 / 6.7 / 7.1 / 7.8; error by length 13/15.5/18 cm: +8 / +4 / +1 / +3; +10 / -3 / -4 / +5; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.835 / 0.984 / 0.990 / 0.926; drag (mean |slope| of the others) 0.011 / 0.023 / 0.033 / 0.032
+
+Fv
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 47.8 / 102.1; F3/F4 mean 74.96
+  closed phase f: bias F1-F3 +7.2 / +10.5 / +16.2; |error| 28.8 / 36.5 / 43.0
+  closed phase m: bias F1-F3 +6.3 / +6.2 / +1.8; |error| 15.8 / 23.5 / 32.3
+  synthetic MAE F1-F4 (Hz), tube: 20.0 / 33.8 / 29.6 / 51.4; all: 22.0 / 44.1 / 59.2 / 91.0
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.0 / 6.6 / 7.5 / 8.0; error by length 13/15.5/18 cm: +8 / +3 / +1 / +3; +10 / -3 / -4 / +6; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.830 / 0.985 / 0.990 / 0.925; drag (mean |slope| of the others) 0.010 / 0.022 / 0.035 / 0.033
+
+Fi_s0
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 48.1 / 102.3; F3/F4 mean 75.23
+  closed phase f: bias F1-F3 +7.2 / +10.3 / +16.1; |error| 28.7 / 36.4 / 42.9
+  closed phase m: bias F1-F3 +6.2 / +6.1 / +1.9; |error| 15.9 / 23.6 / 32.5
+  synthetic MAE F1-F4 (Hz), tube: 20.0 / 33.9 / 29.4 / 51.5; all: 22.0 / 44.2 / 59.3 / 91.5
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.1 / 6.6 / 7.7 / 8.1; error by length 13/15.5/18 cm: +8 / +3 / +2 / +4; +10 / -3 / -4 / +6; +8 / -2 / +3 / +9
+  shift probe, moved F1-F4: follow slope 0.828 / 0.986 / 0.990 / 0.925; drag (mean |slope| of the others) 0.010 / 0.021 / 0.035 / 0.033
+
+Fi_s1
+  Hillenbrand MAE F1-F4 (Hz): 39.4 / 46.8 / 47.5 / 102.1; F3/F4 mean 74.79
+  closed phase f: bias F1-F3 +7.2 / +10.4 / +15.8; |error| 28.7 / 36.7 / 43.0
+  closed phase m: bias F1-F3 +6.3 / +6.1 / +2.1; |error| 15.9 / 23.5 / 32.4
+  synthetic MAE F1-F4 (Hz), tube: 20.0 / 33.9 / 29.8 / 51.7; all: 22.0 / 44.2 / 59.3 / 91.2
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.1 / 6.7 / 7.6 / 8.4; error by length 13/15.5/18 cm: +9 / +3 / +1 / +3; +10 / -3 / -4 / +6; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.835 / 0.985 / 0.990 / 0.926; drag (mean |slope| of the others) 0.011 / 0.023 / 0.034 / 0.032
+
+Fi_s2
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 47.9 / 101.9; F3/F4 mean 74.92
+  closed phase f: bias F1-F3 +7.2 / +10.7 / +16.4; |error| 28.7 / 36.8 / 42.8
+  closed phase m: bias F1-F3 +6.3 / +6.1 / +1.9; |error| 15.9 / 23.5 / 32.4
+  synthetic MAE F1-F4 (Hz), tube: 20.1 / 33.9 / 29.7 / 51.5; all: 22.0 / 44.3 / 59.5 / 91.3
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 7.9 / 6.7 / 7.1 / 7.8; error by length 13/15.5/18 cm: +8 / +4 / +1 / +3; +10 / -3 / -4 / +5; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.835 / 0.984 / 0.990 / 0.926; drag (mean |slope| of the others) 0.011 / 0.023 / 0.033 / 0.033
+
+Fi
+  Hillenbrand MAE F1-F4 (Hz): 39.5 / 46.8 / 47.8 / 102.1; F3/F4 mean 74.96
+  closed phase f: bias F1-F3 +7.1 / +10.5 / +16.2; |error| 28.8 / 36.5 / 43.0
+  closed phase m: bias F1-F3 +6.3 / +6.2 / +1.8; |error| 15.8 / 23.5 / 32.3
+  synthetic MAE F1-F4 (Hz), tube: 20.0 / 33.8 / 29.6 / 51.4; all: 22.0 / 44.1 / 59.2 / 91.1
+  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): 8.0 / 6.6 / 7.5 / 8.0; error by length 13/15.5/18 cm: +8 / +3 / +1 / +3; +10 / -3 / -4 / +6; +8 / -2 / +3 / +8
+  shift probe, moved F1-F4: follow slope 0.830 / 0.985 / 0.990 / 0.925; drag (mean |slope| of the others) 0.010 / 0.022 / 0.036 / 0.033
+
+Paired against F (speaker bootstrap, 2,000): Hillenbrand MAE F1 / F2 / F3 / F4, F3/F4 mean; women's cp F1 |error|
+  Fv - F: F1 -0.01 [-0.03, +0.01]  F2 +0.00 [-0.02, +0.02]  F3 -0.07 [-0.20, -0.00]  F4 -0.08 [-0.30, +0.05]  F3F4 -0.19 [-0.54, +0.01]  cp_f_F1 +0.05 [-0.14, +0.19]
+  Fi - F: F1 -0.01 [-0.03, +0.01]  F2 +0.00 [-0.02, +0.02]  F3 -0.07 [-0.20, -0.00]  F4 -0.08 [-0.27, +0.04]  F3F4 -0.19 [-0.54, +0.00]  cp_f_F1 +0.06 [-0.15, +0.16]
+  T0 - F: F1 -0.12 [-0.64, +0.28]  F2 -0.02 [-0.16, +0.12]  F3 +0.19 [-0.72, +1.09]  F4 -2.87 [-6.23, -0.26]  F3F4 -1.41 [-3.28, +0.01]  cp_f_F1 +0.06 [-0.62, +0.29]
+  Fi - Fv: F1 -0.00 [-0.01, +0.00]  F2 -0.00 [-0.00, +0.00]  F3 -0.00 [-0.00, +0.00]  F4 -0.00 [-0.01, +0.00]  F3F4 -0.00 [-0.00, +0.00]  cp_f_F1 +0.01 [-0.10, +0.05]
+  F_s1 - F_s0: F1 -0.10 [-0.17, -0.04]  F2 -0.00 [-0.07, +0.06]  F3 -0.96 [-1.86, -0.25]  F4 -0.18 [-0.41, +0.06]  F3F4 -0.67 [-1.91, +0.02]  cp_f_F1 -0.09 [-0.28, +0.35]
+  F_s2 - F_s0: F1 -0.08 [-0.13, -0.03]  F2 +0.04 [-0.02, +0.10]  F3 -0.50 [-1.25, +0.00]  F4 -0.12 [-0.61, +0.53]  F3F4 -0.61 [-1.95, +0.21]  cp_f_F1 +0.07 [-0.29, +0.37]
+
+f0 probe, paired over tracts (2,000): |slope| of each formant against log2 f0 (f0 <= 250 Hz), cents per octave
+  Fv - F: F1_f0slope -0.05 [-0.30, +0.13]  F2_f0slope +0.03 [-0.09, +0.14]  F3_f0slope +0.01 [-0.02, +0.05]  F4_f0slope +0.00 [-0.02, +0.03]
+  Fi - F: F1_f0slope -0.08 [-0.33, +0.08]  F2_f0slope +0.03 [-0.09, +0.14]  F3_f0slope +0.01 [-0.02, +0.05]  F4_f0slope +0.01 [-0.02, +0.03]
+  T0 - F: F1_f0slope -2.84 [-5.77, -0.29]  F2_f0slope +0.31 [-0.15, +0.75]  F3_f0slope -0.00 [-0.40, +0.44]  F4_f0slope -0.32 [-0.67, -0.00]
+  Fi - Fv: F1_f0slope -0.03 [-0.09, +0.00]  F2_f0slope +0.00 [-0.01, +0.00]  F3_f0slope -0.00 [-0.00, +0.00]  F4_f0slope +0.00 [-0.00, +0.00]
+  F_s1 - F_s0: F1_f0slope -0.67 [-2.97, +0.81]  F2_f0slope -0.51 [-1.73, +0.16]  F3_f0slope -0.04 [-0.16, +0.09]  F4_f0slope -0.17 [-0.60, +0.10]
+  F_s2 - F_s0: F1_f0slope -0.52 [-1.91, +0.52]  F2_f0slope -0.56 [-1.73, +0.10]  F3_f0slope -0.09 [-0.24, +0.03]  F4_f0slope -0.01 [-0.19, +0.17]
+
+shift probe, the trunk's VTL head (log2 cm per log2 factor), moved F1-F4: -0.116 / -0.080 / -0.257 / -0.107
+
+shift probe, paired over tracts (2,000): follow and drag per moved formant
+  Fv - F: F1_follow +0.004 [-0.002, +0.014]  F1_drag -0.000 [-0.000, +0.000]  F2_follow -0.000 [-0.001, -0.000]  F2_drag +0.000 [-0.000, +0.001]  F3_follow +0.000 [+0.000, +0.001]  F3_drag +0.000 [-0.000, +0.001]  F4_follow -0.000 [-0.001, +0.000]  F4_drag +0.001 [-0.000, +0.002]
+  Fi - F: F1_follow +0.004 [-0.001, +0.015]  F1_drag -0.000 [-0.000, +0.000]  F2_follow -0.000 [-0.000, +0.000]  F2_drag +0.000 [-0.000, +0.001]  F3_follow +0.000 [+0.000, +0.001]  F3_drag +0.000 [-0.000, +0.001]  F4_follow -0.000 [-0.001, +0.000]  F4_drag +0.001 [-0.000, +0.002]
+  T0 - F: F1_follow +0.006 [-0.019, +0.030]  F1_drag -0.000 [-0.002, +0.000]  F2_follow -0.000 [-0.006, +0.005]  F2_drag -0.004 [-0.011, +0.002]  F3_follow -0.001 [-0.006, +0.005]  F3_drag -0.007 [-0.023, +0.006]  F4_follow -0.001 [-0.006, +0.004]  F4_drag +0.001 [-0.005, +0.011]
+  Fi - Fv: F1_follow +0.000 [-0.000, +0.001]  F1_drag -0.000 [-0.000, +0.000]  F2_follow +0.000 [+0.000, +0.000]  F2_drag +0.000 [-0.000, +0.000]  F3_follow +0.000 [-0.000, +0.000]  F3_drag -0.000 [-0.000, +0.000]  F4_follow +0.000 [-0.000, +0.000]  F4_drag +0.000 [-0.000, +0.001]
+  F_s1 - F_s0: F1_follow -0.011 [-0.047, +0.012]  F1_drag -0.000 [-0.000, +0.000]  F2_follow -0.004 [-0.011, +0.001]  F2_drag -0.005 [-0.010, -0.000]  F3_follow -0.000 [-0.001, +0.001]  F3_drag -0.001 [-0.005, +0.003]  F4_follow -0.001 [-0.003, +0.001]  F4_drag -0.000 [-0.002, +0.002]
+  F_s2 - F_s0: F1_follow +0.002 [-0.005, +0.010]  F1_drag +0.000 [-0.000, +0.001]  F2_follow -0.004 [-0.011, +0.001]  F2_drag -0.002 [-0.007, +0.001]  F3_follow -0.000 [-0.001, +0.001]  F3_drag -0.003 [-0.008, +0.001]  F4_follow +0.001 [-0.001, +0.003]  F4_drag +0.000 [-0.003, +0.004]
+
+  criteria Fv: {'primary F3/F4': np.False_, 'guard-rails': np.True_, 'shift': True, 'f0': True}
+  DECISION Fv: does not join item 5
+  criteria Fi: {'primary F3/F4': np.False_, 'guard-rails': np.True_, 'shift': True, 'f0': True}
+  DECISION form: log2 L (Fi passes: False; Fi - Fv F3/F4 -0.00 [-0.00, +0.00])

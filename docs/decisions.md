@@ -1620,6 +1620,11 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
   - If both D-037's Q3 and this rule pass, D-037's loop rule applies (D-037's Q3 failed, so it cannot).
   - Everything else is reported: every formant's MAE, closed-phase bias and |error| by sex, synthetic MAE by clip kind, the probe's error by length, the shift probe's per-formant slopes and the trunk VTL head's response.
   - *Cost*: 9 heads per trunk, about 20 min each, three at a time on the GPU; then the scoring. `chains/d038.sh`.
+- **Result (2026-10-28 17:55; `reports/analysis/d038/d038_arm3.txt`, `d038_arm1.txt`): Fv does not join item 5; neither trunk is unreliable (no seed flagged).**
+  - *Arm 3 (decides)*: Fv − F, Hillenbrand F3 / F4 mean −0.02 [−0.04, +0.00] Hz; every difference is a few hundredths of a hertz, and every guard-rail, shift and f0 criterion passes. Fi matches Fv to the hundredth (Fi − Fv 0.00), so the form question is moot.
+  - *Arm 1 (check, agrees)*: Fv − F, F3 / F4 mean −0.19 [−0.54, +0.01], F3 −0.07 [−0.20, −0.00]; the guard-rails, shift and f0 criteria pass. The primary fails here too, and its point estimate is a tenth of the 1–2 Hz the noise floor could detect.
+  - *Reading*: a head given the trunk's own length estimate learns almost nothing from it. The length is already in h (the joint head reads it from h linearly), so a zero-initialised extra input has nothing new to add. The cascade's question for item 5 is then not "is length an input" but whether a VTL head trained jointly from scratch changes h itself, which is D-040's 5b.
+  - *Seen in passing, the control's own cost on arm 1*: T0 − F, Hillenbrand F4 −2.9 [−6.2, −0.3] Hz and F1's f0 slope −2.8 [−5.8, −0.3] c/oct; i.e. fine-tuning the heads on the mix part, with no new input, costs arm 1 about 3 Hz on F4 and adds about 3 c/oct of F1 f0 leakage. On arm 3 both are within noise (F4 −1.2 [−3.7, +0.4]). It does not affect this decision (every arm is compared with F), but a later head-only refit should be checked against the trunk's own heads (T0), not only against a refit control.
 
 ## D-039 (2026-10-28, pre-registered; exploratory, reported only): VTL heads over teacher and Parakeet features together
 
