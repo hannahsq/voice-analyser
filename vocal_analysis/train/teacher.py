@@ -82,6 +82,12 @@ class TrainConfig:
     vtl_warmup: int = 300
     vtl_detach: int = 300
     vtl_gate_ramp: int = 700
+    # D-040: where the VTL group lives. "rest": in the optimiser of the non-Muon parameters (AdamW or Adan; under "muon" /
+    # "muon_adan" at rest_lr_scale x the rate, like the other heads), which for "adamw" runs is D-036's setup exactly.
+    # "adamw": AdamW at vtl_lr and vtl_weight_decay (None: lr and weight_decay), a separate optimiser under Muon.
+    vtl_optimizer: str = "rest"
+    vtl_lr: float | None = None
+    vtl_weight_decay: float | None = None
 
 
 def _git() -> dict:
@@ -109,7 +115,11 @@ class _Combined:
     groups as one list so the learning-rate schedule sets both."""
 
     def __init__(self, *opts):
-        self.opts = opts
+        self.opts = list(opts)
+
+    def add(self, opt):
+        """a further optimiser stepped with the others (D-040: the VTL head's own AdamW); its state comes last"""
+        self.opts.append(opt)
 
     @property
     def param_groups(self):
@@ -160,7 +170,8 @@ def _optimizer(model, cfg: "TrainConfig"):
     if cfg.optimizer in ("adamw", "adan"):  # the VTL head (D-036) gets its own group, added by the trainer
         return rest([p for n, p in model.named_parameters() if not n.startswith("vtl_head.")])
     if cfg.optimizer in ("muon", "muon_adan"):
-        mu, other = muon_split(model)
+        vtl_ids = {id(p) for n, p in model.named_parameters() if n.startswith("vtl_head.")}  # added by the trainer
+        mu, other = ([p for p in ps if id(p) not in vtl_ids] for ps in muon_split(model))
         other_opt = rest(other)
         for g in other_opt.param_groups:
             g["lr_scale"] = cfg.rest_lr_scale  # the schedule multiplies it in
@@ -182,6 +193,36 @@ def _lr(step: int, cfg: TrainConfig) -> float:
         p = (step - cfg.warmup) / max(1, cfg.steps - cfg.warmup)
         return cfg.lr * 0.5 * (1 + math.cos(math.pi * min(p, 1.0)))
     raise ValueError(f"unknown schedule {cfg.schedule!r}")
+
+
+def _add_vtl_group(opt, params: list, cfg: TrainConfig) -> None:
+    """D-036 / D-040: the VTL head's parameters as their own group, scheduled by _vtl_lr (the trainer multiplies in the
+    group's lr_scale); where it lives is cfg.vtl_optimizer."""
+    import torch
+
+    if not params:
+        return
+    wd = cfg.weight_decay if cfg.vtl_weight_decay is None else cfg.vtl_weight_decay
+    scale = (cfg.vtl_lr if cfg.vtl_lr is not None else cfg.lr) / cfg.lr
+    group = {"params": params, "lr": 0.0, "weight_decay": wd, "vtl": True}
+    if cfg.vtl_optimizer == "rest":
+        if cfg.vtl_lr is not None or cfg.vtl_weight_decay is not None:
+            raise ValueError("vtl_lr / vtl_weight_decay apply to vtl_optimizer='adamw' only")
+        if isinstance(opt, _Combined):  # the non-Muon optimiser, at its rate
+            opt.opts[1].add_param_group({**group, "lr_scale": cfg.rest_lr_scale})
+        else:
+            opt.add_param_group(group)
+    elif cfg.vtl_optimizer == "adamw":
+        if isinstance(opt, _Combined):
+            own = torch.optim.AdamW(params, lr=0.0, weight_decay=wd)
+            own.param_groups[0].update(vtl=True, lr_scale=scale)
+            opt.add(own)
+        elif isinstance(opt, torch.optim.AdamW):
+            opt.add_param_group({**group, "lr_scale": scale})
+        else:
+            raise NotImplementedError("vtl_optimizer='adamw' beside a single non-AdamW optimiser")
+    else:
+        raise ValueError(f"unknown vtl_optimizer {cfg.vtl_optimizer!r}")
 
 
 def _vtl_lr(step: int, cfg: TrainConfig) -> float:
@@ -367,8 +408,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     model_cfg = model_cfg or TeacherConfig()
     new_vtl = bool(cfg.vtl) and not model_cfg.vtl_head  # D-036: the head is added at this branch
     if cfg.vtl:
-        if cfg.optimizer not in ("adamw", "adan"):
-            raise ValueError("a VTL head needs adamw or adan (its own parameter group)")
+        if cfg.optimizer not in ("adamw", "adan", "muon", "muon_adan"):  # D-040: Muon runs keep it out of Muon
+            raise ValueError("a VTL head needs adamw, adan, muon or muon_adan (its own parameter group)")
         model_cfg = replace(model_cfg, vtl_head=True)
     model = Teacher(model_cfg).to(device)
     sf = cfg.optimizer == "schedulefree"
@@ -386,8 +427,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     vtl_params = [p for p in model.vtl_head.parameters() if p.requires_grad] if cfg.vtl else []
 
     def add_vtl_group():
-        if vtl_params:
-            opt.add_param_group({"params": vtl_params, "lr": 0.0, "weight_decay": cfg.weight_decay, "vtl": True})
+        _add_vtl_group(opt, vtl_params, cfg)
 
     if cfg.vtl and not new_vtl:
         if cfg.vtl.startswith("frozen"):

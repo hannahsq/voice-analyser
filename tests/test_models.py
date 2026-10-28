@@ -321,3 +321,51 @@ def test_hybrid_rest_lr_scale():
         g["lr"] = _lr(20, cfg) * g.get("lr_scale", 1.0)
     muon_g, rest_g = opt.opts[0].param_groups, opt.opts[1].param_groups
     assert all(abs(g["lr"] - 0.008) < 1e-12 for g in muon_g) and all(abs(g["lr"] - 0.04) < 1e-12 for g in rest_g)
+
+
+@pytest.mark.parametrize("where", ["rest", "adamw"])
+def test_vtl_head_under_muon_adan(tmp_path, where):
+    """D-040: under muon_adan the VTL head is only in its own group (Muon took its linear weights before the fix), in
+    Adan at rest_lr_scale ("rest") or in its own AdamW at vtl_lr ("adamw"); a branch adds it, trains and resumes."""
+    import torch
+
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.data import consolidate
+    from vocal_analysis.train.teacher import TrainConfig, _add_vtl_group, _optimizer, _vtl_lr, branch_config, train
+
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16,
+                          temporal="conformer", conformer_dim=32)
+    model = Teacher(TeacherConfig(**{**small.__dict__, "vtl_head": True}))
+    extra = {"vtl_lr": 0.001, "vtl_weight_decay": 0.01} if where == "adamw" else {}
+    cfg = TrainConfig(optimizer="muon_adan", rest_lr_scale=5.0, lr=0.002, weight_decay=0.007, vtl="new", vtl_optimizer=where, **extra)
+    opt = _optimizer(model, cfg)
+    vtl = list(model.vtl_head.parameters())
+    _add_vtl_group(opt, vtl, cfg)
+    seen = [id(p) for g in opt.param_groups for p in g["params"]]
+    assert sorted(seen) == sorted(id(p) for p in model.parameters())  # every parameter exactly once
+    vg = [g for g in opt.param_groups if g.get("vtl")]
+    assert len(vg) == 1 and {id(p) for p in vg[0]["params"]} == {id(p) for p in vtl}
+    rate = _vtl_lr(10_000, cfg) * vg[0]["lr_scale"]
+    assert abs(rate / _vtl_lr(10_000, cfg) - (5.0 if where == "rest" else 0.5)) < 1e-12
+    assert vg[0]["weight_decay"] == (0.007 if where == "rest" else 0.01)
+    assert isinstance(opt.opts[-1], torch.optim.AdamW) == (where == "adamw")
+
+    data = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    flat = consolidate(data, log=lambda m: None)
+    fo = np.load(flat / "frame_offsets.npy")
+    np.save(flat / "label_length_cm.npy", np.full(fo[-1], 15.0, np.float32))
+    np.save(flat / "clip_tube.npy", np.ones(len(fo) - 1, bool))
+    np.save(flat / "clip_length_from_f0.npy", np.zeros(len(fo) - 1, bool))
+    base = TrainConfig(data=str(data), out=str(tmp_path / "run"), steps=4, batch=4, n_frames=50, workers=1, log_every=2,
+                       eval_every=4, ckpt_every=2, val_clips=4, warmup=2, optimizer="muon_adan", rest_lr_scale=5.0)
+    out = train(base, small, log=lambda *a: None)
+    b = branch_config(out, 4, str(tmp_path / "branch"), decay_steps=4)
+    b.branch_from = str(out / "ckpt_000004.pt")
+    b.vtl, b.vtl_optimizer, b.vtl_warmup, b.vtl_detach, b.vtl_gate_ramp = "new", where, 1, 1, 1
+    if where == "adamw":
+        b.vtl_lr, b.vtl_weight_decay = 0.001, 0.01
+    out2 = train(b, None, log=lambda *a: None)
+    ck = torch.load(out2 / "ckpt_last.pt", map_location="cpu", weights_only=False)
+    assert ck["step"] == 8 and len(ck["opt"]["combined"]) == (3 if where == "adamw" else 2)
