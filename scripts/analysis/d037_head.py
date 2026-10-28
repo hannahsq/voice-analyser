@@ -7,7 +7,7 @@ Every 500 steps: training NLL (mean of the last 500 steps) and validation NLL / 
 with length not drawn from f0 (sonorant frames; per-clip mean NLL, averaged over clips; SNR = 20 log10(label SD / sigma)
 with sigma = exp(NLL - 1/2)). Overfitting flag: final validation NLL more than 0.05 nats above the run's minimum.
 Resumable: a checkpoint every 500 steps (a cut-off run continues from it). Args: cache dir, inputs (h | hF), seed,
-out dir. Env: VA_STEPS (code checks only), VA_DEVICE (default cpu)."""
+out dir. Env: VA_STEPS (code checks only), VA_DEVICE (default cpu), VA_OPT (adamw, or adan for D-040's check)."""
 import json
 import math
 import os
@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "parakeet"))
 from vtl_head import Head, nll  # noqa: E402
 
 STEPS, WARM, BATCH, EVERY = int(os.environ.get("VA_STEPS", 20000)), 300, 32, 500
+OPT = os.environ.get("VA_OPT", "adamw")  # "adan": D-040's optimiser check (same schedule)
 FLAG_NATS = 0.05
 LABEL_SD = 0.2852  # log2 SD of the labelled tube training crops (d037_noise_floor.py), so SNRs compare across entries
 
@@ -64,7 +65,12 @@ def main():
     in_dim = 128 + (4 if kind == "hF" else 0)
     torch.manual_seed(seed)
     head = Head(in_dim).to(dev)
-    opt = torch.optim.AdamW(head.parameters(), lr=1e-3, weight_decay=0.01)
+    if OPT == "adan":  # D-040's check: the rate and decay a head would get in rA's Adan group (2e-3 x rest_lr_scale 5, wd 0.007)
+        from adan_pytorch import Adan
+
+        opt = Adan(head.parameters(), lr=1e-2, weight_decay=0.007)
+    else:
+        opt = torch.optim.AdamW(head.parameters(), lr=1e-3, weight_decay=0.01)
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda s: (s + 1) / WARM if s < WARM else 0.5 * (1 + math.cos(math.pi * min(1.0, (s - WARM) / max(1, STEPS - WARM)))))
     rng = np.random.default_rng(seed)

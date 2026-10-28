@@ -249,7 +249,7 @@ def main():
 
     p("\nPaired differences (speaker bootstrap)")
     pairs = [(n, "A") for n in names] + [(x, y) for x, y in (("R3", "J3"), ("R1", "J1"), ("R2", "J2"), ("R3c", "R3"), ("R1c", "R1"),
-                                                             ("R3", "RT"), ("R1", "RT"), ("R2", "RT"), ("R1", "R3"), ("R2", "R3")) if x in E and y in E]
+                                                             ("R3", "RT"), ("R1", "RT"), ("R2", "RT"), ("R1", "R3"), ("R2", "R3"), ("R3a", "R3")) if x in E and y in E]
     for a_, b_ in pairs:
         for m in ("reliability", "w/m", "within SD c"):
             d, (lo, hi) = paired(a_, b_, m)
