@@ -7,6 +7,7 @@ Handles zip64. Stored and deflated members only.
 The tail must reach back to the central directory's start (default 64 MB; the error says if it does not)."""
 import argparse
 import collections
+import os
 import struct
 import subprocess
 import zlib
@@ -18,7 +19,10 @@ def curl(url, rng=None, head=False):
 
 
 def remote_size(url):
-    sizes = [int(l.split(b":", 1)[1]) for l in curl(url, head=True).splitlines() if l.lower().startswith(b"content-length:")]
+    """from a one-byte range GET's Content-Range (some hosts, e.g. figshare's signed S3 redirects, refuse HEAD)"""
+    args = ["curl", "-sfL", "-r", "0-0", "-o", os.devnull, "-D", "-", url]
+    hdrs = subprocess.run(args, capture_output=True, check=True).stdout.splitlines()
+    sizes = [int(l.rsplit(b"/", 1)[1]) for l in hdrs if l.lower().startswith(b"content-range:")]
     return sizes[-1]  # the last response after redirects
 
 

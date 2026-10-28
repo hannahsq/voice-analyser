@@ -9,7 +9,7 @@ This project is for personal and research use. Anyone wanting a commercial versi
 | Corpus | Role | Licence | Cite |
 |---|---|---|---|
 | VocalSet v1.1 | training (resynthesis) | CC BY 4.0 | Wilkins, Seetharaman, Wahl & Pardo (2018). VocalSet: a singing voice dataset. ISMIR. |
-| M4Singer | training (resynthesis), planned | CC BY-NC-SA 4.0 (`dataset_license.md` in the M4Singer repository) | Zhang et al. (2022). M4Singer: a multi-style, multi-singer and musical score provided Mandarin singing corpus. NeurIPS Datasets and Benchmarks. |
+| M4Singer | training (resynthesis), planned; **possible overlap with a gold set (Hannah, 2026-10-28): rule it out before any use** | CC BY-NC-SA 4.0 (`dataset_license.md` in the M4Singer repository) | Zhang et al. (2022). M4Singer: a multi-style, multi-singer and musical score provided Mandarin singing corpus. NeurIPS Datasets and Benchmarks. |
 | Common Voice 27.0, Korean | training, planned | CC0; downloading it means agreeing not to try to identify its speakers | Ardila et al. (2020). Common Voice: a massively-multilingual speech corpus. LREC. |
 | Zeroth-Korean | training, planned | CC BY 4.0 (OpenSLR 40) | Lucas Jo and Wonkyum Lee, Zeroth-Korean, OpenSLR SLR40, https://www.openslr.org/40/ |
 | LibriTTS-R (train-clean-100, train-clean-360, dev-clean) | training (distillation audio, D-034); dev-clean held out for fidelity | CC BY 4.0 (OpenSLR 141) | Koizumi et al. (2023). LibriTTS-R: a restored multi-speaker text-to-speech corpus. Interspeech. Derived from LibriTTS (Zen et al. 2019) and LibriSpeech (Panayotov et al. 2015). |
