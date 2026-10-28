@@ -86,6 +86,10 @@ class TrainConfig:
     # "muon_adan" at rest_lr_scale x the rate, like the other heads), which for "adamw" runs is D-036's setup exactly.
     # "adamw": AdamW at vtl_lr and vtl_weight_decay (None: lr and weight_decay), a separate optimiser under Muon.
     vtl_optimizer: str = "rest"
+    # D-040: the head's rate. "cosine": D-036's (warm-up from the branch, cosine to 0 at `steps`). "model": warm-up over
+    # vtl_warmup steps from vtl_detach (the gate's opening, counted from the branch or from step 0), then the model's own
+    # schedule's shape (held, then decayed with it), so a from-scratch head starts on a trunk past its warm-up.
+    vtl_schedule: str = "cosine"
     vtl_lr: float | None = None
     vtl_weight_decay: float | None = None
 
@@ -226,7 +230,13 @@ def _add_vtl_group(opt, params: list, cfg: TrainConfig) -> None:
 
 
 def _vtl_lr(step: int, cfg: TrainConfig) -> float:
-    """D-036: the VTL head's rate: linear warmup from the branch, then cosine to 0 at the run's end."""
+    """D-036: the VTL head's rate: linear warmup from the branch, then cosine to 0 at the run's end. D-040
+    (vtl_schedule "model"): linear warm-up from the gate's opening, times the model's schedule shape."""
+    if cfg.vtl_schedule == "model":
+        rel = step - (cfg.decay_start or 0) - cfg.vtl_detach
+        return 0.0 if rel < 0 else _lr(step, cfg) * min(1.0, (rel + 1) / cfg.vtl_warmup)
+    if cfg.vtl_schedule != "cosine":
+        raise ValueError(f"unknown vtl_schedule {cfg.vtl_schedule!r}")
     rel, span = step - (cfg.decay_start or 0), cfg.steps - (cfg.decay_start or 0)
     if rel < cfg.vtl_warmup:
         return cfg.lr * (rel + 1) / cfg.vtl_warmup

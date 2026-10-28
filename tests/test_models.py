@@ -369,3 +369,16 @@ def test_vtl_head_under_muon_adan(tmp_path, where):
     out2 = train(b, None, log=lambda *a: None)
     ck = torch.load(out2 / "ckpt_last.pt", map_location="cpu", weights_only=False)
     assert ck["step"] == 8 and len(ck["opt"]["combined"]) == (3 if where == "adamw" else 2)
+
+
+def test_vtl_model_schedule_from_scratch():
+    """D-040: from scratch, the head's rate is 0 until the gate opens at vtl_detach, warms up over vtl_warmup, follows
+    the model's WSD shape (held, then decayed), and the gate ramps from the same step."""
+    from vocal_analysis.train.teacher import TrainConfig, _lr, _vtl_gate, _vtl_lr
+
+    cfg = TrainConfig(steps=20000, warmup=1000, schedule="wsd", decay_steps=4000, lr=0.002, vtl="new",
+                      vtl_schedule="model", vtl_detach=1000, vtl_warmup=300, vtl_gate_ramp=700)
+    assert _vtl_lr(999, cfg) == 0.0 and _vtl_gate(999, cfg) == 0.0
+    assert abs(_vtl_lr(1000, cfg) - 0.002 / 300) < 1e-15 and _vtl_gate(1350, cfg) == 0.5
+    assert _vtl_lr(1299, cfg) == _lr(1299, cfg) == 0.002 and _vtl_lr(15999, cfg) == 0.002 and _vtl_gate(1700, cfg) == 1.0
+    assert all(_vtl_lr(s, cfg) == _lr(s, cfg) for s in (16500, 18000, 19999))
