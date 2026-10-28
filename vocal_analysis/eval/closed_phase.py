@@ -144,20 +144,22 @@ def lpc_formants(a: np.ndarray, fs: float, f_min: float = 90.0, max_bw: float = 
 
 
 def analyse(speech: np.ndarray, egg: np.ndarray, fs: float, times: np.ndarray, order: int = 12,
-            window_s: float = 0.04, guard_s: float = 0.0003, lag: int | None = None, n_formants: int = 4) -> dict:
+            window_s: float = 0.04, guard_s: float = 0.0003, lag: int | None = None, n_formants: int = 4,
+            f0_range: tuple[float, float] = F0_RANGE) -> dict:
     """Closed-phase and whole-cycle covariance-LPC formants at `times` (seconds).
 
     For each time, the cycles lying wholly within ±window_s/2 are used: their closed phases, from GCI + guard to
     GOI - guard and shifted by the speech lag, form the closed-phase fit; the whole cycles, GCI to next GCI, the
     control fit with the same estimator. Speech is pre-emphasised by a first difference (lip radiation), as usual
     for LPC formant analysis. A frame needs at least two cycles and 3·order closed-phase samples; otherwise NaN.
+    `f0_range` bounds the cycles kept (`egg_instants`); the default stops at 500 Hz.
 
     Returns arrays (T, n_formants) "cp" and "cycle" (Hz) with their bandwidths "cp_bw" and "cycle_bw", plus f0 (from
     the cycles' periods), closed quotient "cq" and "n_cycles" per time, and the lag used.
     """
     x = np.asarray(speech, float)
     x = np.r_[x[0], np.diff(x)]
-    inst = egg_instants(egg, fs)
+    inst = egg_instants(egg, fs, f0_range)
     lag = speech_lag(speech, inst["gci"], fs) if lag is None else lag
     g, o, nx = inst["gci"] + lag, inst["goi"] + lag, inst["next_gci"] + lag
     guard = int(round(guard_s * fs))
