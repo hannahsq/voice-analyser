@@ -5,7 +5,11 @@ cached F1-F4):
 - PTDB-TUG dev closed phase (cp part): F1-F3 median signed error and median |error| by sex;
 - synthetic: train_v2's held-out crops (val part), sonorant frames, F1-F4 MAE on tube clips and on all clips;
 - the invariance probe: per formant, the median |slope| (Hz per octave of f0, f0 <= 250 Hz) of the clip's median estimate
-  over 0.3-0.7 s, and the median error against the probe's true formants by length.
+  over 0.3-0.7 s, and the median error against the probe's true formants by length;
+- the single-formant-shift probe (shift part, eval.invariance.shift_clips): for each tract, f0 and moved formant n, the
+  slope of each estimate (log2 of the clip's median over 0.3-0.7 s) against log2 of the shift factor, with the unshifted
+  clip at factor 1: *follow* = formant n's slope (ideal 1), *drag* = the mean |slope| of the other three (ideal 0); and
+  the trunk's VTL head's slope (arm-independent; ideal 0). Paired bootstraps over the 18 tracts (vowel x length).
 Paired speaker bootstraps (2,000) of each arm minus F (and Fi minus Fv): Hillenbrand MAE per formant and the F3 / F4 mean
 (resampling speakers, frame-weighted), women's closed-phase F1 median |error|.
 Usage: python d038_score.py <cache dir> <runs dir (holding F_s*, Fv_s*, Fi_s*)> <report .txt>"""
@@ -24,8 +28,11 @@ from vocal_analysis.eval import invariance as inv  # noqa: E402
 
 B = 2000
 ARMS = D.ARMS
-GUARD_HZ = (4.0, 9.0, 20.0)  # D-036's Hillenbrand guard-rails, F1-F3
+GUARD_HZ = (4.0, 9.0, 20.0, 50.0)  # D-036's Hillenbrand guard-rails F1-F3, and F4's added at D-038's registration
 CP_GUARD_HZ = 5.0
+FOLLOW_DROP = (0.05, 0.02, 0.02, 0.02)  # shift probe: largest allowed drop of the follow slope, F1-F4
+DRAG_RISE = 0.01  # shift probe: largest allowed rise of the drag
+F0_RISE = 5.0  # f0 probe: largest allowed rise of a formant's |slope|, cents per octave
 
 
 def part(cache, name):
@@ -63,6 +70,35 @@ def boot_speakers(err_a, err_b, spk, rng, stat=np.mean):
     return obs, np.percentile(bs, 2.5), np.percentile(bs, 97.5)
 
 
+def shift_slopes(p, sm):
+    """p (clips, T, 4) log2 values; -> {n: (tract keys, follow (k,), drag (k,), slopes (k, 4))}"""
+    est = np.nanmedian(p[:, 30:71], 1)
+    out = {}
+    for n in range(4):
+        keys, fol, drag, allsl = [], [], [], []
+        for v, L, f0 in sorted({(a, b, c) for a, b, c in zip(sm["vowel"], sm["length_cm"], sm["f0"])}):
+            g = (sm["vowel"] == v) & (sm["length_cm"] == L) & (sm["f0"] == f0)
+            i = np.flatnonzero(g & ((sm["formant"] == n) | (sm["formant"] == -1)))
+            if len(i) < 3:
+                continue
+            x = np.log2(sm["factor"][i])
+            s = np.array([np.polyfit(x, est[i, m], 1)[0] for m in range(4)])
+            keys.append(f"{v}|{L}"), fol.append(s[n]), drag.append(np.mean(np.abs(np.delete(s, n)))), allsl.append(s)
+        out[n] = (np.array(keys), np.array(fol), np.array(drag), np.array(allsl))
+    return out
+
+
+def boot_tracts(a, b, keys, rng):
+    """paired: mean over the resampled tracts' rows of (a - b)"""
+    us = np.unique(keys)
+    idx = [np.flatnonzero(keys == u) for u in us]
+    bs = []
+    for _ in range(B):
+        j = np.concatenate([idx[k] for k in rng.integers(len(us), size=len(us))])
+        bs.append(np.mean(a[j] - b[j]))
+    return float(np.mean(a - b)), np.percentile(bs, 2.5), np.percentile(bs, 97.5)
+
+
 def fmt(t):
     return f"{t[0]:+.2f} [{t[1]:+.2f}, {t[2]:+.2f}]"
 
@@ -70,7 +106,7 @@ def fmt(t):
 def main():
     cache, runs, out = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
     dev = torch.device(os.environ.get("VA_DEVICE", "cuda"))
-    parts = {p: part(cache, p) for p in ("hb", "cp", "val", "probe")}
+    parts = {p: part(cache, p) for p in ("hb", "cp", "val", "probe", "shift") if (cache / p / "done").exists()}
     preds = {"T0": {p: parts[p][3] for p in parts}}  # the trunk's own heads (cached)
     seeds = {}
     for arm in ARMS:
@@ -96,6 +132,8 @@ def main():
     meta = np.load(cache / "probe" / "meta.npz")
     assert np.allclose([c.f0 for c in clips], meta["f0"]) and np.allclose([c.length_cm for c in clips], meta["length_cm"])
     truth = np.array([c.formants[:4] for c in clips])
+    sm = dict(np.load(cache / "shift" / "meta.npz")) if "shift" in parts else None
+    shifts, probe_c = {}, {}
 
     res, lines = {}, []
     say = lambda s="": lines.append(s)  # noqa: E731
@@ -130,7 +168,19 @@ def main():
             x = np.log2([clips[j].f0 for j in i])
             sl.append([np.polyfit(x, est[i, n], 1)[0] for n in range(4)])
         m["probe_abs_slope"] = np.median(np.abs(sl), 0).tolist()
+        slc = []  # the same slopes in cents per octave, per tract, for the paired f0 guard
+        for key in keys:
+            i = [j for j, c in enumerate(clips) if (c.vowel, c.length_cm) == key and c.f0 <= inv.LOW_F0_MAX_HZ]
+            x = np.log2([clips[j].f0 for j in i])
+            slc.append([np.polyfit(x, 1200 * np.log2(est[i, n]), 1)[0] for n in range(4)])
+        probe_c[k] = (np.array([f"{v}|{L}" for v, L in keys]), np.abs(np.array(slc)))
+        m["probe_abs_slope_cents"] = np.median(np.abs(slc), 0).tolist()
         m["probe_err_by_len"] = {str(L): np.median((est - truth)[meta["length_cm"] == L], 0).tolist() for L in inv.LENGTHS_CM}
+        if "shift" in p:
+            sh = shift_slopes(p["shift"], sm)
+            m["shift_follow"] = [float(np.median(sh[n][1])) for n in range(4)]
+            m["shift_drag"] = [float(np.median(sh[n][2])) for n in range(4)]
+            shifts[k] = sh
         res[k] = m
         say(f"\n{k}")
         say("  Hillenbrand MAE F1-F4 (Hz): " + " / ".join(f"{v:.1f}" for v in m["hb_mae"]) + f"; F3/F4 mean {m['hb_f34']:.2f}")
@@ -142,6 +192,9 @@ def main():
         say("  probe median |slope| F1-F4 (Hz/oct, f0 <= 250): " + " / ".join(f"{v:.1f}" for v in m["probe_abs_slope"])
             + "; error by length 13/15.5/18 cm: " + "; ".join(" / ".join(f"{v:+.0f}" for v in m["probe_err_by_len"][str(L)])
                                                           for L in inv.LENGTHS_CM))
+        if "shift_follow" in m:
+            say("  shift probe, moved F1-F4: follow slope " + " / ".join(f"{v:.3f}" for v in m["shift_follow"])
+                + "; drag (mean |slope| of the others) " + " / ".join(f"{v:.3f}" for v in m["shift_drag"]))
 
     rng = np.random.default_rng(0)
     say("\nPaired against F (speaker bootstrap, 2,000): Hillenbrand MAE F1 / F2 / F3 / F4, F3/F4 mean; women's cp F1 |error|")
@@ -163,15 +216,47 @@ def main():
         d["cp_f_F1"] = boot_speakers(ca, cb, cpf["speaker"][wf], rng, np.median)
         paired[f"{a}-{b}"] = d
         say(f"  {a} - {b}: " + "  ".join(f"{k} {fmt(v)}" for k, v in d.items()))
+    say("\nf0 probe, paired over tracts (2,000): |slope| of each formant against log2 f0 (f0 <= 250 Hz), cents per octave")
+    for a, b in pairs:
+        ka, sa = probe_c[a]
+        _, sb = probe_c[b]
+        d = {f"F{n + 1}_f0slope": boot_tracts(sa[:, n], sb[:, n], ka, rng) for n in range(4)}
+        paired.setdefault(f"{a}-{b}", {}).update(d)
+        say(f"  {a} - {b}: " + "  ".join(f"{kk} {v[0]:+.2f} [{v[1]:+.2f}, {v[2]:+.2f}]" for kk, v in d.items()))
+    if shifts:
+        if parts["shift"][1] is not None:  # the trunk's VTL head on the shift probe (arm-independent)
+            vs = shift_slopes(np.repeat(parts["shift"][1][..., None], 4, -1), sm)
+            say("\nshift probe, the trunk's VTL head (log2 cm per log2 factor), moved F1-F4: "
+                + " / ".join(f"{np.median(vs[n][1]):+.3f}" for n in range(4)))
+        say("\nshift probe, paired over tracts (2,000): follow and drag per moved formant")
+        for a, b in pairs:
+            if a in shifts and b in shifts:
+                d = {}
+                for n in range(4):
+                    ka, fa, da, _ = shifts[a][n]
+                    _, fb, db, _ = shifts[b][n]
+                    d[f"F{n + 1}_follow"] = boot_tracts(fa, fb, ka, rng)
+                    d[f"F{n + 1}_drag"] = boot_tracts(da, db, ka, rng)
+                paired.setdefault(f"{a}-{b}", {}).update(d)
+                say(f"  {a} - {b}: " + "  ".join(f"{kk} {v[0]:+.3f} [{v[1]:+.3f}, {v[2]:+.3f}]" for kk, v in d.items()))
+    def rule(d):
+        """D-038's registered rule on one arm's paired differences against F -> (pass, {criterion: pass})"""
+        c = {"primary F3/F4": d["F3F4"][2] < 0,
+             "guard-rails": all(d[f"F{n + 1}"][0] <= GUARD_HZ[n] for n in range(4)) and d["cp_f_F1"][0] <= CP_GUARD_HZ,
+             "shift": all(d[f"F{n + 1}_follow"][0] >= -FOLLOW_DROP[n] and d[f"F{n + 1}_drag"][0] <= DRAG_RISE for n in range(4)),
+             "f0": all(d[f"F{n + 1}_f0slope"][0] <= F0_RISE for n in range(4))}
+        return all(c.values()), c
+
     if {"Fv", "F"} <= set(preds):
-        d = paired["Fv-F"]
-        ok = (d["F3F4"][2] < 0 and all(d[f"F{n + 1}"][0] <= GUARD_HZ[n] for n in range(3)) and d["cp_f_F1"][0] <= CP_GUARD_HZ)
+        ok, crit = rule(paired["Fv-F"])
         unreliable = any(v for k, v in flags.items() if k.split("_")[0] in ("F", "Fv"))
-        say(f"\n  DECISION Fv: {'joins item 5' if ok else 'does not join item 5'}"
+        say(f"\n  criteria Fv: {crit}")
+        say(f"  DECISION Fv: {'joins item 5' if ok else 'does not join item 5'}"
             + (" (UNRELIABLE: a flagged F or Fv seed)" if unreliable else ""))
         if "Fi" in preds:
-            di, dv = paired["Fi-F"], paired["Fi-Fv"]
-            oki = (di["F3F4"][2] < 0 and all(di[f"F{n + 1}"][0] <= GUARD_HZ[n] for n in range(3)) and di["cp_f_F1"][0] <= CP_GUARD_HZ)
+            oki, criti = rule(paired["Fi-F"])
+            dv = paired["Fi-Fv"]
+            say(f"  criteria Fi: {criti}")
             say(f"  DECISION form: {'1/L' if oki and dv['F3F4'][2] < 0 else 'log2 L'} (Fi passes: {oki}; Fi - Fv F3/F4 {fmt(dv['F3F4'])})")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")

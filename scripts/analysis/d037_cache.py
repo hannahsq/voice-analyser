@@ -11,6 +11,7 @@ Parts (argv[3:], default all; each skipped if done):
 - mix (D-038; not in the default parts): teacher v3's training mixture, 400-frame crops of every train_v2 training
   clip kind (70 %) and its resynthesised sets (30 %, by size), fixed seeds, 29,356 crops; with the formant labels,
   sonorant and formant weights (w_formant);
+- shift (D-038; not in the default parts): the single-formant-shift probe (eval.invariance.shift_clips), whole clips;
 - cp (D-038; not in the default parts): PTDB-TUG dev closed-phase frames, whole utterances (cache.py's closed_phase()
   order, checked against cache/emb_v1/gold_ptdb_cp); the reference rows come from cache/cp/ptdb_egg_sub.npz.
 Whole files and fp32 as D-035's caches, so teacher v3's rebuilt parts can be checked against them.
@@ -232,6 +233,18 @@ def main():
         np.savez(d / "meta.npz", vowel=np.array([c.vowel for c in clips]), length_cm=np.array([c.length_cm for c in clips]),
                  f0=np.array([c.f0 for c in clips]))
         finish("probe", n=len(clips))
+
+    if "shift" in parts and not done("shift"):  # D-038: the single-formant-shift probe, whole clips
+        d = out / "shift"
+        d.mkdir(exist_ok=True)
+        clips = inv.shift_clips()
+        r = [T.file(c.audio) for c in clips]
+        np.save(d / "feats.npy", np.stack([a[0] for a in r]).astype(np.float16))
+        save_cols(d, np.stack([a[1] for a in r]), *((np.stack([a[2] for a in r]), np.stack([a[3] for a in r])) if T.has_vtl else (None, None)))
+        np.savez(d / "meta.npz", vowel=np.array([c.vowel for c in clips]), length_cm=np.array([c.length_cm for c in clips]),
+                 f0=np.array([c.f0 for c in clips]), formant=np.array([c.formant for c in clips]),
+                 factor=np.array([c.factor for c in clips]), formants=np.stack([c.formants for c in clips]))
+        finish("shift", n=len(clips))
 
     if "hb" in parts and not done("hb"):
         d = out / "hb"

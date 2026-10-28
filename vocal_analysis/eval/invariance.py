@@ -59,6 +59,51 @@ def probe_clips(vowels=VOWELS, lengths=LENGTHS_CM, f0s=F0S_HZ, seconds: float = 
     return clips
 
 
+SHIFT_FACTORS = (0.9, 0.95, 1.05, 1.1)  # +-10 % kept every formant's coverage similar; +-20 % left few F3 / F4 shifts
+SHIFT_F0S_HZ = (F0S_HZ[1], F0S_HZ[3], F0S_HZ[5])  # 100, 158, 248 Hz: the low-f0 range, below LOW_F0_MAX_HZ
+SHIFT_MIN_RATIO = 1.10  # a moved formant stays at least this ratio (about 165 cents) from its neighbours
+
+
+@dataclass
+class ShiftClip:
+    vowel: str
+    length_cm: float
+    f0: float
+    formant: int  # 0-3 for the moved formant; -1 for the unshifted tract
+    factor: float  # the moved formant's frequency ratio (1.0 unshifted)
+    audio: np.ndarray
+    formants: np.ndarray  # (4,) true F1-F4 after the shift, Hz
+
+
+def shift_clips(vowels=VOWELS, lengths=LENGTHS_CM, f0s=SHIFT_F0S_HZ, factors=SHIFT_FACTORS, seconds: float = 1.0,
+                seed: int = 0) -> list[ShiftClip]:
+    """Single-formant-shift probe (D-038): the probe's tracts with one of F1-F4 moved by a factor and everything else
+    (the other poles, every bandwidth, the source) unchanged. An estimator should follow the moved formant (slope 1
+    in log frequency) and leave the others and the speaker's length where they are (slope 0); a head that leans on a
+    length or vowel prior follows less and drags its neighbours. Shifts that would bring the moved formant within
+    SHIFT_MIN_RATIO of a neighbour are skipped. Each clip's source noise is seeded by its tract and f0 only, so a
+    shifted clip and its unshifted partner share the same excitation."""
+    clips = []
+    for v in vowels:
+        for L in lengths:
+            f, b = tube.poles(tube.build_shape(*tube.STORY_VOWELS[v], L))
+            keep = f < 7500.0
+            f, b = f[keep][:MAX_POLES], b[keep][:MAX_POLES]
+            variants = [(-1, 1.0, f)]
+            for n in range(4):
+                for a in factors:
+                    g = f.copy()
+                    g[n] *= a
+                    if (n > 0 and g[n] < SHIFT_MIN_RATIO * g[n - 1]) or (n + 1 < len(g) and g[n + 1] < SHIFT_MIN_RATIO * g[n]):
+                        continue
+                    variants.append((n, a, g))
+            for k, f0 in enumerate(f0s):
+                for n, a, g in variants:
+                    rng = np.random.default_rng([seed, 7, VOWELS.index(v) if v in VOWELS else 99, int(L * 10), k])
+                    clips.append(ShiftClip(v, L, f0, n, a, _render(g, b, f0, seconds, rng), g[:4].copy()))
+    return clips
+
+
 def run(predict, clips: list[ProbeClip] | None = None) -> dict:
     """predict(audio, sr, times, meta) -> (T, >=1) formants (a FormantBaseline's predict).
 
