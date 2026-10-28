@@ -1687,3 +1687,16 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
     - **Probe excess R3a +8.9 c/oct against R3's +1.5** (P(null ≥ observed) 0.002 against 0.33): fails "≤ R3's + 3" (it passes ≤ 10). This is the deciding criterion.
     - w/m 0.865 (in range); no seed flagged; validation SNR R3a 22.87 against R3 22.70 dB (reported).
     - *Reading*: the same pattern as D-034's Muon + Adan head: a better fit on synthetic data (+0.17 dB) with nothing gained on real voices, here with a clear rise in f0 dependence. A faster optimiser seems to pick up the f0 cue more, which also fits D-037's observation that heads fitted gently on a frozen trunk are the least f0-dependent.
+
+## D-041 (2026-10-28, pre-registered): is D-031's Muon + Adan recipe less invariant than teacher v3's AdamW?
+
+*Status*: registered with Hannah's agreement before anything ran. Prompted by D-040's check (an Adan VTL head on a frozen trunk: f0 excess +8.9 against AdamW's +1.5 c/oct) and D-034 (a Muon + Adan formant head: lower training loss, no real-voice gain). D-031 adopted rA mostly on synthetic SE units (better F2 and F4; real voices about neutral), and no one has compared the recipes' invariance. Hannah: if Muon + Adan is less invariant, the recipe decision is re-evaluated.
+
+- *Models* (existing checkpoints, nothing trained): teacher v3's three AdamW seeds (`conformer_v2r2_d16k`, `_s1_d16k`, `_s2_d16k`; seeds 0, 1, 2) against **rA** (`d031_rA_b20k`, seed 1, the adopted recipe). Reported, deciding nothing: **rB** and **rC** (2× and 4× rA's rates, seed 1), as a dose-response check.
+- *Measures* (each model's own formant heads, whole clips, `d037_cache.py`'s probe and shift parts; `d041_invariance.py`): per formant F1–F4, the f0 probe's |slope| against log2 f0 at f0 ≤ 250 Hz in cents per octave (per tract); the single-formant-shift probe's follow and drag slopes (D-038). Paired bootstraps over tracts (2,000) of rA minus the per-tract mean of teacher v3's three seeds.
+- *Rule*: rA is **less invariant** if, for any formant, any of D-038's thresholds is exceeded *and* the paired interval excludes 0 *and* rA lies beyond all three teacher v3 seeds (so a difference within AdamW's own seed spread does not count):
+  - f0 |slope| up by more than **+5 c/oct**;
+  - follow down by more than **0.02** (F2–F4) or **0.05** (F1);
+  - drag up by more than **0.01**.
+- *Then*: if rA is less invariant, item 5 pauses before 5b and a re-evaluation entry compares the recipes with seed replicates (5a's seed 2, rA's second seed, is the first), the invariance thresholds as guard-rails beside D-031's synthetic rule. Otherwise D-040 goes ahead on rA as agreed (route A).
+- *Limits*: one rA seed against three AdamW seeds; the "beyond all three" condition guards against reading seed noise as a recipe effect, and makes the rule conservative (it can miss a real but small difference).
