@@ -164,10 +164,11 @@ def fb_wlp(x: np.ndarray, w: np.ndarray, order: int, forward_only: bool = False)
 
 def analyse(x: np.ndarray, fs_in: float, times: np.ndarray, f0_mean: float | None = None, fs: float = 8000.0,
             order: int | None = None, gci: np.ndarray | None = None, forward_only: bool = False,
-            n_formants: int = 4) -> dict:
+            n_formants: int = 4, dq: float = DQ) -> dict:
     """QCP-FB formants at `times` (s). x at fs_in is resampled to fs. GCIs from SEDREAMS (needs f0_mean, Hz) unless
     `gci` is given (sample indices at fs, e.g. ideal ones on synthetic audio). Per time, a FRAME_S rectangular frame
-    centred on it, pre-emphasised; formants from the predictor's roots (`closed_phase.lpc_formants`).
+    centred on it, pre-emphasised; formants from the predictor's roots (`closed_phase.lpc_formants`). `dq` is the
+    weight's duration quotient (0.7 as published; D-046's arm B uses 0.3, inside the closed phase).
 
     Returns "F", "bw" (T, n_formants) Hz with NaN where no fit, "gci" (samples at fs), "fs", "order"."""
     x = np.asarray(x, float)
@@ -181,7 +182,7 @@ def analyse(x: np.ndarray, fs_in: float, times: np.ndarray, f0_mean: float | Non
         if f0_mean is None:
             raise ValueError("f0_mean is needed to detect GCIs")
         gci = sedreams(x, fs, f0_mean)
-    w = qcp_weights(len(x), gci, fs)
+    w = qcp_weights(len(x), gci, fs, dq=dq)
     xp = np.r_[x[0], x[1:] - PREEMPH * x[:-1]]
     half = int(round(FRAME_S * fs / 2))
     T = len(times)
