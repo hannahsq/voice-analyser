@@ -1,0 +1,25 @@
+D-044 stage 1: F1 error (Hz) against the closed-glottis pole, median over 5 frames per render;
+pooled medians with a vowel bootstrap (95 %). Render D, instants from the area, true F2-F4 unless noted.
+
+women's region      reference   +2.4 [ +0.3,  +5.5] n=270
+women's region      R           +1.3 [ -1.1,  +2.3] n=270
+women's region      J          +30.1 [+19.0, +36.6] n=270
+gap 0.10            reference   +8.8 [ +1.5, +12.9] n=90
+gap 0.10            R           +2.0 [ -0.7,  +5.9] n=90
+gap 0.10            J          +28.1 [+17.9, +34.9] n=90
+OQ 0.70             reference  +12.1 [ -2.5, +17.0] n=90
+OQ 0.70             R           +1.6 [ -6.6,  +7.8] n=90
+OQ 0.70             J          +34.6 [+21.1, +43.8] n=90
+F2-F4 x1.03         R          +10.4 [ +5.6, +15.1] n=270
+F2-F4 x1.03         J          +17.4 [ +9.5, +25.6] n=270
+F2-F4 x0.97         R           +5.3 [ +2.7,  +8.4] n=270
+F2-F4 x0.97         J           +9.7 [ +3.4, +17.3] n=270
+men's region        reference   +3.0 [ +1.0,  +4.4] n=180
+men's region        R           +2.3 [ +0.4,  +4.4] n=180
+men's region        J          +27.0 [ +0.0, +42.8] n=180
+correlation over 108 cells of R's error with the reference's: +0.81
+correlation over 108 cells of J's error with the reference's: +0.19
+
+GATE R: passes (women's region |median| <= 4 Hz)
+GATE J: fails (women's region |median| > 4 Hz): stops, reported
+(J is compared with D-043's registered values, +8.2 at gap 0.10 and +12.3 at OQ 0.70; the reference column here is recomputed on 5 frames per render, reported beside them.)
