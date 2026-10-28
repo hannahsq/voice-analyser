@@ -36,26 +36,32 @@ HIGH_F0S = (330.0, 400.0, 500.0, 600.0, 700.0, 800.0)
 HIGH_F0_RANGE = (50.0, 1000.0)
 
 
-def one(job):
-    from scipy.signal import resample_poly
-
-    from vocal_analysis.eval import closed_phase as cp
+def render_one(size, f0, oq, gap, vowel, render):
+    """One static render at FS: (pressure scaled to peak 0.5, glottal area in cm^2, closed-glottis poles F, B)."""
     from vocal_analysis.synth import interactive as it
     from vocal_analysis.synth import tract, tube
     from vocal_analysis.synth.coupling import Glottis
 
-    size, f0, oq, gap, vowel, render, order = job
     L, asc, phar = SIZES[size]
     s = L / 17.5
     g = Glottis(0.12 * s * s, -0.1, 1.4 * s, 0.3 * s, 8000.0, 1 / s)  # as D-026's render check
     n = int(DUR * FS)
     sh = tube.build_shape(*tube.STORY_VOWELS[vowel], L, pharynx_ratio=phar, area_scale=asc)
-    F, _ = tube.poles(sh, tract.F_MAX_HZ)
+    F, B = tube.poles(sh, tract.F_MAX_HZ)
     area = g.peak_area_cm2 * it.area_pulse(np.arange(n) * f0 / FS, oq, 1.3, gap)
     nb = n // 16 + 1
     y = it.render(area, [it.tract_responses(sh, FS, sub_scale=1 / s)], np.zeros(nb, int), np.zeros(nb), g,
                   coupled=render == "D")["pressure"]
-    y = 0.5 * y / np.abs(y).max()
+    return 0.5 * y / np.abs(y).max(), area, F, B
+
+
+def one(job):
+    from scipy.signal import resample_poly
+
+    from vocal_analysis.eval import closed_phase as cp
+
+    size, f0, oq, gap, vowel, render, order = job
+    y, area, F, _ = render_one(size, f0, oq, gap, vowel, render)
     kw = {} if f0 <= 500 and order == ORDER else {"f0_range": HIGH_F0_RANGE}
     r = cp.analyse(resample_poly(y, FS_CP, FS), resample_poly(-area, FS_CP, FS), FS_CP, TIMES, order=order, **kw)
     ok = np.isfinite(r["cp"][:, 0])
