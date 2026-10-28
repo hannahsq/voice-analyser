@@ -7,7 +7,12 @@ Parts (argv[3:], default all; each skipped if done):
   each crop's clip id and log2 length;
 - val: train_v2's first 512 held-out clips (seed 12345, as vtl_cache.py / cache.py's synth_train_v2), clip ids;
 - probe: the f0-invariance probe's 144 clips (eval.invariance), whole clips;
-- hb: Hillenbrand dev files, whole files, at the reference frames (vtl_cache.py's order, checked).
+- hb: Hillenbrand dev files, whole files, at the reference frames (vtl_cache.py's order, checked);
+- mix (D-038; not in the default parts): teacher v3's training mixture, 400-frame crops of every train_v2 training
+  clip kind (70 %) and its resynthesised sets (30 %, by size), fixed seeds, 29,356 crops; with the formant labels,
+  sonorant and formant weights (w_formant);
+- cp (D-038; not in the default parts): PTDB-TUG dev closed-phase frames, whole utterances (cache.py's closed_phase()
+  order, checked against cache/emb_v1/gold_ptdb_cp); the reference rows come from cache/cp/ptdb_egg_sub.npz.
 Whole files and fp32 as D-035's caches, so teacher v3's rebuilt parts can be checked against them.
 Run from the main checkout: VA_DEVICE=cuda python scripts/analysis/d037_cache.py <checkpoint> <out dir> [parts]
 Env VA_LIMIT=n: only the first n train crops and val clips (smoke tests)."""
@@ -18,7 +23,9 @@ import time
 from pathlib import Path
 
 import numpy as np
+import soundfile as sf
 import torch
+from scipy.signal import resample_poly
 from torch.utils.data import DataLoader, Subset
 
 from vocal_analysis.config import DeviceConfig
@@ -30,12 +37,14 @@ from vocal_analysis.eval.datasets import load_audio, registry
 from vocal_analysis.features.vqt import HOP, TorchVQT
 from vocal_analysis.models.infer import decode_outputs, load_teacher
 from vocal_analysis.synth.channel import ChannelConfig
-from vocal_analysis.train.data import SynthCrops, collate, split_ids
+from vocal_analysis.train.data import MixedCrops, SynthCrops, collate, consolidate, split_ids
 
 CROP = 400
 DRAWS = 2
 EMB = Path("cache/emb_v1")
+CP_SUB = Path("cache/cp/ptdb_egg_sub.npz")  # ptdb_egg.py's closed-phase frames (the m3w copy; columns of other models unused)
 LIMIT = int(os.environ.get("VA_LIMIT", 0))
+MIX_N = 29356  # D-038's mix part: as many crops as train has clips (one pass of D-037's cache, half its disk)
 
 
 def log(msg):
@@ -145,6 +154,55 @@ def main():
         np.save(d / "log2_length.npy", np.log2(np.load(flat / "clip_length_cm.npy")[ids]).astype(np.float32))
         finish("train", n=int(k), clips=int(N // DRAWS), draws=DRAWS)
 
+    if "mix" in parts and not done("mix"):  # D-038: teacher v3's training mixture, every clip kind
+        d = out / "mix"
+        d.mkdir(exist_ok=True)
+        train_ids, _ = split_ids(n_clips)
+        tcfg = cfg3["train"]
+        tl = tuple(tcfg["tract_left_weight"])
+        ds_parts, sizes = [SynthCrops(flat, train_ids, CROP, channel, seed=38038, fixed=True)], []
+        for r in tcfg["resynth"]:
+            rflat = consolidate(r)
+            n_r = json.loads((rflat / "done").read_text())["n_clips"]
+            ds_parts.append(SynthCrops(rflat, np.arange(n_r), CROP, channel, seed=38039 + len(sizes), fixed=True, tract_left_weight=tl))
+            sizes.append(n_r)
+        frac = tcfg["resynth_frac"]
+        N = LIMIT or MIX_N
+        ds = MixedCrops(ds_parts, [1.0 - frac] + [frac * n_r / sum(sizes) for n_r in sizes], N, seed=38038, fixed=True)
+        prog = d / "progress.json"
+        k0 = json.loads(prog.read_text())["k"] if prog.exists() else 0
+        mode = "r+" if k0 else "w+"
+        mm = lambda name, dt, shape: np.lib.format.open_memmap(d / name, mode, dt, None if k0 else shape)  # noqa: E731
+        feats = mm("feats.npy", np.float16, (N, CROP, 128))
+        fm = mm("log2F.npy", np.float32, (N, CROP, 4))
+        lab_f = mm("label_formants.npy", np.float32, (N, CROP, 4))
+        lab_s = mm("label_sonorant.npy", np.float32, (N, CROP))
+        lab_w = mm("label_w_formant.npy", np.float32, (N, CROP))
+        mu = lv = None
+        if T.has_vtl:
+            mu = mm("vtl_mu.npy", np.float32, (N, CROP))
+            lv = mm("vtl_logvar.npy", np.float32, (N, CROP))
+        arrays = [a for a in (feats, fm, lab_f, lab_s, lab_w, mu, lv) if a is not None]
+        k, t0 = k0, time.time()
+        for audio, lab in DataLoader(Subset(ds, range(k0, N)), 16, num_workers=8, collate_fn=collate, prefetch_factor=4):
+            b = len(audio)
+            h, f, m, v = T.crops(audio)
+            feats[k:k + b], fm[k:k + b] = h, f
+            lab_f[k:k + b] = lab["formants"].numpy()[..., :4]
+            lab_s[k:k + b] = lab["sonorant"].numpy()
+            lab_w[k:k + b] = lab["w_formant"].numpy()
+            if mu is not None:
+                mu[k:k + b], lv[k:k + b] = m, v
+            k += b
+            if (k // 16) % 200 == 0:
+                for a in arrays:
+                    a.flush()
+                prog.write_text(json.dumps({"k": k}))
+                log(f"  [mix] {k}/{N} ({(k - k0) / (time.time() - t0):.1f} crops/s)")
+        for a in arrays:
+            a.flush()
+        finish("mix", n=int(k), resynth_frac=frac, resynth=tcfg["resynth"])
+
     if "val" in parts and not done("val"):
         d = out / "val"
         d.mkdir(exist_ok=True)
@@ -201,6 +259,33 @@ def main():
         save_cols(d, np.concatenate(F), *((np.concatenate(M), np.concatenate(V)) if T.has_vtl else (None, None)))
         np.savez(d / "files.npz", path=np.array(paths), speaker=np.array(spk), group=np.array(grp), off=np.array(off))  # file j: frames off[j]:off[j+1]
         finish("hb", n_ref=int(k), n_files=len(H))
+
+    if "cp" in parts and not done("cp"):  # D-038: PTDB-TUG dev closed-phase frames, cache.py's closed_phase() order
+        d = out / "cp"
+        d.mkdir(exist_ok=True)
+        s = dict(np.load(CP_SUB, allow_pickle=True))
+        tmap = TI.load()
+        devm = np.array([TI.tier_of(f"ptdb_tug:{x}", tmap) == "dev" for x in s["speaker"]])
+        ref = np.load(EMB / "gold_ptdb_cp" / "ref_cp.npy")
+        H, F, M, V, rows, k = [], [], [], [], [], 0
+        for spk, utt in sorted({(str(a), str(b)) for a, b in zip(s["speaker"][devm], s["utt"][devm])}):
+            x, sr = sf.read(Path("data/ptdb_tug") / ("FEMALE" if spk[0] == "F" else "MALE") / "MIC" / spk / f"{utt}.wav")
+            x = resample_poly(x[:, 0] if x.ndim == 2 else x, 16000, sr).astype(np.float32)
+            i = np.flatnonzero((s["speaker"] == spk) & (s["utt"] == utt))
+            assert np.allclose(s["cp"][i], ref[k:k + len(i)], equal_nan=True), k
+            h, f, m, v = T.file(x)
+            j = np.clip(np.round(s["t"][i].astype(float) / 0.01).astype(int), 0, len(h) - 1)
+            H.append(h[j].astype(np.float16)), F.append(f[j])
+            if T.has_vtl:
+                M.append(m[j]), V.append(v[j])
+            rows.append(i)
+            k += len(i)
+        assert k == len(ref), (k, len(ref))
+        np.save(d / "feats.npy", np.concatenate(H))
+        save_cols(d, np.concatenate(F), *((np.concatenate(M), np.concatenate(V)) if T.has_vtl else (None, None)))
+        r = np.concatenate(rows)  # frame k -> row r[k] of ptdb_egg_sub.npz
+        np.savez(d / "frames.npz", row=r, speaker=s["speaker"][r], sex=s["sex"][r], cp=s["cp"][r])
+        finish("cp", n=int(k), files=len(H))
 
 
 if __name__ == "__main__":
