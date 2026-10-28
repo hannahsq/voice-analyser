@@ -6,7 +6,7 @@ first 16 hex digits of `ckpt_last.pt`'s SHA-256, the same convention the resynth
 tracker. **Commit** is the one in the run's `config.json` (trunk / decay branch when they differ). Runs before
 2026-10-22 are recorded as "dirty" whenever any file in the checkout was, untracked reports included, so that flag
 says nothing about the code; from 2026-10-22 it lists uncommitted changes under `vocal_analysis/` and `configs/` only.
-Released teachers carry an annotated git tag at their training commit.
+Released teachers carry an annotated git tag at their training commit. Versions (2026-10-28): the major number follows the milestone and the training data (v1–v3: M1–M3; v4 is M4's teacher, on re-tracked labels); a minor number marks recipe or head changes within a milestone (teacher v3.1 = roadmap item 5).
 
 Sizes: **full GRU** = front end 24 / 48 / 64 channels, f0 16, embedding 384, BiGRU 256 × 2 (f0 128). **Full
 Conformer** = the same front end, Conformer width 128, 2 layers, 4 heads (f0: dilated convs). **S2** = front end

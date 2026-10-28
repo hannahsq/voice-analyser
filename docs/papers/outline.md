@@ -40,7 +40,7 @@ f0, voicing, F1–F4 with bandwidths and calibrated σ, and anatomical vocal-tra
 | Bandwidths and σ are usable, not decorative | σ coverage, observability label (D-027) | partly done |
 | Compared fairly with Praat and published neural trackers on the same references | baselines (D-007, D-008); a like-for-like set still to fix | partly done |
 | A jointly trained length head reads length better than formant-derived apparent length, without costing formants | D-035, D-036, D-037 | done (dev); item 5 retrain pending |
-| Final numbers | teacher v4 (roadmap item 5), lockbox at milestone | missing |
+| Final numbers | teacher v3.1 (roadmap item 5) and M4's v4, lockbox at milestone | missing |
 
 Figures: synthetic pipeline; error by f0 band and group; reliability of length by group; examples where the trackers disagree.
 
