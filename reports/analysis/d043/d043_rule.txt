@@ -1,0 +1,26 @@
+D-043 registered statistic (women's region: women, f0 180/220/270, all OQ and gaps, render D)
+women's region                                       dF1   +2.9 [ -0.1,  +7.7]  n=270
+RULE: reference stands (|F1| <= 4 Hz)
+
+Reported breakdowns
+women's region                                       dF2   +7.2 [ +4.4,  +9.3]  n=270
+women's region                                       dF3   +7.7 [ +6.7,  +8.9]  n=270
+women's region, gap 0.0                              dF1   +1.2 [ -1.3,  +2.7]  n=90
+women's region, gap 0.05                             dF1   +3.2 [ -1.0,  +8.6]  n=90
+women's region, gap 0.1                              dF1   +8.2 [ +0.9, +12.5]  n=90
+women's region, gap 0.0                              dF3   +1.1 [ -0.8,  +3.3]  n=90
+women's region, gap 0.05                             dF3   +4.4 [ +3.0,  +5.0]  n=90
+women's region, gap 0.1                              dF3  +19.9 [+16.7, +25.1]  n=90
+women's region, OQ 0.45                              dF1   +1.1 [ -2.5,  +3.0]  n=90
+women's region, OQ 0.57                              dF1   +2.9 [ -0.6,  +9.8]  n=90
+women's region, OQ 0.7                               dF1  +12.3 [ -2.4, +16.8]  n=90
+women's region, f0 180                               dF1   +2.9 [ +0.4,  +9.1]  n=90
+women's region, f0 220                               dF1   +3.8 [ -1.8, +10.5]  n=90
+women's region, f0 270                               dF1   +1.6 [ -4.6, +10.7]  n=90
+men's region (men, f0 100/140, render D)             dF1   +3.0 [ +0.9,  +4.6]  n=180
+men's region (men, f0 100/140, render D)             dF2   +6.1 [ +2.5,  +9.7]  n=180
+men's region (men, f0 100/140, render D)             dF3   +7.1 [ +6.1,  +7.5]  n=180
+women's region gap 0, no feedback (C)                dF1   -3.8 [ -5.8,  +2.6]  n=90
+women's region gap 0, feedback (D)                   dF1   +1.2 [ -1.7,  +2.6]  n=90
+
+coverage min 1.0
