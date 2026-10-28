@@ -107,9 +107,8 @@ def _fasttrack_error(tracks: np.ndarray) -> float:
     return err
 
 
-def praat_fasttrack(x: np.ndarray, sr: int, times: np.ndarray, meta: dict) -> np.ndarray:
-    """FastTrack-faithful selection: per-talker-group ceiling range (250 Hz steps),
-    FastTrack's error. Uses the speaker group (m/w/b/g) and the oracle vowel span."""
+def _fasttrack_select(x: np.ndarray, sr: int, meta: dict):
+    """FastTrack's chosen analysis: (Praat Formant object or None, grid times over the vowel span)."""
     import parselmouth
 
     lo, hi = FASTTRACK_RANGES.get(meta.get("group"), (4500.0, 7500.0))
@@ -123,9 +122,99 @@ def praat_fasttrack(x: np.ndarray, sr: int, times: np.ndarray, meta: dict) -> np
         err = _fasttrack_error(_sample_track(formant, grid))
         if err < best_err:
             best, best_err = formant, err
+    return best, grid
+
+
+def praat_fasttrack(x: np.ndarray, sr: int, times: np.ndarray, meta: dict) -> np.ndarray:
+    """FastTrack-faithful selection: per-talker-group ceiling range (250 Hz steps),
+    FastTrack's error. Uses the speaker group (m/w/b/g) and the oracle vowel span."""
+    best, _ = _fasttrack_select(x, sr, meta)
     if best is None:
         return np.full((len(times), N_FORMANTS), np.nan)
     return _sample_track(best, times)
+
+
+# Seeds snapped to QCP-FB peaks (Hannah, 2026-10-29; report-only): FastTrack decides which peak is which formant,
+# QCP-FB (D-046 arm B settings) re-measures each one at its nearest closed-phase peak within SNAP_WINDOW, the seed is
+# kept when no peak is that close. The smoothing constants are fixed in advance, not tuned on any gold set.
+SNAP_WINDOW = 0.15  # relative
+SMOOTH_MEDIAN = 5  # frames of FastTrack's 2 ms grid
+SMOOTH_ALPHA = 0.15  # leaky integrator, run forwards and backwards (zero phase)
+
+
+def _interp_nan(y: np.ndarray) -> np.ndarray:
+    ok = np.isfinite(y)
+    if ok.sum() < 2:
+        return y
+    return np.interp(np.arange(len(y)), np.flatnonzero(ok), y[ok])
+
+
+def _smooth_seed(best, grid: np.ndarray, times: np.ndarray) -> np.ndarray:
+    """FastTrack's tracks on its grid, in log2 Hz: a running median (jumps to a neighbouring peak), then a zero-phase
+    leaky integrator (jitter), sampled at `times`."""
+    from scipy.ndimage import median_filter
+    from scipy.signal import filtfilt
+
+    tr = _sample_track(best, grid)
+    out = np.full((len(times), N_FORMANTS), np.nan)
+    for k in range(N_FORMANTS):
+        y = np.log2(_interp_nan(tr[:, k]))
+        if not np.isfinite(y).sum() >= 2 * SMOOTH_MEDIAN:
+            continue
+        y = median_filter(y, SMOOTH_MEDIAN, mode="nearest")
+        y = filtfilt([SMOOTH_ALPHA], [1.0, SMOOTH_ALPHA - 1.0], y, padlen=min(len(y) - 1, 3 * int(1 / SMOOTH_ALPHA)))
+        out[:, k] = 2.0 ** np.interp(times, grid, y)
+    return out
+
+
+def _dct_seed(best, grid: np.ndarray, times: np.ndarray) -> np.ndarray:
+    """FastTrack's own smoother: its intercept + 5-cosine regression of each track over the span, at `times`."""
+    tr = _sample_track(best, grid)
+    n = len(grid)
+    span = lambda t: (np.asarray(t) - grid[0]) / max(grid[-1] - grid[0], 1e-9)  # noqa: E731
+    basis = lambda u: np.column_stack([np.ones(len(u))] + [np.cos(np.pi * c * u) for c in range(1, FASTTRACK_N_COS + 1)])  # noqa: E731
+    out = np.full((len(times), N_FORMANTS), np.nan)
+    u = span(grid)
+    for k in range(N_FORMANTS):
+        ok = np.isfinite(tr[:, k])
+        if ok.sum() < FASTTRACK_N_COS + 3 or n < 2:
+            continue
+        coef, *_ = np.linalg.lstsq(basis(u[ok]), tr[ok, k], rcond=None)
+        out[:, k] = basis(np.clip(span(times), 0, 1)) @ coef
+    return out
+
+
+def _snap(seed: np.ndarray, cands: np.ndarray) -> np.ndarray:
+    """Each seed formant moved to the nearest candidate within SNAP_WINDOW of it, else kept."""
+    out = seed.copy()
+    for i in range(len(seed)):
+        c = cands[i][np.isfinite(cands[i])]
+        if not len(c):
+            continue
+        for k in range(seed.shape[1]):
+            s = seed[i, k]
+            if not np.isfinite(s):
+                continue
+            j = np.argmin(np.abs(c - s))
+            if abs(c[j] - s) <= SNAP_WINDOW * s:
+                out[i, k] = c[j]
+    return out
+
+
+def _fasttrack_snap(seed_kind: str):
+    def predict(x: np.ndarray, sr: int, times: np.ndarray, meta: dict) -> np.ndarray:
+        from ..eval import qcp
+
+        best, grid = _fasttrack_select(x, sr, meta)
+        if best is None:
+            return np.full((len(times), N_FORMANTS), np.nan)
+        times = np.asarray(times, float)
+        seed = {"raw": lambda: _sample_track(best, times), "smooth": lambda: _smooth_seed(best, grid, times),
+                "dct": lambda: _dct_seed(best, grid, times)}[seed_kind]()
+        cands = qcp.analyse(x, sr, times, f0_mean=_f0_mean(x, sr), fs=10000.0, dq=0.3, n_formants=8)["F"]
+        return _snap(seed, cands)
+
+    return predict
 
 
 @functools.lru_cache(maxsize=1)
@@ -195,5 +284,11 @@ FORMANT_BASELINES: dict[str, FormantBaseline] = {
                         "SEDREAMS GCIs (D-046 arm A; not adopted)", _qcp(8000.0, 0.7)),
         FormantBaseline("qcp_fb", "QCP-FB, duration quotient 0.3, 10 kHz, SEDREAMS GCIs (D-046 arm B; narrowly failed "
                         "its gate, not adopted; report-only)", _qcp(10000.0, 0.3)),
+        FormantBaseline("fasttrack_qcp_snap", "FastTrack (as praat_fasttrack), each formant snapped to the nearest QCP-FB "
+                        "(arm B) peak within 15 %", _fasttrack_snap("raw")),
+        FormantBaseline("fasttrack_smooth_qcp_snap", "FastTrack smoothed (median 5 frames, then a zero-phase leaky integrator, "
+                        "alpha 0.15, log Hz), snapped as fasttrack_qcp_snap", _fasttrack_snap("smooth")),
+        FormantBaseline("fasttrack_dct_qcp_snap", "FastTrack's own DCT fit (intercept + 5 cosines) as the seed, snapped as "
+                        "fasttrack_qcp_snap", _fasttrack_snap("dct")),
     )
 }
