@@ -1,4 +1,4 @@
-"""Formant baselines: Praat defaults, Praat multi-ceiling sweep (FastTrack-style), TVLP."""
+"""Formant baselines: Praat defaults, Praat multi-ceiling sweep (FastTrack-style), TVLP, QCP-FB."""
 
 from __future__ import annotations
 
@@ -154,6 +154,27 @@ def tvlp(x: np.ndarray, sr: int, times: np.ndarray, meta: dict) -> np.ndarray:
     return out
 
 
+def _f0_mean(x: np.ndarray, sr: int) -> float:
+    """The recording's median f0 over voiced frames (Praat autocorrelation, 60-800 Hz): SEDREAMS' window length."""
+    import parselmouth
+
+    f = parselmouth.Sound(x.astype(np.float64), sr).to_pitch_ac(pitch_floor=60.0, pitch_ceiling=800.0).selected_array["frequency"]
+    f = f[f > 0]
+    return float(np.median(f)) if len(f) else 150.0
+
+
+def _qcp(fs: float, dq: float):
+    def predict(x: np.ndarray, sr: int, times: np.ndarray, meta: dict) -> np.ndarray:
+        from ..eval import qcp
+
+        out = np.full((len(times), N_FORMANTS), np.nan)
+        r = qcp.analyse(x, sr, np.asarray(times, float), f0_mean=_f0_mean(x, sr), fs=fs, dq=dq)
+        out[:, : r["F"].shape[1]] = r["F"][:, :N_FORMANTS]
+        return out
+
+    return predict
+
+
 FORMANT_BASELINES: dict[str, FormantBaseline] = {
     b.name: b
     for b in (
@@ -170,5 +191,9 @@ FORMANT_BASELINES: dict[str, FormantBaseline] = {
             praat_fasttrack,
         ),
         FormantBaseline("tvlp", "TVLP, voice-dataset-labeler @ 0ab5568, 150 ms window", tvlp),
+        FormantBaseline("qcp_fb_published", "QCP-FB as published (Gowda et al. 2017): duration quotient 0.7, 8 kHz, "
+                        "SEDREAMS GCIs (D-046 arm A; not adopted)", _qcp(8000.0, 0.7)),
+        FormantBaseline("qcp_fb", "QCP-FB, duration quotient 0.3, 10 kHz, SEDREAMS GCIs (D-046 arm B; narrowly failed "
+                        "its gate, not adopted; report-only)", _qcp(10000.0, 0.3)),
     )
 }
