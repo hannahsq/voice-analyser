@@ -1687,6 +1687,7 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
     - **Probe excess R3a +8.9 c/oct against R3's +1.5** (P(null ≥ observed) 0.002 against 0.33): fails "≤ R3's + 3" (it passes ≤ 10). This is the deciding criterion.
     - w/m 0.865 (in range); no seed flagged; validation SNR R3a 22.87 against R3 22.70 dB (reported).
     - *Reading*: the same pattern as D-034's Muon + Adan head: a better fit on synthetic data (+0.17 dB) with nothing gained on real voices, here with a clear rise in f0 dependence. A faster optimiser seems to pick up the f0 cue more, which also fits D-037's observation that heads fitted gently on a frozen trunk are the least f0-dependent.
+- *5a replica check (2026-10-28, commit `a2528e4`)*: rA's exact command (D-031's `trunk rA`) rerun on the current code reproduces `d031_rA`'s log at steps 50 and 100 to every digit (loss 11.59790283203125 / 10.192691650390625, gradient norm 7.28676513671875 / 4.621672058105469). Stopped at step 100 (sharing the GPU with D-038). **`d031_rA_b20k` stands as 5a's seed 1**; only seed 2 is new.
 
 ## D-041 (2026-10-28, pre-registered): is D-031's Muon + Adan recipe less invariant than teacher v3's AdamW?
 
