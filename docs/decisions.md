@@ -1722,6 +1722,32 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
   - Dose response (reported): rB and rC are within noise of AdamW too, with no trend with the rate (rB's F1 follow 0.850, rC's 0.860), so the F1 follow dip is rA's seed or chance rather than a recipe effect. Item 5's seed replicate (5a seed 2) shows which.
   - *Reading*: the f0 cost of Muon + Adan is specific to small heads on frozen features (D-034, D-040's check), not to the whole model, whose features and heads train together. D-031's adoption stands; the VTL head keeps AdamW inside rA (D-040's check).
 
+## D-042 (2026-10-28, draft, not registered): is Adan too hot for a head on frozen features, or just worse?
+
+*On hold (Hannah, 2026-10-28 23:00): committed as a draft; it is registered and run only after roadmap item 8's low-effort probes (the bias triangulation: D-043, the inverse-filtering test, the domain discriminator). Its two checks before registering still apply.*
+
+Hannah: maybe Muon + Adan is not worse on frozen features, and R3a (D-040's optimiser check) only had too high a rate or too short a warm-up. R3a fitted synthetic data slightly better than AdamW (validation 22.87 against 22.70 dB) and was non-inferior on reliability; what failed was f0 dependence (probe excess +8.9 against +1.5 c/oct). Its rate, 1e-2, is rA's Adan group's (2e-3 × `rest_lr_scale` 5). That ratio was carried over from D-030's small model and scaled with Muon in D-031, never chosen for heads, and D-031 never scored f0 invariance. Frozen features also cannot adjust their scale to a head's rate as a trunk does. D-041 found no f0 cost of rA end to end, so the question is specific to heads on frozen features.
+
+- *Why not warm-up shape*: the usual reason for warm-up is the second-moment estimate's start-up, about 2 / (1 − β₂) steps (Ma & Yarats 2021). `adan_pytorch`'s second moment has β ≈ 0.99, with bias correction, so that is about 200 steps, and R3a had 300. A too-high peak would act through the whole constant phase, not the first few hundred steps. So the peak and the warm-up's length are tested; the warm-up's shape is a follow-up only if length matters (cosine and polynomial warm-ups act like a somewhat longer linear one; exponential is steepest near the peak, the opposite of what is wanted).
+- *Arms*: on `d036_arm3`'s frozen trunk (D-037's cache, its tube-crop train part), D-037's refit recipe (20,000 steps, cosine after warm-up, batch 32, seeds s0–s2), each arm one change from R3a:
+  - **R3** (AdamW 1e-3, wd 0.01, 300 warm-up) and **R3a** (Adan 1e-2, wd 0.007, 300 warm-up): D-040's existing seeds, reused unchanged.
+  - **Ad3**: Adan 3e-3, otherwise R3a.
+  - **Ad1**: Adan 1e-3, otherwise R3a.
+  - **AdW**: Adan 1e-2 with a 2,000-step linear warm-up, otherwise R3a.
+  - Weight decay stays 0.007 in every Adan arm, so the rate is the one change (the decay's span lengthens as the rate falls; D-031 found no effect of decay at full size).
+- *Measures*: D-040's check's, with `d037_score.py` (seed means): Hillenbrand dev reliability with the paired speaker bootstrap, w/m, within-speaker SD; probe excess over its shuffle null; validation SNR (paired clip bootstrap); overfitting flags. Each arm against R3, and the three new arms against R3a.
+- *Rule*: an arm **passes** under D-040's check's criteria against R3: reliability's paired lower bound above −0.02; probe excess ≤ R3's + 3 c/oct and ≤ 10; w/m in [0.85, 0.92]; no seed flagged. Then:
+  - Ad3 or Ad1 passes and AdW does not → **the peak rate**. The candidate is the passing arm with the higher rate (the smaller change from rA's group).
+  - AdW passes and neither lower peak does → **early-phase effect**. The warm-up's shape gets one follow-up arm (cosine over 2,000 steps), registered separately.
+  - Both kinds pass → the peak; AdW is reported.
+  - None passes → **Adan is worse for frozen heads at these rates**; route A stands, and the end-to-end follow-up in `considering.md` is dropped.
+- *Confirmation (exploratory sweep, so a winner is not trusted on its own seeds)*: the candidate and R3 rerun on fresh seeds s3–s5, scored the same way. A pass there is D-042's result; anything else is reported as not confirmed. Neither outcome changes D-040 (registered and running).
+- *Before registering*:
+  1. *Noise floor*: score R3's and R3a's seeds one by one (probe excess per seed), to check the 3 c/oct margin is above seed-to-seed noise. Today the probe is computed on seed means only, so it is unknown. If the noise is comparable, the margin or the number of seeds changes before registering.
+  2. *Code path*: `d037_head.py` takes `VA_LR` and `VA_WARM` (default to today's values, so R3 and R3a reproduce), and `d037_score.py` learns the new arms and pairs. A 1,000-step smoke run of AdW and Ad1.
+- *Cost*: 9 heads (3 arms × 3 seeds), about 20 min each, three at a time beside D-040; then 6 for the confirmation.
+- *Limits*: frozen features are not joint training, and these are VTL heads, not formant heads. Whether a lower head rate helps end to end is the conditional follow-up in `considering.md` ("Head rate inside rA").
+
 ## D-043 (2026-10-28, pre-registered): the closed-phase reference's own bias over real voices' conditions
 
 Hannah, after a discussion of the three "truths" (generator, reference, real): before attributing women's F1 overread to the models, measure the reference on audio whose resonances are known, across the conditions where the overread lives. D-026's render check did this at two points only (men f0 110, women f0 210; open quotient 0.5; complete closure): women +3.0 / −0.1 / +0.7 Hz, men +1.3 / +2.9 / +2.4 (with feedback), "unbiased on our physics". PTDB-TUG dev women's frames span f0 173–324 Hz (10th–90th percentile, median 220) and EGG open quotient 0.45–0.69 (median 0.57); men 91–147 Hz and 0.42–0.63. At high f0 and open quotient the closed phase is a few milliseconds, which is where covariance LPC has least data, and incomplete closure (a gap) leaves the subglottal coupling in the "closed" phase.
