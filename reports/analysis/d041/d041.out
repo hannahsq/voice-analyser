@@ -1,0 +1,57 @@
+D-041: models ['v3_s0', 'v3_s1', 'v3_s2', 'rA', 'rB', 'rC']; v3 seeds ['v3_s0', 'v3_s1', 'v3_s2']
+
+v3_s0: f0 |slope| F1-F4 (c/oct, median over tracts) 24.6 / 4.8 / 4.9 / 3.8; follow 0.850 / 0.987 / 0.990 / 0.935; drag 0.009 / 0.023 / 0.041 / 0.031
+
+v3_s1: f0 |slope| F1-F4 (c/oct, median over tracts) 23.4 / 8.7 / 3.9 / 4.1; follow 0.840 / 0.993 / 0.981 / 0.920; drag 0.011 / 0.025 / 0.038 / 0.031
+
+v3_s2: f0 |slope| F1-F4 (c/oct, median over tracts) 24.4 / 7.1 / 4.6 / 3.0; follow 0.843 / 0.990 / 0.981 / 0.927; drag 0.009 / 0.025 / 0.040 / 0.035
+
+rA: f0 |slope| F1-F4 (c/oct, median over tracts) 22.7 / 5.6 / 1.8 / 5.1; follow 0.784 / 0.983 / 0.985 / 0.948; drag 0.008 / 0.020 / 0.035 / 0.025
+
+rB: f0 |slope| F1-F4 (c/oct, median over tracts) 22.3 / 6.9 / 2.3 / 3.2; follow 0.850 / 0.990 / 0.984 / 0.926; drag 0.008 / 0.019 / 0.029 / 0.028
+
+rC: f0 |slope| F1-F4 (c/oct, median over tracts) 27.3 / 5.1 / 3.6 / 2.1; follow 0.860 / 0.982 / 0.982 / 0.951; drag 0.009 / 0.023 / 0.035 / 0.032
+
+rA - mean(v3), paired over tracts; [beyond every v3 seed]
+  F1 f0      -17.517 [-34.590, -3.597]  beyond all: False  bound +5.000
+  F1 follow   -0.036 [-0.081, +0.008]  beyond all: True  bound -0.050
+  F1 drag     -0.001 [-0.002, +0.001]  beyond all: False  bound +0.010
+  F2 f0       -1.353 [-3.766, +1.119]  beyond all: False  bound +5.000
+  F2 follow   +0.001 [-0.021, +0.023]  beyond all: False  bound -0.020
+  F2 drag     -0.000 [-0.011, +0.014]  beyond all: False  bound +0.010
+  F3 f0       -1.388 [-2.644, -0.026]  beyond all: False  bound +5.000
+  F3 follow   +0.010 [-0.008, +0.035]  beyond all: False  bound -0.020
+  F3 drag     +0.009 [-0.014, +0.047]  beyond all: True  bound +0.010
+  F4 f0       -0.271 [-1.194, +0.744]  beyond all: False  bound +5.000
+  F4 follow   -0.002 [-0.049, +0.029]  beyond all: False  bound -0.020
+  F4 drag     -0.017 [-0.036, -0.004]  beyond all: False  bound +0.010
+
+rB - mean(v3), paired over tracts; [beyond every v3 seed]
+  F1 f0       -5.806 [-17.539, +5.437]  beyond all: False  bound +5.000
+  F1 follow   +0.010 [-0.028, +0.049]  beyond all: False  bound -0.050
+  F1 drag     -0.001 [-0.003, +0.000]  beyond all: False  bound +0.010
+  F2 f0       +0.371 [-2.209, +3.090]  beyond all: False  bound +5.000
+  F2 follow   +0.003 [-0.013, +0.018]  beyond all: False  bound -0.020
+  F2 drag     -0.002 [-0.014, +0.014]  beyond all: False  bound +0.010
+  F3 f0       -1.044 [-1.908, -0.170]  beyond all: False  bound +5.000
+  F3 follow   +0.005 [-0.015, +0.033]  beyond all: False  bound -0.020
+  F3 drag     -0.010 [-0.020, -0.000]  beyond all: False  bound +0.010
+  F4 f0       -1.126 [-2.295, +0.190]  beyond all: False  bound +5.000
+  F4 follow   +0.002 [-0.013, +0.016]  beyond all: False  bound -0.020
+  F4 drag     +0.005 [-0.012, +0.027]  beyond all: False  bound +0.010
+
+rC - mean(v3), paired over tracts; [beyond every v3 seed]
+  F1 f0       -7.390 [-18.062, +1.570]  beyond all: False  bound +5.000
+  F1 follow   +0.029 [-0.008, +0.072]  beyond all: False  bound -0.050
+  F1 drag     -0.001 [-0.003, +0.001]  beyond all: False  bound +0.010
+  F2 f0       -0.811 [-3.385, +1.885]  beyond all: False  bound +5.000
+  F2 follow   +0.003 [-0.014, +0.020]  beyond all: False  bound -0.020
+  F2 drag     -0.005 [-0.015, +0.003]  beyond all: False  bound +0.010
+  F3 f0       +0.199 [-1.202, +1.709]  beyond all: False  bound +5.000
+  F3 follow   +0.001 [-0.021, +0.031]  beyond all: False  bound -0.020
+  F3 drag     +0.004 [-0.018, +0.038]  beyond all: False  bound +0.010
+  F4 f0       -1.118 [-2.085, -0.108]  beyond all: False  bound +5.000
+  F4 follow   +0.030 [+0.008, +0.054]  beyond all: False  bound -0.020
+  F4 drag     +0.019 [-0.005, +0.050]  beyond all: True  bound +0.010
+
+DECISION: rA is not less invariant than teacher v3's AdamW seeds
