@@ -90,6 +90,10 @@ class TrainConfig:
     # vtl_warmup steps from vtl_detach (the gate's opening, counted from the branch or from step 0), then the model's own
     # schedule's shape (held, then decayed with it), so a from-scratch head starts on a trunk past its warm-up.
     vtl_schedule: str = "cosine"
+    # D-040: the step the head's clock counts from. None: the branch point (decay_start, or 0), D-036's case, where the
+    # head is added at the branch. A head trained from step 0 sets 0, which a later decay branch keeps (branch_config
+    # copies it), so the branch neither restarts the head's warm-up nor closes its gate again.
+    vtl_start: int | None = None
     vtl_lr: float | None = None
     vtl_weight_decay: float | None = None
 
@@ -229,22 +233,26 @@ def _add_vtl_group(opt, params: list, cfg: TrainConfig) -> None:
         raise ValueError(f"unknown vtl_optimizer {cfg.vtl_optimizer!r}")
 
 
+def _vtl_origin(cfg: TrainConfig) -> int:
+    return cfg.vtl_start if cfg.vtl_start is not None else (cfg.decay_start or 0)
+
+
 def _vtl_lr(step: int, cfg: TrainConfig) -> float:
     """D-036: the VTL head's rate: linear warmup from the branch, then cosine to 0 at the run's end. D-040
     (vtl_schedule "model"): linear warm-up from the gate's opening, times the model's schedule shape."""
     if cfg.vtl_schedule == "model":
-        rel = step - (cfg.decay_start or 0) - cfg.vtl_detach
+        rel = step - _vtl_origin(cfg) - cfg.vtl_detach
         return 0.0 if rel < 0 else _lr(step, cfg) * min(1.0, (rel + 1) / cfg.vtl_warmup)
     if cfg.vtl_schedule != "cosine":
         raise ValueError(f"unknown vtl_schedule {cfg.vtl_schedule!r}")
-    rel, span = step - (cfg.decay_start or 0), cfg.steps - (cfg.decay_start or 0)
+    rel, span = step - _vtl_origin(cfg), cfg.steps - _vtl_origin(cfg)
     if rel < cfg.vtl_warmup:
         return cfg.lr * (rel + 1) / cfg.vtl_warmup
     return cfg.lr * 0.5 * (1 + math.cos(math.pi * min((rel - cfg.vtl_warmup) / max(1, span - cfg.vtl_warmup), 1.0)))
 
 
 def _vtl_gate(step: int, cfg: TrainConfig) -> float:
-    rel = step - (cfg.decay_start or 0) - cfg.vtl_detach
+    rel = step - _vtl_origin(cfg) - cfg.vtl_detach
     return 0.0 if rel < 0 else min(1.0, rel / max(1, cfg.vtl_gate_ramp))
 
 

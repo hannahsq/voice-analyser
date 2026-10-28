@@ -382,3 +382,22 @@ def test_vtl_model_schedule_from_scratch():
     assert abs(_vtl_lr(1000, cfg) - 0.002 / 300) < 1e-15 and _vtl_gate(1350, cfg) == 0.5
     assert _vtl_lr(1299, cfg) == _lr(1299, cfg) == 0.002 and _vtl_lr(15999, cfg) == 0.002 and _vtl_gate(1700, cfg) == 1.0
     assert all(_vtl_lr(s, cfg) == _lr(s, cfg) for s in (16500, 18000, 19999))
+
+
+def test_vtl_clock_survives_a_decay_branch(tmp_path):
+    """D-040: a head trained from step 0 (vtl_start 0) keeps its clock in the run's decay branch: no second warm-up, the
+    gate stays open, the rate follows the model's decay; D-036's branch-added head (vtl_start None) is unchanged."""
+    import json
+
+    from vocal_analysis.train.teacher import TrainConfig, _lr, _vtl_gate, _vtl_lr, branch_config
+
+    cfg = TrainConfig(steps=16000, warmup=1000, schedule="wsd", decay_steps=4000, lr=0.002, vtl="new", vtl_start=0,
+                      vtl_schedule="model", vtl_detach=1000, vtl_warmup=300, vtl_gate_ramp=700, out=str(tmp_path / "run"))
+    (tmp_path / "run").mkdir()
+    (tmp_path / "run" / "config.json").write_text(json.dumps({"train": cfg.__dict__}))
+    b = branch_config(tmp_path / "run", 16000, str(tmp_path / "b"), decay_steps=4000)
+    assert b.vtl_start == 0 and b.decay_start == 16000
+    assert _vtl_gate(16000, b) == 1.0 and _vtl_lr(16000, b) == _lr(16000, b) == 0.002
+    assert _vtl_lr(18000, b) == _lr(18000, b) < 0.002
+    d036 = TrainConfig(steps=20000, decay_start=16000, vtl="new", vtl_detach=300, vtl_warmup=300)
+    assert _vtl_gate(16299, d036) == 0.0 and _vtl_lr(16000, d036) == d036.lr / 300
