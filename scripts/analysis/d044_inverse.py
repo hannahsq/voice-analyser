@@ -16,7 +16,11 @@ optimum over both. At 10 kHz, as the reference.
 Stage 1 (`stage1 <out dir> [--smoke]`): D-043's renders (render D, both sizes, f0 100-330 Hz, every open quotient and
 gap, 10 vowels), true F2-F4 and bandwidths, instants from the glottal area; also F2-F4 moved by +3 % and -3 %. Five
 frames per render (0.3-0.7 s), median over frames. Writes d044_stage1.tsv and d044_stage1.txt (the registered gate).
-Stage 2 (real voices) is added only if stage 1 allows it.
+Stage 2 (`stage2 <out dir> [--smoke]`, R only: J failed stage 1): PTDB-TUG dev frames of cache/cp/ptdb_egg_sub.npz
+with a finite closed-phase F1 and teacher v3's F1; instants from the laryngograph as the reference; F2-F4 and their
+bandwidths from teacher v3 (rerun; its F1-F3 checked against the cache). Per frame F1_R and F1_R from odd and even
+cycles (the noise floor); signed differences teacher v3 - F1_R and reference - F1_R, medians by sex with a speaker
+bootstrap. Writes d044_stage2.tsv / .txt.
 """
 
 from __future__ import annotations
@@ -222,12 +226,122 @@ def gate(rows, path):
     print("\n".join(lines))
 
 
+TEACHER_V3 = Path("runs/conformer_v2r2_s1_d16k/ckpt_020000.pt")
+PTDB_ROOT = Path("data/ptdb_tug")
+CACHE = Path("cache/cp/ptdb_egg_sub.npz")
+
+
+def stage2_utt(job):
+    """R on one utterance's frames: job = (mic path, lar path, times, reference F1, F2-F4 and B2-B4 per frame)."""
+    import soundfile as sf
+    from scipy.signal import resample_poly
+
+    from vocal_analysis.eval import closed_phase as cp
+
+    mic, lar, times, ref, rest_f, rest_b = job
+    x, sr = sf.read(mic)
+    egg, _ = sf.read(lar)
+    x = resample_poly(x, FS_CP, sr)
+    eg = resample_poly(egg, FS_CP, sr)
+    x_pre = np.r_[x[0], np.diff(x)]
+    inst = cp.egg_instants(eg, FS_CP)
+    lag = cp.speech_lag(x, inst["gci"], FS_CP)
+    out = []
+    for t, r, rf, rb in zip(times, ref, rest_f, rest_b):
+        cyc = frame_cycles(inst, lag, t, len(x))
+        if len(cyc) < 2 or not np.all(np.isfinite(rf)) or not np.all(np.isfinite(rb)):
+            out.append((np.nan, np.nan, np.nan))
+            continue
+        f_all = best_f1(x_pre, x_pre, cyc, r, rf, rb)[0]
+        halves = [best_f1(x_pre, x_pre, cyc[k::2], r, rf, rb)[0] if len(cyc[k::2]) >= 2 else np.nan for k in (0, 1)]
+        out.append((f_all, *halves))
+    return out
+
+
+def stage2(out: Path, smoke: bool):
+    import torch
+
+    from vocal_analysis.eval.datasets import ptdb_tug as pt
+    from vocal_analysis.eval.tiers import load as load_tiers
+    from vocal_analysis.models.infer import analyse, load_teacher
+
+    z = np.load(CACHE, allow_pickle=True)
+    tiers = load_tiers()
+    keep = np.array([tiers.get("ptdb_tug:" + str(s)) == "dev" for s in z["speaker"]])
+    keep &= np.isfinite(z["cp"][:, 0]) & np.isfinite(z["conformer_v2r2_s1_d16k"][:, 0])
+    idx = np.flatnonzero(keep)
+    utts = list(dict.fromkeys(z["utt"][idx]))
+    if smoke:
+        utts = utts[:4]
+    paths = {Path(r.path).stem: PTDB_ROOT / r.path for r in pt.scan(PTDB_ROOT)}
+    dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model, _ = load_teacher(TEACHER_V3, dev)
+    jobs, rows_idx, max_dev = [], [], 0.0
+    import soundfile as sf
+    from scipy.signal import resample_poly
+
+    for u in utts:
+        mic = paths[u]
+        lar = Path(str(mic).replace("MIC", "LAR").replace("mic_", "lar_"))
+        ii = idx[z["utt"][idx] == u]
+        t = z["t"][ii]
+        x, sr = sf.read(mic)
+        res = analyse(model, resample_poly(x, 16000, sr).astype(np.float32), dev, 16000)
+        k = np.clip(np.round(t / 0.010).astype(int), 0, len(res["t"]) - 1)
+        fm, bw = res["formants"][k], res["bandwidths"][k]
+        max_dev = max(max_dev, float(np.nanmax(np.abs(fm[:, :3] - z["conformer_v2r2_s1_d16k"][ii]))))
+        jobs.append((str(mic), str(lar), t, z["cp"][ii, 0], fm[:, 1:4], bw[:, 1:4]))
+        rows_idx.append(ii)
+    del model
+    print(f"teacher v3 rerun on {len(utts)} utterances; largest F1-F3 difference from the cache {max_dev:.2f} Hz", flush=True)
+    from multiprocessing import Pool
+
+    t0 = time.time()
+    with Pool(12) as pool:
+        res = pool.map(stage2_utt, jobs, chunksize=1)
+    print(f"R on {sum(len(j[2]) for j in jobs)} frames in {time.time() - t0:.0f} s", flush=True)
+    ii = np.concatenate(rows_idx)
+    r = np.array([q for rr in res for q in rr], float)
+    tv3, ref = z["conformer_v2r2_s1_d16k"][ii, 0], z["cp"][ii, 0]
+    spk, sex = z["speaker"][ii], z["sex"][ii]
+    cols = "speaker sex utt t f0 cq ref_F1 tv3_F1 R_F1 R_F1_odd R_F1_even".split()
+    name = "d044_stage2_smoke" if smoke else "d044_stage2"
+    with open(out / f"{name}.tsv", "w") as f:
+        f.write("\t".join(cols) + "\n")
+        for j, q in enumerate(ii):
+            f.write("\t".join(map(str, (spk[j], sex[j], z["utt"][q], z["t"][q], z["f0"][q], z["cq"][q], ref[j], tv3[j], *r[j]))) + "\n")
+    rng = np.random.default_rng(0)
+    lines = [f"D-044 stage 2 (R only), PTDB-TUG dev; teacher v3 F1-F3 rerun max difference from the cache {max_dev:.2f} Hz",
+             "Medians over frames (Hz), speaker bootstrap 95 % (2,000).", ""]
+
+    def boot(d, s):
+        ok = np.isfinite(d)
+        d, s = d[ok], s[ok]
+        if not len(d):
+            return "n/a (no frames)"
+        us = np.unique(s)
+        by = {u: d[s == u] for u in us}
+        bs = [np.median(np.concatenate([by[u] for u in rng.choice(us, len(us))])) for _ in range(2000)]
+        return f"{np.median(d):+6.1f} [{np.percentile(bs, 2.5):+5.1f}, {np.percentile(bs, 97.5):+5.1f}] ({ok.sum()} frames, {len(us)} speakers)"
+
+    for sx, label in (("f", "women"), ("m", "men")):
+        m = sex == sx
+        lines.append(f"{label}: teacher v3 - F1_R {boot((tv3 - r[:, 0])[m], spk[m])}")
+        lines.append(f"{label}: reference  - F1_R {boot((ref - r[:, 0])[m], spk[m])}")
+        lines.append(f"{label}: teacher v3 - reference {boot((tv3 - ref)[m], spk[m])}")
+        nd = (r[:, 1] - r[:, 2])[m]
+        lines.append(f"{label}: noise floor, F1_R odd - even cycles: SD {np.nanstd(nd):.1f} Hz, median |.| {np.nanmedian(np.abs(nd)):.1f} Hz")
+        lines.append(f"{label}: frames without F1_R: {np.mean(~np.isfinite(r[m, 0])):.1%}")
+    Path(out / f"{name}.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("\n".join(lines))
+
+
 def main():
-    if len(sys.argv) < 3 or sys.argv[1] != "stage1":
+    if len(sys.argv) < 3 or sys.argv[1] not in ("stage1", "stage2"):
         sys.exit(__doc__)
     out = Path(sys.argv[2])
     out.mkdir(parents=True, exist_ok=True)
-    stage1(out, "--smoke" in sys.argv)
+    (stage1 if sys.argv[1] == "stage1" else stage2)(out, "--smoke" in sys.argv)
 
 
 if __name__ == "__main__":

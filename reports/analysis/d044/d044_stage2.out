@@ -1,0 +1,24 @@
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 83635200, provided ptr: 0000000000000000 size: 0
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 83635200, provided ptr: 0000000000000000 size: 0
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 41932800, provided ptr: 0000000000000000 size: 0
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 125452800, provided ptr: 0000000000000000 size: 0
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 125452800, provided ptr: 0000000000000000 size: 0
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 125798400, provided ptr: 0000000000000000 size: 0
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 125798400, provided ptr: 0000000000000000 size: 0
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 125798400, provided ptr: 0000000000000000 size: 0
+MIOpen: Warning [IsEnoughWorkspace] [EvaluateInvokers] Solver <GemmFwdRest>, workspace required: 83865600, provided ptr: 0000000000000000 size: 0
+teacher v3 rerun on 474 utterances; largest F1-F3 difference from the cache 0.00 Hz
+R on 7743 frames in 3742 s
+D-044 stage 2 (R only), PTDB-TUG dev; teacher v3 F1-F3 rerun max difference from the cache 0.00 Hz
+Medians over frames (Hz), speaker bootstrap 95 % (2,000).
+
+women: teacher v3 - F1_R   +1.9 [ -2.3,  +6.4] (3867 frames, 6 speakers)
+women: reference  - F1_R   -2.4 [ -3.2,  +0.0] (3867 frames, 6 speakers)
+women: teacher v3 - reference   +6.2 [ +2.5, +10.8] (3867 frames, 6 speakers)
+women: noise floor, F1_R odd - even cycles: SD 49.1 Hz, median |.| 11.8 Hz
+women: frames without F1_R: 0.0%
+men: teacher v3 - F1_R   +5.2 [ +1.6,  +9.0] (3876 frames, 6 speakers)
+men: reference  - F1_R   +0.0 [ +0.0,  +0.0] (3876 frames, 6 speakers)
+men: teacher v3 - reference   +6.6 [ +3.2, +10.0] (3876 frames, 6 speakers)
+men: noise floor, F1_R odd - even cycles: SD 18.5 Hz, median |.| 6.5 Hz
+men: frames without F1_R: 0.0%

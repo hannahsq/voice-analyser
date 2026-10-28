@@ -1,0 +1,79 @@
+1080 renders in 35 s
+D-046 stage 1 (1080 renders): median over renders of the per-render median error (Hz); coverage = mean share of frames
+SEDREAMS identification rate (+-0.5 ms): median 1.000, min 0.000
+
+cp      cov 1.00  F1   +3.2 (|.|   9.0)  F2   +6.2 (|.|   8.2)  F3   +7.3 (|.|   8.7)
+A@8     cov 1.00  F1  +12.9 (|.|  20.6)  F2  +10.5 (|.|  25.2)  F3  +13.3 (|.|  49.4)
+B@8     cov 1.00  F1   +1.0 (|.|   9.8)  F2   -1.1 (|.|  14.8)  F3   -1.5 (|.|  24.2)
+B@10    cov 1.00  F1   +2.3 (|.|   9.2)  F2   +0.8 (|.|  11.2)  F3   +0.8 (|.|  18.1)
+B@16    cov 1.00  F1   +2.2 (|.|   7.5)  F2   +2.3 (|.|   7.7)  F3   +7.2 (|.|  14.4)
+BI@8    cov 1.00  F1   +1.6 (|.|  10.7)  F2   +0.3 (|.|  15.7)  F3   +1.4 (|.|  31.2)
+BI@10   cov 1.00  F1   +2.1 (|.|   9.9)  F2   +1.7 (|.|  13.3)  F3   +3.2 (|.|  23.6)
+BI@16   cov 1.00  F1   +2.2 (|.|   8.6)  F2   +3.5 (|.|   9.0)  F3  +10.2 (|.|  16.9)
+qB@8    cov 1.00  F1   -0.0 (|.|  20.9)  F2   -7.1 (|.|  41.0)  F3 -438.5 (|.| 438.5)
+D-046 stage 1 gate (registered criteria; arm B candidates, arm A and variants reported)
+
+SEDREAMS identification rate: mean 0.994; f0 100: 1.000 f0 140: 1.000 f0 180: 1.000 f0 220: 1.000 f0 270: 0.994 f0 330: 0.970
+GCI gate (mean >= 0.95): passes
+
+[A@8]
+  1 bias: women's region F1 +16.6, men's +10.3 (within +-4): False
+  2 gap 0.10: F1 +20.3 vs reference +8.8 + half-width 6.0: False
+  2 OQ 0.70: F1 +29.0 vs reference +12.1 + half-width 9.7: False
+  3 F2: +13.7 vs reference +6.5 + half-width 2.6: False
+  3 F3: +13.7 vs reference +7.5 + half-width 1.1: False
+  4 precision: paired |A@8| - |reference| F1 median +10.3, upper bound +15.7 <= reference half-width 3.1: False
+  5 coverage 1.00 (>= 0.90): True
+  women's-region median |F1 error| 23.7; PASSES: False
+
+[B@8]
+  1 bias: women's region F1 +2.1, men's +0.1 (within +-4): True
+  2 gap 0.10: F1 +4.5 vs reference +8.8 + half-width 6.0: True
+  2 OQ 0.70: F1 +11.9 vs reference +12.1 + half-width 9.9: True
+  3 F2: -6.9 vs reference +6.5 + half-width 2.5: True
+  3 F3: -17.1 vs reference +7.5 + half-width 1.1: False
+  4 precision: paired |B@8| - |reference| F1 median +1.4, upper bound +4.7 <= reference half-width 3.3: False
+  5 coverage 1.00 (>= 0.90): True
+  women's-region median |F1 error| 13.5; PASSES: False
+
+[B@10]
+  1 bias: women's region F1 +3.6, men's -0.0 (within +-4): True
+  2 gap 0.10: F1 +6.4 vs reference +8.8 + half-width 5.7: True
+  2 OQ 0.70: F1 +12.0 vs reference +12.1 + half-width 9.8: True
+  3 F2: -0.2 vs reference +6.5 + half-width 2.6: True
+  3 F3: +3.9 vs reference +7.5 + half-width 1.1: True
+  4 precision: paired |B@10| - |reference| F1 median +1.4, upper bound +4.0 <= reference half-width 3.1: False
+  5 coverage 1.00 (>= 0.90): True
+  women's-region median |F1 error| 11.3; PASSES: False
+
+[B@16]
+  1 bias: women's region F1 +3.1, men's +0.8 (within +-4): True
+  2 gap 0.10: F1 +6.6 vs reference +8.8 + half-width 5.9: True
+  2 OQ 0.70: F1 +11.8 vs reference +12.1 + half-width 9.7: True
+  3 F2: +3.6 vs reference +6.5 + half-width 2.6: True
+  3 F3: +10.1 vs reference +7.5 + half-width 1.1: False
+  4 precision: paired |B@16| - |reference| F1 median +0.1, upper bound +1.6 <= reference half-width 3.2: True
+  5 coverage 1.00 (>= 0.90): True
+  women's-region median |F1 error| 10.6; PASSES: False
+
+[BI@8]
+  1 bias: women's region F1 +5.1, men's -0.2 (within +-4): False
+  2 gap 0.10: F1 +6.6 vs reference +8.8 + half-width 5.9: True
+  2 OQ 0.70: F1 +5.1 vs reference +12.1 + half-width 9.5: True
+  3 F2: +0.6 vs reference +6.5 + half-width 2.6: True
+  3 F3: +10.9 vs reference +7.5 + half-width 1.1: False
+  4 precision: paired |BI@8| - |reference| F1 median +2.2, upper bound +3.9 <= reference half-width 3.3: False
+  5 coverage 1.00 (>= 0.90): True
+  women's-region median |F1 error| 12.3; PASSES: False
+
+[qB@8]
+  1 bias: women's region F1 -29.0, men's +0.3 (within +-4): False
+  2 gap 0.10: F1 -24.8 vs reference +8.8 + half-width 5.7: False
+  2 OQ 0.70: F1 -1.6 vs reference +12.1 + half-width 9.6: True
+  3 F2: -258.1 vs reference +6.5 + half-width 2.6: False
+  3 F3: -1150.5 vs reference +7.5 + half-width 1.1: False
+  4 precision: paired |qB@8| - |reference| F1 median +36.9, upper bound +78.9 <= reference half-width 3.1: False
+  5 coverage 1.00 (>= 0.90): True
+  women's-region median |F1 error| 53.9; PASSES: False
+
+Arm B passing rates: none; chosen: none (the 8 kHz candidate did not pass)
