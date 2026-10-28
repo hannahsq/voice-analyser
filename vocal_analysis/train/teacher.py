@@ -323,11 +323,13 @@ def cache_batches(loader, vq, device) -> list:
 
 
 def evaluate(model, batches, device) -> dict:
-    """Synthetic validation (cache_batches): formant MAE / DR(20 %, 200 Hz), f0 RPA, voicing accuracy, by f0 band."""
+    """Synthetic validation (cache_batches): formant MAE / DR(20 %, 200 Hz), f0 RPA, voicing accuracy, by f0 band; the
+    VTL head (D-036) against its label where both exist."""
     import torch
 
     model.eval()
-    rows = {"fm_err": [], "fm_ref": [], "f0_c": [], "voiced_ok": [], "f0_ref": [], "son": [], "obs_p": [], "obs": []}
+    rows = {"fm_err": [], "fm_ref": [], "f0_c": [], "voiced_ok": [], "f0_ref": [], "son": [], "obs_p": [], "obs": [],
+            "vtl_mu": [], "vtl_lv": [], "vtl": []}
     with torch.inference_mode():
         for lp, lab in batches:
             with torch.autocast(device.type, dtype=torch.bfloat16):
@@ -348,6 +350,10 @@ def evaluate(model, batches, device) -> dict:
             if "obs_logit" in out and "obs" in lab:
                 rows["obs_p"].append(torch.sigmoid(out["obs_logit"].float()).cpu().numpy())
                 rows["obs"].append(lab["obs"].cpu().numpy())
+            if "vtl_mu" in out and "vtl" in lab:
+                rows["vtl_mu"].append(out["vtl_mu"].float().cpu().numpy())
+                rows["vtl_lv"].append(out["vtl_logvar"].float().clamp(-12, 4).cpu().numpy())  # as the loss clamps it
+                rows["vtl"].append(lab["vtl"].cpu().numpy())
     model.train()
     rows = {k: v for k, v in rows.items() if v}
     cat = {k: np.concatenate([r.reshape(-1, *r.shape[2:]) for r in v]) for k, v in rows.items()}
@@ -376,6 +382,17 @@ def evaluate(model, batches, device) -> dict:
             if ok.sum() > 1:
                 res[f"F{n + 1}_obs_mae"] = float(np.mean(np.abs(op[ok, n] - ol[ok, n])))
                 res[f"F{n + 1}_obs_rho"] = float(spearmanr(op[ok, n], ol[ok, n])[0])
+    if "vtl" in cat:  # D-036 head, log2 cm, on sonorant frames with a label (tube clips whose length was not drawn from f0)
+        y = cat["vtl"]
+        ok = son & np.isfinite(y)
+        if ok.any():
+            mu, lv, y = cat["vtl_mu"][ok], cat["vtl_lv"][ok], y[ok]
+            ratio = np.exp2(mu - y)
+            res["vtl_mae_pct"] = float(100 * np.mean(np.abs(ratio - 1)))
+            res["vtl_bias_pct"] = float(100 * (np.exp2(np.median(mu - y)) - 1))
+            res["vtl_nll"] = float(np.mean(0.5 * (lv + (y - mu) ** 2 / np.exp(lv))))  # the training loss's form
+            res["vtl_cover1"] = float(np.mean(np.abs(mu - y) <= np.exp(lv / 2)))  # ideal 0.683
+            res["vtl_frames"] = int(ok.sum())
     return res
 
 
@@ -512,8 +529,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         loader = DataLoader(ds, batch_sampler=batches, **common)
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True, observability=obs)
-    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True, observability=obs)
+    # vtl only adds the label (no random draws), so the crops stay those of runs before it was passed
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True, observability=obs, vtl=vtl)
+    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True, observability=obs, vtl=vtl)
     resynth_val = {}
     for d in cfg.resynth_val:
         rflat = consolidate(d, log=log)
@@ -582,7 +600,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                        "audio_s_per_s": seen / 100 / dt, "time": time.time()}
                 logf.write(json.dumps(rec) + "\n")
                 logf.flush()
-                log(f"step {step} loss {rec['loss']:.3f} (f0 {rec['f0']:.2f} F {rec['formants']:.2f} bw {rec['bandwidth']:.2f}) "
+                vtl_part = f" vtl {rec['vtl']:.2f}" if "vtl" in rec else ""
+                log(f"step {step} loss {rec['loss']:.3f} (f0 {rec['f0']:.2f} F {rec['formants']:.2f} bw {rec['bandwidth']:.2f}{vtl_part}) "
                     f"{rec['audio_s_per_s']:.0f} s/s")
                 acc, t0, seen = {}, time.time(), 0
             if step % cfg.ckpt_every == 0 or step == cfg.steps:
