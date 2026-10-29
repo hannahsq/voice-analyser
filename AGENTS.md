@@ -5,7 +5,7 @@ A voice analyser: f0, voicing, formants F1–F4 with bandwidths, and related mea
 ## Layout
 
 - `vocal_analysis/`: `synth/` (synthesiser, channel model, codecs), `resynth/` (resynthesis of real recordings), `train/` (teacher training, data loading), `models/` (teacher, inference), `eval/` (metrics, gold-set loaders, tiers), `baselines/`, `backend/`, `features/` (VQT), `cli.py`.
-- `docs/decisions.md`: the decision log (D-xxx). **Read the relevant entries before changing anything they cover.** `docs/roadmap.md` lists what's next; `docs/considering.md` holds unscheduled ideas; `docs/models.md` is the model register.
+- `docs/decisions.md`: the decision log (D-xxx). **Read the relevant entries before changing anything they cover.** `docs/roadmap.md` lists what's next; `docs/considering.md` holds unscheduled ideas; `docs/models.md` is the model register. `docs/f1_bias_register.md` indexes everything tried for the women's F1 overread; add a row when an entry tests a cause or fix.
 - `scripts/analysis/`: one-off analyses and decision scripts; `scripts/analysis/chains/` holds the GPU job chains.
 - `scripts/parakeet/`: the Parakeet probe, student distillation (D-033, D-034) and VTL probe scripts (D-035; the MRI midline scripts moved to the private repo `vtl-mri` on 2026-10-28); merged from the `parakeet-probe` worktree. They read `cache/` (feature and label caches) and `external_models/` (Parakeet weights), both uncommitted; `pip install -e .[parakeet]`.
 - `reports/`: committed results (`reports/suite/` for whole-suite reports, `reports/analysis/` per study). `runs/`, `data/` and caches are not committed.
