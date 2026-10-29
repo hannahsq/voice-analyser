@@ -97,7 +97,7 @@ def _warp(src: dict, r: float, n_new: int) -> dict:
 
 
 def render(item: Item, alpha: float = 1.0, r: float = 1.0) -> tuple[np.ndarray, dict]:
-    """-> (audio, labels): labels hold the exact formants (T, N), the frames that are pure re-filtered signal
+    """-> (audio, labels): labels hold the exact formants and bandwidths (T, N), the frames that are pure re-filtered signal
     (`scored`), and the voicing and f0 carried over from the tracker (f0 times r)."""
     source, audio, src = item.source, item.audio, item.src
     if r != 1.0:
@@ -119,7 +119,7 @@ def render(item: Item, alpha: float = 1.0, r: float = 1.0) -> tuple[np.ndarray, 
     y = ws * y + (1 - ws) * audio
     full = np.array([on[i * HOP : (i + 1) * HOP].all() if i * HOP < len(on) else False for i in range(n_frames)])
     peak = np.max(np.abs(y))
-    labels = {"formants": p["formants"], "scored": son & full, "voiced": src["voiced"], "f0": src["f0"]}
+    labels = {"formants": p["formants"], "bandwidths": p["bandwidths"], "scored": son & full, "voiced": src["voiced"], "f0": src["f0"]}
     return (y / peak * 0.9 if peak > 0 else y).astype(np.float32), labels
 
 
