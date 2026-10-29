@@ -3,7 +3,7 @@
     python -m vocal_analysis.eval.probes.run render <probe> [--per-group 6]
     python -m vocal_analysis.eval.probes.run score <probe> <ckpt> [<ckpt> ...]   ($VA_DEVICE=cuda)
 
-Probes: counterfactual (1: length, f0), bandwidth (7), polezero (8), chain (9), articulation (10). Renders are cached under
+Probes: counterfactual (1: length, f0), shift (2), bandwidth (7), polezero (8), chain (9), articulation (10). Renders are cached under
 data/probes/<probe>_v1/ so every model hears identical audio; scores go to reports/probes/<probe>/<run>.{txt,json}.
 
 Each condition is a dict with its arm and settings. "Slope" arms vary one factor (alpha, r, bw): every output's
@@ -37,6 +37,8 @@ PROBES = {
     "chain": [REF] + [{"arm": "gain", "chain": ("gain", g)} for g in (0.1, 0.5, 2.0)]
              + [{"arm": "dc", "chain": ("dc", 0.05)}, {"arm": "clip", "chain": ("clip", 0.5)},
                 {"arm": "resample", "chain": ("resample", 44100)}],
+    # probe 2: one formant moved alone (D-038's factors), on the real source
+    "shift": [REF] + [{"arm": f"shiftF{k + 1}", "shift": (k, s)} for k in range(4) for s in (0.9, 0.95, 1.05, 1.1)],
     # probe 10: synthetic tube clips; larynx (pg) and lip (pm) changes held fixed, cm at Story's size
     "articulation": [REF] + [{"arm": "larynx", "pg": v} for v in (-0.4, -0.2, 0.2, 0.4)]
                     + [{"arm": "lips", "pm": v} for v in (-0.25, 0.4, 0.8)],
@@ -47,6 +49,7 @@ SLOPE_ARMS = {"length": "alpha", "f0": "r", "bw": "bw", "larynx": "label", "lips
 # follow the prior, which depends on the formants and f0); elsewhere against the arm's factor. In the f0 arm the
 # formant labels move only by the time-warp's rounding (<= 0.004 octave), which must not become the x of a slope
 LABEL_X = {"length": "FB", "f0": "B", "bw": "B", "larynx": "FB", "lips": "FB"}
+SHIFT_ARMS = {f"shiftF{k}": f"F{k}" for k in range(1, 5)}  # probe 2: the moved formant
 # ideal slope per arm: formants / bandwidths against the labels' change, VTL and f0 against log2 of the factor
 IDEAL = {"length": {"F": 1.0, "B": 1.0, "VTL": 1.0, "VTLi": 1.0, "f0": 0.0},
          "f0": {"F": 0.0, "B": 1.0, "VTL": 0.0, "VTLi": 0.0, "f0": 1.0},
@@ -113,7 +116,8 @@ def render_probe(probe: str, per_group: int = 6, log=print) -> Path:
                     lab = ref_lab | {"formants": np.full_like(ref_lab["formants"], np.nan),
                                      "bandwidths": np.full_like(ref_lab["bandwidths"], np.nan)}
                 else:
-                    y, lab = cf.render(it, cd.get("alpha", 1.0), cd.get("r", 1.0), cd.get("bw", 1.0), cd.get("extras"))
+                    y, lab = cf.render(it, cd.get("alpha", 1.0), cd.get("r", 1.0), cd.get("bw", 1.0), cd.get("extras"),
+                                       tuple(cd["shift"]) if "shift" in cd else None)
                 arrays[f"audio_{c}"], arrays[f"scored_{c}"], arrays[f"voiced_{c}"] = y, lab["scored"], lab["voiced"]
                 arrays[f"label_formants_{c}"] = lab["formants"][:, :4].astype(np.float32)
                 arrays[f"label_bandwidths_{c}"] = lab["bandwidths"][:, :4].astype(np.float32)
@@ -188,13 +192,16 @@ def analyse_probe(res: dict) -> dict:
     arms = list(dict.fromkeys(c["arm"] for c in conds if c["arm"] != "ref"))
     for arm in arms:
         cols = [0] + [c for c, cd in enumerate(conds) if cd["arm"] == arm]
-        if arm in SLOPE_ARMS:
-            if SLOPE_ARMS[arm] == "label":  # probe 10: per item, the instantaneous length label's own change
+        if arm in SLOPE_ARMS or arm in SHIFT_ARMS:
+            if arm in SHIFT_ARMS:  # probe 2: x is the moved formant's own label change, for every output
+                moved = int(SHIFT_ARMS[arm][1]) - 1
+                factor = L[:, cols, moved] - L[:, [0], moved]
+            elif SLOPE_ARMS[arm] == "label":  # probe 10: per item, the instantaneous length label's own change
                 factor = res["LI"][:, cols] - res["LI"][:, [0]]
             else:
                 factor = np.log2([conds[c].get(SLOPE_ARMS[arm], 1.0) for c in cols])
             subsets = [("all", np.ones(len(beta), bool))]
-            if (np.abs(beta) >= cf.SMALL_BETA).any():
+            if (np.abs(beta) >= cf.SMALL_BETA).any():  # nan beta (synthetic) never qualifies
                 subsets.append(("small_beta", np.abs(beta) < cf.SMALL_BETA))
             for subset, keep in subsets:
                 for o in OUTPUTS:
@@ -202,13 +209,14 @@ def analyse_probe(res: dict) -> dict:
                     if not np.isfinite(y).any():
                         continue
                     kind = o if o in ("VTL", "VTLi", "f0") else o[0]
-                    if kind in ("F", "B") and kind in LABEL_X[arm]:
+                    if kind in ("F", "B") and kind in LABEL_X.get(arm, ""):
                         lab = (L if kind == "F" else LB)[keep][:, cols, int(o[1]) - 1]
                         x = lab - lab[:, [0]]
                     else:
                         x = _x(factor, keep, y.shape)
                     s = M.summarise_slopes(y, x, groups[keep])
-                    out[f"{arm}/{subset}/{o}"] = s.__dict__ | {"ideal": IDEAL[arm][kind]}
+                    ideal = (1.0 if o == SHIFT_ARMS[arm] else 0.0) if arm in SHIFT_ARMS else IDEAL[arm][kind]
+                    out[f"{arm}/{subset}/{o}"] = s.__dict__ | {"ideal": ideal}
         else:  # change against the reference: ideal 0 for every output
             for o in OUTPUTS:
                 d = Y[o][:, cols[1]] - Y[o][:, 0]

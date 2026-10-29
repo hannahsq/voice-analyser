@@ -33,6 +33,7 @@ ALPHAS = (0.85, 0.92, 1.0, 1.09, 1.18)
 RATIOS = (0.84, 0.92, 1.0, 1.09, 1.19)
 CLIP_S = (3.0, 6.0)
 SMALL_BETA = 0.2
+SHIFT_MIN_RATIO = 1.10  # D-038: a moved formant stays at least this ratio from its neighbours
 SRC_KEYS = ("f0", "voiced", "sonorant", "tracks", "tract_left")
 
 
@@ -98,12 +99,15 @@ def _warp(src: dict, r: float, n_new: int) -> dict:
             "tracks": tracks, "tract_left": src["tract_left"][near]}
 
 
-def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extras: str | None = None) -> tuple[np.ndarray, dict]:
+def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extras: str | None = None,
+           shift: tuple[int, float] | None = None) -> tuple[np.ndarray, dict]:
     """-> (audio, labels): labels hold the exact formants and bandwidths (T, N), the frames that are pure re-filtered signal
     (`scored`), and the voicing and f0 carried over from the tracker (f0 times r).
 
     bw scales every bandwidth (probe 7). extras ("nasal" or "subglottal", probe 8) adds that pole-zero pair set, drawn
-    from the training distribution (`synth.tract.sample_extras`) with a seed fixed per item; extras are not labels."""
+    from the training distribution (`synth.tract.sample_extras`) with a seed fixed per item; extras are not labels.
+    shift (n, factor) moves formant n (0-based) alone by factor (probe 2); frames where it comes within
+    SHIFT_MIN_RATIO of a neighbour are left out of `scored` (as D-038's synthetic probe)."""
     source, audio, src = item.source, item.audio, item.src
     if r != 1.0:
         fr = Fraction(r).limit_denominator(50)
@@ -119,6 +123,18 @@ def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extr
         rng = np.random.default_rng(zlib.crc32(item.key.encode()))
         p["extras"] = tract.sample_extras(rng, p["info"]["apparent_length_cm"], p_nasal=float(extras == "nasal"),
                                           p_subglottal=float(extras == "subglottal"))
+    crowded = np.zeros(n_frames, bool)
+    if shift is not None:
+        k, factor = shift
+        f = p["formants"].copy()
+        f[:, k] *= factor
+        with np.errstate(invalid="ignore"):
+            if k > 0:
+                crowded |= f[:, k] < f[:, k - 1] * SHIFT_MIN_RATIO
+            if k + 1 < f.shape[1]:
+                crowded |= f[:, k + 1] < f[:, k] * SHIFT_MIN_RATIO
+        f[:, k] = np.where(crowded, p["formants"][:, k], f[:, k])  # never cross a neighbour
+        p["formants"] = f
     y = refilter(source, p["formants"], p["bandwidths"], p["extras"])
     son = src["sonorant"]
     ws = _ramp_mask(son, len(y), int(0.02 * FS))
@@ -128,7 +144,7 @@ def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extr
     y = ws * y + (1 - ws) * audio
     full = np.array([on[i * HOP : (i + 1) * HOP].all() if i * HOP < len(on) else False for i in range(n_frames)])
     peak = np.max(np.abs(y))
-    labels = {"formants": p["formants"], "bandwidths": p["bandwidths"], "scored": son & full, "voiced": src["voiced"], "f0": src["f0"]}
+    labels = {"formants": p["formants"], "bandwidths": p["bandwidths"], "scored": son & full & ~crowded, "voiced": src["voiced"], "f0": src["f0"]}
     return (y / peak * 0.9 if peak > 0 else y).astype(np.float32), labels
 
 
