@@ -1,0 +1,60 @@
+
+[d040_5b_s1_b20k] synthetic per-clip median |error| (c): tube, not from f0 10  cascade, not from f0 50  length from f0 21; coverage frames 0.80 / 0.98
+[d040_5b_s1_b20k] probe: median |slope| f0 <= 250 Hz 9.5 c/oct; shuffle null median 9.0 (95 % 12.6); excess +0.5; P(null >= obs) 0.404; vowel spread 21 c; bias by length 13: +10  15.5: +9  18: -11
+
+[d040_5b_s2_b20k] synthetic per-clip median |error| (c): tube, not from f0 12  cascade, not from f0 47  length from f0 24; coverage frames 0.79 / 0.99
+[d040_5b_s2_b20k] probe: median |slope| f0 <= 250 Hz 9.1 c/oct; shuffle null median 8.4 (95 % 11.4); excess +0.7; P(null >= obs) 0.356; vowel spread 18 c; bias by length 13: +15  15.5: +17  18: -10
+
+Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
+  reliability
+    d040_5b_s1_b20k                 0.228 [   0.167,    0.274]
+    d040_5b_s2_b20k                 0.261 [   0.203,    0.303]
+    A                               0.153 [   0.104,    0.197]
+  rel men
+    d040_5b_s1_b20k                 0.254 [   0.160,    0.332]
+    d040_5b_s2_b20k                 0.328 [   0.233,    0.402]
+    A                               0.170 [   0.089,    0.257]
+  rel women
+    d040_5b_s1_b20k                 0.201 [   0.133,    0.258]
+    d040_5b_s2_b20k                 0.194 [   0.135,    0.244]
+    A                               0.135 [   0.089,    0.173]
+  w/m
+    d040_5b_s1_b20k                 0.869 [   0.844,    0.900]
+    d040_5b_s2_b20k                 0.860 [   0.844,    0.890]
+    A                               0.863 [   0.849,    0.891]
+  within SD c
+    d040_5b_s1_b20k               119.030 [ 113.238,  125.074]
+    d040_5b_s2_b20k               110.776 [ 105.453,  116.273]
+    A                             155.816 [ 149.790,  161.740]
+  men cm
+    d040_5b_s1_b20k                17.015 [  16.514,   17.347]
+    d040_5b_s2_b20k                17.316 [  16.824,   17.524]
+    A                              17.837 [  17.431,   18.062]
+  women cm
+    d040_5b_s1_b20k                14.782 [  14.542,   15.078]
+    d040_5b_s2_b20k                14.900 [  14.638,   15.138]
+    A                              15.390 [  15.248,   15.657]
+  children cm
+    d040_5b_s1_b20k                13.869 [  13.721,   14.218]
+    d040_5b_s2_b20k                13.986 [  13.642,   14.232]
+    A                              14.679 [  14.421,   15.035]
+  r(len, f0) in sex
+    d040_5b_s1_b20k                -0.399 [  -0.629,   -0.141]
+    d040_5b_s2_b20k                -0.417 [  -0.662,   -0.138]
+    A                              -0.347 [  -0.575,   -0.090]
+
+Paired differences (speaker bootstrap)
+  d040_5b_s1_b20k - A                          reliability    +0.075 [  +0.036,   +0.113]
+  d040_5b_s1_b20k - A                          w/m            +0.006 [  -0.025,   +0.023]
+  d040_5b_s1_b20k - A                          within SD c   -36.786 [ -41.793,  -31.907]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            reliability    -0.034 [  -0.060,   -0.003]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            w/m            +0.008 [  -0.011,   +0.021]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            within SD c    +8.253 [  +5.404,  +11.180]
+  d040_5b_s2_b20k - A                          reliability    +0.109 [  +0.061,   +0.150]
+  d040_5b_s2_b20k - A                          w/m            -0.002 [  -0.029,   +0.017]
+  d040_5b_s2_b20k - A                          within SD c   -45.040 [ -48.680,  -41.187]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            reliability    +0.034 [  +0.003,   +0.060]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            w/m            -0.008 [  -0.021,   +0.011]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            within SD c    -8.253 [ -11.180,   -5.404]
+
+Seed mean 5b (d040_5b_s1_b20k + d040_5b_s2_b20k): reliability - A +0.092 [+0.050, +0.130]; w/m 0.865; probe excess +0.6 c/oct
