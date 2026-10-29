@@ -1666,7 +1666,7 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
 
 ## D-040 (2026-10-28, pre-registered): roadmap items 5a and 5b, the full-size control and the joint VTL head from scratch
 
-*Status*: **decided 2026-10-29: 5b (rA + joint VTL head) is teacher v3.1** (seed to choose; see *Result*). **Registered with Hannah's agreement (2026-10-28), before any 5a or 5b run**. Seen beforehand: the head-optimiser check, D-041, the replica check and a 60-step smoke run of the 5b command (none of them a 5b result). The registered form is the *Registered* bullet at the end of this entry. Item 5 is split so each addition has its own control (Hannah, 2026-10-28). If D-038 adopts a VTL → formants cascade, it is a further arm on top of 5b, in its own entry (one change at a time).
+*Status*: **decided 2026-10-29: 5b (rA + joint VTL head) is teacher v3.1** (seed 2, `d040_5b_s2_b20k`, Hannah 2026-10-29; tag `teacher-v3.1`). **Registered with Hannah's agreement (2026-10-28), before any 5a or 5b run**. Seen beforehand: the head-optimiser check, D-041, the replica check and a 60-step smoke run of the 5b command (none of them a 5b result). The registered form is the *Registered* bullet at the end of this entry. Item 5 is split so each addition has its own control (Hannah, 2026-10-28). If D-038 adopts a VTL → formants cascade, it is a further arm on top of 5b, in its own entry (one change at a time).
 
 - *Question*: trained from scratch with D-031's adopted recipe, does adding D-036's joint VTL head change the formants, f0 or bandwidths, and does its length beat A, as it did in D-036's decay branch?
 - *Arms* (full size, teacher v3's data and command as D-031's rA: train_v2 + resynthesised VocalSet and Zeroth-Korean, mixed crops 32–400, `muon_adan` Muon 2e-3 / Adan ×5 / wd 0.007, warm-up 1,000, 16,000 constant + 4,000 decay):
@@ -1714,6 +1714,7 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
     - **5b-R against 5b's own joint head**: no consistent gain (reliability +0.014 [−0.011, +0.038] and −0.015 [−0.043, +0.016]); the refits' probe excess (−1.3 and +4.1) is no better than the joint heads' (+0.4, +0.8). Nothing argues for a refit step.
     - Hillenbrand lengths (joint heads, seeds 1 / 2): men 17.0 / 17.3 cm, women 14.8 / 14.9, children 13.9 / 14.0. Vowel classification from the trunk's own F1–F3 plus log length: 0.857 / 0.870 (raw 0.806 / 0.818, A 0.844 / 0.848, Lobanov 0.938 / 0.933).
   - *Next*: which seed becomes the released teacher v3.1 (tagged; teacher v3 was a single seed) is Hannah's call: seed 2 has the better length numbers and the smaller F1 f0 slope, seed 1 the better PTDB-TUG RPA. Then 5c on 5b.
+  - *Release (Hannah, 2026-10-29)*: **seed 2 (`d040_5b_s2_b20k`, sha256 `fa176ad17f13a5f2`) is teacher v3.1**, tagged `teacher-v3.1` at its decay commit `4805e5d`; seed 1 stays a sibling. Dev-tier suite report in `reports/suite/`.
 
 
 ## D-041 (2026-10-28, pre-registered): is D-031's Muon + Adan recipe less invariant than teacher v3's AdamW?

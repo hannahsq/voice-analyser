@@ -18,10 +18,10 @@ Conformer** = the same front end, Conformer width 128, 2 layers, 4 heads (f0: di
 |---|---|---|---|---|---|---|---|---|
 | **teacher v1** (tag `teacher-v1`) | `teacher_v1` | full GRU | train_v1 | AdamW 1e-3, cosine, 20k | `7f89c09` (clean) | `d6a6a64beb52fb5e` | D-010, D-014 | superseded by v2 |
 | **teacher v2** (tag `teacher-v2`) | `teacher_v2` → `teacher_v2_d16k` | full GRU | train_v2 | AdamW 1e-3, WSD: constant to 16k, decay 4k | `2a173d0` / `e43dfdd` | `bd90516ef923d592` | D-013, D-020 | superseded by v3; **tracked the resynthesised sets** (VocalSet and Zeroth-Korean `*_d16k`, their `index.json` names it) |
-| **teacher v3** (tag `teacher-v3`) | `conformer_v2r2_s1` → `_s1_d16k` | full Conformer | train_v2 + 30 % resynthesised VocalSet and Zeroth-Korean (`v2r2`) | AdamW 1e-3, WSD 16k + 4k, seed 1 | `8e58a13` | `d28ef6f610f5ea04` | D-025 | **current** single model |
+| **teacher v3** (tag `teacher-v3`) | `conformer_v2r2_s1` → `_s1_d16k` | full Conformer | train_v2 + 30 % resynthesised VocalSet and Zeroth-Korean (`v2r2`) | AdamW 1e-3, WSD 16k + 4k, seed 1 | `8e58a13` | `d28ef6f610f5ea04` | D-025 | superseded by v3.1 as the single model |
 | **labeller v3** | `conformer_v2r2_s1_d16k` + `conformer_v2r2_s2_d16k` | 2 × full Conformer | as teacher v3 | per-frame mean in log frequency of the two (`ensemble_v3.py`) | `8e58a13`; `316990b` / `4265498` | `d28ef6f610f5ea04` + `d204df7dd521982d` | D-025 | **current** labeller (M4 re-tracking) |
 
-| **teacher v3.1** (seed to choose; untagged) | `d040_5b_s1` → `_s1_b20k`; `d040_5b_s2` → `_s2_b20k` | full Conformer + joint VTL head | as teacher v3 | rA (Muon 2e-3 / Adan 1e-2, wd 0.007; VTL head AdamW 1e-3 / wd 0.01), WSD 16k + 4k, seeds 1, 2 | `62c72e1` / `e66d438`; `d9bb3f6` / `4805e5d` | `22107329f6a0731f`, `fa176ad17f13a5f2` | D-031, D-036, D-040 | adopted 2026-10-29 |
+| **teacher v3.1** (tag `teacher-v3.1`) | `d040_5b_s2` → `_s2_b20k` | full Conformer + joint VTL head | as teacher v3 | rA (Muon 2e-3 / Adan 1e-2, wd 0.007; VTL head AdamW 1e-3 / wd 0.01), WSD 16k + 4k, seed 2 | `d9bb3f6` / `4805e5d` | `fa176ad17f13a5f2` | D-031, D-036, D-040 | **current** single model (Hannah chose seed 2, 2026-10-29); sibling seed 1 `d040_5b_s1` → `_s1_b20k` (`62c72e1` / `e66d438`, `22107329f6a0731f`) |
 
 ## Other full-size runs that decisions cite
 
@@ -46,6 +46,7 @@ is released.
 train_v1 ──> teacher v1
 train_v2 ──> teacher v2 (d16k) ──tracks──> resynthesised VocalSet + Zeroth-Korean (*_d16k)
 train_v2 + those sets ──> conformer_v2r2 seeds 0–2 ──> teacher v3 (seed 1), labeller v3 (mean of seeds 1, 2)
+those data, rA recipe + joint VTL head ──> d040_5b seeds 1, 2 ──> teacher v3.1 (seed 2)
 ```
 
 M4 re-tracks with labeller v3; any later resynthesised set records its tracker in its `index.json` the same way.
