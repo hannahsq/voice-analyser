@@ -170,4 +170,11 @@ def chain(audio: np.ndarray, kind: str, value: float) -> np.ndarray:
         fr = Fraction(int(value), FS)
         up = resample_poly(x, fr.numerator, fr.denominator)
         return resample_poly(up, fr.denominator, fr.numerator)[: len(x)].astype(np.float32)
+    if kind == "offset":  # probe 4: value samples of silence first (a sub-hop shift of every frame)
+        return np.r_[np.zeros(int(value)), x].astype(np.float32)
+    if kind == "polarity":
+        return (-x).astype(np.float32)
+    if kind == "pad":  # value seconds of silence both sides
+        z = np.zeros(int(round(value * FS)))
+        return np.r_[z, x, z].astype(np.float32)
     raise ValueError(kind)

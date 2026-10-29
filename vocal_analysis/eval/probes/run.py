@@ -3,7 +3,7 @@
     python -m vocal_analysis.eval.probes.run render <probe> [--per-group 6]
     python -m vocal_analysis.eval.probes.run score <probe> <ckpt> [<ckpt> ...]   ($VA_DEVICE=cuda)
 
-Probes: counterfactual (1: length, f0), shift (2), bandwidth (7), polezero (8), chain (9), articulation (10). Renders are cached under
+Probes: counterfactual (1: length, f0), shift (2), timing (4), voice (6), bandwidth (7), polezero (8), chain (9), articulation (10). Renders are cached under
 data/probes/<probe>_v1/ so every model hears identical audio; scores go to reports/probes/<probe>/<run>.{txt,json}.
 
 Each condition is a dict with its arm and settings. "Slope" arms vary one factor (alpha, r, bw): every output's
@@ -37,6 +37,14 @@ PROBES = {
     "chain": [REF] + [{"arm": "gain", "chain": ("gain", g)} for g in (0.1, 0.5, 2.0)]
              + [{"arm": "dc", "chain": ("dc", 0.05)}, {"arm": "clip", "chain": ("clip", 0.5)},
                 {"arm": "resample", "chain": ("resample", 44100)}],
+    # probe 4: timing, on the original clips (time-stretch left out: it needs a pitch-preserving method chosen)
+    "timing": [REF] + [{"arm": f"offset_{k}", "chain": ("offset", k)} for k in (20, 40, 80)]
+              + [{"arm": "polarity", "chain": ("polarity", 0)}, {"arm": "pad_2s", "chain": ("pad", 2.0)}],
+    # probe 6: voice quality and effort, synthetic (only the source settings differ; reference Rd 1.2, HNR 25 dB,
+    # jitter 0.005, shimmer 0.3 dB)
+    "voice": [REF] + [{"arm": f"rd_{v}", "rd": v} for v in (0.5, 0.8, 1.8, 2.5)]
+             + [{"arm": f"hnr_{v}", "hnr": v} for v in (10.0, 15.0, 40.0)]
+             + [{"arm": "jitter_0.02", "jitter": 0.02}, {"arm": "shimmer_1.0", "shimmer": 1.0}],
     # probe 2: one formant moved alone (D-038's factors), on the real source
     "shift": [REF] + [{"arm": f"shiftF{k + 1}", "shift": (k, s)} for k in range(4) for s in (0.9, 0.95, 1.05, 1.1)],
     # probe 10: synthetic tube clips; larynx (pg) and lip (pm) changes held fixed, cm at Story's size
@@ -44,6 +52,8 @@ PROBES = {
                     + [{"arm": "lips", "pm": v} for v in (-0.25, 0.4, 0.8)],
 }
 ARTIC_ITEMS, ARTIC_SEED = 60, 5052  # seed used by no other set
+VOICE_SEED = 5053
+VOICE_REF = {"rd": 1.2, "hnr": 25.0, "jitter": 0.005, "shimmer": 0.3}
 SLOPE_ARMS = {"length": "alpha", "f0": "r", "bw": "bw", "larynx": "label", "lips": "label"}
 # outputs read against their labels' own change, per arm: only where the labels are meant to move (bandwidth labels
 # follow the prior, which depends on the formants and f0); elsewhere against the arm's factor. In the f0 arm the
@@ -97,9 +107,42 @@ def render_articulation(log=print) -> Path:
     return out
 
 
+def render_voice(log=print) -> Path:
+    """Probe 6: ARTIC_ITEMS synthetic clips (train_v2's settings, 3-4 s, no Rd wander); conditions set Rd, HNR,
+    jitter and shimmer to fixed values (each still one uniform draw, so every other draw is shared)."""
+    import dataclasses
+
+    from ...synth.sampler import SynthConfig, generate
+
+    out = CACHE / "voice_v1"
+    out.mkdir(parents=True, exist_ok=True)
+    conds = PROBES["voice"]
+    meta = {"conditions": conds, "seed": VOICE_SEED, "items": []}
+    for i in range(ARTIC_ITEMS):
+        arrays = {}
+        for c, cd in enumerate(conds):
+            v = VOICE_REF | {k: cd[k] for k in VOICE_REF if k in cd}
+            cfg = dataclasses.replace(SynthConfig(), duration_s=(3.0, 4.0), rd=(v["rd"], v["rd"]), rd_wander_sd=(0.0, 0.0),
+                                      hnr_db=(v["hnr"], v["hnr"]), jitter=(v["jitter"], v["jitter"]),
+                                      shimmer_db=(v["shimmer"], v["shimmer"]))
+            clip = generate(i, cfg, VOICE_SEED)
+            lab = clip.labels
+            arrays[f"audio_{c}"], arrays[f"scored_{c}"], arrays[f"voiced_{c}"] = clip.audio, lab["sonorant"], lab["voiced"]
+            arrays[f"label_formants_{c}"] = lab["formants"][:, :4].astype(np.float32)
+            arrays[f"label_bandwidths_{c}"] = lab["bandwidths"][:, :4].astype(np.float32)
+        np.savez_compressed(out / f"synth_{i:03d}.npz", **arrays)
+        meta["items"].append({"file": f"synth_{i:03d}.npz", "key": f"synth:{VOICE_SEED}:{i}", "group": f"synth:{i}",
+                              "beta": float("nan")})
+    (out / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    log(f"voice: {ARTIC_ITEMS} items")
+    return out
+
+
 def render_probe(probe: str, per_group: int = 6, log=print) -> Path:
     if probe == "articulation":
         return render_articulation(log)
+    if probe == "voice":
+        return render_voice(log)
     out = CACHE / f"{probe}_v1"
     out.mkdir(parents=True, exist_ok=True)
     conds = PROBES[probe]
@@ -111,10 +154,16 @@ def render_probe(probe: str, per_group: int = 6, log=print) -> Path:
             arrays = {"original": it.audio.astype(np.float32)} if probe == "counterfactual" else {}
             _, ref_lab = cf.render(it)
             for c, cd in enumerate(conds):
-                if probe == "chain":  # on the original clip; frames chosen as in the reference resynthesis
+                if probe in ("chain", "timing"):  # on the original clip; frames chosen as in the reference resynthesis
                     y = cf.chain(it.audio, *cd["chain"]) if "chain" in cd else it.audio.astype(np.float32)
                     lab = ref_lab | {"formants": np.full_like(ref_lab["formants"], np.nan),
                                      "bandwidths": np.full_like(ref_lab["bandwidths"], np.nan)}
+                    if "chain" in cd and cd["chain"][0] == "pad":  # the clip's frames move by the padding
+                        k = int(round(cd["chain"][1] * 100))
+                        pad = lambda m: np.r_[np.zeros(k, bool), m, np.zeros(k, bool)]  # noqa: E731
+                        lab = lab | {"scored": pad(lab["scored"]), "voiced": pad(lab["voiced"]),
+                                     "formants": np.full((len(lab["scored"]) + 2 * k, lab["formants"].shape[1]), np.nan),
+                                     "bandwidths": np.full((len(lab["scored"]) + 2 * k, lab["bandwidths"].shape[1]), np.nan)}
                 else:
                     y, lab = cf.render(it, cd.get("alpha", 1.0), cd.get("r", 1.0), cd.get("bw", 1.0), cd.get("extras"),
                                        tuple(cd["shift"]) if "shift" in cd else None)
