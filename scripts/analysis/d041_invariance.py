@@ -4,6 +4,7 @@ shift follow and drag (D-038). rA against the per-tract mean of teacher v3's thr
 whether rA lies beyond every v3 seed; rB and rC reported.
 Usage: python d041_invariance.py <report .txt> name=<cache dir> ... (v3 seeds named v3_*, the candidate rA)"""
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -46,7 +47,8 @@ def boot(a, b, keys, rng):
 def main():
     out = Path(sys.argv[1])
     M = {a.split("=")[0]: measures(Path(a.split("=")[1])) for a in sys.argv[2:]}
-    v3 = [k for k in M if k.startswith("v3_")]
+    REF = os.environ.get("VA_REF_PREFIX", "v3_")  # D-040 scores 5b against the 5a seeds
+    v3 = [k for k in M if k.startswith(REF)]
     lines = [f"D-041: models {list(M)}; v3 seeds {v3}"]
     say = lines.append
     for k, m in M.items():
@@ -55,7 +57,7 @@ def main():
             + "; drag " + " / ".join(f"{np.median(m['drag'][n][1]):.3f}" for n in range(4)))
     rng = np.random.default_rng(0)
     res, flags = {}, []
-    for cand in [k for k in M if not k.startswith("v3_")]:
+    for cand in [k for k in M if not k.startswith(REF)]:
         say(f"\n{cand} - mean(v3), paired over tracts; [beyond every v3 seed]")
         r = {}
         for n in range(4):
@@ -72,7 +74,8 @@ def main():
         res[cand] = r
         if cand == "rA":
             flags = [k for k, v in r.items() if v["worse"]]
-    say(f"\nDECISION: rA is {'LESS INVARIANT (' + ', '.join(flags) + ')' if flags else 'not less invariant'} than teacher v3's AdamW seeds")
+    if "rA" in M:
+        say(f"\nDECISION: rA is {'LESS INVARIANT (' + ', '.join(flags) + ')' if flags else 'not less invariant'} than teacher v3's AdamW seeds")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     out.with_suffix(".json").write_text(json.dumps(res, indent=1))

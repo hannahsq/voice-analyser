@@ -11,6 +11,7 @@
 Args: out txt, then name=checkpoint pairs (VTL-head models), [--ref name=<d035 vtl_score cache dir>:<arm>].
 Run from the main checkout."""
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -176,9 +177,21 @@ def main():
             for m in ("reliability", "w/m", "within SD c"):
                 x = np.array([r[a_][m] - r[b_][m] for r in bs])
                 p(f"  {a_ + ' - ' + b_:44s} {m:12s} {pt[a_][m] - pt[b_][m]:+8.3f} [{np.percentile(x, 2.5):+8.3f}, {np.percentile(x, 97.5):+8.3f}]")
-    json.dump({n: {"reliability_ci_vs_A": list(np.percentile([r[n]["reliability"] - r["A"]["reliability"] for r in bs], [2.5, 97.5])),
-                   "w/m": pt[n]["w/m"], "probe_excess": probe[n][0] - probe[n][1], "probe_obs": probe[n][0]} for n in names},
-              open(Path(outf).with_suffix(".json"), "w"), indent=1, default=float)
+    res = {n: {"reliability_ci_vs_A": list(np.percentile([r[n]["reliability"] - r["A"]["reliability"] for r in bs], [2.5, 97.5])),
+               "w/m": pt[n]["w/m"], "probe_excess": probe[n][0] - probe[n][1], "probe_obs": probe[n][0]} for n in names}
+    # D-040: seed means, e.g. VA_SEED_MEANS="5b=d040_5b_s1+d040_5b_s2": each bootstrap draw's mean over the seeds
+    for spec in filter(None, os.environ.get("VA_SEED_MEANS", "").split(";")):
+        lab, ms = spec.split("=")
+        ms = ms.split("+")
+        mean = lambda r, m: float(np.mean([r[n][m] for n in ms]))  # noqa: E731
+        res[lab] = {"seeds": ms, "reliability": mean(pt, "reliability"), "reliability_vs_A": mean(pt, "reliability") - pt["A"]["reliability"],
+                    "reliability_ci_vs_A": list(np.percentile([mean(r, "reliability") - r["A"]["reliability"] for r in bs], [2.5, 97.5])),
+                    "w/m": mean(pt, "w/m"), "probe_excess": float(np.mean([res[n]["probe_excess"] for n in ms])),
+                    "probe_obs": float(np.mean([res[n]["probe_obs"] for n in ms]))}
+        p(f"\nSeed mean {lab} ({' + '.join(ms)}): reliability - A {res[lab]['reliability_vs_A']:+.3f} "
+          f"[{res[lab]['reliability_ci_vs_A'][0]:+.3f}, {res[lab]['reliability_ci_vs_A'][1]:+.3f}]; w/m {res[lab]['w/m']:.3f}; "
+          f"probe excess {res[lab]['probe_excess']:+.1f} c/oct")
+    json.dump(res, open(Path(outf).with_suffix(".json"), "w"), indent=1, default=float)
 
 
 if __name__ == "__main__":
