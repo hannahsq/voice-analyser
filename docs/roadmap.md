@@ -1,6 +1,6 @@
 # Roadmap
 
-What is planned and in what order. Reasons and results go in `decisions.md`; this file only tracks what is next. "Now" updated 2026-10-30; the order last fully re-read on 2026-10-26, after a full re-read of the plan, the decisions log and `considering.md` against what D-028 to D-034 found.
+What is planned and in what order. Reasons and results go in `decisions.md`; this file only tracks what is next. "Now" updated 2026-10-30; the order was last checked on 2026-10-26, in a full re-read of the plan, the decisions log and `considering.md` against what D-028 to D-034 found.
 
 ## Now
 
