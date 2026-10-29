@@ -18,7 +18,7 @@ V="--train-set vtl=new --train-set vtl_start=0 --train-set vtl_schedule=model --
 X="--train-set vtl_inst=true --train-set synth_extra=$L --train-set synth_extra_frac=0.3"
 
 say "d051: start (data)"
-$PY scripts/analysis/make_long_set.py $L 25000 5051 12 >> runs/make_long_v1.log 2>&1 || fail "long set"
+[ -f $L/shard_00097.npz ] || $PY scripts/analysis/make_long_set.py $L 25000 5051 12 >> runs/make_long_v1.log 2>&1 || fail "long set"
 [ -f $L/flat/done ] || $PY -c "from vocal_analysis.train.data import consolidate; consolidate('$L')" >> runs/make_long_v1.log 2>&1 || fail "consolidate"
 [ -f $L/flat/label_length_cm.npy ] || $PY scripts/analysis/vtl_labels.py $L 12 >> runs/make_long_v1.log 2>&1 || fail "vtl labels long"
 [ -f $L/flat/label_length_inst_cm.npy ] || $PY scripts/analysis/inst_labels.py $L 12 >> runs/make_long_v1.log 2>&1 || fail "inst labels long"
