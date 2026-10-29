@@ -1884,3 +1884,22 @@ Hannah: run it alongside D-045, so D-045's children's arm can use a better refer
   - *Forward-only QCP (duration quotient 0.3)* collapses (F3 −438 Hz): with a short weighted span the backward half of the fit is essential, as Gowda et al. argue.
   - *400–800 Hz*: every method fails, the reference included (F1 median |error| 63–111 Hz), as D-043's addendum.
   - *Not done*: changing a setting until a rate passes would fit the gate. A second attempt needs its own entry and fresh validation material not used here (other tract shapes, a child's tract among them, other vowels and source seeds), with the rate fixed in advance.
+
+
+## D-047 (2026-10-29, pre-registered): does aspiration level move teacher v3's F1 bias on synthetic renders?
+
+D-045's addendum: on PTDB-TUG dev, teacher v3's F1 overread rises with Praat HNR against all three references (women −0.1 → +14.7 Hz from the least to the most harmonic quartile, men +3.1 → +10.0), and the references' differences don't track HNR. Hannah: test it on renders, where the noise level can be changed alone. Earlier findings (D-034's sweeps, on the fidelity dashboard): on *steady* synthetic vowels with no aspiration, teacher v3 reads F1 as a staircase locked near harmonics, and 0 dB aspiration removes it; on real VocalSet singing there is no locking at all. Those sweeps compared no noise against an extreme one on unnatural vowels. This entry asks whether the noise level within the training range shifts the *signed bias* on natural renders.
+
+- *Renders*: fresh clips from train_v2's synthesis config (teacher v3's synthetic training pool), seed 4547 (train_v2 is seed 2, so never trained on), no channel. Each clip is regenerated once per arm with `hnr_db` fixed. The generator still draws `hnr_db` from a one-point range, so its random stream is unchanged. *Checked*: on two clips, the voiced component and every label are identical between 5 and 40 dB, and the aspiration's RMS ratio is 56.2, as set.
+- *Clips*: chosen by labels alone (arm-independent): not whole-clip whispered, median label-voiced f0 165–300 Hz (**women's range**, the first 150) or 90–160 Hz (**men's range**, the first 100), in index order.
+- *Arms*: `hnr_db` 5, 10, 20, 30, 40 dB (training draws 5–40) and 60 dB (cleaner than any training clip).
+- *Measure*: teacher v3 (`conformer_v2r2_s1_d16k`, whole-file `analyse`) against the label F1 on label-voiced, non-whispered frames with finite F1, 5 frames trimmed at each end; per clip the median signed error (Hz). Also the median |error| and Praat HNR (cc, as D-045) per clip and arm, to place the arms on the real voices' scale (PTDB-TUG women's Praat HNR quartiles 12.5 / 16.4 / 19.9 dB; synthetic training frames at f0 165–400 Hz 8.1 / 13.8 / 18.6).
+- **Rule** (women's range): the paired difference in per-clip median signed error, 40 dB − 5 dB, mean over clips with a 95 % clip bootstrap (2,000).
+  - Lower bound ≥ +4 Hz → **"cleaner excitation raises F1 on renders"**: the noise level reaches the bias directly, which supports a source-noise part in the real-voice link. Next: compare the training HNR distribution with real voices' (its own entry).
+  - Interval inside ±4 Hz → **"no HNR effect on renders"**: the real-voice link goes through something that correlates with HNR (vowel nucleus, level, closure), not the noise level itself.
+  - Upper bound ≤ −4 Hz → "opposite"; otherwise "inconclusive".
+  - ±4 Hz is half of the women's +8 Hz closed-phase bias, as in D-046.
+- *Reported*: every arm's mean and median signed error, |error| and Praat HNR; paired 20 − 5, 40 − 20 and 60 − 40 dB (the last outside the training range); the men's range likewise (reported only).
+- *Noise floor, checked before registering* (`pilot`: the 20 dB arm only; seen: the per-clip spread and one clip's error, no contrast): per-clip median error SD 5.0 Hz (women, 150 clips), 3.2 Hz (men, 100), so a paired interval's half-width is at most 0.8 / 0.6 Hz, well inside ±4.
+- *Limits*: one synthesiser, whose noise has a fixed spectral shape relative to the harmonics (pulsed, differentiated white noise through the tract). Real aperiodicity rises with frequency in a way that differs by phone class (SoFilNet's band aperiodicities, `docs/papers/literature.md`), so a null here doesn't rule out a noise-*shape* effect. No channel, so the channel augmentation's own noise is absent.
+- *Code*: `scripts/analysis/d047_hnr_renders.py` (`check`, `pilot`, `run`). The 20 dB rows of the pilot are reused, since rendering is deterministic.
