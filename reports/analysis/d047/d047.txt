@@ -1,0 +1,27 @@
+D-047 (2026-10-29 11:47): teacher v3 on fresh train_v2 renders (seed 4547), hnr_db fixed per arm, no channel; per clip the median signed F1 error (Hz) on label-voiced frames
+
+women (150 clips)
+     5 dB: mean signed   -0.1  median signed   -0.2  mean |err|    7.3  Praat HNR median   7.7 dB
+    10 dB: mean signed   +0.1  median signed   -0.1  mean |err|    7.4  Praat HNR median  11.3 dB
+    20 dB: mean signed   +0.4  median signed   -0.1  mean |err|    7.7  Praat HNR median  17.6 dB
+    30 dB: mean signed   +0.6  median signed   +0.2  mean |err|    8.3  Praat HNR median  20.4 dB
+    40 dB: mean signed   +0.6  median signed   -0.0  mean |err|    8.4  Praat HNR median  21.1 dB
+    60 dB: mean signed   +0.6  median signed   +0.2  mean |err|    8.5  Praat HNR median  21.3 dB
+  paired 40 - 5 dB: +0.7 [+0.1, +1.3] Hz
+  paired 20 - 5 dB: +0.4 [+0.0, +0.8] Hz
+  paired 40 - 20 dB: +0.2 [-0.1, +0.6] Hz
+  paired 60 - 40 dB: +0.0 [-0.1, +0.1] Hz
+
+men (100 clips)
+     5 dB: mean signed   -0.3  median signed   -0.4  mean |err|    6.0  Praat HNR median   8.1 dB
+    10 dB: mean signed   -0.5  median signed   -0.5  mean |err|    5.9  Praat HNR median  11.3 dB
+    20 dB: mean signed   -0.8  median signed   -0.7  mean |err|    6.0  Praat HNR median  17.1 dB
+    30 dB: mean signed   -0.8  median signed   -0.5  mean |err|    6.0  Praat HNR median  20.0 dB
+    40 dB: mean signed   -0.8  median signed   -0.6  mean |err|    6.1  Praat HNR median  20.7 dB
+    60 dB: mean signed   -0.8  median signed   -0.5  mean |err|    6.1  Praat HNR median  20.8 dB
+  paired 40 - 5 dB: -0.6 [-1.1, -0.0] Hz
+  paired 20 - 5 dB: -0.5 [-0.8, -0.1] Hz
+  paired 40 - 20 dB: -0.1 [-0.5, +0.2] Hz
+  paired 60 - 40 dB: +0.1 [-0.0, +0.2] Hz
+
+READING (women, paired 40 - 5 dB, +-4 Hz): no HNR effect on renders
