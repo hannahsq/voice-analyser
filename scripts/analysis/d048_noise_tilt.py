@@ -147,6 +147,10 @@ def run(out):
                 reading = ("matched noise shape raises F1 on renders" if lo >= 4 else
                            "matched noise shape lowers F1 on renders" if hi <= -4 else
                            "no noise-shape effect on renders" if lo > -4 and hi < 4 else "inconclusive")
+    old = {(q[0], int(q[1])): float(q[3]) for q in (ln.split("\t") for ln in Path("runs/d047/d047.tsv").read_text().splitlines()[1:])
+           if float(q[2]) == 20.0}
+    dmax = max(abs(E[k, i, "reference"][0] - old[k, i]) for k, idx in picked.items() for i in idx)
+    lines.append(f"\nreference against D-047's 20 dB rows: max |difference| {dmax:.3f} Hz")
     lines.append(f"\nREADING (women, shape_matched - reference, +-4 Hz): {reading}")
     (out / "d048.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
