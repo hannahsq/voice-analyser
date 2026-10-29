@@ -1,0 +1,29 @@
+Probe 'polezero' (D-050): teacher_v2_d16k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  nasal/change/F1            +0.0037 [-0.0005, +0.0086]  ideal 0
+  nasal/change/F2            +0.0003 [-0.0014, +0.0020]  ideal 0
+  nasal/change/F3            -0.0005 [-0.0009, +0.0004]  ideal 0
+  nasal/change/F4            -0.0001 [-0.0008, +0.0006]  ideal 0
+  nasal/change/B1            -0.0006 [-0.0168, +0.0222]  ideal 0
+  nasal/change/B2            +0.0132 [-0.0224, +0.0229]  ideal 0
+  nasal/change/B3            +0.0128 [+0.0068, +0.0322]  ideal 0
+  nasal/change/B4            +0.0103 [-0.0057, +0.0231]  ideal 0
+  nasal/change/f0            +0.0001 [-0.0004, +0.0006]  ideal 0
+  nasal/sigma_growth/F1      sigma log2 change: ref:+0.00 extras=nasal:+0.29
+  nasal/sigma_growth/F2      sigma log2 change: ref:+0.00 extras=nasal:+0.12
+  nasal/sigma_growth/F3      sigma log2 change: ref:+0.00 extras=nasal:+0.04
+  nasal/sigma_growth/F4      sigma log2 change: ref:+0.00 extras=nasal:+0.02
+  subglottal/change/F1       +0.0015 [+0.0003, +0.0029]  ideal 0
+  subglottal/change/F2       -0.0022 [-0.0043, -0.0007]  ideal 0
+  subglottal/change/F3       +0.0028 [+0.0015, +0.0038]  ideal 0
+  subglottal/change/F4       +0.0007 [+0.0001, +0.0018]  ideal 0
+  subglottal/change/B1       -0.0328 [-0.0418, -0.0219]  ideal 0
+  subglottal/change/B2       -0.0005 [-0.0202, +0.0184]  ideal 0
+  subglottal/change/B3       +0.0194 [+0.0096, +0.0301]  ideal 0
+  subglottal/change/B4       -0.0129 [-0.0213, +0.0103]  ideal 0
+  subglottal/change/f0       +0.0002 [-0.0000, +0.0003]  ideal 0
+  subglottal/sigma_growth/F1 sigma log2 change: ref:+0.00 extras=subglottal:+0.06
+  subglottal/sigma_growth/F2 sigma log2 change: ref:+0.00 extras=subglottal:+0.09
+  subglottal/sigma_growth/F3 sigma log2 change: ref:+0.00 extras=subglottal:+0.10
+  subglottal/sigma_growth/F4 sigma log2 change: ref:+0.00 extras=subglottal:+0.04

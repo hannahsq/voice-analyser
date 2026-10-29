@@ -1,0 +1,55 @@
+Probe 'chain' (D-050): conformer_v2r2_d16k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  gain/change/F1             -0.0021 [-0.0129, +0.0009]  ideal 0
+  gain/change/F2             +0.0017 [+0.0002, +0.0045]  ideal 0
+  gain/change/F3             +0.0000 [-0.0016, +0.0020]  ideal 0
+  gain/change/F4             +0.0019 [+0.0000, +0.0037]  ideal 0
+  gain/change/B1             -0.0565 [-0.0652, -0.0526]  ideal 0
+  gain/change/B2             -0.0187 [-0.0273, -0.0037]  ideal 0
+  gain/change/B3             -0.0131 [-0.0362, +0.0033]  ideal 0
+  gain/change/B4             +0.0038 [-0.0080, +0.0174]  ideal 0
+  gain/change/f0             +0.0005 [-0.0004, +0.0009]  ideal 0
+  gain/sigma_growth/F1       sigma log2 change: ref:+0.00 chain=['gain', 0.1]:+0.02 chain=['gain', 0.5]:+0.01 chain=['gain', 2.0]:-0.00
+  gain/sigma_growth/F2       sigma log2 change: ref:+0.00 chain=['gain', 0.1]:-0.07 chain=['gain', 0.5]:-0.02 chain=['gain', 2.0]:+0.01
+  gain/sigma_growth/F3       sigma log2 change: ref:+0.00 chain=['gain', 0.1]:+0.00 chain=['gain', 0.5]:+0.00 chain=['gain', 2.0]:-0.01
+  gain/sigma_growth/F4       sigma log2 change: ref:+0.00 chain=['gain', 0.1]:-0.03 chain=['gain', 0.5]:-0.00 chain=['gain', 2.0]:-0.00
+  dc/change/F1               +0.0001 [-0.0002, +0.0009]  ideal 0
+  dc/change/F2               -0.0002 [-0.0004, +0.0001]  ideal 0
+  dc/change/F3               -0.0001 [-0.0007, +0.0007]  ideal 0
+  dc/change/F4               -0.0004 [-0.0010, +0.0002]  ideal 0
+  dc/change/B1               +0.0081 [+0.0025, +0.0108]  ideal 0
+  dc/change/B2               -0.0071 [-0.0104, -0.0038]  ideal 0
+  dc/change/B3               -0.0071 [-0.0116, -0.0036]  ideal 0
+  dc/change/B4               -0.0246 [-0.0299, -0.0171]  ideal 0
+  dc/change/f0               +0.0001 [-0.0000, +0.0002]  ideal 0
+  dc/sigma_growth/F1         sigma log2 change: ref:+0.00 chain=['dc', 0.05]:-0.04
+  dc/sigma_growth/F2         sigma log2 change: ref:+0.00 chain=['dc', 0.05]:-0.03
+  dc/sigma_growth/F3         sigma log2 change: ref:+0.00 chain=['dc', 0.05]:+0.00
+  dc/sigma_growth/F4         sigma log2 change: ref:+0.00 chain=['dc', 0.05]:+0.01
+  clip/change/F1             +0.0012 [+0.0005, +0.0055]  ideal 0
+  clip/change/F2             +0.0001 [-0.0005, +0.0010]  ideal 0
+  clip/change/F3             +0.0005 [-0.0005, +0.0027]  ideal 0
+  clip/change/F4             -0.0004 [-0.0018, +0.0017]  ideal 0
+  clip/change/B1             -0.0037 [-0.0142, +0.0082]  ideal 0
+  clip/change/B2             +0.0020 [-0.0013, +0.0072]  ideal 0
+  clip/change/B3             +0.0057 [-0.0107, +0.0141]  ideal 0
+  clip/change/B4             +0.0204 [-0.0001, +0.0336]  ideal 0
+  clip/change/f0             +0.0000 [-0.0000, +0.0002]  ideal 0
+  clip/sigma_growth/F1       sigma log2 change: ref:+0.00 chain=['clip', 0.5]:+0.03
+  clip/sigma_growth/F2       sigma log2 change: ref:+0.00 chain=['clip', 0.5]:+0.10
+  clip/sigma_growth/F3       sigma log2 change: ref:+0.00 chain=['clip', 0.5]:+0.09
+  clip/sigma_growth/F4       sigma log2 change: ref:+0.00 chain=['clip', 0.5]:+0.09
+  resample/change/F1         +0.0000 [-0.0000, +0.0000]  ideal 0
+  resample/change/F2         +0.0000 [-0.0000, +0.0000]  ideal 0
+  resample/change/F3         +0.0000 [-0.0000, +0.0000]  ideal 0
+  resample/change/F4         -0.0000 [-0.0001, +0.0000]  ideal 0
+  resample/change/B1         -0.0006 [-0.0011, -0.0001]  ideal 0
+  resample/change/B2         -0.0017 [-0.0024, -0.0014]  ideal 0
+  resample/change/B3         +0.0005 [-0.0006, +0.0012]  ideal 0
+  resample/change/B4         -0.0007 [-0.0014, -0.0003]  ideal 0
+  resample/change/f0         -0.0000 [-0.0000, -0.0000]  ideal 0
+  resample/sigma_growth/F1   sigma log2 change: ref:+0.00 chain=['resample', 44100]:+0.00
+  resample/sigma_growth/F2   sigma log2 change: ref:+0.00 chain=['resample', 44100]:+0.00
+  resample/sigma_growth/F3   sigma log2 change: ref:+0.00 chain=['resample', 44100]:+0.00
+  resample/sigma_growth/F4   sigma log2 change: ref:+0.00 chain=['resample', 44100]:+0.00

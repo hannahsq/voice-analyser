@@ -43,6 +43,10 @@ PROBES = {
 }
 ARTIC_ITEMS, ARTIC_SEED = 60, 5052  # seed used by no other set
 SLOPE_ARMS = {"length": "alpha", "f0": "r", "bw": "bw", "larynx": "label", "lips": "label"}
+# outputs read against their labels' own change, per arm: only where the labels are meant to move (bandwidth labels
+# follow the prior, which depends on the formants and f0); elsewhere against the arm's factor. In the f0 arm the
+# formant labels move only by the time-warp's rounding (<= 0.004 octave), which must not become the x of a slope
+LABEL_X = {"length": "FB", "f0": "B", "bw": "B", "larynx": "FB", "lips": "FB"}
 # ideal slope per arm: formants / bandwidths against the labels' change, VTL and f0 against log2 of the factor
 IDEAL = {"length": {"F": 1.0, "B": 1.0, "VTL": 1.0, "VTLi": 1.0, "f0": 0.0},
          "f0": {"F": 0.0, "B": 1.0, "VTL": 0.0, "VTLi": 0.0, "f0": 1.0},
@@ -198,11 +202,9 @@ def analyse_probe(res: dict) -> dict:
                     if not np.isfinite(y).any():
                         continue
                     kind = o if o in ("VTL", "VTLi", "f0") else o[0]
-                    if kind in ("F", "B"):
+                    if kind in ("F", "B") and kind in LABEL_X[arm]:
                         lab = (L if kind == "F" else LB)[keep][:, cols, int(o[1]) - 1]
                         x = lab - lab[:, [0]]
-                        if np.nanmax(np.abs(x)) < 1e-6:  # the labels do not move in this arm: read against the factor
-                            x = _x(factor, keep, y.shape)
                     else:
                         x = _x(factor, keep, y.shape)
                     s = M.summarise_slopes(y, x, groups[keep])
@@ -253,6 +255,23 @@ def report(probe: str, name: str, a: dict, beta: np.ndarray) -> str:
     return "\n".join(lines)
 
 
+def reanalyse(probe: str, name: str) -> str:
+    """Rebuild a report from its saved raw scores (after a change to the analysis only)."""
+    src = CACHE / f"{probe}_v1"
+    meta = json.loads((src / "meta.json").read_text(encoding="utf-8"))
+    out = REPORTS / probe
+    d = np.load(out / f"{name}_raw.npz")
+    res = {"conds": [_cond(c) for c in meta["conditions"]], "Y": {k[2:]: d[k] for k in d.files if k.startswith("Y_")},
+           "L": d["L"], "LB": d["LB"], "LI": d["LI"] if "LI" in d.files else None, "groups": d["groups"], "beta": d["beta"]}
+    for k in KEYS:  # raw files from before an output existed
+        res["Y"].setdefault(k, np.full_like(res["Y"]["F1"], np.nan))
+    a = analyse_probe(res)
+    (out / f"{name}.json").write_text(json.dumps(a, indent=1), encoding="utf-8")
+    text = report(probe, name, a, res["beta"])
+    (out / f"{name}.txt").write_text(text + "\n", encoding="utf-8")
+    return text
+
+
 def main(argv: list[str]) -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     if len(argv) >= 2 and argv[0] == "render" and argv[1] in PROBES:
@@ -273,6 +292,10 @@ def main(argv: list[str]) -> int:
             text = report(probe, name, a, res["beta"])
             (out / f"{name}.txt").write_text(text + "\n", encoding="utf-8")
             print(text)
+        return 0
+    if len(argv) >= 3 and argv[0] == "reanalyse" and argv[1] in PROBES:
+        for name in argv[2:]:
+            print(reanalyse(argv[1], name))
         return 0
     print(__doc__)
     return 2

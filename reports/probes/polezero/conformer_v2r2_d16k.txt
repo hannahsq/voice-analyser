@@ -1,0 +1,29 @@
+Probe 'polezero' (D-050): conformer_v2r2_d16k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  nasal/change/F1            +0.0011 [-0.0011, +0.0036]  ideal 0
+  nasal/change/F2            -0.0003 [-0.0012, +0.0001]  ideal 0
+  nasal/change/F3            -0.0001 [-0.0004, +0.0004]  ideal 0
+  nasal/change/F4            -0.0003 [-0.0007, +0.0003]  ideal 0
+  nasal/change/B1            +0.0059 [-0.0350, +0.0301]  ideal 0
+  nasal/change/B2            +0.0274 [+0.0028, +0.0669]  ideal 0
+  nasal/change/B3            -0.0067 [-0.0130, +0.0073]  ideal 0
+  nasal/change/B4            -0.0070 [-0.0142, +0.0028]  ideal 0
+  nasal/change/f0            -0.0001 [-0.0004, +0.0003]  ideal 0
+  nasal/sigma_growth/F1      sigma log2 change: ref:+0.00 extras=nasal:+0.31
+  nasal/sigma_growth/F2      sigma log2 change: ref:+0.00 extras=nasal:+0.10
+  nasal/sigma_growth/F3      sigma log2 change: ref:+0.00 extras=nasal:+0.04
+  nasal/sigma_growth/F4      sigma log2 change: ref:+0.00 extras=nasal:+0.06
+  subglottal/change/F1       +0.0025 [+0.0018, +0.0041]  ideal 0
+  subglottal/change/F2       -0.0043 [-0.0054, -0.0014]  ideal 0
+  subglottal/change/F3       +0.0024 [+0.0005, +0.0031]  ideal 0
+  subglottal/change/F4       +0.0013 [+0.0010, +0.0015]  ideal 0
+  subglottal/change/B1       -0.0706 [-0.0781, -0.0661]  ideal 0
+  subglottal/change/B2       +0.0136 [-0.0037, +0.0333]  ideal 0
+  subglottal/change/B3       +0.0758 [+0.0635, +0.0957]  ideal 0
+  subglottal/change/B4       -0.0442 [-0.0659, -0.0323]  ideal 0
+  subglottal/change/f0       -0.0002 [-0.0003, +0.0000]  ideal 0
+  subglottal/sigma_growth/F1 sigma log2 change: ref:+0.00 extras=subglottal:+0.05
+  subglottal/sigma_growth/F2 sigma log2 change: ref:+0.00 extras=subglottal:+0.09
+  subglottal/sigma_growth/F3 sigma log2 change: ref:+0.00 extras=subglottal:+0.17
+  subglottal/sigma_growth/F4 sigma log2 change: ref:+0.00 extras=subglottal:+0.05

@@ -1,0 +1,230 @@
+{
+ "nasal/change/F1": {
+  "point": 0.0036820535793120612,
+  "low": -0.00045405557651803066,
+  "high": 0.008636105140716666,
+  "ideal": 0.0
+ },
+ "nasal/change/F2": {
+  "point": 0.0002581989970042997,
+  "low": -0.0013635970813670184,
+  "high": 0.002018324443297924,
+  "ideal": 0.0
+ },
+ "nasal/change/F3": {
+  "point": -0.0004841216083644184,
+  "low": -0.0008856571562354532,
+  "high": 0.00040992953886132,
+  "ideal": 0.0
+ },
+ "nasal/change/F4": {
+  "point": -0.00013106832503773092,
+  "low": -0.0008102665814622156,
+  "high": 0.0006496237779343161,
+  "ideal": 0.0
+ },
+ "nasal/change/B1": {
+  "point": -0.0006165504455566406,
+  "low": -0.01681804656982422,
+  "high": 0.022200584411621094,
+  "ideal": 0.0
+ },
+ "nasal/change/B2": {
+  "point": 0.013202667236328125,
+  "low": -0.022394180297851562,
+  "high": 0.022903364896774286,
+  "ideal": 0.0
+ },
+ "nasal/change/B3": {
+  "point": 0.012768983840942383,
+  "low": 0.00682300329208374,
+  "high": 0.032222747802734375,
+  "ideal": 0.0
+ },
+ "nasal/change/B4": {
+  "point": 0.010289192199707031,
+  "low": -0.005686759948730469,
+  "high": 0.02309870719909668,
+  "ideal": 0.0
+ },
+ "nasal/change/f0": {
+  "point": 7.276584092474891e-05,
+  "low": -0.0003641005234849004,
+  "high": 0.0006221440593289408,
+  "ideal": 0.0
+ },
+ "nasal/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   0.28811020355644557
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "nasal/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   0.11679290183442452
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "nasal/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.042033216927847436
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "nasal/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.024946612862446087
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "subglottal/change/F1": {
+  "point": 0.0014698732370987955,
+  "low": 0.00027263030024204937,
+  "high": 0.0029384389003865863,
+  "ideal": 0.0
+ },
+ "subglottal/change/F2": {
+  "point": -0.002188478671707017,
+  "low": -0.0043374910278366485,
+  "high": -0.0007044015313422136,
+  "ideal": 0.0
+ },
+ "subglottal/change/F3": {
+  "point": 0.002756240858649228,
+  "low": 0.0015179086292267385,
+  "high": 0.0038369652339449445,
+  "ideal": 0.0
+ },
+ "subglottal/change/F4": {
+  "point": 0.0007484480544670546,
+  "low": 0.00013570564364506765,
+  "high": 0.001793772548323247,
+  "ideal": 0.0
+ },
+ "subglottal/change/B1": {
+  "point": -0.03281903266906738,
+  "low": -0.04181981086730957,
+  "high": -0.021903038024902344,
+  "ideal": 0.0
+ },
+ "subglottal/change/B2": {
+  "point": -0.0005011558532714844,
+  "low": -0.020208358764648438,
+  "high": 0.01842975616455078,
+  "ideal": 0.0
+ },
+ "subglottal/change/B3": {
+  "point": 0.019359827041625977,
+  "low": 0.00956869125366211,
+  "high": 0.030135631561279297,
+  "ideal": 0.0
+ },
+ "subglottal/change/B4": {
+  "point": -0.012913942337036133,
+  "low": -0.021320819854736328,
+  "high": 0.0103302001953125,
+  "ideal": 0.0
+ },
+ "subglottal/change/f0": {
+  "point": 0.00015193340993713278,
+  "low": -3.7970934783970733e-05,
+  "high": 0.00034690135425741175,
+  "ideal": 0.0
+ },
+ "subglottal/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   0.06273278888489062
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ },
+ "subglottal/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   0.08973475348357125
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ },
+ "subglottal/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.09544473744244093
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ },
+ "subglottal/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.04372333882955275
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ }
+}

@@ -651,7 +651,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                        "audio_s_per_s": seen / 100 / dt, "time": time.time()}
                 logf.write(json.dumps(rec) + "\n")
                 logf.flush()
-                vtl_part = f" vtl {rec['vtl']:.2f}" if "vtl" in rec else ""
+                vtl_part = (f" vtl {rec['vtl']:.2f}" if "vtl" in rec else "") + (f" inst {rec['vtl_inst']:.2f}" if "vtl_inst" in rec else "")
                 log(f"step {step} loss {rec['loss']:.3f} (f0 {rec['f0']:.2f} F {rec['formants']:.2f} bw {rec['bandwidth']:.2f}{vtl_part}) "
                     f"{rec['audio_s_per_s']:.0f} s/s")
                 acc, t0, seen = {}, time.time(), 0

@@ -1,0 +1,33 @@
+Probe 'polezero' (D-050): d040_5b_s1_b20k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  nasal/change/F1            +0.0029 [-0.0007, +0.0047]  ideal 0
+  nasal/change/F2            +0.0003 [-0.0004, +0.0008]  ideal 0
+  nasal/change/F3            -0.0004 [-0.0008, +0.0002]  ideal 0
+  nasal/change/F4            +0.0001 [-0.0008, +0.0004]  ideal 0
+  nasal/change/B1            -0.0168 [-0.0766, +0.0284]  ideal 0
+  nasal/change/B2            +0.0356 [+0.0007, +0.0661]  ideal 0
+  nasal/change/B3            +0.0023 [-0.0096, +0.0225]  ideal 0
+  nasal/change/B4            +0.0055 [-0.0099, +0.0201]  ideal 0
+  nasal/change/VTL           +0.0019 [-0.0000, +0.0033]  ideal 0
+  nasal/change/f0            +0.0001 [-0.0007, +0.0004]  ideal 0
+  nasal/sigma_growth/F1      sigma log2 change: ref:+0.00 extras=nasal:+0.31
+  nasal/sigma_growth/F2      sigma log2 change: ref:+0.00 extras=nasal:+0.19
+  nasal/sigma_growth/F3      sigma log2 change: ref:+0.00 extras=nasal:+0.06
+  nasal/sigma_growth/F4      sigma log2 change: ref:+0.00 extras=nasal:+0.06
+  nasal/sigma_growth/VTL     sigma log2 change: ref:+0.00 extras=nasal:+0.06
+  subglottal/change/F1       +0.0019 [+0.0012, +0.0039]  ideal 0
+  subglottal/change/F2       -0.0022 [-0.0064, -0.0009]  ideal 0
+  subglottal/change/F3       +0.0016 [-0.0006, +0.0035]  ideal 0
+  subglottal/change/F4       +0.0006 [+0.0003, +0.0010]  ideal 0
+  subglottal/change/B1       -0.0860 [-0.1163, -0.0748]  ideal 0
+  subglottal/change/B2       +0.0014 [-0.0123, +0.0156]  ideal 0
+  subglottal/change/B3       +0.1344 [+0.1187, +0.1669]  ideal 0
+  subglottal/change/B4       -0.0449 [-0.0667, -0.0316]  ideal 0
+  subglottal/change/VTL      +0.0007 [-0.0007, +0.0026]  ideal 0
+  subglottal/change/f0       -0.0000 [-0.0002, +0.0001]  ideal 0
+  subglottal/sigma_growth/F1 sigma log2 change: ref:+0.00 extras=subglottal:+0.04
+  subglottal/sigma_growth/F2 sigma log2 change: ref:+0.00 extras=subglottal:+0.10
+  subglottal/sigma_growth/F3 sigma log2 change: ref:+0.00 extras=subglottal:+0.15
+  subglottal/sigma_growth/F4 sigma log2 change: ref:+0.00 extras=subglottal:+0.06
+  subglottal/sigma_growth/VTL sigma log2 change: ref:+0.00 extras=subglottal:+0.03

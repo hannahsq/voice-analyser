@@ -1,0 +1,29 @@
+Probe 'polezero' (D-050): teacher_v1
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  nasal/change/F1            +0.0050 [+0.0001, +0.0181]  ideal 0
+  nasal/change/F2            +0.0001 [-0.0014, +0.0010]  ideal 0
+  nasal/change/F3            -0.0002 [-0.0005, +0.0002]  ideal 0
+  nasal/change/F4            +0.0001 [-0.0006, +0.0007]  ideal 0
+  nasal/change/B1            -0.0091 [-0.0204, +0.0105]  ideal 0
+  nasal/change/B2            -0.0032 [-0.0132, +0.0086]  ideal 0
+  nasal/change/B3            +0.0006 [-0.0062, +0.0099]  ideal 0
+  nasal/change/B4            +0.0057 [-0.0146, +0.0133]  ideal 0
+  nasal/change/f0            +0.0001 [-0.0001, +0.0003]  ideal 0
+  nasal/sigma_growth/F1      sigma log2 change: ref:+0.00 extras=nasal:+0.23
+  nasal/sigma_growth/F2      sigma log2 change: ref:+0.00 extras=nasal:+0.16
+  nasal/sigma_growth/F3      sigma log2 change: ref:+0.00 extras=nasal:+0.08
+  nasal/sigma_growth/F4      sigma log2 change: ref:+0.00 extras=nasal:+0.07
+  subglottal/change/F1       +0.0024 [+0.0003, +0.0045]  ideal 0
+  subglottal/change/F2       -0.0070 [-0.0093, -0.0028]  ideal 0
+  subglottal/change/F3       +0.0022 [+0.0004, +0.0042]  ideal 0
+  subglottal/change/F4       +0.0008 [+0.0004, +0.0013]  ideal 0
+  subglottal/change/B1       -0.0384 [-0.0418, -0.0295]  ideal 0
+  subglottal/change/B2       -0.0244 [-0.0542, +0.0068]  ideal 0
+  subglottal/change/B3       +0.0338 [+0.0176, +0.0490]  ideal 0
+  subglottal/change/B4       -0.0468 [-0.0601, -0.0386]  ideal 0
+  subglottal/change/f0       -0.0002 [-0.0002, +0.0000]  ideal 0
+  subglottal/sigma_growth/F1 sigma log2 change: ref:+0.00 extras=subglottal:+0.04
+  subglottal/sigma_growth/F2 sigma log2 change: ref:+0.00 extras=subglottal:+0.08
+  subglottal/sigma_growth/F3 sigma log2 change: ref:+0.00 extras=subglottal:+0.16
+  subglottal/sigma_growth/F4 sigma log2 change: ref:+0.00 extras=subglottal:+0.04

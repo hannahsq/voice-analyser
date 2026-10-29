@@ -1,0 +1,29 @@
+Probe 'polezero' (D-050): conformer_v2r2_s1_d16k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  nasal/change/F1            +0.0001 [-0.0023, +0.0023]  ideal 0
+  nasal/change/F2            -0.0006 [-0.0010, +0.0003]  ideal 0
+  nasal/change/F3            -0.0004 [-0.0009, +0.0001]  ideal 0
+  nasal/change/F4            -0.0003 [-0.0008, -0.0000]  ideal 0
+  nasal/change/B1            +0.0051 [-0.0582, +0.0209]  ideal 0
+  nasal/change/B2            +0.0392 [+0.0182, +0.0761]  ideal 0
+  nasal/change/B3            +0.0049 [-0.0041, +0.0157]  ideal 0
+  nasal/change/B4            +0.0094 [+0.0012, +0.0216]  ideal 0
+  nasal/change/f0            -0.0002 [-0.0005, -0.0000]  ideal 0
+  nasal/sigma_growth/F1      sigma log2 change: ref:+0.00 extras=nasal:+0.29
+  nasal/sigma_growth/F2      sigma log2 change: ref:+0.00 extras=nasal:+0.19
+  nasal/sigma_growth/F3      sigma log2 change: ref:+0.00 extras=nasal:+0.05
+  nasal/sigma_growth/F4      sigma log2 change: ref:+0.00 extras=nasal:+0.11
+  subglottal/change/F1       +0.0021 [+0.0015, +0.0033]  ideal 0
+  subglottal/change/F2       -0.0030 [-0.0061, -0.0011]  ideal 0
+  subglottal/change/F3       +0.0016 [-0.0020, +0.0036]  ideal 0
+  subglottal/change/F4       +0.0014 [+0.0001, +0.0020]  ideal 0
+  subglottal/change/B1       -0.0664 [-0.0764, -0.0570]  ideal 0
+  subglottal/change/B2       -0.0129 [-0.0323, +0.0017]  ideal 0
+  subglottal/change/B3       +0.0890 [+0.0786, +0.1126]  ideal 0
+  subglottal/change/B4       -0.0458 [-0.0564, -0.0376]  ideal 0
+  subglottal/change/f0       +0.0000 [-0.0002, +0.0001]  ideal 0
+  subglottal/sigma_growth/F1 sigma log2 change: ref:+0.00 extras=subglottal:+0.04
+  subglottal/sigma_growth/F2 sigma log2 change: ref:+0.00 extras=subglottal:+0.10
+  subglottal/sigma_growth/F3 sigma log2 change: ref:+0.00 extras=subglottal:+0.17
+  subglottal/sigma_growth/F4 sigma log2 change: ref:+0.00 extras=subglottal:+0.04
