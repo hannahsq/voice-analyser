@@ -1,18 +1,20 @@
 # Roadmap
 
-What is planned and in what order. Reasons and results go in `decisions.md`; this file only tracks what is next. Updated 2026-10-26, after a full re-read of the plan, the decisions log and `considering.md` against what D-028 to D-034 found.
+What is planned and in what order. Reasons and results go in `decisions.md`; this file only tracks what is next. "Now" updated 2026-10-30; the order last fully re-read on 2026-10-26, after a full re-read of the plan, the decisions log and `considering.md` against what D-028 to D-034 found.
 
 ## Now
 
-*State on 2026-10-26. Results and reasoning are in D-025 to D-034 (decisions.md).*
+*State on 2026-10-30. Results and reasoning are in D-025 to D-049 (decisions.md).*
 
-- **Teacher v3** (D-025): `conformer_v2r2_s1_d16k`; **labeller v3** = the per-frame mean (in log frequency) of seeds 1 and 2.
+- **Teacher v3.1** (D-040, tag `teacher-v3.1`): `d040_5b_s2_b20k`, D-031's rA recipe with the joint VTL head; dev-tier suite in `reports/suite/d040_5b_s2_b20k_dev.md`. Teacher v3 (D-025) is superseded as the single model; **labeller v3** (the per-frame mean in log frequency of v3's seeds 1 and 2) is still the labeller.
+- **Women's F1 overread** (`f1_bias_register.md`): real, not the reference's (D-043, D-044, D-045 addendum); not noise level, noise shape or real dynamics and source (D-047, D-048, D-049). The real vocal tract and F1's definition remain.
 - **F1 labeller candidate: labeller v3 + H5×6** (D-033): F1 = the mean in log frequency of labeller v3's F1 and six frozen heads on Parakeet layer 5; everything else labeller v3's. Passed on dev (women's closed-phase F1 bias 8.0 → 0.2 Hz, men's 6.8 → 3.6, Hillenbrand F1 MAE 37.1 → 32.8), at a cost in F1 scatter where teacher v3 is already accurate. **Not confirmed on semi-private**: the one use was reserved for stage 2's deployable form, which needed a student that transfers.
 - **Distilled students** (D-034): v2 and v4 do not transfer the correction. v4 with phase-aligned pooling (adopted) leaves an F1 offset of about 7 Hz. The fitted teacher/head weight passes the rule on v4, but its gain over an equal mix is inside speaker noise. Further student arms are paused (below).
-- **D-031** (full-size recipe bracket): rA and rB done; rC's branches and the weight-decay control running (about 7 h); rule not yet read.
 - **Evaluation power**: dev's six PTDB-TUG women give speaker intervals of about ±5 Hz on women's F1 bias (D-033 full arm; D-034 ensemble weight), the size of the 5 Hz bars every rule since D-033 uses.
 
-*Done since 2026-10-17*: the replica check (D-027: same code is bit-identical); D-027's decision (M4 gates on sigma; the label work stops); the recipe screen (D-029, D-030: S2 recipe Muon 8e-3 + Adan 4e-2); long inputs measured (D-028 "long"; windowed analysis decided "windows", not yet the default); the Parakeet probe and heads (D-033); the student work (D-034).
+*Done since 2026-10-26*: D-031 decided (rA); windowed analysis the default; the VTL head from probe to joint training (D-035 to D-040); D-041's invariance check of rA; the closed-phase reference examined (D-043, D-044, D-046); the real-versus-synthetic discriminator (D-045) and the synthesiser tests it led to (D-047 to D-049); the MRI image work moved to `vtl-mri`.
+
+*Done between 2026-10-17 and 2026-10-26*: the replica check (D-027: same code is bit-identical); D-027's decision (M4 gates on sigma; the label work stops); the recipe screen (D-029, D-030: S2 recipe Muon 8e-3 + Adan 4e-2); long inputs measured (D-028 "long"; windowed analysis decided "windows", not yet the default); the Parakeet probe and heads (D-033); the student work (D-034).
 
 ## Next, in order
 
