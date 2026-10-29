@@ -1,0 +1,28 @@
+  [d040_5a_s2_b20k/hillenbrand] 400/1668
+  [d040_5a_s2_b20k/hillenbrand] 800/1668
+  [d040_5a_s2_b20k/hillenbrand] 1200/1668
+  [d040_5a_s2_b20k/hillenbrand] 1600/1668
+  [d040_5a_s2_b20k/ptdb_tug] 250/1579  (RTF 0.024)
+  [d040_5a_s2_b20k/ptdb_tug] 500/1579  (RTF 0.025)
+  [d040_5a_s2_b20k/ptdb_tug] 750/1579  (RTF 0.024)
+  [d040_5a_s2_b20k/ptdb_tug] 1000/1579  (RTF 0.024)
+  [d040_5a_s2_b20k/ptdb_tug] 1250/1579  (RTF 0.024)
+  [d040_5a_s2_b20k/ptdb_tug] 1500/1579  (RTF 0.024)
+tiers: dev
+
+Hillenbrand, d031_rA_b20k vs d040_5a_s2_b20k (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    42.0    43.3  diff   +1.3 [+0.2, +2.5]  WORSE
+  F1 MAE children:    50.3    50.2  diff   -0.2 [-1.7, +1.1]  within noise
+  F1 MAE men     :    20.1    21.3  diff   +1.2 [-0.0, +2.3]  within noise
+  F1 MAE all     :    37.6    38.4  diff   +0.8 [-0.0, +1.6]  within noise
+  F2 MAE all     :    46.8    43.6  diff   -3.2 [-6.6, -1.2]  better
+  F2 DR  all     :    98.2    98.3  diff   +0.1 [-0.1, +0.4]  within noise
+  F3 MAE all     :    47.8    46.2  diff   -1.6 [-4.9, +2.2]  within noise
+  F3 DR  all     :    98.0    98.3  diff   +0.3 [-0.0, +0.6]  within noise
+  F4 MAE all     :    93.5    95.4  diff   +1.9 [-7.0, +11.0]  within noise
+  F4 DR  all     :    92.9    92.3  diff   -0.6 [-1.9, +0.7]  within noise
+
+PTDB-TUG f0 RPA, d031_rA_b20k vs d040_5a_s2_b20k
+  all frames    :  87.3  87.8  diff  +0.4 [+0.2, +0.7]  better  (n 154653)
+  modal         :  94.1  94.3  diff  +0.2 [+0.1, +0.3]  better  (n 126992)
+  modal < 85 Hz :  85.7  86.1  diff  +0.3 [-0.1, +2.5]  within noise  (n 11014)

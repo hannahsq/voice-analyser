@@ -1,0 +1,7 @@
+D-040: 5b against 5a, seeds paired  [CHECK MODE: not a D-040 result]
+  d040_5a_s2_b20k vs d031_rA_b20k: synthetic F1-F4 -0.3 -0.5 +1.5 -0.2 SE, RPA -0.00 | dev Hillenbrand F1/F2/F3 +0.8/-3.2/-1.6  RPA +0.4  cp women F1 -1.9 | length (d036_arm1): reliability - A [+0.025, +0.123], w/m 0.868, probe excess +7.3 c/oct | criteria ['yes', 'yes', 'yes']
+
+Seed means: synthetic F1-F4 -0.3 -0.5 +1.5 -0.2 SE, RPA -0.00 | dev Hillenbrand F1/F2/F3 +0.8/-3.2/-1.6  RPA +0.4  cp women F1 -1.9 | length (d036_arm1): reliability - A [+0.025, +0.123], w/m 0.868, probe excess +7.3 c/oct
+(1) no formant cost: yes; (2) length beats A: yes; (3) f0 guard: yes
+Per seed: F3 synthetic +1.5 SE / dev -1.6 Hz; f0 excess +7.3
+DECISION: 5b becomes item 5's model (teacher v3.1)
