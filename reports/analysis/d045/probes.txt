@@ -1,0 +1,65 @@
+D-045 probes (2026-10-29 12:55); D_h refitted on D-045's cached frames as registered; new frames scored with it (logit, real = +)
+
+D_h zeroth f: CV AUC 1.000 (as D-045)
+D_h zeroth m: CV AUC 1.000 (as D-045)
+D_h so_adult f: CV AUC 0.999 (as D-045)
+D_h so_adult m: CV AUC 0.999 (as D-045)
+
+(1) Occlusion: D_h refitted per condition on the probe frames (fresh channelled renders against real), CV AUC
+  zeroth   f: full 0.998  lp4k 0.999  lp2k 1.000  noise30 0.999
+  zeroth   m: full 1.000  lp4k 1.000  lp2k 1.000  noise30 1.000
+  so_adult f: full 0.996  lp4k 0.994  lp2k 0.997  noise30 0.997
+  so_adult m: full 0.999  lp4k 1.000  lp2k 0.999  noise30 1.000
+  READING (women, both corpora, AUC < 0.95 once removed): no occlusion removes the separation
+
+(2) Fresh channelled renders: clip-mean real-ness against generator and channel settings (Spearman, clip bootstrap)
+  zeroth women's D_h: clip real-ness median -20.38 (real frames' median +10.35)
+    f0_median              +0.499 [+0.416, +0.579]*
+    ch_codec_kbps          -0.353 [-0.557, -0.090]*
+    ch_drr_db              -0.305 [-0.457, -0.145]*
+    length_cm              -0.214 [-0.315, -0.093]*
+    ch_clean               -0.189 [-0.273, -0.095]*
+    tube                   -0.183 [-0.280, -0.086]*
+    hnr_db                 +0.153 [+0.054, +0.255]*
+    rd_median              -0.103 [-0.208, +0.008]
+    ch_mains_hz            -0.089 [-0.392, +0.214]
+    ch_gain_db             +0.080 [-0.035, +0.190]
+    jitter                 +0.069 [-0.036, +0.172]
+    ch_lowpass_order       -0.062 [-0.275, +0.134]
+    ch_highpass_order      +0.051 [-0.093, +0.192]
+    shimmer_db             -0.051 [-0.155, +0.045]
+    ch_snr_db              -0.039 [-0.176, +0.118]
+    ch_t60_s               +0.017 [-0.164, +0.185]
+    ch_highpass_hz         +0.011 [-0.139, +0.160]
+    ch_lowpass_hz          -0.011 [-0.211, +0.188]
+    nasal_or_subglottal    -0.002 [-0.097, +0.097]
+  so_adult women's D_h: clip real-ness median -14.22 (real frames' median +7.96)
+    f0_median              +0.439 [+0.346, +0.521]*
+    ch_codec_kbps          -0.374 [-0.555, -0.157]*
+    tube                   -0.277 [-0.366, -0.181]*
+    ch_drr_db              -0.274 [-0.440, -0.111]*
+    ch_mains_hz            -0.243 [-0.525, +0.073]
+    ch_clean               -0.209 [-0.302, -0.107]*
+    hnr_db                 +0.144 [+0.044, +0.244]*
+    ch_highpass_order      +0.088 [-0.068, +0.230]
+    jitter                 +0.080 [-0.025, +0.186]
+    ch_gain_db             +0.072 [-0.034, +0.180]
+    length_cm              -0.070 [-0.166, +0.034]
+    rd_median              -0.064 [-0.153, +0.033]
+    ch_lowpass_order       -0.037 [-0.245, +0.176]
+    shimmer_db             -0.026 [-0.126, +0.082]
+    ch_snr_db              +0.023 [-0.122, +0.180]
+    ch_highpass_hz         -0.018 [-0.170, +0.141]
+    ch_lowpass_hz          -0.015 [-0.223, +0.198]
+    nasal_or_subglottal    +0.010 [-0.087, +0.114]
+    ch_t60_s               +0.004 [-0.164, +0.177]
+
+(3) Resynthesised training clips (channelled as trained): real-ness logit, median [IQR]; share scored real
+  zeroth f: real +10.3; synth -20.2; vocalset -1.2 [-6.7, +3.1] real 0.43; zeroth_korean -4.2 [-9.0, +0.5] real 0.27
+  zeroth m: real +10.2; synth -17.5; vocalset -2.6 [-7.4, +0.8] real 0.30; zeroth_korean -6.6 [-11.1, -2.5] real 0.14
+  so_adult f: real +8.0; synth -14.1; vocalset -2.4 [-6.5, +1.2] real 0.33; zeroth_korean -4.1 [-7.8, -0.6] real 0.21
+  so_adult m: real +12.9; synth -20.6; vocalset -1.1 [-6.9, +3.8] real 0.44; zeroth_korean -4.7 [-10.4, +0.6] real 0.28
+
+(4) D-047's paired renders (women's range, channelled): clip-mean real-ness, 40 - 5 dB (clip bootstrap)
+  zeroth: +0.99 [+0.45, +1.55] (women's D_h; logit units; real frames minus synthetic frames median +30.6)
+  so_adult: +1.96 [+1.29, +2.67] (women's D_h; logit units; real frames minus synthetic frames median +22.1)

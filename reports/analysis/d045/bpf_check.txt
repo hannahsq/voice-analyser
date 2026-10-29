@@ -1,0 +1,6 @@
+bpf check: D-047 women's clips 0-19, mean band periodic fraction at 5 / 40 dB, and clips where 40 dB is higher
+  0-1 kHz: 0.954 / 0.971; higher at 40 dB in 19 of 20
+  1-2 kHz: 0.398 / 0.755; higher at 40 dB in 20 of 20
+  2-4 kHz: 0.042 / 0.452; higher at 40 dB in 20 of 20
+  4-6 kHz: -0.006 / 0.216; higher at 40 dB in 19 of 20
+  6-8 kHz: -0.005 / 0.053; higher at 40 dB in 14 of 20
