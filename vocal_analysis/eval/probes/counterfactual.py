@@ -16,6 +16,7 @@ with alpha, and resampling moves it with r, so every slope is also reported for 
 from __future__ import annotations
 
 import json
+import zlib
 from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
@@ -26,6 +27,7 @@ from scipy.signal import resample_poly
 from ...resynth.corpus import _analysis_name, load_audio
 from ...resynth.render import FS, HOP, ResynthConfig, _ramp_mask, cut_points, refilter, source_from_audio
 from ...resynth.tracks import PerturbConfig, perturb
+from ...synth import tract
 
 ALPHAS = (0.85, 0.92, 1.0, 1.09, 1.18)
 RATIOS = (0.84, 0.92, 1.0, 1.09, 1.19)
@@ -81,8 +83,8 @@ def load_items(store: str | Path, corpus_root: str | Path, per_group: int = 6, g
     return items
 
 
-def _det_tract(alpha: float) -> PerturbConfig:
-    return PerturbConfig(alpha=(alpha, alpha), offset_sd=(0.0, 0.0), bw_scale=(1.0, 1.0), upper_sd=0.0, p_nasal=0.0)
+def _det_tract(alpha: float, bw: float = 1.0) -> PerturbConfig:
+    return PerturbConfig(alpha=(alpha, alpha), offset_sd=(0.0, 0.0), bw_scale=(bw, bw), upper_sd=0.0, p_nasal=0.0)
 
 
 def _warp(src: dict, r: float, n_new: int) -> dict:
@@ -96,9 +98,12 @@ def _warp(src: dict, r: float, n_new: int) -> dict:
             "tracks": tracks, "tract_left": src["tract_left"][near]}
 
 
-def render(item: Item, alpha: float = 1.0, r: float = 1.0) -> tuple[np.ndarray, dict]:
+def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extras: str | None = None) -> tuple[np.ndarray, dict]:
     """-> (audio, labels): labels hold the exact formants and bandwidths (T, N), the frames that are pure re-filtered signal
-    (`scored`), and the voicing and f0 carried over from the tracker (f0 times r)."""
+    (`scored`), and the voicing and f0 carried over from the tracker (f0 times r).
+
+    bw scales every bandwidth (probe 7). extras ("nasal" or "subglottal", probe 8) adds that pole-zero pair set, drawn
+    from the training distribution (`synth.tract.sample_extras`) with a seed fixed per item; extras are not labels."""
     source, audio, src = item.source, item.audio, item.src
     if r != 1.0:
         fr = Fraction(r).limit_denominator(50)
@@ -109,7 +114,11 @@ def render(item: Item, alpha: float = 1.0, r: float = 1.0) -> tuple[np.ndarray, 
     # frame i at i * HOP: a clip of k * HOP samples has k + 1 frames, one more than its slice of the per-frame values
     src = {k: np.concatenate([np.asarray(v)[:n_frames]] + [np.asarray(v)[-1:]] * max(0, n_frames - len(v)))
            for k, v in src.items()}
-    p = perturb(src["tracks"], src["f0"], src["voiced"], np.random.default_rng(0), _det_tract(alpha))
+    p = perturb(src["tracks"], src["f0"], src["voiced"], np.random.default_rng(0), _det_tract(alpha, bw))
+    if extras:
+        rng = np.random.default_rng(zlib.crc32(item.key.encode()))
+        p["extras"] = tract.sample_extras(rng, p["info"]["apparent_length_cm"], p_nasal=float(extras == "nasal"),
+                                          p_subglottal=float(extras == "subglottal"))
     y = refilter(source, p["formants"], p["bandwidths"], p["extras"])
     son = src["sonorant"]
     ws = _ramp_mask(son, len(y), int(0.02 * FS))
@@ -127,3 +136,22 @@ def conditions() -> list[tuple[str, float, float]]:
     """(arm, alpha, r) for every rendered condition; the reference (1, 1) once, shared by both arms."""
     return ([("ref", 1.0, 1.0)] + [("length", a, 1.0) for a in ALPHAS if a != 1.0]
             + [("f0", 1.0, r) for r in RATIOS if r != 1.0])
+
+
+def chain(audio: np.ndarray, kind: str, value: float) -> np.ndarray:
+    """Probe 9's signal-chain conditions on a clip: "gain" (x value, no clipping: the peak is not renormalised),
+    "dc" (offset of value times the peak), "clip" (hard clip at value times the peak), "resample" (16 kHz -> value Hz
+    -> 16 kHz, polyphase both ways)."""
+    x = np.asarray(audio, float)
+    if kind == "gain":
+        return (x * value).astype(np.float32)
+    if kind == "dc":
+        return (x + value * np.max(np.abs(x))).astype(np.float32)
+    if kind == "clip":
+        c = value * np.max(np.abs(x))
+        return np.clip(x, -c, c).astype(np.float32)
+    if kind == "resample":
+        fr = Fraction(int(value), FS)
+        up = resample_poly(x, fr.numerator, fr.denominator)
+        return resample_poly(up, fr.denominator, fr.numerator)[: len(x)].astype(np.float32)
+    raise ValueError(kind)

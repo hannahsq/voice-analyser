@@ -361,9 +361,14 @@ def sample_speaker(rng: np.random.Generator, length_cm: float) -> TubeSpeaker:
     )
 
 
+# tier III length changes at Story's size (cm): larynx (lowering > 0) and lips (protrusion > 0)
+PG_RANGE = (-0.5, 0.5)
+PM_RANGE = (-0.3, 1.0)
+
+
 def sample_target(rng: np.random.Generator, spk: TubeSpeaker, n_poles: int, f_max_hz: float, p_constrict: float = 0.15,
-                  p_larynx: float = 0.3, p_lips: float = 0.3, min_area_cm2: float = 0.1, q_draw=None, glottis=None
-                  ) -> tuple[np.ndarray, np.ndarray, dict]:
+                  p_larynx: float = 0.3, p_lips: float = 0.3, min_area_cm2: float = 0.1, q_draw=None, glottis=None,
+                  pg_cm: float | None = None, pm_cm: float | None = None) -> tuple[np.ndarray, np.ndarray, dict]:
     """One articulatory target: F1..F_n_poles and bandwidths (NaN above f_max_hz) plus the parameters drawn.
 
     glottis (`coupling.Glottis`, D-023): also find how far the first poles move with the glottis open at its peak
@@ -374,6 +379,9 @@ def sample_target(rng: np.random.Generator, spk: TubeSpeaker, n_poles: int, f_ma
     size) are redrawn, so the tract stays open (sonorant). Optional tier II constriction (approximant-like,
     0.15-0.8 cm^2 at Story's size) and tier III larynx / lip length changes. A shape whose poles can't be
     found is redrawn and listed under info["rejected"]; the first shape's draws are unchanged by this.
+
+    pg_cm, pm_cm (D-051): larynx and lip length changes imposed from outside (a sustained trajectory) instead of drawn;
+    None draws them as before (PG_RANGE, PM_RANGE times the speaker's size), so earlier sets reproduce.
     """
     rel = spk.length_cm / STORY_LENGTH_CM
     rejected: list[dict] = []
@@ -391,8 +399,14 @@ def sample_target(rng: np.random.Generator, spk: TubeSpeaker, n_poles: int, f_ma
                          "sc": float(np.exp(rng.uniform(np.log(1 / 3), np.log(3)))),
                          "ac": float(rng.uniform(0.15, 0.8) * spk.area_scale)}
             info["constrict"] = constrict
-        pg = float(rng.uniform(-0.5, 0.5) * rel) if rng.random() < p_larynx else 0.0
-        pm = float(rng.uniform(-0.3, 1.0) * rel) if rng.random() < p_lips else 0.0
+        if pg_cm is not None:
+            pg = float(pg_cm)
+        else:
+            pg = float(rng.uniform(*PG_RANGE) * rel) if rng.random() < p_larynx else 0.0
+        if pm_cm is not None:
+            pm = float(pm_cm)
+        else:
+            pm = float(rng.uniform(*PM_RANGE) * rel) if rng.random() < p_lips else 0.0
         info.update(pg_cm=pg, pm_cm=pm)
         shape = build_shape(q1, q2, spk.length_cm, pharynx_ratio=spk.pharynx_ratio, area_scale=spk.area_scale,
                             omega_warp=spk.omega_warp, constrict=constrict, pg=pg, pm=pm, perimeter_factor=spk.perimeter_factor)

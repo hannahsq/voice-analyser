@@ -40,6 +40,8 @@ def decode_outputs(out: dict) -> dict[str, np.ndarray]:
         res["observability"] = sig(out["obs_logit"])
     if "vtl_mu" in out:  # D-036: anatomical tract length, log2 cm, and its sigma (log2 units)
         res["vtl_log2cm"], res["vtl_sigma"] = out["vtl_mu"], np.exp(0.5 * out["vtl_logvar"])
+    if "vtl_inst_mu" in out:  # D-051: instantaneous tract length (larynx and lips included), log2 cm, and its sigma
+        res["vtl_inst_log2cm"], res["vtl_inst_sigma"] = out["vtl_inst_mu"], np.exp(0.5 * out["vtl_inst_logvar"])
     return res
 
 

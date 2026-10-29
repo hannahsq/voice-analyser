@@ -259,7 +259,10 @@ def cmd_train(cfg: Config, args: argparse.Namespace) -> int:
     for kv in args.train_set:
         k, v = kv.split("=", 1)
         cur = getattr(tc, k)
-        setattr(tc, k, _parse_value(v) if cur is None else type(cur)(v))
+        # bools by name (bool("false") is True); tuples as comma lists (tuple(str) splits characters). No chain had
+        # passed either before 2026-10-30 (D-051), so earlier commands parse as they did
+        setattr(tc, k, _parse_value(v) if cur is None else v.lower() in ("1", "true", "yes") if isinstance(cur, bool)
+                else tuple(_parse_value(x) for x in v.split(",")) if isinstance(cur, tuple) else type(cur)(v))
     mc = TeacherConfig(comb=not args.no_comb)
     for kv in args.model_set:  # new runs only: a resumed run or branch keeps its checkpoint's architecture
         k, v = kv.split("=", 1)

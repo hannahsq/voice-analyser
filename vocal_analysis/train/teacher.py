@@ -71,6 +71,11 @@ class TrainConfig:
     resynth: tuple[str, ...] = ()
     resynth_frac: float = 0.3
     resynth_val: tuple[str, ...] = ()  # held-out resynthesised sets, scored on their (exact) formants
+    # D-051: further synthetic sets (e.g. long articulation clips): `synth_extra_frac` of items, split by clip count;
+    # the rest keeps the main set and resynthesised sets in their usual proportions. Their last 2 % of clips are held
+    # out and scored as "eval_extra:<name>". 0 / () = earlier runs' mix exactly
+    synth_extra: tuple[str, ...] = ()
+    synth_extra_frac: float = 0.0
     tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT
     # D-036: an anatomical vocal-tract-length head added at a branch. None = none; "new" (initialised with vtl_seed);
     # "frozen:<head.pt>" (D-035's trained head, not updated); "tepid:<head.pt>" (shrink and perturb: 0.5 x D-035's
@@ -78,6 +83,9 @@ class TrainConfig:
     # branch, then cosine to 0 at `steps`. Gradient into the trunk gated: 0 for vtl_detach steps, then a linear ramp to
     # 1 over vtl_gate_ramp steps. Labels: train.data's "vtl"; loss weight loss_weights["vtl"].
     vtl: str | None = None
+    # D-051: also the instantaneous-length head (TeacherConfig.vtl_inst_head), initialised with vtl_seed + 1, in the
+    # VTL head's parameter group, gate and schedule; labels train.data's "vtl_inst"; loss weight loss_weights["vtl_inst"]
+    vtl_inst: bool = False
     vtl_seed: int = 0
     vtl_warmup: int = 300
     vtl_detach: int = 300
@@ -176,9 +184,9 @@ def _optimizer(model, cfg: "TrainConfig"):
         return torch.optim.AdamW(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
 
     if cfg.optimizer in ("adamw", "adan"):  # the VTL head (D-036) gets its own group, added by the trainer
-        return rest([p for n, p in model.named_parameters() if not n.startswith("vtl_head.")])
+        return rest([p for n, p in model.named_parameters() if not n.startswith(VTL_PREFIXES)])
     if cfg.optimizer in ("muon", "muon_adan"):
-        vtl_ids = {id(p) for n, p in model.named_parameters() if n.startswith("vtl_head.")}  # added by the trainer
+        vtl_ids = {id(p) for n, p in model.named_parameters() if n.startswith(VTL_PREFIXES)}  # added by the trainer
         mu, other = ([p for p in ps if id(p) not in vtl_ids] for ps in muon_split(model))
         other_opt = rest(other)
         for g in other_opt.param_groups:
@@ -256,10 +264,22 @@ def _vtl_gate(step: int, cfg: TrainConfig) -> float:
     return 0.0 if rel < 0 else min(1.0, rel / max(1, cfg.vtl_gate_ramp))
 
 
+VTL_PREFIXES = ("vtl_head.", "vtl_inst_head.")  # D-036 / D-051: the heads in the VTL parameter group
+
+
+def _vtl_params(model) -> list:
+    return [p for n, p in model.named_parameters() if n.startswith(VTL_PREFIXES) and p.requires_grad]
+
+
 def _add_vtl_head(model, cfg: TrainConfig, log) -> None:
     """Initialise the VTL head per cfg.vtl (see TrainConfig)."""
     import torch
 
+    if hasattr(model, "vtl_inst_head"):  # D-051: always fresh (no saved head exists)
+        torch.manual_seed(cfg.vtl_seed + 1)
+        for m in model.vtl_inst_head:
+            if hasattr(m, "reset_parameters"):
+                m.reset_parameters()
     torch.manual_seed(cfg.vtl_seed)
     for m in model.vtl_head:
         if hasattr(m, "reset_parameters"):
@@ -329,7 +349,7 @@ def evaluate(model, batches, device) -> dict:
 
     model.eval()
     rows = {"fm_err": [], "fm_ref": [], "f0_c": [], "voiced_ok": [], "f0_ref": [], "son": [], "obs_p": [], "obs": [],
-            "vtl_mu": [], "vtl_lv": [], "vtl": []}
+            "vtl_mu": [], "vtl_lv": [], "vtl": [], "vtl_inst_mu": [], "vtl_inst_lv": [], "vtl_inst": []}
     with torch.inference_mode():
         for lp, lab in batches:
             with torch.autocast(device.type, dtype=torch.bfloat16):
@@ -354,6 +374,10 @@ def evaluate(model, batches, device) -> dict:
                 rows["vtl_mu"].append(out["vtl_mu"].float().cpu().numpy())
                 rows["vtl_lv"].append(out["vtl_logvar"].float().clamp(-12, 4).cpu().numpy())  # as the loss clamps it
                 rows["vtl"].append(lab["vtl"].cpu().numpy())
+            if "vtl_inst_mu" in out and "vtl_inst" in lab:
+                rows["vtl_inst_mu"].append(out["vtl_inst_mu"].float().cpu().numpy())
+                rows["vtl_inst_lv"].append(out["vtl_inst_logvar"].float().clamp(-12, 4).cpu().numpy())
+                rows["vtl_inst"].append(lab["vtl_inst"].cpu().numpy())
     model.train()
     rows = {k: v for k, v in rows.items() if v}
     cat = {k: np.concatenate([r.reshape(-1, *r.shape[2:]) for r in v]) for k, v in rows.items()}
@@ -382,17 +406,21 @@ def evaluate(model, batches, device) -> dict:
             if ok.sum() > 1:
                 res[f"F{n + 1}_obs_mae"] = float(np.mean(np.abs(op[ok, n] - ol[ok, n])))
                 res[f"F{n + 1}_obs_rho"] = float(spearmanr(op[ok, n], ol[ok, n])[0])
-    if "vtl" in cat:  # D-036 head, log2 cm, on sonorant frames with a label (tube clips whose length was not drawn from f0)
-        y = cat["vtl"]
+    # D-036 head ("vtl") and D-051's instantaneous head ("vtl_inst"), log2 cm, on sonorant frames with a label (tube
+    # clips whose length was not drawn from f0)
+    for key in ("vtl", "vtl_inst"):
+        if key not in cat:
+            continue
+        y = cat[key]
         ok = son & np.isfinite(y)
         if ok.any():
-            mu, lv, y = cat["vtl_mu"][ok], cat["vtl_lv"][ok], y[ok]
+            mu, lv, y = cat[f"{key}_mu"][ok], cat[f"{key}_lv"][ok], y[ok]
             ratio = np.exp2(mu - y)
-            res["vtl_mae_pct"] = float(100 * np.mean(np.abs(ratio - 1)))
-            res["vtl_bias_pct"] = float(100 * (np.exp2(np.median(mu - y)) - 1))
-            res["vtl_nll"] = float(np.mean(0.5 * (lv + (y - mu) ** 2 / np.exp(lv))))  # the training loss's form
-            res["vtl_cover1"] = float(np.mean(np.abs(mu - y) <= np.exp(lv / 2)))  # ideal 0.683
-            res["vtl_frames"] = int(ok.sum())
+            res[f"{key}_mae_pct"] = float(100 * np.mean(np.abs(ratio - 1)))
+            res[f"{key}_bias_pct"] = float(100 * (np.exp2(np.median(mu - y)) - 1))
+            res[f"{key}_nll"] = float(np.mean(0.5 * (lv + (y - mu) ** 2 / np.exp(lv))))  # the training loss's form
+            res[f"{key}_cover1"] = float(np.mean(np.abs(mu - y) <= np.exp(lv / 2)))  # ideal 0.683
+            res[f"{key}_frames"] = int(ok.sum())
     return res
 
 
@@ -445,7 +473,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     if cfg.vtl:
         if cfg.optimizer not in ("adamw", "adan", "muon", "muon_adan"):  # D-040: Muon runs keep it out of Muon
             raise ValueError("a VTL head needs adamw, adan, muon or muon_adan (its own parameter group)")
-        model_cfg = replace(model_cfg, vtl_head=True)
+        model_cfg = replace(model_cfg, vtl_head=True, vtl_inst_head=model_cfg.vtl_inst_head or cfg.vtl_inst)
+    elif cfg.vtl_inst:
+        raise ValueError("vtl_inst needs vtl")
     model = Teacher(model_cfg).to(device)
     sf = cfg.optimizer == "schedulefree"
     if sf:
@@ -459,7 +489,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     sf_mode = lambda mode: getattr(opt, mode)() if sf else None  # noqa: E731
     step = 0
     ema = None
-    vtl_params = [p for p in model.vtl_head.parameters() if p.requires_grad] if cfg.vtl else []
+    vtl_params = _vtl_params(model) if cfg.vtl else []
 
     def add_vtl_group():
         _add_vtl_group(opt, vtl_params, cfg)
@@ -472,7 +502,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     if ck is not None:
         if new_vtl:
             missing, unexpected = model.load_state_dict(ck["model"], strict=False)
-            assert not unexpected and all(k.startswith("vtl_head.") for k in missing), (missing, unexpected)
+            assert not unexpected and all(k.startswith(VTL_PREFIXES) for k in missing), (missing, unexpected)
         else:
             model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
@@ -481,7 +511,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         log(f"{'resumed' if start == last else f'branched from {start}'} at step {step}")
     if new_vtl:
         _add_vtl_head(model, cfg, log)
-        vtl_params = [p for p in model.vtl_head.parameters() if p.requires_grad]
+        vtl_params = _vtl_params(model)
         add_vtl_group()
     if cfg.ema_decay > 0:  # from the checkpoint's average if it has one, else from the current weights
         import copy
@@ -509,19 +539,39 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     obs = model_cfg.obs_head  # D-027: the loaders add observability labels (NaN where a set has no store)
     if obs and not (flat / "obs_sig.npy").exists():
         raise FileNotFoundError(f"obs_head needs {flat}'s observability store (obs_store.write_store)")
-    vtl = bool(cfg.vtl)
-    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs, vtl=vtl)
+    vtl, vti = bool(cfg.vtl), bool(cfg.vtl_inst)
+    ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs, vtl=vtl,
+                    vtl_inst=vti)
     if cfg.resynth:
         parts, sizes = [], []
         for d in cfg.resynth:
             rflat = consolidate(d, log=log)
             n = json.loads((rflat / "done").read_text())["n_clips"]
             parts.append(SynthCrops(rflat, np.arange(n), cfg.n_frames, channel, seed=cfg.seed + 1 + len(parts),
-                                    epoch_size=epoch, tract_left_weight=cfg.tract_left_weight, observability=obs, vtl=vtl))
+                                    epoch_size=epoch, tract_left_weight=cfg.tract_left_weight, observability=obs, vtl=vtl,
+                                    vtl_inst=vti))
             sizes.append(n)
         weights = [1.0 - cfg.resynth_frac] + [cfg.resynth_frac * n / sum(sizes) for n in sizes]
-        ds = MixedCrops([ds, *parts], weights, epoch, seed=cfg.seed)
+        if not cfg.synth_extra:
+            ds = MixedCrops([ds, *parts], weights, epoch, seed=cfg.seed)
         log(f"resynthesised: {sum(sizes):,} clips in {len(sizes)} sets, {cfg.resynth_frac:.0%} of items")
+    extra_val = {}
+    if cfg.synth_extra:  # D-051: the rest keeps its proportions, scaled by 1 - synth_extra_frac
+        base_parts, base_w = ([ds, *parts], weights) if cfg.resynth else ([ds], [1.0])
+        xparts, xsizes = [], []
+        for d in cfg.synth_extra:
+            xflat = consolidate(d, log=log)
+            n = json.loads((xflat / "done").read_text())["n_clips"]
+            xtr, xva = split_ids(n)
+            xparts.append(SynthCrops(xflat, xtr, cfg.n_frames, channel, seed=cfg.seed + 101 + len(xparts), epoch_size=epoch,
+                                     observability=obs, vtl=vtl, vtl_inst=vti))
+            xsizes.append(len(xtr))
+            extra_val[f"eval_extra:{Path(d).name}"] = SynthCrops(xflat, xva[: cfg.val_clips], cfg.n_frames, channel, seed=12345,
+                                                                  fixed=True, observability=obs, vtl=vtl, vtl_inst=vti)
+        f = cfg.synth_extra_frac
+        weights = [(1.0 - f) * w for w in base_w] + [f * n / sum(xsizes) for n in xsizes]
+        ds = MixedCrops([*base_parts, *xparts], weights, epoch, seed=cfg.seed)
+        log(f"extra synthetic: {sum(xsizes):,} clips in {len(xsizes)} sets, {f:.0%} of items")
     common = dict(num_workers=cfg.workers, collate_fn=collate, persistent_workers=True, pin_memory=False, prefetch_factor=4)
     if cfg.crop_frames:
         batches = LengthBatches(1000, epoch, tuple(cfg.crop_frames), cfg.batch * cfg.n_frames, seed=cfg.seed + step,
@@ -530,8 +580,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     # vtl only adds the label (no random draws), so the crops stay those of runs before it was passed
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True, observability=obs, vtl=vtl)
-    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True, observability=obs, vtl=vtl)
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti)
+    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True, observability=obs, vtl=vtl,
+                          vtl_inst=vti)
     resynth_val = {}
     for d in cfg.resynth_val:
         rflat = consolidate(d, log=log)
@@ -543,7 +594,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     val_sets = {"eval": cache_batches(DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate), vq, device),
                 "eval_short": cache_batches(DataLoader(short_ds, cfg.batch * cfg.n_frames // cfg.val_short_frames,
                                                        num_workers=4, collate_fn=collate), vq, device)}
-    for name, rv in resynth_val.items():
+    for name, rv in (resynth_val | extra_val).items():
         val_sets[name] = cache_batches(DataLoader(rv, cfg.batch, num_workers=4, collate_fn=collate), vq, device)
     rng = np.random.default_rng(cfg.seed + step)
 

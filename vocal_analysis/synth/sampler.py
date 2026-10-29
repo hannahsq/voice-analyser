@@ -119,6 +119,17 @@ class SynthConfig:
     interactive_return: bool = False
     # subglottal resonance strength between speakers: the subglottal impedance's magnitude x log-uniform in this range
     interactive_sub_gain: tuple[float, float] = (0.5, 2.0)
+    # D-051: per tube clip, larynx height and lip protrusion follow sustained trajectories ("sustained": holds of
+    # artic_hold_s joined by raised-cosine transitions of artic_transition_s, each level uniform over tube.PG_RANGE /
+    # PM_RANGE times the speaker's size, pg and pm independently) instead of a draw per target. None draws nothing,
+    # so earlier sets reproduce. The anatomical length stays the clip's; label length_inst_cm follows the tube's length
+    articulation: str | None = None
+    artic_hold_s: tuple[float, float] = (1.0, 4.0)
+    artic_transition_s: tuple[float, float] = (0.2, 1.0)
+    # "fixed" (D-050 probe 10): larynx and lip changes held at these values (cm at Story's size, times the speaker's)
+    # on every target, with no draws, so clips differing only in them share every other draw
+    artic_pg_cm: float = 0.0
+    artic_pm_cm: float = 0.0
 
 
 # How train_v1 and suite_v1 were generated, for fields added since (D-011, D-012). Pinning these
@@ -188,6 +199,21 @@ def _smooth_noise(rng: np.random.Generator, n: int, corr_pts: float, std: float)
     k = np.exp(-0.5 * (np.arange(-pad, pad + 1) / max(corr_pts, 1e-3)) ** 2)
     s = np.convolve(w, k / k.sum(), mode="same")[pad : pad + n]
     return s / (s.std() + 1e-12) * std
+
+
+def _sustained(rng: np.random.Generator, n: int, lo: float, hi: float, hold_s: tuple[float, float],
+               transition_s: tuple[float, float]) -> np.ndarray:
+    """D-051: a level held for hold_s, then a raised-cosine move over transition_s to a new level, ...; levels uniform
+    in [lo, hi]; n control points (1 ms)."""
+    values, times, widths, t = [rng.uniform(lo, hi)], [], [], 0.0
+    while True:
+        t += rng.uniform(*hold_s) * 1000
+        w = rng.uniform(*transition_s) * 1000
+        if t >= n:
+            break
+        times.append(t + w / 2), widths.append(w), values.append(rng.uniform(lo, hi))
+        t += w
+    return _raised_cosine_steps(n, np.array(times), np.array(values), np.array(widths))
 
 
 def _raised_cosine_steps(n: int, times: np.ndarray, values: np.ndarray, widths: np.ndarray) -> np.ndarray:
@@ -438,6 +464,57 @@ def _phrasing(rng: np.random.Generator, cfg: SynthConfig, n: int):
     return voice_env, whisper, fric, h_env, segments, whisper_clip, loud, tt
 
 
+def _articulation(rng, cfg: SynthConfig, spk, n: int, tt) -> tuple[list, list]:
+    """Per target: imposed larynx and lip changes (cm) under cfg.articulation, else None (sample_target draws them)."""
+    if cfg.articulation is None:
+        return [None] * len(tt), [None] * len(tt)
+    rel = spk.length_cm / tube.STORY_LENGTH_CM
+    if cfg.articulation == "fixed":
+        return [cfg.artic_pg_cm * rel] * len(tt), [cfg.artic_pm_cm * rel] * len(tt)
+    if cfg.articulation != "sustained":
+        raise ValueError(f"unknown articulation {cfg.articulation!r}")
+    at = np.clip(np.array(tt).astype(int), 0, n - 1)
+    pg = _sustained(rng, n, *(np.array(tube.PG_RANGE) * rel), cfg.artic_hold_s, cfg.artic_transition_s)
+    pm = _sustained(rng, n, *(np.array(tube.PM_RANGE) * rel), cfg.artic_hold_s, cfg.artic_transition_s)
+    return [float(x) for x in pg[at]], [float(x) for x in pm[at]]
+
+
+def clip_length_inst(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> np.ndarray:
+    """Clip `index`'s per-frame instantaneous tract length (cm; D-051) without rendering: `generate`'s draws up to the
+    transitions, copied in order (tube targets included; a coupled or interactive clip's glottis is drawn but not
+    used, since it does not change the target lengths). Equals generate's labels["length_inst_cm"] (tested)."""
+    cfg = cfg or SynthConfig()
+    if cfg.formant_constraint:
+        raise NotImplementedError("formant_constraint draws between the targets and the transitions")
+    v = _voice_and_length(index, cfg, seed)
+    rng, n, length = v.rng, v.n, v.length
+    *_, tt = _phrasing(rng, cfg, n)
+    fi = np.arange(0, n - 1, int(round(cfg.hop_s * 1000)))
+    use_tube = cfg.p_tube > 0 and rng.random() < cfg.p_tube
+    if not use_tube:
+        return np.full(len(fi), length)
+    spk = tube.sample_speaker(rng, length)
+    if cfg.p_interactive > 0 and cfg.formant_constraint is None and rng.random() < cfg.p_interactive:
+        coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
+        rng.uniform(*cfg.interactive_sq)
+        rng.uniform(*np.log(cfg.interactive_sub_gain))
+        if cfg.interactive_coupled and not cfg.p_interactive_coupled >= 1:
+            rng.random()
+        if cfg.p_lf_pulse > 0:
+            rng.random()
+        if cfg.interactive_closure is not None:
+            rng.uniform(*np.log(cfg.interactive_closure))
+    elif cfg.p_coupling > 0 and rng.random() < cfg.p_coupling:
+        coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
+        rng.uniform(*cfg.coupling_scale)
+    q_draw = tube.vowel_q_sampler(tube.CONVERSATIONAL_VOWELS, tube.vowel_centres(length)) if cfg.vowel_dist == "conversational" else None
+    pg_at, pm_at = _articulation(rng, cfg, spk, n, tt)
+    inst = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw,
+                               pg_cm=pg_at[i], pm_cm=pm_at[i])[2]["length_cm"] for i in range(len(tt))]
+    widths = rng.uniform(*cfg.transition_s, len(tt) - 1) * 1000
+    return _raised_cosine_steps(n, np.array(tt[1:]), np.array(inst), widths)[fi]
+
+
 def clip_tract(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> tuple[float, bool, bool]:
     """Clip `index`'s anatomical tract length (cm), whether it was drawn from the clip's f0 (`p_length_from_f0`), and
     whether the clip uses the tube (else the cascade), without rendering: the draws `generate` makes before the tract
@@ -478,8 +555,10 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
             glottis = coupling.sample_glottis(rng, length, cfg.glottal_peak_area_cm2, cfg.glottal_gap_offset)
             c_scale = float(rng.uniform(*cfg.coupling_scale))
         q_draw = tube.vowel_q_sampler(tube.CONVERSATIONAL_VOWELS, tube.vowel_centres(length)) if cfg.vowel_dist == "conversational" else None
+        pg_at, pm_at = _articulation(rng, cfg, spk, n, tt)
         drawn = [tube.sample_target(rng, spk, tract.N_POLES, tract.F_MAX_HZ, cfg.p_tube_constrict, q_draw=q_draw,
-                                    glottis=None if interactive else glottis) for _ in tt]
+                                    glottis=None if interactive else glottis, pg_cm=pg_at[i], pm_cm=pm_at[i])
+                 for i in range(len(tt))]
         targets = np.array([d[0] for d in drawn])
         tube_bws = np.array([d[1] for d in drawn])
         tube_info = {"speaker": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in asdict(spk).items()},
@@ -570,6 +649,9 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
         "source_h_db": (np.full((len(fi), N_SOURCE_HARMONICS), np.nan) if interactive
                         else source_h_db(rd[fi], N_SOURCE_HARMONICS)),
         "length_cm": np.full(len(fi), length),
+        # D-051: the tube's length at each target (anatomical + larynx + lips), with the formants' transitions
+        "length_inst_cm": (_raised_cosine_steps(n, np.array(tt[1:]), np.array([d[2]["length_cm"] for d in drawn]), widths)[fi]
+                           if use_tube else np.full(len(fi), length)),
     }
     meta = {
         "index": index, "seed": seed, "fs": FS, "duration_s": len(audio) / FS, "length_cm": length, "length_group": length_group,

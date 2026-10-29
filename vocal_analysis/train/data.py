@@ -88,7 +88,7 @@ def _pad_labels(key: str, v: np.ndarray, n: int) -> np.ndarray:
     keep finite on every frame (f0 carries its contour through unvoiced frames; the comb reads it), repeat the last."""
     if v.dtype == bool:
         return np.zeros((n,) + v.shape[1:], bool)
-    if key in ("formants", "bandwidths", "vtl"):
+    if key in ("formants", "bandwidths", "vtl", "vtl_inst"):
         return np.full((n,) + v.shape[1:], np.nan, v.dtype)
     return np.repeat(v[-1:], n, axis=0)
 
@@ -104,7 +104,7 @@ class SynthCrops:
                  channel: ChannelConfig | None = ChannelConfig(), seed: int = 0, epoch_size: int | None = None,
                  fixed: bool = False, tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT,
                  observability: bool = False, obs_config=None, obs_floor: str = "recording",
-                 obs_rec_snr_db: float | None = None, vtl: bool = False):
+                 obs_rec_snr_db: float | None = None, vtl: bool = False, vtl_inst: bool = False):
         self.dir = Path(flat_dir)
         self.clip_ids = np.asarray(clip_ids)
         self.n_frames = n_frames
@@ -121,6 +121,9 @@ class SynthCrops:
         # D-036: per-frame anatomical length label ("vtl", log2 cm) on tube clips whose length was not drawn from f0
         # (scripts/analysis/vtl_labels.py's files beside flat/); NaN elsewhere and for sets without those files
         self.vtl = vtl
+        # D-051: per-frame instantaneous length ("vtl_inst", log2 cm; scripts/analysis/inst_labels.py's
+        # label_length_inst_cm.npy), on the same clips as "vtl"; NaN elsewhere
+        self.vtl_inst = vtl_inst
         self._arrays = None
 
     def _open(self):
@@ -134,6 +137,8 @@ class SynthCrops:
             if self.vtl and (self.dir / "label_length_cm.npy").exists():
                 self._arrays["vtl_frames"] = load("label_length_cm.npy")
                 self._arrays["vtl_ok"] = np.load(self.dir / "clip_tube.npy") & ~np.load(self.dir / "clip_length_from_f0.npy")
+                if self.vtl_inst and (self.dir / "label_length_inst_cm.npy").exists():
+                    self._arrays["vtl_inst_frames"] = load("label_length_inst_cm.npy")
             tl = self.dir / "clip_tract_left.npy"
             self._arrays["clip_weight"] = formant_weight(np.load(tl), self.tract_left_weight) if tl.exists() else None
         return self._arrays
@@ -160,6 +165,10 @@ class SynthCrops:
         if self.vtl:
             ok = "vtl_ok" in arr and bool(arr["vtl_ok"][cid])
             lab["vtl"] = np.log2(np.asarray(arr["vtl_frames"][f0_:f1_], np.float32)) if ok else np.full(n_clip_frames, np.nan, np.float32)
+            if self.vtl_inst:
+                ok_i = ok and "vtl_inst_frames" in arr
+                lab["vtl_inst"] = (np.log2(np.asarray(arr["vtl_inst_frames"][f0_:f1_], np.float32)) if ok_i
+                                   else np.full(n_clip_frames, np.nan, np.float32))
         params = {"clean": True}
         if self.channel is not None:
             mask = np.repeat(lab["voiced"], HOP)[: len(x)]

@@ -53,6 +53,9 @@ class TeacherConfig:
     # D-036: anatomical vocal-tract-length head (D-035's per-frame design): mean and log variance of log2 length (cm)
     # from the formant trunk, behind a gradient gate (Teacher.vtl_gate: 0 = no gradient into the trunk, 1 = full).
     vtl_head: bool = False
+    # D-051: instantaneous tract length head (larynx height and lip protrusion included), built as vtl_head and fed
+    # through the same gate; needs vtl_head
+    vtl_inst_head: bool = False
 
 
 class _GradGate(torch.autograd.Function):
@@ -238,6 +241,8 @@ class Teacher(nn.Module):
         if cfg.vtl_head:
             self.vtl_head = vtl_head_module(d)
             self.vtl_gate = 1.0  # set by the trainer each step
+        if cfg.vtl_inst_head:
+            self.vtl_inst_head = vtl_head_module(d)
         self.register_buffer("log2_vqt", LOG2_VQT.clone(), persistent=False)
         self.register_buffer("f0_log2", torch.log2(torch.tensor(F0_AXIS.centres_hz, dtype=torch.float32)), persistent=False)
         self.register_buffer("fm_bins", torch.arange(FORMANT_AXIS.n_bins, dtype=torch.float32), persistent=False)
@@ -285,6 +290,9 @@ class Teacher(nn.Module):
             hv = h.detach() if g == 0 else h if g == 1 else _GradGate.apply(h, float(g))
             v = self.vtl_head(hv).float()
             out["vtl_mu"], out["vtl_logvar"] = v[..., 0], v[..., 1]
+            if self.cfg.vtl_inst_head:
+                vi = self.vtl_inst_head(hv).float()
+                out["vtl_inst_mu"], out["vtl_inst_logvar"] = vi[..., 0], vi[..., 1]
         return out
 
 

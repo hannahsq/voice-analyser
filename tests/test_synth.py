@@ -377,3 +377,46 @@ def test_write_set_keeps_provenance_when_nothing_is_written(tmp_path):
     (tmp_path / "index.json").write_text(json.dumps(idx | {"git_commit": "original"}))
     write_set(tmp_path, 2, cfg, seed=0, shard_size=2, workers=1, log=lambda m: None)
     assert json.loads((tmp_path / "index.json").read_text())["git_commit"] == "original"
+
+
+def test_length_inst_replay_matches_generate():
+    from dataclasses import replace
+
+    from vocal_analysis.synth.sampler import SynthConfig, clip_length_inst, generate
+
+    base = SynthConfig(duration_s=(1.0, 1.5), p_tube=0.7)
+    for cfg in (base, replace(base, articulation="sustained", p_tube=1.0, duration_s=(3.0, 4.0))):
+        for i in range(6):
+            c = generate(i, cfg, seed=3)
+            np.testing.assert_allclose(clip_length_inst(i, cfg, seed=3), c.labels["length_inst_cm"], rtol=0, atol=1e-9)
+
+
+def test_sustained_articulation_moves_length_and_keeps_anatomy():
+    from vocal_analysis.synth.sampler import SynthConfig, generate
+
+    cfg = SynthConfig(duration_s=(8.0, 8.0), p_tube=1.0, articulation="sustained")
+    c = generate(1, cfg, seed=0)
+    inst, anat = c.labels["length_inst_cm"], c.labels["length_cm"]
+    assert np.ptp(anat) == 0 and np.ptp(inst) > 0.2  # the tube's length moves while the anatomical label stays
+    assert np.all(np.abs(inst - anat) <= 1.5 * anat[0] / 17.5 + 1e-6)  # within PG + PM range at this size
+
+
+def test_default_config_draws_unchanged_by_articulation_option():
+    from vocal_analysis.synth.sampler import SynthConfig, generate
+
+    cfg = SynthConfig(duration_s=(1.0, 1.5), p_tube=1.0)
+    c = generate(4, cfg, seed=1)
+    assert all(t.get("pg_cm") is not None for t in c.meta["tube"]["targets"])
+
+
+def test_fixed_articulation_pairs_clips():
+    from dataclasses import replace
+
+    from vocal_analysis.synth.sampler import SynthConfig, generate
+
+    cfg = SynthConfig(duration_s=(1.0, 1.5), p_tube=1.0, articulation="fixed")
+    a, b = generate(2, cfg, seed=5), generate(2, replace(cfg, artic_pg_cm=0.4), seed=5)
+    np.testing.assert_array_equal(a.labels["f0"], b.labels["f0"])  # same source draws
+    np.testing.assert_array_equal(a.labels["length_cm"], b.labels["length_cm"])  # same anatomy
+    assert np.all(b.labels["length_inst_cm"] > a.labels["length_inst_cm"])  # a lowered larynx lengthens the tract
+    assert np.nanmedian(b.labels["formants"][:, 0]) < np.nanmedian(a.labels["formants"][:, 0])
