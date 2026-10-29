@@ -1,0 +1,5 @@
+Time reversal across a speaker change (D-050, probe 5): conformer_v2r2_s1_d16k
+median |forward - reversed| (cents) by distance from the join (frames); cross-speaker, same-speaker, difference
+  F1  0-10: 60/118/-58  10-25: 46/56/-10  25-50: 55/42/+12  50-100: 56/53/+3  100-200: 57/59/-2  200-end: 57/60/-3
+  F2  0-10: 12/27/-15  10-25: 21/17/+3  25-50: 33/26/+7  50-100: 22/17/+4  100-200: 28/27/+1  200-end: 23/29/-7
+  F3  0-10: 8/6/+3  10-25: 9/8/+1  25-50: 13/16/-3  50-100: 10/10/-0  100-200: 11/11/+0  200-end: 11/12/-1

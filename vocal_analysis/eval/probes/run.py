@@ -159,11 +159,11 @@ def render_probe(probe: str, per_group: int = 6, log=print) -> Path:
                     lab = ref_lab | {"formants": np.full_like(ref_lab["formants"], np.nan),
                                      "bandwidths": np.full_like(ref_lab["bandwidths"], np.nan)}
                     if "chain" in cd and cd["chain"][0] == "pad":  # the clip's frames move by the padding
-                        k = int(round(cd["chain"][1] * 100))
-                        pad = lambda m: np.r_[np.zeros(k, bool), m, np.zeros(k, bool)]  # noqa: E731
+                        npad = int(round(cd["chain"][1] * 100))
+                        pad = lambda m: np.r_[np.zeros(npad, bool), m, np.zeros(npad, bool)]  # noqa: E731
                         lab = lab | {"scored": pad(lab["scored"]), "voiced": pad(lab["voiced"]),
-                                     "formants": np.full((len(lab["scored"]) + 2 * k, lab["formants"].shape[1]), np.nan),
-                                     "bandwidths": np.full((len(lab["scored"]) + 2 * k, lab["bandwidths"].shape[1]), np.nan)}
+                                     "formants": np.full((len(lab["scored"]) + 2 * npad, lab["formants"].shape[1]), np.nan),
+                                     "bandwidths": np.full((len(lab["scored"]) + 2 * npad, lab["bandwidths"].shape[1]), np.nan)}
                 else:
                     y, lab = cf.render(it, cd.get("alpha", 1.0), cd.get("r", 1.0), cd.get("bw", 1.0), cd.get("extras"),
                                        tuple(cd["shift"]) if "shift" in cd else None)
