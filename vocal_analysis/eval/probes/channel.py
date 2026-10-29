@@ -198,7 +198,7 @@ def main(argv: list[str]) -> int:
         for ckpt in argv[1:]:
             name = Path(ckpt).parent.name
             res = score(ckpt)
-            np.savez(REPORTS / f"{name}_raw.npz", hf=res["hf"], he=res["he"], hs=res["hs"], pt=res["pt"])
+            np.savez_compressed(REPORTS / f"{name}_raw.npz", hf=res["hf"], he=res["he"], hs=res["hs"], pt=res["pt"])
             a = analyse_scores(res)
             (REPORTS / f"{name}.json").write_text(json.dumps(a, indent=1), encoding="utf-8")
             n_h = sum(it["corpus"] == "hillenbrand" for it in res["items"])
