@@ -28,6 +28,7 @@ A register of every hypothesis tested for the upward F1 bias that synthetically 
 | Context length / long inputs | D-028 | Signed bias moves ≤ 1.6 Hz | No |
 | Aspiration *level* | D-047 | Paired renders 5–60 dB: women 40 − 5 dB +0.7 [+0.1, +1.3] Hz | No |
 | Aspiration *shape* (real band periodic fraction) | D-048 | −6 dB/oct at 10 dB matches real women's profile; shape-matched − reference −2.0 [−2.7, −1.4] Hz | No |
+| Real speech dynamics and real source (resynthesis, exact labels) | D-049 | Zeroth val speech resynthesis: teacher v3 women −0.0 [−0.8, +0.7] Hz, men +0.7; the same-seed synthetic-only model *underreads* (−5.4 / −4.1) | No: the overread needs the real tract or F1's definition |
 
 ## What the model's features see
 
@@ -41,7 +42,8 @@ A register of every hypothesis tested for the upward F1 bias that synthetically 
 
 ## Open
 
-- **Dynamics**: synthetic f0, level and articulation contours are unnatural. Teacher v3 is unbiased on identity resynthesis of real *singing* (pooled sexes); real *speech* resynthesis by sex has not been measured.
-- **Source pulse shape**: only LF (and Rosenberg in the interactive sets) has been used; testing needs another family of source shapes.
+- ~~**Dynamics**~~: ruled out for the overread by D-049 (real speech dynamics and source, exact labels: no bias, either sex).
+- **Source pulse shape**: resynthesis keeps the real (inverse-filtered) source and shows no bias (D-049), which makes the source an unlikely cause; another family of synthetic pulse shapes remains untested.
+- **The real vocal tract** (real bandwidths, wall vibration, subglottal coupling and the open-phase shift): what resynthesis replaces, so now the main suspect with the definition below.
 - **F1's definition**: our labels are the closed-glottis resonance (D-023); real voices' effective resonance over the whole cycle includes the open-phase coupling shift. A head for whole-cycle effective F1 (`considering.md`) would show how much of the overread is the definition.
 - **Children**: D-045's children's arm (Samrómur licence check) not done.
