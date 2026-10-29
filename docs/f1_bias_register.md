@@ -28,6 +28,7 @@ A register of every hypothesis tested for the upward F1 bias that synthetically 
 | Context length / long inputs | D-028 | Signed bias moves ≤ 1.6 Hz | No |
 | Aspiration *level* | D-047 | Paired renders 5–60 dB: women 40 − 5 dB +0.7 [+0.1, +1.3] Hz | No |
 | Aspiration *shape* (real band periodic fraction) | D-048 | −6 dB/oct at 10 dB matches real women's profile; shape-matched − reference −2.0 [−2.7, −1.4] Hz | No |
+| Wider real bandwidths pulling F1 up | D-050 probes 1, 7 | Real recordings read B1 / B2 1.4–1.8 × the synthesis prior (men more than women); but scaling every bandwidth × 0.7–2 on resynthesised speech moves F1–F4 by ≤ ±0.003 log2 per log2 in every model | No (on resynthesised speech) |
 | Real speech dynamics and real source (resynthesis, exact labels) | D-049 | Zeroth val speech resynthesis: teacher v3 women −0.0 [−0.8, +0.7] Hz, men +0.7; the same-seed synthetic-only model *underreads* (−5.4 / −4.1) | No: the overread needs the real tract or F1's definition |
 
 ## What the model's features see
