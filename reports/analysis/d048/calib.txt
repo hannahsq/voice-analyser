@@ -1,0 +1,25 @@
+D-048 calibration: 30 women's-range clips (seed 4550), clean; band periodic fraction 0-1 / 1-2 / 2-4 / 4-6 / 6-8 kHz; distance = root mean square over bands to real women's mean profile
+real women 0.907 0.527 0.286 0.127 0.042
+
+tilt diff hnr    5: 0.954 0.399 0.056 0.005 -0.008  distance 0.133
+tilt diff hnr   10: 0.967 0.512 0.101 0.016 -0.009  distance 0.103
+tilt diff hnr   15: 0.970 0.610 0.168 0.026 -0.007  distance 0.086
+tilt diff hnr   20: 0.971 0.689 0.254 0.045 -0.002  distance 0.089
+tilt diff hnr   30: 0.972 0.759 0.435 0.120 0.020  distance 0.127
+tilt   +0 hnr    5: 0.908 0.303 0.056 0.015 -0.006  distance 0.153
+tilt   +0 hnr   10: 0.947 0.428 0.108 0.017 -0.007  distance 0.107
+tilt   +0 hnr   15: 0.962 0.554 0.193 0.039 -0.004  distance 0.067
+tilt   +0 hnr   20: 0.968 0.658 0.295 0.073 0.004  distance 0.071
+tilt   +0 hnr   30: 0.971 0.756 0.472 0.180 0.037  distance 0.137
+tilt   -6 hnr    5: 0.803 0.368 0.141 0.043 0.001  distance 0.115
+tilt   -6 hnr   10: 0.899 0.531 0.264 0.090 0.005  distance 0.025
+tilt   -6 hnr   15: 0.947 0.655 0.386 0.154 0.030  distance 0.076
+tilt   -6 hnr   20: 0.965 0.726 0.473 0.219 0.048  distance 0.131
+tilt   -6 hnr   30: 0.973 0.770 0.541 0.292 0.083  distance 0.178
+tilt  -12 hnr    5: 0.837 0.710 0.470 0.231 0.051  distance 0.129
+tilt  -12 hnr   10: 0.913 0.747 0.515 0.270 0.077  distance 0.157
+tilt  -12 hnr   15: 0.950 0.761 0.529 0.281 0.084  distance 0.168
+tilt  -12 hnr   20: 0.966 0.771 0.541 0.293 0.086  distance 0.178
+tilt  -12 hnr   30: 0.973 0.775 0.550 0.303 0.089  distance 0.184
+
+chosen: reference = diff at 20 dB (D-047's arm); level_matched = diff at 15 dB (distance 0.086); shape_matched = tilt -6.0 at 10 dB (distance 0.025)

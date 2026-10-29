@@ -187,6 +187,28 @@ def test_fixed_jitter_keeps_the_random_stream():
     assert all(np.array_equal(a.labels[k], c.labels[k], equal_nan=True) for k in a.labels)
 
 
+def test_aspiration_tilt_changes_only_the_aspiration():
+    """D-048: a tilted aspiration keeps every other component and label (same random draws); 0 dB/oct is white
+    before the tract, and a steeper negative tilt puts relatively more of the noise below 1 kHz"""
+    from dataclasses import replace
+
+    cfg = SynthConfig(duration_s=(1.0, 1.0), hnr_db=(10.0, 10.0))
+    i = next(i for i in range(20) if generate(i, cfg, seed=2).labels["voiced"].mean() > 0.5)
+    a = generate(i, cfg, seed=2, keep_components=True)
+    b = generate(i, replace(cfg, asp_tilt_db_oct=-6.0), seed=2, keep_components=True)
+    assert np.array_equal(a.components["voiced"], b.components["voiced"])
+    assert all(np.array_equal(a.labels[k], b.labels[k], equal_nan=True) for k in a.labels)
+    assert not np.array_equal(a.components["aspiration"], b.components["aspiration"])
+    assert np.isclose(np.mean(a.components["aspiration"] ** 2), np.mean(b.components["aspiration"] ** 2), rtol=0.05)
+
+    def low_share(x):
+        p = np.abs(np.fft.rfft(x)) ** 2
+        f = np.fft.rfftfreq(len(x), 1 / 16000)
+        return p[f < 1000].sum() / p.sum()
+
+    assert low_share(b.components["aspiration"]) > low_share(a.components["aspiration"])
+
+
 @pytest.mark.parametrize("how", ["f1_near_h1", "f1_near_h2", "f2_f3_close"])
 def test_constraints_keep_formants_ordered(how):
     clip = generate(5, SynthConfig(formant_constraint=how, p_register_step=0))

@@ -171,12 +171,16 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
 
 
 def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
-               hnr_db: float | None = None, fs: float = FS, coupling: dict | None = None) -> dict[str, np.ndarray]:
+               hnr_db: float | None = None, fs: float = FS, coupling: dict | None = None,
+               asp_tilt_db_oct: float | None = None) -> dict[str, np.ndarray]:
     """Render the components. Returns dict of float64 arrays (same length) and 'cycles' (glottal phase).
 
     jitter: SD of the per-period relative period perturbation; shimmer_db: SD of per-period amplitude (dB).
     hnr_db: voiced-to-aspiration energy ratio over voiced samples; None = no aspiration.
     coupling: glottal coupling within the cycle (`_voiced_coupled`); None = the harmonic path.
+    asp_tilt_db_oct: the aspiration noise's spectral tilt before the tract (dB per octave, 0 = white, re 1 kHz, flat
+    below 50 Hz); None = the first difference of white noise (about +6 dB/octave, every set before D-048). The same
+    random draws either way, so a clip differs only in its aspiration.
     """
     n = traj.n_samples
     f0_s = _per_sample(traj.f0)
@@ -204,7 +208,13 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
         frac = cycles % 1.0
         te_s = _per_sample(te)
         mod = np.where(frac < te_s, 0.25 + 0.75 * np.sin(np.pi * frac / te_s) ** 2, 0.25)
-        src = np.diff(rng.standard_normal(n + 1)) * mod * va
+        white = rng.standard_normal(n + 1)
+        if asp_tilt_db_oct is None:
+            src = np.diff(white) * mod * va
+        else:
+            f = np.fft.rfftfreq(n, 1.0 / fs)
+            gain = 10 ** (asp_tilt_db_oct * np.log2(np.maximum(f, 50.0) / 1000.0) / 20)
+            src = np.fft.irfft(np.fft.rfft(white[:n]) * gain, n) * mod * va
         asp = tract_filter(src, traj, fs)
         on = va > 0.5 * va.max() if va.max() > 0 else np.zeros(n, bool)
         if on.any():
