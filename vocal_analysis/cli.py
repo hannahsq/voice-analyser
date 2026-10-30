@@ -291,6 +291,7 @@ def cmd_analyse(cfg: Config, args: argparse.Namespace) -> int:
 
     analyse_files(args.audio, args.model, args.window, args.out, tuple(args.format.split(",")), args.plot, args.mask,
                   args.channel, args.start, args.end, args.device, args.fmax, args.threshold, args.spectrogram,
+                  not args.no_normalise,
                   log=lambda m: print(m, flush=True))
     return 0
 
@@ -383,6 +384,8 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--end", type=float, default=None, help="end of the excerpt, seconds")
     a.add_argument("--device", default="auto", help="auto (default), cpu or cuda")
     a.add_argument("--fmax", type=float, default=5000.0, help="plot's upper frequency, Hz (default 5000)")
+    a.add_argument("--no-normalise", action="store_true",
+                   help="analyse at the recorded level (default: peak-normalise to -12 dBFS, the middle of training's range)")
     a.add_argument("--spectrogram", default="wide", choices=("wide", "narrow"),
                    help="plot's spectrogram: wide (6 ms, formants; default) or narrow (30 ms, harmonics)")
     a.set_defaults(fn=cmd_analyse)

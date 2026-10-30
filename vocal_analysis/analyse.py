@@ -4,6 +4,8 @@ Frames are 10 ms apart (frame i at t = i * 10 ms). Outputs per frame: f0 and its
 probabilities, F1-F4 and their sigmas (cents), B1-B4, and where the model has them the anatomical tract length (cm)
 and the instantaneous length (larynx and lips included, D-051) with their sigmas. Values are the model's raw outputs on
 every frame; `mask` blanks f0 where unvoiced and the formants, bandwidths and lengths where non-sonorant.
+Input is peak-normalised to -12 dBFS by default (`normalise`), the middle of training's level range; the
+recording's own levels are reported in the summary.
 
 Windowing (D-028): "crop" analyses long files in windows of the training crop (400 frames, half-window hop, each
 frame taken from the window where it is most central), the default since 2026-10-27; "whole" runs the file at once;
@@ -22,6 +24,8 @@ FS = 16000
 HOP_S = 0.01
 DEFAULT_MODEL = "runs/d040_5b_s2_b20k/ckpt_last.pt"  # teacher v3.1 (docs/models.md, tag teacher-v3.1)
 FORMATS = ("csv", "json", "npz")
+NORMALISE_PEAK_DBFS = -12.0  # the middle of training's peak range (channel augmentation: -6 to -26 dBFS)
+QUIETEST_TRAINED_PEAK_DBFS = -26.0  # channel-augmented clips peak at -6 to -26 dBFS; clean clips (15 %) near full scale
 
 
 def parse_window(value: str) -> int | None:
@@ -80,6 +84,31 @@ def load(path: str | Path, channel: int | None = None, start: float | None = Non
         g = gcd(FS, sr)
         x = resample_poly(x, FS // g, sr // g).astype(np.float32)
     return np.ascontiguousarray(x, np.float32), sr
+
+
+def levels(x: np.ndarray) -> dict:
+    """Peak, overall RMS and the median and 10-90 % spread of 100 ms RMS over the louder half of windows (dBFS)."""
+    db = lambda v: float(20 * np.log10(max(float(v), 1e-12)))  # noqa: E731
+    w = int(0.1 * FS)
+    r = np.array([np.sqrt(np.mean(x[i:i + w] ** 2)) for i in range(0, max(len(x) - w, 1), w)])
+    lv = 20 * np.log10(np.maximum(r, 1e-12))
+    lo, hi = np.percentile(lv, [5, 99])
+    act = lv[lv > lo + 0.5 * (hi - lo)]
+    return {"peak_dbfs": db(np.max(np.abs(x))), "rms_dbfs": db(np.sqrt(np.mean(x ** 2))),
+            "active_rms_dbfs": float(np.median(act)) if len(act) else float("nan"),
+            "active_range_db": float(np.ptp(np.percentile(act, [10, 90]))) if len(act) else float("nan"),
+            "floor_rms_dbfs": float(lo), "clipped_samples": int(np.sum(np.abs(x) >= 0.999))}
+
+
+def normalise(x: np.ndarray, peak_dbfs: float = NORMALISE_PEAK_DBFS) -> tuple[np.ndarray, float]:
+    """Scale so the peak sits at peak_dbfs. -> (audio, gain in dB). Training clips are peak-normalised before their
+    random gain, and on quiet input most of the features sit at their -100 dB floor, which moves the bandwidths and
+    the tract length (2026-10-30: a recording peaking at -36 dBFS had 76 % of its bins at the floor)."""
+    peak = float(np.max(np.abs(x)))
+    if peak <= 0:
+        return x, 0.0
+    g = 10 ** (peak_dbfs / 20) / peak
+    return (x * g).astype(np.float32), float(20 * np.log10(g))
 
 
 def columns(r: dict, t0: float = 0.0, mask: bool = False, threshold: float = 0.5) -> dict[str, np.ndarray]:
@@ -206,7 +235,7 @@ def plot(audio: np.ndarray, r: dict, path: Path, title: str = "", t0: float = 0.
 def analyse_files(paths: list[str], model_path: str | None = DEFAULT_MODEL, window: str = "crop", out_dir: str = "va_analyse",
                   formats: tuple[str, ...] = ("csv",), make_plot: bool = False, mask: bool = False, channel: int | None = None,
                   start: float | None = None, end: float | None = None, device: str = "auto", fmax: float = 5000.0,
-                  threshold: float = 0.5, spectrogram: str = "wide", log=print) -> list[dict]:
+                  threshold: float = 0.5, spectrogram: str = "wide", norm: bool = True, log=print) -> list[dict]:
     import time
 
     import torch
@@ -224,18 +253,30 @@ def analyse_files(paths: list[str], model_path: str | None = DEFAULT_MODEL, wind
     results = []
     for path in paths:
         audio, sr = load(path, channel, start, end)
+        lev = levels(audio)
+        gain_db = 0.0
+        if norm:
+            audio, gain_db = normalise(audio)
         tic = time.time()
         r = analyse(model, audio, dev, window_frames=wf)
         dt = time.time() - tic
         t0 = start or 0.0
         cols, summ = columns(r, t0, mask, threshold), summary(r, threshold)
+        summ["levels"] = lev
         meta = {"file": str(path), "source_rate_hz": sr, "start_s": t0, "end_s": end, "channel": channel, "model": model_path,
+                "normalised": norm, "normalise_gain_db": gain_db,
                 "window": window, "window_frames": wf, "mask": mask, "threshold": threshold, "frame_hop_s": HOP_S}
         stem = out / Path(path).stem
         written = write(cols, summ, meta, stem, formats)
         if make_plot:
             written.append(plot(audio, r, stem.with_suffix(".png"), Path(path).name, t0, fmax, threshold, spectrogram))
         log(_describe(Path(path).name, summ, sr, dt, dev.type))
+        if lev["peak_dbfs"] < QUIETEST_TRAINED_PEAK_DBFS:
+            what = "normalised" if norm else "analysed as recorded: bandwidths and tract length may be off"
+            log(f"  note: peak {lev['peak_dbfs']:.1f} dBFS is quieter than any training clip "
+                f"({QUIETEST_TRAINED_PEAK_DBFS:.0f} dBFS; {what})")
+        if lev["clipped_samples"]:
+            log(f"  note: {lev['clipped_samples']} samples at full scale (clipping)")
         log("  wrote " + ", ".join(str(p) for p in written))
         results.append({"file": str(path), "summary": summ, "written": [str(p) for p in written]})
     return results
@@ -244,6 +285,10 @@ def analyse_files(paths: list[str], model_path: str | None = DEFAULT_MODEL, wind
 def _describe(name: str, s: dict, sr: int, dt: float, dev: str) -> str:
     lines = [f"{name}: {s['duration_s']:.1f} s (source {sr} Hz), {s['frames']} frames in {dt:.2f} s on {dev}; "
              f"voiced {s['voiced_frac']:.0%}, sonorant {s['sonorant_frac']:.0%}"]
+    if "levels" in s:
+        lv = s["levels"]
+        lines.append(f"  level: peak {lv['peak_dbfs']:.1f} dBFS, active RMS {lv['active_rms_dbfs']:.1f} dBFS "
+                     f"(spread {lv['active_range_db']:.0f} dB), floor {lv['floor_rms_dbfs']:.0f} dBFS")
     if "f0_hz" in s:
         lines.append(f"  f0 median {s['f0_hz']['median']:.0f} Hz (5-95 % {s['f0_hz']['p5']:.0f}-{s['f0_hz']['p95']:.0f})")
     if "formants_hz_median" in s:

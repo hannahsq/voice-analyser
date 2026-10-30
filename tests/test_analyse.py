@@ -110,3 +110,13 @@ def test_load_falls_back_to_ffmpeg_for_unfinished_ogg_opus(tmp_path):
         sf.read(str(bad))
     x, sr = A.load(bad)
     assert sr == 48000 and abs(len(x) - 16000) < 400
+
+
+def test_levels_and_normalise():
+    x = (0.01 * np.sin(2 * np.pi * 200 * np.arange(16000) / 16000)).astype(np.float32)  # peak -40 dBFS
+    lv = A.levels(x)
+    assert abs(lv["peak_dbfs"] + 40) < 0.1 and lv["clipped_samples"] == 0
+    y, g = A.normalise(x)
+    assert abs(A.levels(y)["peak_dbfs"] - A.NORMALISE_PEAK_DBFS) < 0.01 and abs(g - 28) < 0.1
+    z, g0 = A.normalise(np.zeros(100, np.float32))
+    assert g0 == 0.0 and not z.any()
