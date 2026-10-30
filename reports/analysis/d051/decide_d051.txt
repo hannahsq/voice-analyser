@@ -1,0 +1,14 @@
+D-051: 5c against 5b, seeds paired
+  d051_5c_s1_b20k vs d040_5b_s1_b20k: synthetic F1-F4 -0.1 +1.7 +1.9 +0.8 SE, RPA +0.03 | dev Hillenbrand F1/F2/F3 +0.4/-0.2/-6.7  RPA -0.1  cp women F1 -0.2 | length (s1): [-0.050, +0.010], w/m 0.878, probe excess +5.5 c/oct | criteria ['yes', 'no', 'yes']
+  d051_5c_s2_b20k vs d040_5b_s2_b20k: synthetic F1-F4 -1.8 -0.2 +0.2 +0.8 SE, RPA -0.00 | dev Hillenbrand F1/F2/F3 -2.1/+0.9/+0.5  RPA +0.0  cp women F1 +1.4 | length (s2): [-0.090, -0.036], w/m 0.877, probe excess +2.2 c/oct | criteria ['yes', 'no', 'yes']
+
+Seed means: synthetic F1-F4 -0.9 +0.8 +1.0 +0.8 SE, RPA +0.01 | dev Hillenbrand F1/F2/F3 -0.9/+0.3/-3.1  RPA -0.1  cp women F1 +0.6 | length (5c-5b): reliability 5c - 5b [-0.066, -0.017], w/m 0.878, probe excess +3.9 c/oct
+(1) no formant cost: yes; (2) length not worse: NO; (3) f0 guard: yes
+
+Reported (decides nothing):
+  D-050 probe 10, d051_5c_s1_b20k: larynx/all/VTL +0.67, larynx/all/VTLi +1.07, lips/all/VTL +0.76, lips/all/VTLi +0.93
+  held-out long clips, d051_5c_s1_b20k (last eval): vtl_mae_pct 2.028, vtl_bias_pct 0.1111, vtl_nll -2.796, vtl_cover1 0.6208, vtl_inst_mae_pct 1.403, vtl_inst_bias_pct -0.2675, vtl_inst_nll -3.265, vtl_inst_cover1 0.7059
+  D-050 probe 10, d051_5c_s2_b20k: larynx/all/VTL +0.67, larynx/all/VTLi +1.13, lips/all/VTL +0.77, lips/all/VTLi +0.92
+  held-out long clips, d051_5c_s2_b20k (last eval): vtl_mae_pct 1.987, vtl_bias_pct 0.1396, vtl_nll -2.81, vtl_cover1 0.6085, vtl_inst_mae_pct 1.383, vtl_inst_bias_pct -0.3194, vtl_inst_nll -3.266, vtl_inst_cover1 0.6967
+
+DECISION: 5b stays item 5's model

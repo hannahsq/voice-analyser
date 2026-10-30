@@ -1,0 +1,19 @@
+Probe 'stretch' (D-050): d051_5c_s2_b20k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  stretch/all/F1             -0.008 [-0.015, -0.004]  null -0.000 [-0.005, +0.004]  n 60/10  ideal 0
+  stretch/all/F2             +0.001 [-0.003, +0.006]  null +0.000 [-0.003, +0.003]  n 60/10  ideal 0
+  stretch/all/F3             -0.000 [-0.002, +0.001]  null -0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  stretch/all/F4             -0.001 [-0.002, +0.003]  null +0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  stretch/all/B1             +0.021 [-0.002, +0.039]  null +0.000 [-0.016, +0.015]  n 60/10  ideal 0
+  stretch/all/B2             -0.064 [-0.112, -0.026]  null -0.001 [-0.021, +0.019]  n 60/10  ideal 0
+  stretch/all/B3             -0.013 [-0.032, +0.016]  null -0.000 [-0.016, +0.015]  n 60/10  ideal 0
+  stretch/all/B4             -0.041 [-0.067, -0.018]  null +0.000 [-0.017, +0.019]  n 60/10  ideal 0
+  stretch/all/VTL            +0.002 [-0.003, +0.006]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  stretch/all/VTLi           +0.001 [-0.000, +0.004]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  stretch/all/f0             +0.001 [-0.003, +0.004]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  stretch/sigma_growth/F1    sigma log2 change: ref:+0.00 stretch=0.8:+0.07 stretch=0.9:+0.04 stretch=1.1:-0.01 stretch=1.25:-0.01
+  stretch/sigma_growth/F2    sigma log2 change: ref:+0.00 stretch=0.8:+0.08 stretch=0.9:+0.05 stretch=1.1:+0.03 stretch=1.25:+0.04
+  stretch/sigma_growth/F3    sigma log2 change: ref:+0.00 stretch=0.8:+0.02 stretch=0.9:+0.02 stretch=1.1:+0.01 stretch=1.25:+0.03
+  stretch/sigma_growth/F4    sigma log2 change: ref:+0.00 stretch=0.8:+0.04 stretch=0.9:+0.04 stretch=1.1:+0.05 stretch=1.25:+0.10
+  stretch/sigma_growth/VTL   sigma log2 change: ref:+0.00 stretch=0.8:+0.01 stretch=0.9:+0.01 stretch=1.1:+0.01 stretch=1.25:+0.03

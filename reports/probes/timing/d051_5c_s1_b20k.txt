@@ -1,0 +1,83 @@
+Probe 'timing' (D-050): d051_5c_s1_b20k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  offset_20/change/F1        +0.0003 [+0.0001, +0.0005]  ideal 0
+  offset_20/change/F2        +0.0004 [+0.0000, +0.0011]  ideal 0
+  offset_20/change/F3        -0.0001 [-0.0004, +0.0003]  ideal 0
+  offset_20/change/F4        -0.0003 [-0.0007, +0.0007]  ideal 0
+  offset_20/change/B1        +0.0002 [-0.0013, +0.0008]  ideal 0
+  offset_20/change/B2        -0.0004 [-0.0022, +0.0022]  ideal 0
+  offset_20/change/B3        +0.0008 [-0.0005, +0.0028]  ideal 0
+  offset_20/change/B4        +0.0039 [+0.0004, +0.0076]  ideal 0
+  offset_20/change/VTL       -0.0001 [-0.0005, +0.0000]  ideal 0
+  offset_20/change/VTLi      +0.0001 [-0.0003, +0.0005]  ideal 0
+  offset_20/change/f0        -0.0000 [-0.0003, +0.0007]  ideal 0
+  offset_20/sigma_growth/F1  sigma log2 change: ref:+0.00 chain=['offset', 20]:-0.00
+  offset_20/sigma_growth/F2  sigma log2 change: ref:+0.00 chain=['offset', 20]:+0.00
+  offset_20/sigma_growth/F3  sigma log2 change: ref:+0.00 chain=['offset', 20]:+0.00
+  offset_20/sigma_growth/F4  sigma log2 change: ref:+0.00 chain=['offset', 20]:-0.00
+  offset_20/sigma_growth/VTL sigma log2 change: ref:+0.00 chain=['offset', 20]:-0.00
+  offset_40/change/F1        +0.0002 [-0.0005, +0.0012]  ideal 0
+  offset_40/change/F2        +0.0008 [+0.0001, +0.0010]  ideal 0
+  offset_40/change/F3        -0.0001 [-0.0009, +0.0003]  ideal 0
+  offset_40/change/F4        -0.0001 [-0.0005, +0.0007]  ideal 0
+  offset_40/change/B1        -0.0008 [-0.0028, +0.0018]  ideal 0
+  offset_40/change/B2        -0.0004 [-0.0035, +0.0034]  ideal 0
+  offset_40/change/B3        +0.0008 [-0.0003, +0.0029]  ideal 0
+  offset_40/change/B4        +0.0041 [-0.0022, +0.0082]  ideal 0
+  offset_40/change/VTL       -0.0001 [-0.0006, +0.0007]  ideal 0
+  offset_40/change/VTLi      +0.0002 [-0.0004, +0.0006]  ideal 0
+  offset_40/change/f0        +0.0006 [+0.0000, +0.0009]  ideal 0
+  offset_40/sigma_growth/F1  sigma log2 change: ref:+0.00 chain=['offset', 40]:-0.00
+  offset_40/sigma_growth/F2  sigma log2 change: ref:+0.00 chain=['offset', 40]:+0.00
+  offset_40/sigma_growth/F3  sigma log2 change: ref:+0.00 chain=['offset', 40]:+0.01
+  offset_40/sigma_growth/F4  sigma log2 change: ref:+0.00 chain=['offset', 40]:+0.00
+  offset_40/sigma_growth/VTL sigma log2 change: ref:+0.00 chain=['offset', 40]:+0.00
+  offset_80/change/F1        +0.0003 [-0.0020, +0.0009]  ideal 0
+  offset_80/change/F2        +0.0006 [-0.0003, +0.0014]  ideal 0
+  offset_80/change/F3        +0.0002 [-0.0003, +0.0011]  ideal 0
+  offset_80/change/F4        +0.0001 [-0.0008, +0.0011]  ideal 0
+  offset_80/change/B1        -0.0002 [-0.0026, +0.0022]  ideal 0
+  offset_80/change/B2        +0.0012 [-0.0024, +0.0062]  ideal 0
+  offset_80/change/B3        +0.0024 [-0.0005, +0.0047]  ideal 0
+  offset_80/change/B4        +0.0056 [+0.0018, +0.0113]  ideal 0
+  offset_80/change/VTL       -0.0004 [-0.0008, +0.0005]  ideal 0
+  offset_80/change/VTLi      +0.0002 [-0.0004, +0.0013]  ideal 0
+  offset_80/change/f0        +0.0005 [+0.0002, +0.0008]  ideal 0
+  offset_80/sigma_growth/F1  sigma log2 change: ref:+0.00 chain=['offset', 80]:+0.00
+  offset_80/sigma_growth/F2  sigma log2 change: ref:+0.00 chain=['offset', 80]:-0.00
+  offset_80/sigma_growth/F3  sigma log2 change: ref:+0.00 chain=['offset', 80]:+0.01
+  offset_80/sigma_growth/F4  sigma log2 change: ref:+0.00 chain=['offset', 80]:+0.00
+  offset_80/sigma_growth/VTL sigma log2 change: ref:+0.00 chain=['offset', 80]:+0.00
+  polarity/change/F1         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/F2         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/F3         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/F4         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/B1         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/B2         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/B3         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/B4         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/VTL        +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/VTLi       +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/change/f0         +0.0000 [+0.0000, +0.0000]  ideal 0
+  polarity/sigma_growth/F1   sigma log2 change: ref:+0.00 chain=['polarity', 0]:+0.00
+  polarity/sigma_growth/F2   sigma log2 change: ref:+0.00 chain=['polarity', 0]:+0.00
+  polarity/sigma_growth/F3   sigma log2 change: ref:+0.00 chain=['polarity', 0]:+0.00
+  polarity/sigma_growth/F4   sigma log2 change: ref:+0.00 chain=['polarity', 0]:+0.00
+  polarity/sigma_growth/VTL  sigma log2 change: ref:+0.00 chain=['polarity', 0]:+0.00
+  pad_2s/change/F1           +0.0001 [-0.0009, +0.0004]  ideal 0
+  pad_2s/change/F2           -0.0001 [-0.0004, +0.0000]  ideal 0
+  pad_2s/change/F3           -0.0003 [-0.0018, +0.0000]  ideal 0
+  pad_2s/change/F4           -0.0004 [-0.0016, +0.0000]  ideal 0
+  pad_2s/change/B1           +0.0186 [+0.0110, +0.0257]  ideal 0
+  pad_2s/change/B2           +0.0125 [+0.0032, +0.0232]  ideal 0
+  pad_2s/change/B3           +0.0009 [-0.0107, +0.0070]  ideal 0
+  pad_2s/change/B4           +0.0116 [+0.0073, +0.0222]  ideal 0
+  pad_2s/change/VTL          +0.0017 [-0.0000, +0.0044]  ideal 0
+  pad_2s/change/VTLi         +0.0022 [+0.0010, +0.0039]  ideal 0
+  pad_2s/change/f0           +0.0000 [-0.0001, +0.0000]  ideal 0
+  pad_2s/sigma_growth/F1     sigma log2 change: ref:+0.00 chain=['pad', 2.0]:+0.02
+  pad_2s/sigma_growth/F2     sigma log2 change: ref:+0.00 chain=['pad', 2.0]:+0.07
+  pad_2s/sigma_growth/F3     sigma log2 change: ref:+0.00 chain=['pad', 2.0]:+0.04
+  pad_2s/sigma_growth/F4     sigma log2 change: ref:+0.00 chain=['pad', 2.0]:+0.04
+  pad_2s/sigma_growth/VTL    sigma log2 change: ref:+0.00 chain=['pad', 2.0]:+0.00

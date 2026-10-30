@@ -1,0 +1,46 @@
+Probe 'counterfactual' (D-050): d051_5c_s1_b20k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  length/all/F1              +0.973 [+0.942, +0.999]  null +0.002 [-0.169, +0.184]  n 60/10  ideal 1
+  length/all/F2              +0.983 [+0.973, +0.990]  null +0.001 [-0.173, +0.188]  n 60/10  ideal 1
+  length/all/F3              +0.991 [+0.988, +0.999]  null +0.002 [-0.173, +0.193]  n 60/10  ideal 1
+  length/all/F4              +0.996 [+0.983, +1.006]  null -0.001 [-0.167, +0.199]  n 60/10  ideal 1
+  length/all/B1              +1.061 [+0.697, +1.478]  null -0.056 [-0.423, +0.305]  n 60/10  ideal 1
+  length/all/B2              +0.999 [+0.928, +1.270]  null -0.025 [-0.236, +0.235]  n 60/10  ideal 1
+  length/all/B3              +1.020 [+0.974, +1.111]  null -0.001 [-0.189, +0.201]  n 60/10  ideal 1
+  length/all/B4              +0.986 [+0.977, +1.038]  null -0.001 [-0.163, +0.184]  n 60/10  ideal 1
+  length/all/VTL             +0.992 [+0.852, +1.010]  null -0.003 [-0.159, +0.167]  n 60/10  ideal 1
+  length/all/VTLi            +0.966 [+0.890, +0.990]  null +0.001 [-0.153, +0.171]  n 60/10  ideal 1
+  length/all/f0              +0.000 [-0.001, +0.001]  null +0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  length/sigma_growth/F1     sigma log2 change: ref:+0.00 alpha=0.85:-0.07 alpha=0.92:-0.09 alpha=1.09:+0.15 alpha=1.18:+0.40
+  length/sigma_growth/F2     sigma log2 change: ref:+0.00 alpha=0.85:+0.03 alpha=0.92:+0.04 alpha=1.09:+0.04 alpha=1.18:+0.27
+  length/sigma_growth/F3     sigma log2 change: ref:+0.00 alpha=0.85:+0.16 alpha=0.92:+0.09 alpha=1.09:+0.01 alpha=1.18:+0.16
+  length/sigma_growth/F4     sigma log2 change: ref:+0.00 alpha=0.85:+0.36 alpha=0.92:+0.21 alpha=1.09:+0.02 alpha=1.18:+0.00
+  length/sigma_growth/VTL    sigma log2 change: ref:+0.00 alpha=0.85:-0.04 alpha=0.92:+0.03 alpha=1.09:-0.12 alpha=1.18:-0.22
+  f0/all/F1                  +0.014 [-0.015, +0.050]  null -0.000 [-0.013, +0.014]  n 60/10  ideal 0
+  f0/all/F2                  +0.006 [-0.005, +0.020]  null +0.000 [-0.008, +0.008]  n 60/10  ideal 0
+  f0/all/F3                  +0.004 [-0.001, +0.015]  null -0.000 [-0.007, +0.006]  n 60/10  ideal 0
+  f0/all/F4                  +0.008 [+0.003, +0.022]  null +0.000 [-0.008, +0.008]  n 60/10  ideal 0
+  f0/all/B1                  +0.949 [+0.617, +1.289]  null -0.001 [-0.233, +0.233]  n 60/10  ideal 1
+  f0/all/B2                  +1.328 [+1.129, +1.552]  null -0.005 [-0.294, +0.306]  n 60/10  ideal 1
+  f0/all/B3                  +0.796 [+0.477, +1.209]  null +0.004 [-0.328, +0.311]  n 60/10  ideal 1
+  f0/all/B4                  +1.634 [+1.368, +1.812]  null -0.007 [-0.371, +0.365]  n 60/10  ideal 1
+  f0/all/VTL                 -0.007 [-0.017, -0.000]  null +0.000 [-0.007, +0.006]  n 60/10  ideal 0
+  f0/all/VTLi                -0.004 [-0.010, +0.003]  null +0.000 [-0.007, +0.007]  n 60/10  ideal 0
+  f0/all/f0                  +1.003 [+1.001, +1.007]  null -0.002 [-0.189, +0.202]  n 60/10  ideal 1
+  f0/sigma_growth/F1         sigma log2 change: ref:+0.00 r=0.84:-0.05 r=0.92:-0.04 r=1.09:+0.13 r=1.19:+0.29
+  f0/sigma_growth/F2         sigma log2 change: ref:+0.00 r=0.84:+0.16 r=0.92:+0.13 r=1.09:+0.08 r=1.19:+0.28
+  f0/sigma_growth/F3         sigma log2 change: ref:+0.00 r=0.84:+0.09 r=0.92:+0.07 r=1.09:+0.15 r=1.19:+0.25
+  f0/sigma_growth/F4         sigma log2 change: ref:+0.00 r=0.84:+0.19 r=0.92:+0.12 r=1.09:+0.18 r=1.19:+0.47
+  f0/sigma_growth/VTL        sigma log2 change: ref:+0.00 r=0.84:-0.00 r=0.92:-0.02 r=1.09:-0.02 r=1.19:+0.00
+  original_vs_resynth/F1     +0.0165 [-0.0090, +0.0388]
+  original_vs_resynth/F2     +0.0196 [+0.0129, +0.0303]
+  original_vs_resynth/F3     +0.0049 [-0.0004, +0.0138]
+  original_vs_resynth/F4     -0.0035 [-0.0130, +0.0084]
+  original_vs_resynth/B1     +0.5737 [+0.4702, +0.7959]
+  original_vs_resynth/B2     +0.8038 [+0.6479, +0.9402]
+  original_vs_resynth/B3     +0.4313 [+0.1858, +0.6626]
+  original_vs_resynth/B4     +0.0228 [-0.0957, +0.1000]
+  original_vs_resynth/VTL    +0.0263 [+0.0141, +0.0444]
+  original_vs_resynth/VTLi   +0.0312 [+0.0171, +0.0470]
+  original_vs_resynth/f0     -0.0000 [-0.0008, +0.0004]

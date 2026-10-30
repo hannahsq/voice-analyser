@@ -1,0 +1,304 @@
+{
+ "length_bwhold/all/F1": {
+  "point": 0.9807406876731001,
+  "low": 0.9497348362758984,
+  "high": 0.9934111706617954,
+  "null_median": -0.0028156449105740623,
+  "null_low": -0.1715081234933761,
+  "null_high": 0.18546050793929242,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/F2": {
+  "point": 0.9833821744515598,
+  "low": 0.9719251389463819,
+  "high": 0.9888856952069548,
+  "null_median": 0.0016060922426945682,
+  "null_low": -0.17378182877118606,
+  "null_high": 0.18933327736054623,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/F3": {
+  "point": 0.9862106647097135,
+  "low": 0.9821008223041914,
+  "high": 0.9931962844380313,
+  "null_median": 0.0001512013639558172,
+  "null_low": -0.17604151144519448,
+  "null_high": 0.1896064741560295,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/F4": {
+  "point": 0.990645909097962,
+  "low": 0.9872577800086424,
+  "high": 1.0011315522011013,
+  "null_median": 0.0003966364517358526,
+  "null_low": -0.1701539785041466,
+  "null_high": 0.1968388538949988,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/B1": {
+  "point": 0.21310053689609693,
+  "low": 0.10853749737211281,
+  "high": 0.3156925555865039,
+  "null_median": 0.0011021093041863146,
+  "null_low": -0.06928973357784737,
+  "null_high": 0.07211486028947489,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/all/B2": {
+  "point": -0.14102734611837758,
+  "low": -0.33427074442658505,
+  "high": 0.014197098885637034,
+  "null_median": 0.00043239122086468967,
+  "null_low": -0.10056809995185678,
+  "null_high": 0.10405931584393906,
+  "p_null": 0.01,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/all/B3": {
+  "point": -0.7505692866690375,
+  "low": -0.922408438023779,
+  "high": -0.6462963593434099,
+  "null_median": -0.002474386143329804,
+  "null_low": -0.19190062094173418,
+  "null_high": 0.1690554237321544,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/all/B4": {
+  "point": -0.6989414854738928,
+  "low": -0.9855152451940523,
+  "high": -0.5695367363685457,
+  "null_median": -0.0033306499006254637,
+  "null_low": -0.14855372484246937,
+  "null_high": 0.15650867606979152,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/all/VTL": {
+  "point": 0.9894308951940917,
+  "low": 0.8952771598023025,
+  "high": 1.0309214482980218,
+  "null_median": 0.0014403788651517022,
+  "null_low": -0.15505968910626142,
+  "null_high": 0.17246475072514142,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/VTLi": {
+  "point": 0.957571023933012,
+  "low": 0.866914607425628,
+  "high": 0.9914153324629569,
+  "null_median": 0.0004105051416511261,
+  "null_low": -0.15451228429666122,
+  "null_high": 0.1659575299967365,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/f0": {
+  "point": 0.0018615193437023568,
+  "low": -0.0005177161899030718,
+  "high": 0.0033454138847136944,
+  "null_median": -1.3494307624489551e-05,
+  "null_low": -0.0014986165264291855,
+  "null_high": 0.0014028816203497582,
+  "p_null": 0.014,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   -0.10531924396024708,
+   -0.1002988393211196,
+   0.17492112015080352,
+   0.4328307171423869
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ },
+ "length_bwhold/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   0.033649520574983854,
+   0.008601837349480723,
+   0.16807603789737505,
+   0.37929249447217206
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ },
+ "length_bwhold/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.05304445542553415,
+   -0.006554155556662036,
+   0.15851932177011674,
+   0.37626533511512605
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ },
+ "length_bwhold/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.32348953838695627,
+   0.06506846129897546,
+   0.25747132381285376,
+   0.5426631712053216
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ },
+ "length_bwhold/sigma_growth/VTL": {
+  "per_condition_median": [
+   0.0,
+   0.04897474047112596,
+   0.033009079164166594,
+   -0.018286494837232145,
+   0.015120879072004722
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ }
+}
