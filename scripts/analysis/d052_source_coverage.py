@@ -260,7 +260,7 @@ def report() -> str:
         for sex in ("female", "male"):
             for lo, hi in F0_BANDS:
                 rm = (real["sex"] == sex) & (real["f0"] >= lo) & (real["f0"] < hi)
-                sm = (syn["sex"] == sex) & (syn["f0"] >= lo) & (syn["f0"] < hi)
+                sm = (syn["f0"] >= lo) & (syn["f0"] < hi)  # synthetic voices have no sex (D-052 amendment)
                 if rm.sum() < 50 or sm.sum() < 50:
                     continue
                 lines.append(f"  {sex} f0 {lo}-{hi} Hz ({rm.sum()} real, {sm.sum()} synthetic frames)")
