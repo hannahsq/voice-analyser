@@ -84,6 +84,54 @@ def score(ckpt: str) -> dict:
     return rows
 
 
+def score_direction(ckpt: str) -> dict:
+    """Direction arm (D-050 amendment 3): probe 1's reference resynthesis (exact formant labels), forward and reversed.
+    Per item and formant: median |error| (cents) over the scored frames each way, and median |forward - reversed|."""
+    import torch
+
+    from ...models.infer import analyse, load_teacher
+    from . import measures as M
+
+    dev = torch.device(os.environ.get("VA_DEVICE", "cpu"))
+    model = load_teacher(ckpt, dev)[0]
+    meta = json.loads((SRC / "meta.json").read_text(encoding="utf-8"))
+    n_items = len(meta["items"])
+    fwd, rev, diff = (np.full((n_items, 4), np.nan) for _ in range(3))
+    for i, it in enumerate(meta["items"]):
+        with np.load(SRC / it["file"]) as z:
+            d = {key: z[key] for key in ("audio_0", "label_formants_0", "scored_0")}
+        k = (len(d["audio_0"]) - 1) // HOP
+        x = d["audio_0"][: k * HOP + 1].astype(np.float32)  # frame i <-> reversed frame k - i
+        n = k + 1
+        fw = analyse(model, x, dev, window_frames=None)["formants"][:n, :4]
+        rv = analyse(model, x[::-1].copy(), dev, window_frames=None)["formants"][:n, :4][::-1]
+        lab, sc = d["label_formants_0"][:n], d["scored_0"][:n]
+        with np.errstate(all="ignore"):
+            for m in range(4):
+                ok = sc & np.isfinite(lab[:, m])
+                if ok.any():
+                    fwd[i, m] = np.median(np.abs(1200 * np.log2(fw[ok, m] / lab[ok, m])))
+                    rev[i, m] = np.median(np.abs(1200 * np.log2(rv[ok, m] / lab[ok, m])))
+                    diff[i, m] = np.median(np.abs(1200 * np.log2(fw[ok, m] / rv[ok, m])))
+    groups = np.array([it["group"] for it in meta["items"]])
+    res = {}
+    for m in range(4):
+        ok = np.isfinite(fwd[:, m]) & np.isfinite(rev[:, m])
+        res[f"F{m + 1}"] = {"forward_error": float(np.median(fwd[ok, m])), "reversed_error": float(np.median(rev[ok, m])),
+                            "reversed_minus_forward": list(M.group_bootstrap(rev[ok, m] - fwd[ok, m], groups[ok])),
+                            "forward_vs_reversed": float(np.median(diff[ok, m])), "n_items": int(ok.sum())}
+    return res
+
+
+def report_direction(res: dict) -> str:
+    lines = ["direction arm (amendment 3): probe 1's reference resynthesis, |error| against exact labels (cents, median over items)"]
+    for o, v in res.items():
+        p, lo, hi = v["reversed_minus_forward"]
+        lines.append(f"  {o}  forward {v['forward_error']:.0f}  reversed {v['reversed_error']:.0f}  reversed - forward "
+                     f"{p:+.1f} [{lo:+.1f}, {hi:+.1f}]  |forward - reversed| {v['forward_vs_reversed']:.0f}  ({v['n_items']} items)")
+    return "\n".join(lines)
+
+
 def report(name: str, rows: dict) -> tuple[str, dict]:
     res = {}
     lines = [f"Time reversal across a speaker change (D-050, probe 5): {name}",
@@ -110,6 +158,8 @@ def main(argv: list[str]) -> int:
     for ckpt in argv:
         name = Path(ckpt).parent.name
         text, res = report(name, score(ckpt))
+        res["direction"] = score_direction(ckpt)
+        text += "\n" + report_direction(res["direction"])
         (REPORTS / f"{name}.json").write_text(json.dumps(res, indent=1), encoding="utf-8")
         (REPORTS / f"{name}.txt").write_text(text + "\n", encoding="utf-8")
         print(text)
