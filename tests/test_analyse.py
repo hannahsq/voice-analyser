@@ -71,3 +71,42 @@ def test_plot_writes_png(tmp_path):
     for kind in ("wide", "narrow"):
         p = A.plot(audio, r, tmp_path / f"{kind}.png", spectrogram=kind)
         assert p.exists() and p.stat().st_size > 1000
+
+
+def _ogg_crc(page: bytes) -> int:
+    crc = 0
+    for byte in page:
+        crc ^= byte << 24
+        for _ in range(8):
+            crc = ((crc << 1) ^ 0x04C11DB7) & 0xFFFFFFFF if crc & 0x80000000 else (crc << 1) & 0xFFFFFFFF
+    return crc
+
+
+def test_load_falls_back_to_ffmpeg_for_unfinished_ogg_opus(tmp_path):
+    """An Ogg Opus stream without its end-of-stream page (a recorder that never finalised the file): libsndfile
+    calls it malformed; load() decodes it with ffmpeg instead."""
+    import shutil
+    import struct
+    import subprocess
+
+    import soundfile as sf
+
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg is None:
+        pytest.skip("ffmpeg not on PATH")
+    wav = tmp_path / "tone.wav"
+    sf.write(wav, 0.3 * np.sin(2 * np.pi * 220 * np.arange(48000) / 48000), 48000)
+    good = tmp_path / "good.ogg"
+    subprocess.run([ffmpeg, "-v", "error", "-y", "-i", str(wav), "-c:a", "libopus", str(good)], check=True)
+    b = bytearray(good.read_bytes())
+    i = b.rfind(b"OggS")
+    b[i + 5] &= ~0x04
+    b[i + 22:i + 26] = b"\0\0\0\0"
+    end = i + 27 + b[i + 26] + sum(b[i + 27:i + 27 + b[i + 26]])
+    b[i + 22:i + 26] = struct.pack("<I", _ogg_crc(bytes(b[i:end])))
+    bad = tmp_path / "no_eos.ogg"
+    bad.write_bytes(bytes(b))
+    with pytest.raises(sf.LibsndfileError):
+        sf.read(str(bad))
+    x, sr = A.load(bad)
+    assert sr == 48000 and abs(len(x) - 16000) < 400

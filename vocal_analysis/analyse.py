@@ -38,12 +38,35 @@ def parse_window(value: str) -> int | None:
     return n
 
 
+def _read(path: str | Path) -> tuple[np.ndarray, int]:
+    """(frames, channels) float32 and the rate. libsndfile first; if it cannot open the file, ffmpeg (on PATH) decodes it
+    to WAV in memory: formats libsndfile lacks (m4a, ...) and streams it rejects, such as an Ogg Opus recording whose
+    writer never wrote the end-of-stream page."""
+    import io
+    import shutil
+    import subprocess
+
+    import soundfile as sf
+
+    try:
+        return sf.read(str(path), dtype="float32", always_2d=True)
+    except sf.LibsndfileError as err:
+        ffmpeg = shutil.which("ffmpeg")
+        if ffmpeg is None:
+            raise RuntimeError(f"{path}: libsndfile cannot read it ({err}) and ffmpeg is not on PATH") from err
+        res = subprocess.run([ffmpeg, "-v", "error", "-nostdin", "-i", str(path), "-f", "wav", "-c:a", "pcm_f32le", "-"],
+                             capture_output=True, check=False)
+        if res.returncode != 0 or not res.stdout:
+            raise RuntimeError(f"{path}: neither libsndfile ({err}) nor ffmpeg could read it: "
+                               f"{res.stderr.decode(errors='replace').strip()}") from err
+        return sf.read(io.BytesIO(res.stdout), dtype="float32", always_2d=True)
+
+
 def load(path: str | Path, channel: int | None = None, start: float | None = None, end: float | None = None) -> tuple[np.ndarray, int]:
     """Mono float32 at 16 kHz (channels averaged unless one is chosen), cut to [start, end) seconds. -> (audio, source rate)."""
-    import soundfile as sf
     from scipy.signal import resample_poly
 
-    x, sr = sf.read(str(path), dtype="float32", always_2d=True)
+    x, sr = _read(path)
     if channel is not None:
         if not 0 <= channel < x.shape[1]:
             raise ValueError(f"{path} has {x.shape[1]} channel(s); --channel {channel} is out of range")
