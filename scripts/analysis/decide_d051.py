@@ -105,9 +105,11 @@ def main():
     for ref, run, _ in pairs:
         pr = probe10(run)
         print(f"  D-050 probe 10, {run}: " + (", ".join(f"{k} {v:+.2f}" for k, v in sorted(pr.items())) if pr else "not scored"))
-        ex = [e for e in evals(run) if any(k.startswith("vtl_inst") for k in e)]
+        lines = (Path("runs") / run / "log.jsonl").read_text().splitlines()
+        ex = [json.loads(x)["eval_extra:train_long_v1"] for x in lines if '"eval_extra:train_long_v1"' in x]
         if ex:
-            print(f"  instantaneous head, {run} (last eval): " + ", ".join(f"{k} {v:.4g}" for k, v in ex[-1].items() if "vtl_inst" in k))
+            print(f"  held-out long clips, {run} (last eval): " + ", ".join(f"{k} {v:.4g}" for k, v in ex[-1].items()
+                                                                          if k.startswith("vtl") and not k.endswith("frames")))
     verdict = "5c becomes item 5's model" if all(ok) else "5b stays item 5's model"
     print(f"\nDECISION: {verdict}" + ("" if robust else " (NOT ROBUST TO THE SEED: the seeds disagree on a criterion)"))
 
