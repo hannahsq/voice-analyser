@@ -1,6 +1,11 @@
 Time reversal across a speaker change (D-050, probe 5): d040_5b_s2_b20k
 median |forward - reversed| (cents) by distance from the join (frames); cross-speaker, same-speaker, difference
-  F1  0-10: 38/80/-41  10-25: 42/38/+4  25-50: 58/47/+11  50-100: 40/42/-2  100-200: 41/46/-4  200-end: 42/42/-1
-  F2  0-10: 16/15/+1  10-25: 20/17/+4  25-50: 27/30/-3  50-100: 19/17/+3  100-200: 21/20/+1  200-end: 20/22/-2
-  F3  0-10: 14/2/+12  10-25: 8/6/+2  25-50: 13/15/-2  50-100: 10/7/+2  100-200: 9/7/+2  200-end: 10/10/-0
-  VTL 0-10: 13/6/+8  10-25: 13/9/+5  25-50: 11/9/+2  50-100: 12/8/+4  100-200: 14/10/+4  200-end: 14/11/+3
+  F1  0-10: 38/38/+0  10-25: 42/38/+3  25-50: 58/41/+17  50-100: 40/43/-3  100-200: 41/43/-2  200-end: 42/43/-1
+  F2  0-10: 16/21/-5  10-25: 20/23/-2  25-50: 27/21/+6  50-100: 19/19/-0  100-200: 21/21/+0  200-end: 20/21/-1
+  F3  0-10: 14/7/+7  10-25: 8/8/+1  25-50: 13/8/+4  50-100: 10/8/+1  100-200: 9/9/+0  200-end: 10/9/+1
+  VTL 0-10: 13/12/+1  10-25: 13/10/+3  25-50: 11/11/-0  50-100: 12/10/+2  100-200: 14/11/+3  200-end: 14/12/+3
+direction arm (amendment 3): probe 1's reference resynthesis, |error| against exact labels (cents, median over items)
+  F1  forward 30  reversed 41  reversed - forward +11.7 [+8.3, +15.8]  |forward - reversed| 26  (60 items)
+  F2  forward 12  reversed 13  reversed - forward +0.8 [+0.1, +1.3]  |forward - reversed| 9  (60 items)
+  F3  forward 8  reversed 8  reversed - forward -0.2 [-0.4, +0.2]  |forward - reversed| 4  (60 items)
+  F4  forward 9  reversed 9  reversed - forward +0.1 [-0.2, +0.4]  |forward - reversed| 4  (60 items)

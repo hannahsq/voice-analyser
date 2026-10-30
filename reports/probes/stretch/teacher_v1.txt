@@ -1,0 +1,16 @@
+Probe 'stretch' (D-050): teacher_v1
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  stretch/all/F1             -0.014 [-0.019, -0.004]  null -0.000 [-0.006, +0.006]  n 60/10  ideal 0
+  stretch/all/F2             +0.005 [+0.001, +0.010]  null +0.000 [-0.003, +0.003]  n 60/10  ideal 0
+  stretch/all/F3             +0.000 [-0.001, +0.002]  null -0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  stretch/all/F4             +0.000 [-0.001, +0.001]  null +0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  stretch/all/B1             -0.007 [-0.031, +0.013]  null -0.000 [-0.014, +0.014]  n 60/10  ideal 0
+  stretch/all/B2             -0.037 [-0.048, -0.023]  null -0.000 [-0.016, +0.015]  n 60/10  ideal 0
+  stretch/all/B3             -0.025 [-0.046, +0.008]  null -0.000 [-0.019, +0.018]  n 60/10  ideal 0
+  stretch/all/B4             -0.016 [-0.057, +0.022]  null +0.000 [-0.018, +0.018]  n 60/10  ideal 0
+  stretch/all/f0             -0.001 [-0.003, +0.002]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  stretch/sigma_growth/F1    sigma log2 change: ref:+0.00 stretch=0.8:+0.03 stretch=0.9:+0.01 stretch=1.1:-0.02 stretch=1.25:-0.04
+  stretch/sigma_growth/F2    sigma log2 change: ref:+0.00 stretch=0.8:+0.11 stretch=0.9:+0.04 stretch=1.1:-0.03 stretch=1.25:-0.07
+  stretch/sigma_growth/F3    sigma log2 change: ref:+0.00 stretch=0.8:+0.03 stretch=0.9:+0.02 stretch=1.1:+0.01 stretch=1.25:-0.00
+  stretch/sigma_growth/F4    sigma log2 change: ref:+0.00 stretch=0.8:+0.04 stretch=0.9:+0.02 stretch=1.1:-0.00 stretch=1.25:-0.05

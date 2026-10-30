@@ -1,5 +1,10 @@
 Time reversal across a speaker change (D-050, probe 5): conformer_v2r2_s2_d16k
 median |forward - reversed| (cents) by distance from the join (frames); cross-speaker, same-speaker, difference
-  F1  0-10: 46/260/-214  10-25: 26/40/-13  25-50: 61/57/+4  50-100: 47/46/+1  100-200: 56/57/-2  200-end: 57/59/-2
-  F2  0-10: 14/7/+7  10-25: 21/19/+2  25-50: 35/34/+1  50-100: 19/19/-0  100-200: 25/25/-0  200-end: 22/26/-4
-  F3  0-10: 4/3/+2  10-25: 10/6/+3  25-50: 14/19/-5  50-100: 12/10/+2  100-200: 12/11/+1  200-end: 12/12/+0
+  F1  0-10: 46/60/-14  10-25: 26/54/-28  25-50: 61/58/+3  50-100: 47/56/-9  100-200: 56/59/-3  200-end: 57/59/-1
+  F2  0-10: 14/16/-3  10-25: 21/32/-11  25-50: 35/24/+11  50-100: 19/21/-2  100-200: 25/24/+1  200-end: 22/24/-2
+  F3  0-10: 4/7/-3  10-25: 10/9/+1  25-50: 14/11/+3  50-100: 12/11/+1  100-200: 12/12/-0  200-end: 12/12/+0
+direction arm (amendment 3): probe 1's reference resynthesis, |error| against exact labels (cents, median over items)
+  F1  forward 32  reversed 44  reversed - forward +11.5 [+8.4, +16.1]  |forward - reversed| 32  (60 items)
+  F2  forward 12  reversed 14  reversed - forward +0.2 [+0.0, +0.8]  |forward - reversed| 10  (60 items)
+  F3  forward 8  reversed 8  reversed - forward +0.1 [-0.3, +0.2]  |forward - reversed| 5  (60 items)
+  F4  forward 9  reversed 9  reversed - forward -0.1 [-0.4, +0.4]  |forward - reversed| 5  (60 items)
