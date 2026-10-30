@@ -7,6 +7,7 @@
     va tiers [--dev-copy IN OUT]   assign gold speakers to dev / semi / lockbox (eval/tiers.json); copy IN's dev rows to OUT
     va baselines [--only NAME...]  run/score baselines on dev speakers -> reports/suite/baselines_dev.md (cached in runs/)
     va resynth <pool> --teacher CKPT   analysis-resynthesis training set from a training pool (plan §5.2)
+    va analyse FILE... [--plot]    analyse audio files with a teacher -> per-frame tracks, a summary and a plot
     va config                      print the resolved config
 
 Every command takes --config FILE and repeated --set key.sub=value overrides.
@@ -285,6 +286,15 @@ def cmd_eval(cfg: Config, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_analyse(cfg: Config, args: argparse.Namespace) -> int:
+    from .analyse import analyse_files
+
+    analyse_files(args.audio, args.model, args.window, args.out, tuple(args.format.split(",")), args.plot, args.mask,
+                  args.channel, args.start, args.end, args.device, args.fmax, args.threshold, args.spectrogram,
+                  log=lambda m: print(m, flush=True))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--config", default=None, help="YAML config (default: configs/default.yaml if present)")
@@ -359,6 +369,23 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--tiers", default="dev", help=TIERS_HELP)
     e.add_argument("--suite", default="data/synth/suite_v1")
     e.set_defaults(fn=cmd_eval)
+    a = sub.add_parser("analyse", parents=[common], help="analyse audio files: per-frame tracks, summary, optional plot")
+    a.add_argument("audio", nargs="+", help="audio files (any rate soundfile reads; resampled to 16 kHz)")
+    a.add_argument("--model", default=None, help="checkpoint (default: teacher v3.1)")
+    a.add_argument("--window", default="crop", help="crop (training crop, 400 frames; default), whole, or a window in frames")
+    a.add_argument("--out", default="va_analyse", help="output directory (default: va_analyse)")
+    a.add_argument("--format", default="csv", help="comma list of csv, json, npz (a summary .json is always written)")
+    a.add_argument("--plot", action="store_true", help="spectrogram with F1-F4 (+-sigma), f0 and tract length panels (.png)")
+    a.add_argument("--mask", action="store_true", help="blank f0 where unvoiced and formants / lengths where non-sonorant")
+    a.add_argument("--threshold", type=float, default=0.5, help="voicing / sonorant probability threshold (default 0.5)")
+    a.add_argument("--channel", type=int, default=None, help="channel to analyse (default: the mean of all)")
+    a.add_argument("--start", type=float, default=None, help="start of the excerpt, seconds")
+    a.add_argument("--end", type=float, default=None, help="end of the excerpt, seconds")
+    a.add_argument("--device", default="auto", help="auto (default), cpu or cuda")
+    a.add_argument("--fmax", type=float, default=5000.0, help="plot's upper frequency, Hz (default 5000)")
+    a.add_argument("--spectrogram", default="wide", choices=("wide", "narrow"),
+                   help="plot's spectrogram: wide (6 ms, formants; default) or narrow (30 ms, harmonics)")
+    a.set_defaults(fn=cmd_analyse)
     return p
 
 
