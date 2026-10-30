@@ -2046,6 +2046,7 @@ D-045's follow-ups: renders are too periodic below 2 kHz (women's 1–2 kHz band
   - **Bandwidths narrow as level drops, even inside the trained range**: Conformer B1 -8 to -28 cents at ×0.3 (about -24 dBFS, inside training's -6 to -26), -22 to -68 at ×0.1, -19 to -115 at ×0.03 and -64 to -186 at ×0.01 (about ×0.3-0.7); B2 -97 to -216 cents at ×0.01. v1 moves the other way. This is the direction seen on Hannah's quiet singing recording (narrower B1 raw than normalised), so the bandwidth heads read level as evidence: a fifth context effect on bandwidth after probes 4, 6, 7 and 12.
   - **VTL** (v3.1's seeds): within 1.3 cents down to ×0.03; -1 and -16 cents at ×0.01.
   - Reading: for analysis, peak normalisation (now `va analyse`'s default) removes the level effect; for training, the bandwidth heads' level dependence joins the decoupling question (`considering.md`, Synthesiser) and the level-range note (roadmap, Later's AGC item).
+  - *5c's seeds (2026-10-31 02:53, after D-051 was decided; `reports/probes/gain/d051_5c_*`)*: same pattern. f0 within 1 cent; F1 within 3 cents at every gain (×0.01: +3 / +2, against 5b's -14 / -13 in the same report column); VTL -26 / -15 cents at ×0.01 and within 4 cents above it; bandwidths still erratic below training's range (×0.01 B1 -68 / +35, B2 -102 / -6 cents) with no consistent sign between seeds.
 
 ## D-051 (2026-10-30, registered with Hannah's choices before anything was built): roadmap 5c, long clips with sustained larynx and lip movement, and an instantaneous-length head
 
