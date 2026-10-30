@@ -191,6 +191,18 @@ def main():
         p(f"\nSeed mean {lab} ({' + '.join(ms)}): reliability - A {res[lab]['reliability_vs_A']:+.3f} "
           f"[{res[lab]['reliability_ci_vs_A'][0]:+.3f}, {res[lab]['reliability_ci_vs_A'][1]:+.3f}]; w/m {res[lab]['w/m']:.3f}; "
           f"probe excess {res[lab]['probe_excess']:+.1f} c/oct")
+    # D-051: paired seed means, e.g. VA_SEED_PAIRS="5c-5b=d051_5c_s1+d051_5c_s2:d040_5b_s1+d040_5b_s2": each bootstrap
+    # draw's mean reliability over the first seeds minus the mean over the second
+    for spec in filter(None, os.environ.get("VA_SEED_PAIRS", "").split(";")):
+        lab, rest = spec.split("=")
+        new, ref = (s.split("+") for s in rest.split(":"))
+        mean = lambda r, m, ms: float(np.mean([r[n][m] for n in ms]))  # noqa: E731
+        diff = [mean(r, "reliability", new) - mean(r, "reliability", ref) for r in bs]
+        res[lab] = {"new": new, "ref": ref, "reliability_diff": mean(pt, "reliability", new) - mean(pt, "reliability", ref),
+                    "reliability_ci": list(np.percentile(diff, [2.5, 97.5])), "w/m": mean(pt, "w/m", new),
+                    "probe_excess": float(np.mean([res[n]["probe_excess"] for n in new]))}
+        p(f"\nPaired seed means {lab}: reliability {res[lab]['reliability_diff']:+.3f} [{res[lab]['reliability_ci'][0]:+.3f}, "
+          f"{res[lab]['reliability_ci'][1]:+.3f}]; w/m {res[lab]['w/m']:.3f}; probe excess {res[lab]['probe_excess']:+.1f} c/oct")
     json.dump(res, open(Path(outf).with_suffix(".json"), "w"), indent=1, default=float)
 
 

@@ -1,0 +1,12 @@
+D-051: 5c against 5b, seeds paired  [CHECK MODE: not a D-051 result]
+  d040_5b_s1_b20k vs d031_rA_b20k: synthetic F1-F4 -0.5 -0.9 +0.6 +1.4 SE, RPA -0.03 | dev Hillenbrand F1/F2/F3 +1.5/-2.7/+3.0  RPA +0.1  cp women F1 +0.0 | length (d040_5b_s1_b20k): [+0.036, +0.113], w/m 0.869, probe excess +0.5 c/oct | criteria ['yes', 'yes', 'yes']
+  d040_5b_s2_b20k vs d040_5a_s2_b20k: synthetic F1-F4 +1.4 +0.5 +0.2 +0.5 SE, RPA -0.01 | dev Hillenbrand F1/F2/F3 +0.4/-0.1/-1.1  RPA -0.8  cp women F1 +1.1 | length (d040_5b_s2_b20k): [+0.061, +0.150], w/m 0.860, probe excess +0.7 c/oct | criteria ['yes', 'yes', 'yes']
+
+Seed means: synthetic F1-F4 +0.5 -0.2 +0.4 +0.9 SE, RPA -0.02 | dev Hillenbrand F1/F2/F3 +0.9/-1.4/+0.9  RPA -0.4  cp women F1 +0.5 | length (5b): reliability 5c - 5b [+0.050, +0.130], w/m 0.865, probe excess +0.6 c/oct
+(1) no formant cost: yes; (2) length not worse: yes; (3) f0 guard: yes
+
+Reported (decides nothing):
+  D-050 probe 10, d040_5b_s1_b20k: larynx/all/VTL +1.11, lips/all/VTL +0.87
+  D-050 probe 10, d040_5b_s2_b20k: larynx/all/VTL +1.01, lips/all/VTL +0.89
+
+DECISION: 5c becomes item 5's model
