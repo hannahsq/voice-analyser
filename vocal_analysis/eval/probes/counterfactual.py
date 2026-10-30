@@ -135,7 +135,7 @@ def _stretch(signals: list[np.ndarray], f0: np.ndarray, voiced: np.ndarray, s: f
 
 
 def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extras: str | None = None,
-           shift: tuple[int, float] | None = None, stretch: float = 1.0) -> tuple[np.ndarray, dict]:
+           shift: tuple[int, float] | None = None, stretch: float = 1.0, hold_bw: bool = False) -> tuple[np.ndarray, dict]:
     """-> (audio, labels): labels hold the exact formants and bandwidths (T, N), the frames that are pure re-filtered signal
     (`scored`), and the voicing and f0 carried over from the tracker (f0 times r).
 
@@ -144,7 +144,8 @@ def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extr
     shift (n, factor) moves formant n (0-based) alone by factor (probe 2); frames where it comes within
     SHIFT_MIN_RATIO of a neighbour are left out of `scored` (as D-038's synthetic probe).
     stretch s (probe 4) lengthens the clip by s without a pitch change (`_stretch`); the tracks are time-warped,
-    f0 and the formants keep their values."""
+    f0 and the formants keep their values. hold_bw (probe 12) keeps the bandwidths at their alpha = 1 values in Hz
+    while alpha moves the formants (normally they follow the formants through the prior)."""
     source, audio, src = item.source, item.audio, item.src
     if stretch != 1.0:
         assert r == 1.0, "stretch and r do not combine"
@@ -161,6 +162,9 @@ def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extr
     src = {k: np.concatenate([np.asarray(v)[:n_frames]] + [np.asarray(v)[-1:]] * max(0, n_frames - len(v)))
            for k, v in src.items()}
     p = perturb(src["tracks"], src["f0"], src["voiced"], np.random.default_rng(0), _det_tract(alpha, bw))
+    if hold_bw and alpha != 1.0:
+        held = perturb(src["tracks"], src["f0"], src["voiced"], np.random.default_rng(0), _det_tract(1.0, bw))["bandwidths"]
+        p["bandwidths"] = np.where(np.isfinite(held), held, p["bandwidths"])
     if extras:
         rng = np.random.default_rng(zlib.crc32(item.key.encode()))
         p["extras"] = tract.sample_extras(rng, p["info"]["apparent_length_cm"], p_nasal=float(extras == "nasal"),
