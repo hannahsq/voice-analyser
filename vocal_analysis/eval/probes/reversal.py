@@ -28,7 +28,8 @@ OUTS = ("F1", "F2", "F3", "VTL")
 
 
 def joins() -> list[tuple[str, np.ndarray, int]]:
-    """(kind, audio, join frame): every ordered pair of speakers (their first clips) and every speaker's first two clips."""
+    """(kind, audio, join frame): every ordered pair of speakers (their first clips) and every ordered pair of one
+    speaker's clips (D-050 amendment 2: the same-speaker control needs as many frames near the join)."""
     meta = json.loads((SRC / "meta.json").read_text(encoding="utf-8"))
     by: dict[str, list[np.ndarray]] = {}
     for it in meta["items"]:
@@ -40,8 +41,10 @@ def joins() -> list[tuple[str, np.ndarray, int]]:
         for b in spk:
             if a != b:
                 out.append(("cross", *(_join(trim(by[a][0]), trim(by[b][0])))))
-        if len(by[a]) > 1:
-            out.append(("same", *(_join(trim(by[a][0]), trim(by[a][1])))))
+        for i, x in enumerate(by[a]):
+            for k, y in enumerate(by[a]):
+                if i != k:
+                    out.append(("same", *(_join(trim(x), trim(y)))))
     return out
 
 

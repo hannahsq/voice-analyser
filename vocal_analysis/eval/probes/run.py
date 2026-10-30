@@ -33,6 +33,8 @@ PROBES = {
     "counterfactual": [REF] + [{"arm": "length", "alpha": a} for a in cf.ALPHAS if a != 1.0]
                       + [{"arm": "f0", "r": r} for r in cf.RATIOS if r != 1.0],
     "bandwidth": [REF] + [{"arm": "bw", "bw": s} for s in (0.7, 0.85, 1.2, 1.45, 2.0)],
+    # probe 4's time-stretch arm (D-050 amendment 2), on resynthesis: its reference is the resynthesised clip
+    "stretch": [REF] + [{"arm": "stretch", "stretch": s} for s in (0.8, 0.9, 1.1, 1.25)],
     "polezero": [REF, {"arm": "nasal", "extras": "nasal"}, {"arm": "subglottal", "extras": "subglottal"}],
     "chain": [REF] + [{"arm": "gain", "chain": ("gain", g)} for g in (0.1, 0.5, 2.0)]
              + [{"arm": "dc", "chain": ("dc", 0.05)}, {"arm": "clip", "chain": ("clip", 0.5)},
@@ -54,7 +56,7 @@ PROBES = {
 ARTIC_ITEMS, ARTIC_SEED = 60, 5052  # seed used by no other set
 VOICE_SEED = 5053
 VOICE_REF = {"rd": 1.2, "hnr": 25.0, "jitter": 0.005, "shimmer": 0.3}
-SLOPE_ARMS = {"length": "alpha", "f0": "r", "bw": "bw", "larynx": "label", "lips": "label"}
+SLOPE_ARMS = {"length": "alpha", "f0": "r", "bw": "bw", "stretch": "stretch", "larynx": "label", "lips": "label"}
 # outputs read against their labels' own change, per arm: only where the labels are meant to move (bandwidth labels
 # follow the prior, which depends on the formants and f0); elsewhere against the arm's factor. In the f0 arm the
 # formant labels move only by the time-warp's rounding (<= 0.004 octave), which must not become the x of a slope
@@ -64,6 +66,7 @@ SHIFT_ARMS = {f"shiftF{k}": f"F{k}" for k in range(1, 5)}  # probe 2: the moved 
 IDEAL = {"length": {"F": 1.0, "B": 1.0, "VTL": 1.0, "VTLi": 1.0, "f0": 0.0},
          "f0": {"F": 0.0, "B": 1.0, "VTL": 0.0, "VTLi": 0.0, "f0": 1.0},
          "bw": {"F": 0.0, "B": 1.0, "VTL": 0.0, "VTLi": 0.0, "f0": 0.0},
+         "stretch": {"F": 0.0, "B": 0.0, "VTL": 0.0, "VTLi": 0.0, "f0": 0.0},
          # probe 10: x is the instantaneous length's own change; the anatomical head should not follow it
          "larynx": {"F": 1.0, "B": 1.0, "VTL": 0.0, "VTLi": 1.0, "f0": 0.0},
          "lips": {"F": 1.0, "B": 1.0, "VTL": 0.0, "VTLi": 1.0, "f0": 0.0}}
@@ -166,7 +169,7 @@ def render_probe(probe: str, per_group: int = 6, log=print) -> Path:
                                      "bandwidths": np.full((len(lab["scored"]) + 2 * npad, lab["bandwidths"].shape[1]), np.nan)}
                 else:
                     y, lab = cf.render(it, cd.get("alpha", 1.0), cd.get("r", 1.0), cd.get("bw", 1.0), cd.get("extras"),
-                                       tuple(cd["shift"]) if "shift" in cd else None)
+                                       tuple(cd["shift"]) if "shift" in cd else None, cd.get("stretch", 1.0))
                 arrays[f"audio_{c}"], arrays[f"scored_{c}"], arrays[f"voiced_{c}"] = y, lab["scored"], lab["voiced"]
                 arrays[f"label_formants_{c}"] = lab["formants"][:, :4].astype(np.float32)
                 arrays[f"label_bandwidths_{c}"] = lab["bandwidths"][:, :4].astype(np.float32)

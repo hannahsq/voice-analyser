@@ -99,16 +99,58 @@ def _warp(src: dict, r: float, n_new: int) -> dict:
             "tracks": tracks, "tract_left": src["tract_left"][near]}
 
 
+UNVOICED_UNIT = 80  # samples (5 ms): overlap-add unit where there is no pitch period to keep
+
+
+def _stretch(signals: list[np.ndarray], f0: np.ndarray, voiced: np.ndarray, s: float) -> list[np.ndarray]:
+    """Time-stretch by s without a pitch change (probe 4, D-050 amendment 2): pitch-synchronous overlap-add.
+
+    Analysis marks one local period apart (from the per-frame f0 where voiced, UNVOICED_UNIT elsewhere); output marks
+    spaced the same way along the stretched time axis, each taking the analysis mark nearest its time / s, windowed
+    by a Hann window two periods long. Whole periods are repeated or dropped, so the period, and the formants of the
+    source's filter, stay. Every signal gets the same marks (the source and the clip it is blended with)."""
+    n = len(signals[0])
+
+    def period(t: float) -> int:
+        i = min(int(t) // HOP, len(f0) - 1)
+        return int(round(FS / f0[i])) if voiced[i] and f0[i] > 0 else UNVOICED_UNIT
+
+    marks = [0]
+    while marks[-1] < n:
+        marks.append(marks[-1] + period(marks[-1]))
+    marks = np.array(marks[:-1])
+    n_out = int(round(n * s))
+    pad = 2 * int(FS / 50)
+    outs = [np.zeros(n_out + 2 * pad) for _ in signals]
+    xs = [np.r_[np.zeros(pad), np.asarray(x, float), np.zeros(pad)] for x in signals]
+    t = 0
+    while t < n_out:
+        a = int(marks[np.argmin(np.abs(marks - t / s))])
+        p = period(a)
+        w = np.hanning(2 * p + 1)
+        for x, y in zip(xs, outs):
+            y[pad + t - p : pad + t + p + 1] += w * x[pad + a - p : pad + a + p + 1]
+        t += p
+    return [y[pad : pad + n_out].astype(np.float32) for y in outs]
+
+
 def render(item: Item, alpha: float = 1.0, r: float = 1.0, bw: float = 1.0, extras: str | None = None,
-           shift: tuple[int, float] | None = None) -> tuple[np.ndarray, dict]:
+           shift: tuple[int, float] | None = None, stretch: float = 1.0) -> tuple[np.ndarray, dict]:
     """-> (audio, labels): labels hold the exact formants and bandwidths (T, N), the frames that are pure re-filtered signal
     (`scored`), and the voicing and f0 carried over from the tracker (f0 times r).
 
     bw scales every bandwidth (probe 7). extras ("nasal" or "subglottal", probe 8) adds that pole-zero pair set, drawn
     from the training distribution (`synth.tract.sample_extras`) with a seed fixed per item; extras are not labels.
     shift (n, factor) moves formant n (0-based) alone by factor (probe 2); frames where it comes within
-    SHIFT_MIN_RATIO of a neighbour are left out of `scored` (as D-038's synthetic probe)."""
+    SHIFT_MIN_RATIO of a neighbour are left out of `scored` (as D-038's synthetic probe).
+    stretch s (probe 4) lengthens the clip by s without a pitch change (`_stretch`); the tracks are time-warped,
+    f0 and the formants keep their values."""
     source, audio, src = item.source, item.audio, item.src
+    if stretch != 1.0:
+        assert r == 1.0, "stretch and r do not combine"
+        source, audio = _stretch([source, audio], np.asarray(src["f0"]), np.asarray(src["voiced"]), stretch)
+        src = _warp(src, 1.0 / stretch, len(source) // HOP + 1)
+        src["f0"] = src["f0"] * stretch  # _warp scales f0 by its rate; a stretch keeps it
     if r != 1.0:
         fr = Fraction(r).limit_denominator(50)
         source = resample_poly(source, fr.denominator, fr.numerator)
