@@ -41,6 +41,8 @@ PROBES = {
     "chain": [REF] + [{"arm": "gain", "chain": ("gain", g)} for g in (0.1, 0.5, 2.0)]
              + [{"arm": "dc", "chain": ("dc", 0.05)}, {"arm": "clip", "chain": ("clip", 0.5)},
                 {"arm": "resample", "chain": ("resample", 44100)}],
+    # probe 13 (D-050 amendment 5): one arm per gain (probe 9's single gain arm reports only its first condition)
+    "gain": [REF] + [{"arm": f"gain_{g}", "chain": ("gain", g)} for g in (0.01, 0.03, 0.1, 0.3, 2.0)],
     # probe 4: timing, on the original clips (time-stretch left out: it needs a pitch-preserving method chosen)
     "timing": [REF] + [{"arm": f"offset_{k}", "chain": ("offset", k)} for k in (20, 40, 80)]
               + [{"arm": "polarity", "chain": ("polarity", 0)}, {"arm": "pad_2s", "chain": ("pad", 2.0)}],
@@ -160,7 +162,7 @@ def render_probe(probe: str, per_group: int = 6, log=print) -> Path:
             arrays = {"original": it.audio.astype(np.float32)} if probe == "counterfactual" else {}
             _, ref_lab = cf.render(it)
             for c, cd in enumerate(conds):
-                if probe in ("chain", "timing"):  # on the original clip; frames chosen as in the reference resynthesis
+                if probe in ("chain", "timing", "gain"):  # on the original clip; frames chosen as in the reference resynthesis
                     y = cf.chain(it.audio, *cd["chain"]) if "chain" in cd else it.audio.astype(np.float32)
                     lab = ref_lab | {"formants": np.full_like(ref_lab["formants"], np.nan),
                                      "bandwidths": np.full_like(ref_lab["bandwidths"], np.nan)}
