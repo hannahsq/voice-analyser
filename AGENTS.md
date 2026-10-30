@@ -39,4 +39,5 @@ A voice analyser: f0, voicing, formants F1–F4 with bandwidths, and related mea
 - **The iGPU drives the display.** Keep single GPU operations short: chunk big matmuls.
 - **Prefer seed means over single seeds** (seed-to-seed variation on real voices is large), and paired comparisons with bootstrap intervals.
 - **Check a hypothesis can hold before pre-registering it**: estimate the measure's noise floor (e.g. a shuffle null; a small effect seen once may be sampling noise), and trace the code path to confirm the proposed cause can reach what is measured.
+- **Committed reports are immutable.** A correction or a new layout goes into a new file, with a dated note in the decision log or plan pointing to it; the original stays as the record of what was reported then (the git history is to be archived with a DOI).
 - **Commit messages** say what changed and why, referencing D-xxx.
