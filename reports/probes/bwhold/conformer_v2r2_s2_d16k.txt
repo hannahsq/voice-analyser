@@ -1,0 +1,16 @@
+Probe 'bwhold' (D-050): conformer_v2r2_s2_d16k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  length_bwhold/all/F1       +0.968 [+0.932, +1.007]  null -0.000 [-0.170, +0.181]  n 60/10  ideal 1
+  length_bwhold/all/F2       +0.979 [+0.972, +0.993]  null +0.001 [-0.182, +0.189]  n 60/10  ideal 1
+  length_bwhold/all/F3       +0.995 [+0.985, +1.000]  null +0.001 [-0.169, +0.191]  n 60/10  ideal 1
+  length_bwhold/all/F4       +0.994 [+0.988, +0.999]  null -0.000 [-0.172, +0.196]  n 60/10  ideal 1
+  length_bwhold/all/B1       +0.388 [+0.312, +0.450]  null +0.000 [-0.074, +0.076]  n 60/10  ideal 0
+  length_bwhold/all/B2       -0.203 [-0.295, -0.109]  null +0.003 [-0.101, +0.097]  n 60/10  ideal 0
+  length_bwhold/all/B3       -0.952 [-1.158, -0.884]  null -0.002 [-0.207, +0.190]  n 60/10  ideal 0
+  length_bwhold/all/B4       -0.929 [-1.160, -0.721]  null +0.002 [-0.180, +0.179]  n 60/10  ideal 0
+  length_bwhold/all/f0       +0.001 [-0.000, +0.003]  null +0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  length_bwhold/sigma_growth/F1 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:-0.12 alpha=0.92,hold_bw=True:-0.11 alpha=1.09,hold_bw=True:+0.18 alpha=1.18,hold_bw=True:+0.36
+  length_bwhold/sigma_growth/F2 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.05 alpha=0.92,hold_bw=True:+0.05 alpha=1.09,hold_bw=True:+0.07 alpha=1.18,hold_bw=True:+0.27
+  length_bwhold/sigma_growth/F3 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.06 alpha=0.92,hold_bw=True:+0.09 alpha=1.09,hold_bw=True:+0.12 alpha=1.18,hold_bw=True:+0.31
+  length_bwhold/sigma_growth/F4 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.22 alpha=0.92,hold_bw=True:+0.08 alpha=1.09,hold_bw=True:+0.18 alpha=1.18,hold_bw=True:+0.34
