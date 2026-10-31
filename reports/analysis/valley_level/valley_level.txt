@@ -1,0 +1,30 @@
+D-057: level just above F1, relative to F1's envelope peak (dB; median [95 % bootstrap over speakers or clips])
+low: a third of the way from F1 to F2 (log frequency); fill: mean over D-055's fill region. Frames matched on
+f0 band, F1 300-1000 Hz, F2 / F1 >= 1.6. Implied F1 shift: the difference times D-055's sensitivity at +6 dB
+(1.54 c/dB low, 1.91 c/dB fill; linear, rough).
+
+== women (f0 150-300 Hz)
+  low  hillenbrand   -12.8 [ -13.8,  -12.0] dB  (307 frames, 29 groups)
+  low  synthetic     -13.4 [ -14.3,  -12.7] dB  (2182 frames, 240 groups)
+  low  zeroth        -14.6 [ -15.3,  -13.5] dB  (5945 frames, 6 groups)
+  low  real - synthetic   +0.7 [  -0.7,   +1.8] dB  -> implied F1 shift  +1.0 c
+  low  real - zeroth      +1.8 [  +0.2,   +2.9] dB  -> implied F1 shift  +2.8 c
+  fill hillenbrand   -18.7 [ -20.6,  -17.9] dB  (307 frames, 29 groups)
+  fill synthetic     -19.4 [ -20.2,  -18.4] dB  (2182 frames, 240 groups)
+  fill zeroth        -21.0 [ -21.9,  -19.7] dB  (5945 frames, 6 groups)
+  fill real - synthetic   +0.7 [  -1.2,   +2.0] dB  -> implied F1 shift  +1.4 c
+  fill real - zeroth      +2.3 [  +0.2,   +3.6] dB  -> implied F1 shift  +4.4 c
+
+== men (f0 80-150 Hz)
+  low  hillenbrand   -17.4 [ -18.1,  -15.9] dB  (228 frames, 24 groups)
+  low  synthetic     -18.0 [ -18.7,  -17.2] dB  (1693 frames, 165 groups)
+  low  zeroth        -18.7 [ -19.1,  -18.0] dB  (4487 frames, 4 groups)
+  low  real - synthetic   +0.6 [  -0.4,   +2.3] dB  -> implied F1 shift  +1.0 c
+  low  real - zeroth      +1.3 [  +0.3,   +2.8] dB  -> implied F1 shift  +2.0 c
+  fill hillenbrand   -22.0 [ -23.0,  -21.0] dB  (228 frames, 24 groups)
+  fill synthetic     -23.1 [ -24.2,  -22.2] dB  (1693 frames, 165 groups)
+  fill zeroth        -23.5 [ -23.9,  -22.9] dB  (4487 frames, 4 groups)
+  fill real - synthetic   +1.2 [  -0.3,   +2.6] dB  -> implied F1 shift  +2.2 c
+  fill real - zeroth      +1.5 [  +0.4,   +2.5] dB  -> implied F1 shift  +2.9 c
+
+FLAG (women, low: real - synthetic and real - resynthesised both >= 2 dB with intervals above 0): not raised
