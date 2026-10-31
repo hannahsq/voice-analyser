@@ -56,6 +56,13 @@ class TeacherConfig:
     # D-051: instantaneous tract length head (larynx height and lip protrusion included), built as vtl_head and fed
     # through the same gate; needs vtl_head
     vtl_inst_head: bool = False
+    # D-054: how the formant and bandwidth heads read the trunk. "flat": linear heads on the pooled per-frame vector h
+    # (every model to D-051); "mlp": the same with one hidden layer of readout_hidden (a capacity control); "film":
+    # frequency-resolved (`FreqReadout`): the encoder's conv maps, modulated by h, upsampled back to the VQT's bins, one
+    # logit per bin per formant, and each bandwidth read at its formant's position
+    readout: str = "flat"
+    readout_channels: int = 32
+    readout_hidden: int = 512
 
 
 class _GradGate(torch.autograd.Function):
@@ -209,15 +216,83 @@ class Encoder(nn.Module):
         else:
             raise ValueError(f"unknown temporal module {temporal!r}")
 
-    def forward(self, x):  # x: (B, C, F, T)
-        h = self.convs(x)
+    def forward(self, x, maps: bool = False):  # x: (B, C, F, T)
+        """maps: also return the conv maps at the end of each frequency resolution, full resolution first."""
+        kept = []
+        h = x
+        for m in self.convs:
+            if isinstance(m, Down):
+                kept.append(h)
+            h = m(h)
+        kept.append(h)
         b, c, f, t = h.shape
         h = Fn.gelu(self.proj(h.permute(0, 3, 1, 2).reshape(b, t, c * f)))
         if self.temporal == "gru":
-            return self.gru(h)[0]  # (B, T, 2 * hidden)
-        if self.temporal == "conformer":
-            return self.blocks(self.t_in(h))  # (B, T, conformer_dim)
-        return self.tconv(self.t_in(h))
+            h = self.gru(h)[0]  # (B, T, 2 * hidden)
+        elif self.temporal == "conformer":
+            h = self.blocks(self.t_in(h))  # (B, T, conformer_dim)
+        else:
+            h = self.tconv(self.t_in(h))
+        return (h, kept) if maps else h
+
+
+def _interp_matrix(src_log2: torch.Tensor, dst_log2: torch.Tensor) -> torch.Tensor:
+    """(len(dst), len(src)) linear interpolation in log frequency (clamped at the ends)."""
+    pos = torch.searchsorted(src_log2, dst_log2).clamp(1, len(src_log2) - 1)
+    lo, hi = src_log2[pos - 1], src_log2[pos]
+    w = ((dst_log2 - lo) / (hi - lo)).clamp(0.0, 1.0)
+    m = torch.zeros(len(dst_log2), len(src_log2))
+    m[torch.arange(len(dst_log2)), pos - 1] = 1.0 - w
+    m[torch.arange(len(dst_log2)), pos] = w
+    return m
+
+
+class FreqReadout(nn.Module):
+    """D-054: formant logits read per frequency bin, and bandwidths read at each formant's position.
+
+    The coarsest conv map (64 ch x 91 bins) is FiLM-modulated by the temporal module's output h (one scale and shift
+    per channel and frame, the same at every bin), then upsampled along frequency twice, adding the finer conv maps
+    (U-Net skips) through 1x1 convs, with a residual conv Block at each resolution. A 1x1 conv gives one logit per VQT
+    bin per formant, interpolated onto the formant axis; the cascade's soft mask is the flat heads'. Bandwidth n reads
+    the full-resolution features at formant n's expected position (no gradient through the position) beside h.
+    """
+
+    def __init__(self, d: int, chans: tuple[int, ...], c: int):
+        super().__init__()
+        self.film = nn.Linear(d, 2 * chans[-1])
+        self.lat = nn.ModuleList([nn.Conv2d(ch, c, 1) for ch in chans])
+        self.blocks = nn.ModuleList([Block(c, c, 1) for _ in chans])
+        self.out = nn.Conv2d(c, N_FORMANTS, 1)
+        self.bw = nn.ModuleList([nn.Sequential(nn.Linear(c + d, 64), nn.GELU(), nn.Linear(64, 2)) for _ in range(N_FORMANTS)])
+        fm_log2 = torch.log2(torch.tensor(FORMANT_AXIS.centres_hz, dtype=torch.float32))
+        self.register_buffer("to_formant", _interp_matrix(LOG2_VQT.clone(), fm_log2), persistent=False)
+
+    def maps(self, kept: list, h: torch.Tensor) -> torch.Tensor:
+        """-> full-resolution features (B, c, F_vqt, T)."""
+        g, b = self.film(h).transpose(1, 2)[:, :, None, :].chunk(2, 1)  # (B, C, 1, T) each
+        x = self.blocks[-1](self.lat[-1](kept[-1] * (1.0 + g) + b))
+        for i in range(len(kept) - 2, -1, -1):
+            x = Fn.interpolate(x, size=kept[i].shape[-2:], mode="bilinear", align_corners=True)
+            x = self.blocks[i](x + self.lat[i](kept[i]))
+        return x
+
+    def logits(self, x: torch.Tensor) -> torch.Tensor:
+        """(B, N, T, formant bins) before the cascade's mask."""
+        return torch.einsum("bnft,kf->bntk", self.out(x).float(), self.to_formant)
+
+    def bandwidths(self, x: torch.Tensor, h: torch.Tensor, pos_hz: torch.Tensor) -> torch.Tensor:
+        """pos_hz (B, T, N) -> (B, T, 2N): mean of log B per formant, then log-variances (the flat head's layout)."""
+        f = x.shape[2]
+        lv = LOG2_VQT.to(x.device)
+        idx = ((torch.log2(pos_hz.clamp_min(1.0)) - lv[0]) / ((lv[-1] - lv[0]) / (f - 1))).clamp(0, f - 1.001)
+        i0 = idx.floor().long()
+        w = (idx - i0)[:, None].to(x.dtype)  # (B, 1, T, N)
+        xt = x.permute(0, 1, 3, 2)  # (B, c, T, F)
+        g0 = torch.gather(xt, 3, i0[:, None].expand(-1, xt.shape[1], -1, -1))
+        g1 = torch.gather(xt, 3, (i0 + 1)[:, None].expand(-1, xt.shape[1], -1, -1))
+        local = ((1 - w) * g0 + w * g1).permute(0, 2, 3, 1)  # (B, T, N, c)
+        v = torch.stack([self.bw[n](torch.cat([local[:, :, n], h.to(local.dtype)], -1)) for n in range(N_FORMANTS)], 2).float()
+        return torch.cat([v[..., 0], v[..., 1]], -1)
 
 
 class Teacher(nn.Module):
@@ -233,8 +308,18 @@ class Teacher(nn.Module):
         self.enc = Encoder(c_in, cfg.channels, (cfg.full_res_dilations, (1, 2, 4, 8), (1, 2)), cfg.embed, cfg.gru_hidden,
                            cfg.gru_layers, cfg.temporal, cfg)
         d = self.enc.out_dim
-        self.formant_heads = nn.ModuleList([nn.Linear(d + n, FORMANT_AXIS.n_bins) for n in range(N_FORMANTS)])
-        self.bw_head = nn.Linear(d, 2 * N_FORMANTS)  # mean and log-variance of log B per formant
+        if cfg.readout == "flat":
+            self.formant_heads = nn.ModuleList([nn.Linear(d + n, FORMANT_AXIS.n_bins) for n in range(N_FORMANTS)])
+            self.bw_head = nn.Linear(d, 2 * N_FORMANTS)  # mean and log-variance of log B per formant
+        elif cfg.readout == "mlp":
+            hid = cfg.readout_hidden
+            self.formant_heads = nn.ModuleList([nn.Sequential(nn.Linear(d + n, hid), nn.GELU(), nn.Linear(hid, FORMANT_AXIS.n_bins))
+                                                for n in range(N_FORMANTS)])
+            self.bw_head = nn.Sequential(nn.Linear(d, hid), nn.GELU(), nn.Linear(hid, 2 * N_FORMANTS))
+        elif cfg.readout == "film":
+            self.readout = FreqReadout(d, cfg.channels, cfg.readout_channels)
+        else:
+            raise ValueError(f"unknown readout {cfg.readout!r}")
         self.sonorant_head = nn.Linear(d, 1)
         if cfg.obs_head:
             self.obs_head = nn.Linear(d + N_FORMANTS, N_FORMANTS)
@@ -268,17 +353,28 @@ class Teacher(nn.Module):
                 f0 = comb_f0 if comb_f0 is not None else self.expected_f0(out["f0_logits"].float())
                 vp = comb_voiced if comb_voiced is not None else torch.sigmoid(out["voicing_logit"].float())
             x = torch.cat([x, self.comb(f0, vp).to(x.dtype)], 1)
-        h = self.enc(x)
+        film = self.cfg.readout == "film"
+        h, kept = self.enc(x, maps=True) if film else (self.enc(x), None)
+        if film:
+            fx = self.readout.maps(kept, h)
+            raw = self.readout.logits(fx)
         logits, means = [], []
-        for n, head in enumerate(self.formant_heads):
-            inp = torch.cat([h] + [(m / FORMANT_AXIS.n_bins)[..., None].to(h.dtype) for m in means], -1) if means else h
-            lg = head(inp).float()
+        for n in range(N_FORMANTS):
+            if film:
+                lg = raw[:, n]
+            else:
+                inp = torch.cat([h] + [(m / FORMANT_AXIS.n_bins)[..., None].to(h.dtype) for m in means], -1) if means else h
+                lg = self.formant_heads[n](inp).float()
             if means:  # soft mask below the previous formant
                 below = (means[-1][..., None] - self.cfg.mask_margin_bins - self.fm_bins).clamp_min(0.0)
                 lg = lg - self.cfg.mask_strength * torch.tanh(below / self.cfg.mask_margin_bins)
             logits.append(lg)
             means.append((lg.softmax(-1) * self.fm_bins).sum(-1))  # expected bin index
-        bw = self.bw_head(h).float()
+        if film:
+            pos = FORMANT_AXIS.f_min * torch.exp2(torch.stack(means, -1).detach() * FORMANT_AXIS.cents_per_bin / 1200.0)
+            bw = self.readout.bandwidths(fx, h, pos)
+        else:
+            bw = self.bw_head(h).float()
         out.update(formant_logits=torch.stack(logits, 2),  # (B, T, N, bins)
                    logb_mean=bw[..., :N_FORMANTS] + 4.5, logb_logvar=bw[..., N_FORMANTS:],
                    sonorant_logit=self.sonorant_head(h)[..., 0].float())

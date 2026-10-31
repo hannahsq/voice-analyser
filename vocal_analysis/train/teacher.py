@@ -104,6 +104,12 @@ class TrainConfig:
     vtl_start: int | None = None
     vtl_lr: float | None = None
     vtl_weight_decay: float | None = None
+    # D-054: a new run that starts from another run's weights without its step or optimiser (a probe on a frozen trunk).
+    # Every parameter of init_from whose name and shape match is loaded, except those under `reinit` (they keep this
+    # run's fresh initialisation from `seed`); parameters under `freeze` (module name prefixes) are not trained.
+    init_from: str | None = None
+    freeze: tuple[str, ...] = ()
+    reinit: tuple[str, ...] = ()
 
 
 def _git() -> dict:
@@ -477,6 +483,17 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     elif cfg.vtl_inst:
         raise ValueError("vtl_inst needs vtl")
     model = Teacher(model_cfg).to(device)
+    if ck is None and cfg.init_from:  # D-054
+        src = torch.load(cfg.init_from, map_location="cpu", weights_only=False)["model"]
+        own = model.state_dict()
+        take = {k: v for k, v in src.items() if k in own and own[k].shape == v.shape and not k.startswith(cfg.reinit or ("\0",))}
+        model.load_state_dict(take, strict=False)
+        for n, p in model.named_parameters():
+            if n.startswith(cfg.freeze or ("\0",)):
+                p.requires_grad_(False)
+        fresh = [k for k in own if k not in take]
+        log(f"init from {cfg.init_from}: {len(take)} tensors loaded, fresh: {sorted({k.split('.')[0] for k in fresh})}; "
+            f"trainable {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
     sf = cfg.optimizer == "schedulefree"
     if sf:
         import schedulefree

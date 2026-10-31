@@ -2102,3 +2102,27 @@ D-045's follow-ups: renders are too periodic below 2 kHz (women's 1–2 kHz band
   - **Formant share** carries the error: H1\*–H2\* 0.14 / 0.68 / 0.85–0.91 dB (150–300 / 300–500 / > 500 Hz) on synthetic clips, and 0.4–0.5 / 1.5–1.9 / 2.0–2.1 dB on the resynthesised sets. Deliverable median |error| H1\*–H2\*: synthetic 0.11 / 0.42 / 1.15 / 1.87 dB by band (floor 0.10 / 0.19 / 0.34 / 0.91), Zeroth 0.23 / 0.98 / 2.5, VocalSet 0.13 / 0.73 / 1.86 / 2.69; uncorrected 1–10 dB. Bias stays within ±0.2 dB except 300–500 Hz on the resynthesised sets (+0.2 to +0.6 dB).
   - The model's own f0 ("full") changes nothing (≤ 0.05 dB).
   - Reading: for M3's corrected measures the bandwidth heads' known defects (D-050) cost almost nothing, because H1 and H2 rarely sit on a formant's peak, where the bandwidth matters; F1's error at f0 above 300 Hz is the limit. Bandwidth decoupling is not justified by this use; it stays a candidate for the bandwidth outputs themselves.
+
+## D-054 (2026-10-31, registered before any arm trained; a 60-step smoke run per arm was seen, for speed and memory only): a frequency-resolved read-out on teacher v3.1's frozen trunk
+
+*Status*: **registered**. Hannah's choice (2026-10-31): test the trunk's bottleneck cheaply on a frozen trunk first, with FiLM. The formant heads read the pooled per-frame vector h (128-d), which reaches them only through one non-residual flatten (64 channels × 91 bins → 384 → 128); the heat maps are linear in h and the bandwidth head is one shared linear layer of 1,032 parameters. Probes 3, 11 and 12 (D-050) are consistent with a read-out that has lost local spectral detail: F1 follows the envelope peak, F1 under- or over-follows a uniform scaling, and the bandwidths mostly return their prior.
+
+- *Question*: do teacher v3.1's frozen conv maps carry formant and bandwidth evidence that the flatten discards, so that a frequency-resolved read-out does better than heads on h?
+- *Trunk* (frozen, all arms): `d040_5b_s2_b20k` (teacher v3.1): f0 network, comb, encoder, sonorant and VTL heads; only the formant and bandwidth heads train.
+- *Arms* (`TeacherConfig.readout`; `scripts/analysis/d054_readout.py`):
+  - **flat**: today's heads (cascaded linear F1–F4 heat maps, linear bandwidth head), fresh: 193 k parameters.
+  - **mlp**: the same with one hidden layer of 512 (GELU): 1.09 M parameters, the capacity control.
+  - **film** (`FreqReadout`): the coarsest conv map FiLM-modulated by h (a scale and shift per channel and frame, the same at every bin), upsampled along frequency to the VQT's 363 bins with U-Net skips from the finer conv maps (1×1 convs, a residual conv Block per resolution), one logit per bin per formant interpolated onto the formant axis, the cascade's soft mask as the flat heads'; bandwidth n read from the full-resolution features at formant n's expected position, beside h: 91 k parameters. More compute than flat or mlp, fewer parameters than either.
+- *Training*: 5b's data mix and channel (train_v2 + 30 % resynthesised VocalSet and Zeroth), 5b's mixed crop lengths and batch; AdamW 1e-3, weight decay 0.01, 300 warm-up steps, cosine over **8,000 steps**; comb from the frozen f0 network throughout; head seeds 1 and 2 per arm (initialisation and data order). Six runs, about 7 h.
+- *Measures* (each run's final checkpoint):
+  1. Synthetic validation F1–F4 MAE (Hz; the trainer's `eval`), and resynthesised validation F1–F3 MAE (Zeroth, VocalSet; `eval_resynth`).
+  2. Bandwidth error: median |cents| of predicted against true B1–B4 on D-053's frames (synthetic, Zeroth, VocalSet; `d053_iseli_alwan.py score`), by f0 band; D-053's corrected-measure arms come with it.
+  3. D-050 probe 12 (bandwidth evidence: arm C's weight on the label) and probe 11 (tape speed: F1–F4 slopes, ideal 1).
+  4. Dev: Hillenbrand F1 / F2 / F3 MAE (windowed, paired) and women's closed-phase F1 bias (PTDB-TUG); f0 and voicing are the frozen trunk's, identical in every arm.
+  - Context, reported: film and mlp against flat, flat against v3.1's own (jointly trained) heads, and the spread between head seeds within each arm.
+- *Rule* (film against **mlp**, seed means of the two head seeds): the frequency-resolved read-out is **supported** if (A) or (B) holds and no guard fails.
+  - (A) formants: synthetic F1–F4 MAE lower by at least 5 % (mean over F1–F4 of the relative change), with both film seeds better than both mlp seeds on that mean;
+  - (B) bandwidths: synthetic bandwidth error lower by at least 10 % (mean over B1–B4) and probe 12's weight on the label up by at least 0.05 (mean over B1–B4), both on both seeds;
+  - guards (film − mlp): Hillenbrand dev F1 ≤ +4, F2 ≤ +9, F3 ≤ +20 Hz; women's closed-phase F1 |error| ≤ +5 Hz (D-040's margins, as `decide_d051.py` measures them); resynthesised F1–F3 MAE no more than 5 % worse.
+  - Supported: a full-size registration follows (readout "film" trained end to end, against 5b). Not supported: no full-size run on this evidence; since the frozen conv maps were trained for the flat read-out, that is "not shown on v3.1's trunk", not "the bottleneck doesn't matter". The thresholds are mine; amendable before any arm's results are seen.
+- *Code*: `TeacherConfig.readout` ("flat" default: earlier checkpoints load unchanged), `FreqReadout`, `Encoder.forward(maps=True)`; `TrainConfig.init_from` / `freeze` / `reinit` (a new run from another run's weights without its step or optimiser).
