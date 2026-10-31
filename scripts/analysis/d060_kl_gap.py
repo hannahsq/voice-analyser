@@ -28,7 +28,8 @@ def render(cache: Path, sex: str, vowel: str, f0: float, gap: float) -> tuple[np
     from vocal_analysis.synth import branches as br
     from vocal_analysis.synth import kl, tube
 
-    path = cache / f"{sex}_{vowel}_{f0}_{gap:.1f}.npz"
+    tag = "".join(c + "^" if c.isupper() else c for c in vowel)  # Windows names ignore case: I and i would share
+    path = cache / f"{sex}_{tag}_{f0}_{gap:.1f}.npz"
     if path.exists():
         z = np.load(path)
         return z["x"], float(z["f1"])
@@ -73,7 +74,7 @@ def main():
     spec = PILOT if mode == "pilot" else MAIN
     gaps = spec.get("gaps", GAPS)
     out.mkdir(parents=True, exist_ok=True)
-    cache = Path("runs") / f"d060_{mode}"
+    cache = Path("runs") / f"d060_{mode}_cs"  # case-safe names (amendment 1); runs/d060_main had collisions
     dev = torch.device(os.environ.get("VA_DEVICE", "cpu"))
     models = {a.split("=", 1)[0]: load_teacher(a.split("=", 1)[1], dev)[0] for a in sys.argv[3:]}
     names = list(models)
