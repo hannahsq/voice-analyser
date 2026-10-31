@@ -45,6 +45,7 @@ class SynthConfig:
     shimmer_db: tuple[float, float] = (0.0, 1.0)
     hnr_db: tuple[float, float] | None = (5.0, 40.0)  # None: no aspiration
     asp_tilt_db_oct: float | None = None  # aspiration tilt before the tract, fixed (no draw); None: +6 dB/oct difference (D-048)
+    whisper_tilt_db_oct: float | None = None  # the same for whisper and /h/ onsets (D-063); None: as before
     vibrato_rate_hz: tuple[float, float] = (4.0, 8.0)
     vibrato_extent_cents: tuple[float, float] = (40.0, 100.0)  # bulk; see p_vibrato_wide
     p_vibrato_wide: float = 0.3  # extent from (0, 150) instead
@@ -140,6 +141,7 @@ V1_SETTINGS = {
     "p_f1_band": 0.0, "f1_band_f0_hz": (150.0, 350.0), "f1_band_ratio": (1.5, 4.5),
     "p_whisper_clip": 0.0, "p_h_onset": 0.0, "h_amp": (1.5, 5.0), "sonorant_includes_whisper": False,
     "asp_tilt_db_oct": None,
+    "whisper_tilt_db_oct": None,
 }
 
 
@@ -621,10 +623,10 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
         comps = interactive_source.synthesize(traj, kf_shapes, kf_block, kf_w, glottis, area_sq, rng, jitter=jitter,
                                               shimmer_db=shimmer, hnr_db=hnr, extras=extras,
                                               coupled=feedback, closure=closure, ret=cfg.interactive_return,
-                                              asp_tilt_db_oct=cfg.asp_tilt_db_oct)
+                                              asp_tilt_db_oct=cfg.asp_tilt_db_oct, whisper_tilt_db_oct=cfg.whisper_tilt_db_oct)
     else:
         comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled,
-                           asp_tilt_db_oct=cfg.asp_tilt_db_oct)
+                           asp_tilt_db_oct=cfg.asp_tilt_db_oct, whisper_tilt_db_oct=cfg.whisper_tilt_db_oct)
     audio = comps["total"]
     peak = np.max(np.abs(audio)) + 1e-12
     gain = 0.5 / peak

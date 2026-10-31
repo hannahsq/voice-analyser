@@ -341,7 +341,7 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
                sq: float | None, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
                hnr_db: float | None = None, extras: dict | None = None, fs: float = 16000.0,
                coupled: bool = True, closure: float = 1.0, ret: bool = False,
-               asp_tilt_db_oct: float | None = None) -> dict[str, np.ndarray]:
+               asp_tilt_db_oct: float | None = None, whisper_tilt_db_oct: float | None = None) -> dict[str, np.ndarray]:
     """The components of `voice.synthesize` with the interactive source (same Trajectories; its poles are ignored:
     the tract is `responses`, blended per control block). The area is the Rosenberg pulse at the open quotient of
     the clip's Rd (LF te), the closed-phase gap following it (`coupling.gap_from_open_quotient`), scaled by the
@@ -375,7 +375,9 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
         out["aspiration"] = asp
     wa = _per_sample(traj.whisper_amp)
     if wa.any():
-        out["whisper"] = _convolve_tv(np.diff(rng.standard_normal(n + 1)) * wa, h, bt, bw, CTRL) * 0.05
+        white = rng.standard_normal(n + 1)
+        noise = np.diff(white) if whisper_tilt_db_oct is None else tilted_noise(white[:n], whisper_tilt_db_oct, fs)
+        out["whisper"] = _convolve_tv(noise * wa, h, bt, bw, CTRL) * 0.05
     fa = _per_sample(traj.fric_amp)
     if fa.any():
         sos = butter(4, rng.uniform(2000, 5000), "highpass", fs=fs, output="sos")

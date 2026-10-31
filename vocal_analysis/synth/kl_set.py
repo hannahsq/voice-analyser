@@ -154,7 +154,10 @@ def generate(index: int, cfg: KLSetConfig | None = None, seed: int = 0, keep_com
 
     wa = _per_sample(traj.whisper_amp)[:ns]
     if wa.any():
-        out["whisper"] = kl.render(*args, flow=np.diff(rng.standard_normal(ns + 1)) * wa, **common)["audio"][:ns] / FS * 0.05
+        white = rng.standard_normal(ns + 1)
+        t = sc.whisper_tilt_db_oct  # as the aspiration's: a flow tilt of t - 6 (the waveguide radiates)
+        noise = np.diff(white) if t is None else tilted_noise(white[:ns], t - 6.0, FS)
+        out["whisper"] = kl.render(*args, flow=noise * wa, **common)["audio"][:ns] / FS * 0.05
     fa = _per_sample(traj.fric_amp)[:ns]
     if fa.any():
         from scipy.signal import butter, sosfilt

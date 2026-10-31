@@ -180,7 +180,7 @@ def tilted_noise(white: np.ndarray, tilt_db_oct: float, fs: float = 16000.0) -> 
 
 def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
                hnr_db: float | None = None, fs: float = FS, coupling: dict | None = None,
-               asp_tilt_db_oct: float | None = None) -> dict[str, np.ndarray]:
+               asp_tilt_db_oct: float | None = None, whisper_tilt_db_oct: float | None = None) -> dict[str, np.ndarray]:
     """Render the components. Returns dict of float64 arrays (same length) and 'cycles' (glottal phase).
 
     jitter: SD of the per-period relative period perturbation; shimmer_db: SD of per-period amplitude (dB).
@@ -230,7 +230,9 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
         out["aspiration"] = asp
     wa = _per_sample(traj.whisper_amp)
     if wa.any():
-        out["whisper"] = tract_filter(np.diff(rng.standard_normal(n + 1)) * wa, traj, fs) * 0.05
+        white = rng.standard_normal(n + 1)
+        noise = np.diff(white) if whisper_tilt_db_oct is None else tilted_noise(white[:n], whisper_tilt_db_oct, fs)
+        out["whisper"] = tract_filter(noise * wa, traj, fs) * 0.05
     fa = _per_sample(traj.fric_amp)
     if fa.any():
         sos = butter(4, rng.uniform(2000, 5000), "highpass", fs=fs, output="sos")
