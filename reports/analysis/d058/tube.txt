@@ -1,0 +1,14 @@
+D-058 amendment 1 (reported only): interactive-source tube clips on D-058's arms. F1 error (Hz, seed mean of v31_s2, v31_s1), median over files [95 % bootstrap]; 6 of 128 files left out.
+
+tube     Male   arm 0.0 :  +11.9 [-1.7, +28.5]  (v31_s2 +11  v31_s1 +13; 16 files)
+tube     Male   arm 0.1 :  +14.3 [+5.3, +27.9]  (v31_s2 +10  v31_s1 +21; 16 files)
+tube     Male   arm 0.2 :  +31.4 [+19.4, +60.8]  (v31_s2 +35  v31_s1 +31; 13 files)
+tube     Male   arm 0.3 :  +39.9 [+24.4, +68.9]  (v31_s2 +44  v31_s1 +40; 13 files)
+tube Male: gap 0.3 minus gap 0, paired: +21.5 [+6.9, +45.6] Hz
+
+tube     Female arm 0.0 :  +33.4 [+9.3, +81.2]  (v31_s2 +30  v31_s1 +39; 16 files)
+tube     Female arm 0.1 :  +27.1 [-0.3, +52.8]  (v31_s2 +33  v31_s1 +27; 16 files)
+tube     Female arm 0.2 :  +43.2 [+27.4, +80.4]  (v31_s2 +50  v31_s1 +39; 16 files)
+tube     Female arm 0.3 :  +60.5 [+31.5, +81.2]  (v31_s2 +64  v31_s1 +56; 16 files)
+tube Female: gap 0.3 minus gap 0, paired: +3.8 [-0.3, +34.7] Hz
+
