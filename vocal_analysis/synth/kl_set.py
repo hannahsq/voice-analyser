@@ -28,7 +28,7 @@ import numpy as np
 
 from . import branches, coupling, interactive, kl, sampler, tract, tube
 from .sampler import N_LABEL_FORMANTS, N_SOURCE_HARMONICS, SynthClip
-from .voice import CTRL, FS, Trajectories
+from .voice import CTRL, FS, Trajectories, tilted_noise
 
 
 def _base() -> sampler.SynthConfig:
@@ -43,6 +43,9 @@ class KLSetConfig:
     subglottal: bool = True
     sq: tuple[float, float] = (0.9, 2.0)  # Rosenberg speed quotient, uniform per clip
     p_lf_pulse: float = 0.3  # per clip: the LF-derived area pulse instead
+    # Rosenberg pulses close with an exponential return in area at LF's Ta for the clip's Rd (`interactive.area_pulse`
+    # ret; D-062), instead of the quarter-cosine's corner. No draw; False reproduces earlier sets
+    area_return: bool = False
     p_larynx: float = 0.3  # per clip: a larynx height change (tube.PG_RANGE, scaled)
     p_lips: float = 0.3  # per clip: a lip protrusion change (tube.PM_RANGE, scaled)
     oversample: int = kl.OVERSAMPLE
@@ -122,7 +125,7 @@ def generate(index: int, cfg: KLSetConfig | None = None, seed: int = 0, keep_com
                         zeros_f=np.zeros((n, 0)), zeros_b=np.zeros((n, 0)))
     jitter, shimmer = rng.uniform(*sc.jitter), rng.uniform(*sc.shimmer_db)
     hnr = None if sc.hnr_db is None else rng.uniform(*sc.hnr_db)
-    src = interactive.glottal_area_track(traj, glottis, sq, rng, jitter, shimmer, FS)
+    src = interactive.glottal_area_track(traj, glottis, sq, rng, jitter, shimmer, FS, ret=cfg.area_return)
     ns = traj.n_samples
     frames = ns // kl.HOP + 1
     ms = np.minimum(np.arange(frames) * kl.HOP // CTRL, n - 1)
@@ -135,7 +138,11 @@ def generate(index: int, cfg: KLSetConfig | None = None, seed: int = 0, keep_com
     out = {"voiced": kl.render(*args, **common)["audio"][:ns] / FS * src["shimmer"][:ns], "cycles": src["cycles"]}
     va = src["va"][:ns]
     if hnr is not None:
-        noise = np.diff(rng.standard_normal(ns + 1)) * (0.25 + 0.75 * src["pulse"][:ns]) * va
+        # the waveguide radiates (d/dt) its flow, so the cascade's source tilt t is a flow tilt of t - 6 dB/oct; None:
+        # the first difference of white noise as flow (radiated, about +12 dB/oct: every set before D-062)
+        white = rng.standard_normal(ns + 1)
+        t = sc.asp_tilt_db_oct
+        noise = (np.diff(white) if t is None else tilted_noise(white[:ns], t - 6.0, FS)) * (0.25 + 0.75 * src["pulse"][:ns]) * va
         asp = kl.render(*args, flow=noise, **common)["audio"][:ns] / FS
         on = va > 0.5 * va.max() if va.max() > 0 else np.zeros(ns, bool)
         if on.any():
@@ -181,7 +188,7 @@ def generate(index: int, cfg: KLSetConfig | None = None, seed: int = 0, keep_com
         "register_steps": v.register_steps, "segments": segments, "jitter": jitter, "shimmer_db": shimmer,
         "hnr_db": hnr, "gain": gain, "tract": "kl",
         "kl": {"speaker": {k: (x.tolist() if isinstance(x, np.ndarray) else x) for k, x in asdict(spk).items()},
-               "targets": [d[2] for d in drawn], "glottis": asdict(glottis), "pulse": "lf" if sq is None else "rosenberg",
+               "targets": [d[2] for d in drawn], "glottis": asdict(glottis), "pulse": "lf" if sq is None else "rosenberg", "area_return": bool(cfg.area_return and sq is not None),
                "area_sq": sq, "pg_cm": pg, "pm_cm": pm, "n_sections": nsect, "oversample": os,
                "port_cm": port_cm, "port_cm2_targets": ports.tolist(),
                "nasal": {k: (x.tolist() if isinstance(x, np.ndarray) else x) for k, x in asdict(nas).items()},

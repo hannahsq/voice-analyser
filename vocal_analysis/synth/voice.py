@@ -170,6 +170,14 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
     return filters.filter_tv(src, np.concatenate([pf, zf]), np.concatenate([pb, zb]), fs, is_zero)
 
 
+def tilted_noise(white: np.ndarray, tilt_db_oct: float, fs: float = 16000.0) -> np.ndarray:
+    """White noise given a spectral tilt (dB per octave re 1 kHz, flat below 50 Hz), by FFT; same length."""
+    n = len(white)
+    f = np.fft.rfftfreq(n, 1.0 / fs)
+    gain = 10 ** (tilt_db_oct * np.log2(np.maximum(f, 50.0) / 1000.0) / 20)
+    return np.fft.irfft(np.fft.rfft(white) * gain, n)
+
+
 def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
                hnr_db: float | None = None, fs: float = FS, coupling: dict | None = None,
                asp_tilt_db_oct: float | None = None) -> dict[str, np.ndarray]:
@@ -212,9 +220,7 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
         if asp_tilt_db_oct is None:
             src = np.diff(white) * mod * va
         else:
-            f = np.fft.rfftfreq(n, 1.0 / fs)
-            gain = 10 ** (asp_tilt_db_oct * np.log2(np.maximum(f, 50.0) / 1000.0) / 20)
-            src = np.fft.irfft(np.fft.rfft(white[:n]) * gain, n) * mod * va
+            src = tilted_noise(white[:n], asp_tilt_db_oct, fs) * mod * va
         asp = tract_filter(src, traj, fs)
         on = va > 0.5 * va.max() if va.max() > 0 else np.zeros(n, bool)
         if on.any():

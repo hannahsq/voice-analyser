@@ -618,11 +618,10 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
     jitter, shimmer = rng.uniform(*cfg.jitter), rng.uniform(*cfg.shimmer_db)
     hnr = None if cfg.hnr_db is None else rng.uniform(*cfg.hnr_db)
     if interactive:
-        if cfg.asp_tilt_db_oct is not None:
-            raise NotImplementedError("asp_tilt_db_oct: the interactive source has its own aspiration")
         comps = interactive_source.synthesize(traj, kf_shapes, kf_block, kf_w, glottis, area_sq, rng, jitter=jitter,
                                               shimmer_db=shimmer, hnr_db=hnr, extras=extras,
-                                              coupled=feedback, closure=closure, ret=cfg.interactive_return)
+                                              coupled=feedback, closure=closure, ret=cfg.interactive_return,
+                                              asp_tilt_db_oct=cfg.asp_tilt_db_oct)
     else:
         comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled,
                            asp_tilt_db_oct=cfg.asp_tilt_db_oct)
