@@ -45,6 +45,9 @@ for s in 1 2; do
     ls cache/d053/vocalset_$r.npz > /dev/null 2>&1 || $PY -c "import sys; sys.path.insert(0, '$SA'); import d053_iseli_alwan as D
 if __name__ == '__main__': D.score('$ck')" >> runs/d054_score_$r.log 2>&1 || fail "d053 frames $r"
     [ -s reports/probes/scale/$r.json ] || $PY -m vocal_analysis.eval.probes.scale score $ck >> runs/d054_score_$r.log 2>&1 || fail "probe scale $r"
+    for p in bwhold counterfactual bandwidth; do  # probe 12 reads these probes' reports (arms A and B)
+      [ -s reports/probes/$p/$r.json ] || $PY -m vocal_analysis.eval.probes.run score $p $ck >> runs/d054_score_$r.log 2>&1 || fail "probe $p $r"
+    done
     [ -s reports/probes/bw_evidence/$r.json ] || $PY -m vocal_analysis.eval.probes.bw_evidence $ck >> runs/d054_score_$r.log 2>&1 || fail "probe bw_evidence $r"
     grep -q "\"$r\"\|'$r'" <($PY -c "import numpy as np; print(list(np.load('$SW/ptdb_egg_sub.npz').files))") \
       || $PY -u $SA/add_model.py "$SW" $r $ck _sub > "$SW/add_sub_$r.log" 2>&1 || fail "closed phase $r"
