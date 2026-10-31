@@ -8,7 +8,7 @@ def _lossless_ir(n: int, m: int = 1 << 14) -> np.ndarray:
     """Impulse response of a lossless uniform tube (3 cm^2), rigid glottis, ideal open lips (reflection -1)."""
     areas, lip = np.full((1, n), 3.0), np.array([[-1.0, 0.0, 0.0]])
     g, z, p = kl._loss_filters(np.zeros((1, n)))
-    u, _, _ = kl._run(areas, g, z, p, lip, m, np.zeros(m), 0.0, 0.0, np.zeros(4), 1.0 / (kl.FS * kl.OVERSAMPLE),
+    u, _, _ = kl._run(areas, g, z, p, lip, m, np.r_[1.0, np.zeros(m - 1)], 0.0, 0.0, np.zeros(4), 1.0 / (kl.FS * kl.OVERSAMPLE),
                       kl.section_length(), True, True, *kl._no_branches(1, kl.OVERSAMPLE))
     return u
 

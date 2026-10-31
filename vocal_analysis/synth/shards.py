@@ -44,10 +44,10 @@ def _pack(clips: list[tuple]) -> dict:
 
 
 def _make_shard(args) -> str:
-    path, indices, cfg, seed, channel, channel_seed = args
+    path, indices, cfg, seed, channel, channel_seed, generator = args
     clips = []
     for i in indices:
-        c = generate(i, cfg, seed)
+        c = generator(i, cfg, seed)
         audio = c.audio
         if channel is not None:  # suite: bake a fixed channel into the stored audio
             mask = np.repeat(c.labels["voiced"], int(c.meta["fs"] * cfg.hop_s))[: len(audio)]
@@ -69,7 +69,9 @@ LEGACY_DEFAULTS = {"synth_config": json.loads(json.dumps(V1_SETTINGS)),
 
 def write_set(out_dir: str | Path, n_clips: int, cfg: SynthConfig, seed: int, shard_size: int = 256,
               workers: int | None = None, channel: ChannelConfig | None = None, channel_seed: int = 0,
-              extra_index: dict | None = None, log=print) -> Path:
+              extra_index: dict | None = None, log=print, generator=generate) -> Path:
+    """generator(i, cfg, seed) -> SynthClip, module-level (pickled to the workers): `sampler.generate`, or another
+    generator with the same output, as `kl_set.generate`."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     index = {"format_version": FORMAT_VERSION, "n_clips": n_clips, "shard_size": shard_size, "seed": seed,
@@ -91,7 +93,8 @@ def write_set(out_dir: str | Path, n_clips: int, cfg: SynthConfig, seed: int, sh
     for s, start in enumerate(range(0, n_clips, shard_size)):
         path = out / f"shard_{s:05d}.npz"
         if not path.exists():  # resumable
-            jobs.append((str(path), list(range(start, min(start + shard_size, n_clips))), cfg, seed, channel, channel_seed))
+            jobs.append((str(path), list(range(start, min(start + shard_size, n_clips))), cfg, seed, channel, channel_seed,
+                         generator))
     log(f"{out}: {n_clips} clips, {len(jobs)} shards to write")
     workers = workers or max(1, (os.cpu_count() or 2) - 2)
     with ProcessPoolExecutor(workers) as ex:

@@ -58,13 +58,21 @@ def test_waveguide_matches_the_branched_model(vowel):
     assert err[0] < 0.04 and np.all(err[1:] < 0.01)
 
 
-def test_mixed_identity_is_flagged():
-    """Nasalised /u/'s F1 meets the nose's lowest pole (an avoided crossing): flagged; /A/'s F1 is not."""
+def test_entangled_labels_go_to_the_more_oral_root():
+    """Where an oral and a nasal root are entangled (/u/'s F1 crosses the nose's lowest pole; /A/'s F1 starts degenerate
+    with a nasal pole), the label sits on the root with the larger oral energy share, and is mixed only when neither is
+    clearly oral. Unentangled labels are not mixed."""
     nas = br.nasal(17.5, DX)
-    for vowel, want in [("u", True), ("A", False)]:
+    for vowel in ["u", "A", "i"]:
         s, oral = _oral(vowel)
-        *_, mixed = br.branched_poles(oral, br.port_junction(br.port_position_cm(s), len(oral.areas), DX), 0.3, nas)
-        assert bool(mixed[0]) is want
+        j = br.port_junction(br.port_position_cm(s), len(oral.areas), DX)
+        fo, bo, fn, bn, mixed = br.branched_poles(oral, j, 0.3, nas)
+        phi_o = [br.oral_fraction(-np.pi * b + 2j * np.pi * f, oral, j, 0.3, nas) for f, b in zip(fo[:3], bo[:3])]
+        phi_n = [br.oral_fraction(-np.pi * b + 2j * np.pi * f, oral, j, 0.3, nas) for f, b in zip(fn, bn)]
+        for k in range(3):
+            if not mixed[k]:
+                assert phi_o[k] >= br.ORAL_CLEAR
+        assert np.median(phi_n) < 0.5  # the nose's own poles are mostly nasal
 
 
 def test_trachea_passes_dc_and_the_nose_radiates():

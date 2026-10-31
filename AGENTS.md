@@ -13,7 +13,7 @@ A voice analyser: f0, voicing, formants F1–F4 with bandwidths, and related mea
 
 ## Running
 
-- Tests: `.venv/Scripts/python.exe -m pytest -q` (Windows venv; GPU via ROCm, `VA_DEVICE=cuda`).
+- Tests: `.venv/Scripts/python.exe -m pytest -q` (Windows venv; GPU via ROCm, `VA_DEVICE=cuda`). The default run is the full suite; `-m "not slow"` skips tests marked `@pytest.mark.slow` (over ~10 s each) for a quick loop.
 - Training and evaluation: `va train teacher ...`, `va eval teacher ...`, `va baselines ...` (`--tiers`, dev by default).
 
 ## Rules that are not optional

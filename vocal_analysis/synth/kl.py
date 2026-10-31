@@ -126,7 +126,8 @@ def _run(areas, loss_g, loss_z, loss_p, lip, step, ag, p_sub, kv, wall, dt, dx, 
     in between over `step` samples; loss_g (n_ctrl, N), loss_z (n_ctrl, N, K), loss_p (K,): each section's
     per-traversal loss filter (`_loss_filters`), one state per direction; lip (n_ctrl, 3) reflection filter
     coefficients; ag glottal area per sample (cm^2); kv the viscous flow coefficient (12 mu d lg^2); wall (m, b, k, on)
-    per unit area; impulse: glottis rigid, a unit volume velocity at sample 0 (for the labels); coupled False: the
+    per unit area; impulse: glottis rigid, the volume velocity prescribed as ag (a unit impulse for the labels, flow
+    noise for aspiration); coupled False: the
     flow from the glottis and subglottal pressure alone (no feedback from the tract; the control for interaction).
 
     Subglottal system (used when coupled and not impulse, and len(sg_areas) > 0): sections glottis first, loss filters
@@ -179,7 +180,7 @@ def _run(areas, loss_g, loss_z, loss_p, lip, step, ag, p_sub, kv, wall, dt, dx, 
         a_t = tb[0]
         zt = rc / sg_areas[0] if has_sg else 0.0
         if impulse:
-            ug = 1.0 if t == 0 else 0.0
+            ug = ag[t]
         else:
             g = ag[t]
             if not coupled:
@@ -268,11 +269,17 @@ def glottal_area(f0_hz: np.ndarray, n_samples: int, fs: float, peak_cm2: float, 
     return peak_cm2 * area_pulse(cycles, oq, sq, gap=gap, closure=closure)
 
 
-def _controls(shapes: list[TubeShape], oversample: int) -> tuple[np.ndarray, tuple, np.ndarray, float]:
-    """Per control frame: areas on a common section count (the clip's mean length), loss filters
+def n_sections(shapes: list[TubeShape], oversample: int = OVERSAMPLE) -> int:
+    """The clip's section count: its mean length in sections (fixed within a clip)."""
+    return max(2, int(round(np.mean([s.length_cm for s in shapes]) / section_length(oversample))))
+
+
+def _controls(shapes: list[TubeShape], oversample: int, n: int | None = None
+              ) -> tuple[np.ndarray, tuple, np.ndarray, float]:
+    """Per control frame: areas on a common section count n (default `n_sections`), loss filters
     (`_loss_filters`), lip filters."""
     dx = section_length(oversample)
-    n = max(2, int(round(np.mean([s.length_cm for s in shapes]) / dx)))
+    n = n or n_sections(shapes, oversample)
     areas = np.empty((len(shapes), n))
     eps = np.empty((len(shapes), n))
     lip = np.empty((len(shapes), 3))
@@ -321,23 +328,26 @@ def _nasal_args(nas: Nasal | None, nj: int, port_cm2: np.ndarray | None, n_ctrl:
 
 def render(shapes: list[TubeShape], ag_cm2: np.ndarray, pressure: float, glottis_depth_cm: float, glottis_length_cm: float,
            oversample: int = OVERSAMPLE, walls: bool = True, coupled: bool = True, subglottal: Subglottal | None = None,
-           nasal: Nasal | None = None, port_cm: float | None = None, port_cm2: np.ndarray | float = 0.0) -> dict:
+           nasal: Nasal | None = None, port_cm: float | None = None, port_cm2: np.ndarray | float = 0.0,
+           n_sect: int | None = None, flow: np.ndarray | None = None) -> dict:
     """Synthesise through the waveguide. shapes: one TubeShape per HOP frame (areas move linearly between them);
     ag_cm2: glottal area per sample at FS; pressure: subglottal (lung) pressure, dyn/cm^2; coupled False: no feedback
     from the tract into the flow (the subglottal system is then unused). subglottal: a `branches.Subglottal` below the
     glottis. nasal: a `branches.Nasal` joined port_cm above the glottis (`branches.port_position_cm`), opened by
     port_cm2 (per frame or one value; 0 = velum raised). Returns 16 kHz `audio` (d/dt of the lips' plus the nostrils'
     volume velocity, unnormalised), `ug` (glottal volume velocity), the tube's `length_cm` and the port's junction `nj`
-    (-1 without a nose)."""
-    areas, loss, lip, length = _controls(shapes, oversample)
+    (-1 without a nose). n_sect: the section count (default `n_sections`). flow: a prescribed glottal volume velocity
+    per sample (cm^3/s) through a rigid glottis instead of the flow from ag_cm2 (aspiration and whisper sources).
+    """
+    areas, loss, lip, length = _controls(shapes, oversample, n_sect)
     fs_in = FS * oversample
     m = len(ag_cm2) * oversample
-    ag = np.interp(np.arange(m) / fs_in, np.arange(len(ag_cm2)) / FS, ag_cm2)
+    ag = np.interp(np.arange(m) / fs_in, np.arange(len(ag_cm2)) / FS, ag_cm2 if flow is None else flow)
     kv = 12.0 * MU * glottis_depth_cm * glottis_length_cm**2
     wall = np.array([WALL_M, WALL_B, WALL_K, 1.0 if walls else 0.0])
     nj = -1 if nasal is None else port_junction(port_cm, areas.shape[1], section_length(oversample))
     u_lip, u_g, u_nose = _run(areas, *loss, lip, HOP * oversample, ag, float(pressure), kv, wall, 1.0 / fs_in,
-                              section_length(oversample), False, coupled, *_sub_args(subglottal, oversample),
+                              section_length(oversample), flow is not None, coupled, *_sub_args(subglottal, oversample),
                               *_nasal_args(nasal, nj, port_cm2, len(shapes), oversample))
     rad = np.diff(u_lip + u_nose, prepend=0.0) * fs_in
     audio = resample_poly(rad, 1, oversample)[: len(ag_cm2)]
@@ -386,14 +396,14 @@ def _vector_fit(h: np.ndarray, f: np.ndarray, seed_f: np.ndarray, seed_b: np.nda
 
 def frame_poles(shapes: list[TubeShape], oversample: int = OVERSAMPLE, walls: bool = True, n_ir: int = LABEL_IR_SAMPLES,
                 f_max_hz: float = LABEL_F_MAX_HZ, nasal: Nasal | None = None, port_cm: float | None = None,
-                port_cm2: np.ndarray | float = 0.0) -> list[tuple[np.ndarray, np.ndarray]]:
+                port_cm2: np.ndarray | float = 0.0, n_sect: int | None = None) -> list[tuple[np.ndarray, np.ndarray]]:
     """Closed-glottis resonances (F, B per frame, Hz) of the waveguide as `render` builds it: the impulse response of
     (U_lips + U_nostrils) / U_glottis with the glottis rigid and the frame's shape held, FFT, `_vector_fit` seeded by
     the continuous model of the same discretised tube (`tube.poles`; with the port open, every pole of
     `branches.branched_poles`, oral and nasal), so close pairs stay apart and none is missed. With the port open
     this returns all poles, unnumbered: the scoring labels are `frame_labels`. Frames with the same areas share one
     computation."""
-    areas, loss, lip, _ = _controls(shapes, oversample)
+    areas, loss, lip, _ = _controls(shapes, oversample, n_sect)
     fs_in = FS * oversample
     dx = section_length(oversample)
     wall = np.array([WALL_M, WALL_B, WALL_K, 1.0 if walls else 0.0])
@@ -408,7 +418,7 @@ def frame_poles(shapes: list[TubeShape], oversample: int = OVERSAMPLE, walls: bo
         if key not in cache:
             na = (nargs[0], nargs[1][c : c + 1], nargs[2][c : c + 1], nargs[3][c : c + 1], nargs[4][c : c + 1], nargs[5])
             u, _, un = _run(areas[c : c + 1], loss[0][c : c + 1], loss[1][c : c + 1], loss[2], lip[c : c + 1], n_ir,
-                            np.zeros(n_ir), 0.0, 0.0, wall, 1.0 / fs_in, dx, True, True,
+                            np.r_[1.0, np.zeros(n_ir - 1)], 0.0, 0.0, wall, 1.0 / fs_in, dx, True, True,
                             *_sub_args(None, oversample), *na)
             oral = TubeShape(areas[c], np.full(len(areas[c]), dx), shapes[c].perimeter_factor)
             if nasal is not None and port > PORT_CLOSED_CM2:
@@ -423,13 +433,13 @@ def frame_poles(shapes: list[TubeShape], oversample: int = OVERSAMPLE, walls: bo
 
 
 def frame_labels(shapes: list[TubeShape], oversample: int = OVERSAMPLE, f_max_hz: float = LABEL_F_MAX_HZ,
-                 nasal: Nasal | None = None, port_cm: float | None = None, port_cm2: np.ndarray | float = 0.0
-                 ) -> list[tuple[np.ndarray, np.ndarray, np.ndarray]]:
+                 nasal: Nasal | None = None, port_cm: float | None = None, port_cm2: np.ndarray | float = 0.0,
+                 n_sect: int | None = None) -> list[tuple[np.ndarray, np.ndarray, np.ndarray]]:
     """Scoring labels per frame (`docs/considering.md`): F, B of the oral formants by the training definition,
     `tube.poles` of the same discretised tube, and with the port open `branches.branched_poles` (the oral roots
     followed as the port opens; the nose's own poles are not numbered), plus `mixed` per formant (an avoided crossing
     with a nasal pole: mask that label). The waveguide's measured poles (`frame_poles`) are the consistency check."""
-    areas, _, _, _ = _controls(shapes, oversample)
+    areas, _, _, _ = _controls(shapes, oversample, n_sect)
     dx = section_length(oversample)
     nj = -1 if nasal is None else port_junction(port_cm, areas.shape[1], dx)
     port = np.broadcast_to(np.asarray(port_cm2, float), (len(shapes),))

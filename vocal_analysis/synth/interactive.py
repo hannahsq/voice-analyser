@@ -306,25 +306,17 @@ def render(area_cm2: np.ndarray, responses: list[TractResponses], block_target: 
     return {"flow": ug, "lip_flow": ul, "pressure": np.diff(ul, prepend=0.0)}
 
 
-def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, block_w: np.ndarray, glottis: Glottis,
-               sq: float | None, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
-               hnr_db: float | None = None, extras: dict | None = None, fs: float = 16000.0,
-               coupled: bool = True, closure: float = 1.0, ret: bool = False) -> dict[str, np.ndarray]:
-    """The components of `voice.synthesize` with the interactive source (same Trajectories; its poles are ignored:
-    the tract is `responses`, blended per control block). The area is the Rosenberg pulse at the open quotient of
-    the clip's Rd (LF te), the closed-phase gap following it (`coupling.gap_from_open_quotient`), scaled by the
-    voice envelope (onsets and loudness open the glottis less). Aspiration (open-phase modulated) and whisper are
-    flow noise at the glottis through the same responses; frication is as in `voice.synthesize`. `extras` (nasal
-    and other pole-zero pairs, `tract.sample_extras`) filter every component afterwards. ret: the area return phase
-    at each sample's Rd (`area_pulse` ret, `return_fraction`)."""
-    from scipy.signal import butter, sosfilt
-
-    from . import filters
+def glottal_area_track(traj, glottis: Glottis, sq: float | None, rng: np.random.Generator, jitter: float = 0.0,
+                       shimmer_db: float = 0.0, fs: float = 16000.0, closure: float = 1.0, ret: bool = False) -> dict:
+    """The interactive source's glottal area per sample (`synthesize`; also the KL waveguide's, `kl_set`): the
+    Rosenberg pulse at the open quotient of the clip's Rd (LF te), or the LF-derived pulse (sq None), the closed-phase
+    gap following it, scaled by the voice envelope; jitter and shimmer per period (drawn here, in that order). Returns
+    `area` (cm^2), `pulse` (0-1, for open-phase modulated noise), `va` (the voice envelope per sample), `shimmer`
+    (gain per sample) and `cycles`."""
     from .coupling import gap_from_open_quotient
     from .glottal import open_phase
-    from .voice import CTRL, _glottal_phase, _per_sample
+    from .voice import _glottal_phase, _per_sample
 
-    n = traj.n_samples
     f0_s = _per_sample(traj.f0)
     n_periods = int(np.sum(f0_s) / fs * 1.1) + 16
     jit = np.exp(rng.normal(0.0, jitter, n_periods)) if jitter > 0 else np.ones(n_periods)
@@ -342,8 +334,30 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
     else:
         pulse = area_pulse(cycles, te_s, sq, 0.0, closure, return_fraction(_per_sample(rd)) if ret else 0.0)
     area = glottis.peak_area_cm2 * (gap + (1.0 - gap) * pulse) * va_n
+    return {"area": area, "pulse": pulse, "va": va, "shimmer": shim[period], "cycles": cycles}
+
+
+def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, block_w: np.ndarray, glottis: Glottis,
+               sq: float | None, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
+               hnr_db: float | None = None, extras: dict | None = None, fs: float = 16000.0,
+               coupled: bool = True, closure: float = 1.0, ret: bool = False) -> dict[str, np.ndarray]:
+    """The components of `voice.synthesize` with the interactive source (same Trajectories; its poles are ignored:
+    the tract is `responses`, blended per control block). The area is the Rosenberg pulse at the open quotient of
+    the clip's Rd (LF te), the closed-phase gap following it (`coupling.gap_from_open_quotient`), scaled by the
+    voice envelope (onsets and loudness open the glottis less). Aspiration (open-phase modulated) and whisper are
+    flow noise at the glottis through the same responses; frication is as in `voice.synthesize`. `extras` (nasal
+    and other pole-zero pairs, `tract.sample_extras`) filter every component afterwards. ret: the area return phase
+    at each sample's Rd (`area_pulse` ret, `return_fraction`)."""
+    from scipy.signal import butter, sosfilt
+
+    from . import filters
+    from .voice import CTRL, _per_sample
+
+    n = traj.n_samples
+    src = glottal_area_track(traj, glottis, sq, rng, jitter, shimmer_db, fs, closure, ret)
+    area, pulse, va, cycles = src["area"], src["pulse"], src["va"], src["cycles"]
     bt, bw = np.asarray(block_target, np.int64), np.asarray(block_w, float)
-    out = {"voiced": render(area, responses, bt, bw, glottis, CTRL, fs, coupled)["pressure"] * shim[period], "cycles": cycles}
+    out = {"voiced": render(area, responses, bt, bw, glottis, CTRL, fs, coupled)["pressure"] * src["shimmer"], "cycles": cycles}
     h = np.stack([r.h for r in responses])
     if hnr_db is not None:
         src = np.diff(rng.standard_normal(n + 1)) * (0.25 + 0.75 * pulse) * va

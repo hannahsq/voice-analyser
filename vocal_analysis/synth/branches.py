@@ -42,7 +42,7 @@ LUNG_FC_HZ = 50.0
 
 NASAL_CM = 11.0
 PORT_JITTER_CM = 0.5
-PORT_CLOSED_CM2 = 1e-3  # continuation starts here: coupling through a port this small is negligible
+PORT_CLOSED_CM2 = 1e-6  # continuation starts here: even a near-degenerate oral / nasal pair has barely split
 SINUS_Q = 6.0
 
 
@@ -218,7 +218,7 @@ def _nasal_seeds(nas: Nasal, f_max_hz: float) -> np.ndarray:
     out = []
     for z in -np.pi * 100.0 + 2j * np.pi * f[idx]:
         try:
-            r = _newton(lambda x: _nasal_load(x, nas, None, 1.0)[0], np.array([z]), 1e-3)[0]
+            r = _newton(lambda x: _nasal_load(x, nas, None, 1.0)[0], np.array([z]), 1e-6)[0]
         except RuntimeError:
             continue
         if r.real < 0 and all(abs(r - o) > 2 * np.pi * 1.0 for o in out):
@@ -226,38 +226,104 @@ def _nasal_seeds(nas: Nasal, f_max_hz: float) -> np.ndarray:
     return np.array(out, complex)
 
 
-def _continue_port(s: np.ndarray, oral: TubeShape, j: int, nas: Nasal, port_cm2: float, n_steps: int, tol_hz: float
-                   ) -> np.ndarray:
+def _continue_port(s: np.ndarray, oral: TubeShape, j: int, nas: Nasal, port_cm2: float, n_steps: int, tol_hz: float,
+                   strict: bool = True) -> tuple[np.ndarray, np.ndarray]:
     """Follow the roots s as the port opens from PORT_CLOSED_CM2 to port_cm2 (log-spaced). A step is accepted only if
-    Newton converges, no two roots meet, and no root moves more than a third of its distance to its nearest neighbour
-    at the step's start; otherwise the step is halved (down to 1/4096 of the log range)."""
+    Newton converges, every root stays stable and distinct, and (strict) identities are kept both ways: each new root
+    is nearest its own old root and each old root nearest its own new one (two roots near an avoided crossing come close
+    without meeting, so a fixed fraction of their gap would stall the steps); otherwise the step is halved (down to
+    2^-16 of the range). strict False accepts identity swaps and reports them. -> (roots, swapped per root)."""
     lo, hi = np.log(PORT_CLOSED_CM2), np.log(port_cm2)
     t, h = 0.0, 1.0 / n_steps
+    idx = np.arange(len(s))
+    swapped = np.zeros(len(s), bool)
     while t < 1.0:
         h = min(h, 1.0 - t)
         a = float(np.exp(lo + (t + h) * (hi - lo)))
-        near = (np.abs(s[:, None] - s[None, :]) + np.diag(np.full(len(s), np.inf))).min(1) if len(s) > 1 else np.inf
         try:
             new = _newton(lambda x: branched_denominator(x, oral, j, a, nas), s, tol_hz if t + h >= 1.0 else 0.5)
-            ok = np.all(np.abs(new - s) < near / 3) and np.all(new.real < 0)
+            d = np.abs(new[:, None] - s[None, :])
+            keeps = (d.argmin(1) == idx) & (d.argmin(0) == idx)
+            gap = np.abs(new[:, None] - new[None, :]) + np.diag(np.full(len(s), np.inf))
+            ok = np.all(new.real < 0) and (len(s) < 2 or gap.min() > 2 * np.pi * 0.5) and (np.all(keeps) or not strict)
         except RuntimeError:
             ok = False
         if ok:
+            swapped |= ~keeps
             s, t, h = new, t + h, h * 1.5
         else:
             h /= 2
-            if h < 1.0 / 4096:
+            if h < 2.0**-16:
                 raise RuntimeError("branched continuation lost track of a root")
-    return s
+    return s, swapped
+
+
+ORAL_CLEAR = 0.6  # a label's root must carry at least this share of its energy in the oral tract,
+SHAPE_CLEAR = 0.8  # its oral field must match the port-closed formant's this well (MAC),
+LABEL_MARGIN = 0.2  # and its score (MAC x oral share) must beat the label's next best root by this; else mixed
+
+
+def _section_mats(s: complex, areas: np.ndarray, dx: float, pf: float, walls: bool) -> list:
+    return [chain_matrix(np.array([s]), TubeShape(np.array([a]), np.array([dx]), pf), walls=walls) for a in areas]
+
+
+def _field(mats: list, areas: np.ndarray, dx: float, p: complex, u: complex) -> tuple[np.ndarray, complex, complex]:
+    """A mode's field through a run of sections from (p, u) at the near end, each section's [[A, B], [C, D]] mapping
+    its far end to its near end (so the far end is the inverse: AD - BC = 1). -> (per section the energy-normalised
+    pair [p sqrt(A dx / (rho c^2)), u sqrt(rho dx / A)], whose squared norm is the acoustic energy; p and u at the far
+    end)."""
+    out = np.empty((len(areas), 2), complex)
+    for n, ((A, B, C, D), a) in enumerate(zip(mats, areas)):
+        out[n] = p * np.sqrt(a * dx / (RHO * C_CM_S**2)), u * np.sqrt(RHO * dx / a)
+        p, u = complex(D[0] * p - B[0] * u), complex(-C[0] * p + A[0] * u)
+    return out, p, u
+
+
+def mode(s: complex, oral: TubeShape, j: int, port_cm2: float, nas: Nasal) -> tuple[float, np.ndarray]:
+    """A coupled mode at complex frequency s: the closed-glottis field (p = 1, u = 0) carried section by section to the
+    port, split there by the nasal input admittance (none with port_cm2 0) and on through both tubes. -> (share of
+    its energy in the oral tract, the oral tract's energy-normalised field, flattened)."""
+    dx = float(oral.lengths[0])
+    a = np.asarray(oral.areas, float)
+    lo, p, u = _field(_section_mats(s, a[: j + 1], dx, oral.perimeter_factor, True), a[: j + 1], dx, 1.0 + 0j, 0j)
+    if port_cm2 > 0:
+        num, den = _nasal_load(np.array([s]), nas, port_cm2, 1.0)
+        un = complex(num[0] / den[0] * p)
+    else:
+        un = 0j
+    hi, _, _ = _field(_section_mats(s, a[j + 1:], dx, oral.perimeter_factor, True), a[j + 1:], dx, p, u - un)
+    vec = np.r_[lo.ravel(), hi.ravel()]
+    eo = float(np.sum(np.abs(vec) ** 2))
+    en = 0.0
+    if port_cm2 > 0:
+        na = np.r_[port_cm2, nas.areas]
+        m, r, cinv = nas.helmholtz()
+        head = nas.sinus_at + 2  # the port section and the passage up to the sinus
+        n1, pn, qn = _field(_section_mats(s, na[:head], nas.dx, nas.perimeter_factor, False), na[:head], nas.dx, p, un)
+        qn -= pn / (r + s * m + cinv / s)
+        n2, _, _ = _field(_section_mats(s, na[head:], nas.dx, nas.perimeter_factor, False), na[head:], nas.dx, pn, qn)
+        en = float(np.sum(np.abs(n1) ** 2) + np.sum(np.abs(n2) ** 2))
+    return eo / (eo + en), vec
+
+
+def oral_fraction(s: complex, oral: TubeShape, j: int, port_cm2: float, nas: Nasal) -> float:
+    """Share of a coupled mode's energy in the oral tract (`mode`)."""
+    return mode(s, oral, j, port_cm2, nas)[0]
 
 
 def branched_poles(oral: TubeShape, j: int, port_cm2: float, nas: Nasal, f_max_hz: float = 5000.0,
                    n_steps: int = 24, tol_hz: float = 1e-4
                    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """(F, B) of the oral formants with the nasal load, (F, B) of the nose's own poles (Hz), and `mixed` per oral
-    formant: True when a nasal pole ends up between its port-closed and its continued frequency, i.e. the two
-    crossed (an avoided crossing near degeneracy, as nasalised /u/'s F1 and the nose's lowest pole: 335 Hz splits into
-    362 and 546). There the identity is a convention, so a scored label should be masked.
+    formant: True when its identity is a convention, so a scored label should be masked.
+
+    Continuation finds every root but its identities are arbitrary where an oral and a nasal root interact: they cross
+    (an avoided crossing), start degenerate (Newton may follow either), or exchange character as the port opens
+    (nasalised /u/'s F2 continues to a root with 21 % of its energy in the oral tract while a 98 % oral one sits beside
+    it). So identity is by mode shape (the modal assurance criterion): each root's field along the oral tract is
+    compared, in an energy norm, with each port-closed formant's (`mode`), scored MAC x oral energy share, and labels
+    assigned to roots by maximum total score (Hungarian). A label is mixed unless its root's oral share is at least
+    ORAL_CLEAR, its MAC at least SHAPE_CLEAR, and its score LABEL_MARGIN above its next best root's.
 
     Each oral root of the port-closed tract (`tube.poles`) and each nasal root (the nose with the port all but closed)
     is followed by Newton's method as the port opens geometrically from PORT_CLOSED_CM2 to port_cm2; a root keeps the
@@ -267,11 +333,37 @@ def branched_poles(oral: TubeShape, j: int, port_cm2: float, nas: Nasal, f_max_h
     so = -np.pi * bo + 2j * np.pi * fo
     sn = _nasal_seeds(nas, f_max_hz + 1000.0) if port_cm2 > PORT_CLOSED_CM2 else np.zeros(0, complex)
     s = np.r_[so, sn]
-    if port_cm2 > PORT_CLOSED_CM2:
-        s = _continue_port(s, oral, j, nas, port_cm2, n_steps, tol_hz)
-    F, B = s.imag / (2 * np.pi), -s.real / np.pi
     no = len(so)
+    swapped = np.zeros(len(s), bool)
+    if port_cm2 > PORT_CLOSED_CM2:
+        try:
+            s, swapped = _continue_port(s, oral, j, nas, port_cm2, n_steps, tol_hz)
+        except RuntimeError:
+            s, swapped = _continue_port(s, oral, j, nas, port_cm2, n_steps, tol_hz, strict=False)
+    F, B = s.imag / (2 * np.pi), -s.real / np.pi
+    mixed = np.zeros(no, bool)
+    if port_cm2 > PORT_CLOSED_CM2 and len(s) > no:
+        from scipy.optimize import linear_sum_assignment
+
+        ref = [mode(z, oral, j, 0.0, nas)[1] for z in so]
+        modes = [mode(z, oral, j, port_cm2, nas) for z in s]
+        phi = np.array([m[0] for m in modes])
+        mac = np.array([[abs(np.vdot(r, m[1])) ** 2 / (np.vdot(r, r).real * np.vdot(m[1], m[1]).real) for m in modes]
+                        for r in ref])
+        score = mac * phi[None, :]
+        rows, cols = linear_sum_assignment(-score)
+        pick = np.empty(no, int)
+        pick[rows] = cols
+        rest = np.setdiff1d(np.arange(len(s)), pick)
+        for i in range(no):
+            c = pick[i]
+            runner = np.max(np.delete(score[i], c)) if len(s) > 1 else 0.0
+            mixed[i] = phi[c] < ORAL_CLEAR or mac[i, c] < SHAPE_CLEAR or score[i, c] - runner < LABEL_MARGIN
+        rest = rest[np.argsort(s[rest].imag)]
+        s = np.r_[s[pick], s[rest]]
+        F, B = s.imag / (2 * np.pi), -s.real / np.pi
+        down = np.nonzero(np.diff(F[:no]) <= 0)[0]  # labels out of frequency order: neither is clear
+        mixed[down] = mixed[down + 1] = True
     fn = F[no:]
-    mixed = np.array([np.any((fn - f0) * (fn - f1) < 0) for f0, f1 in zip(fo, F[:no])], bool)
     keep_o, keep_n = F[:no] <= f_max_hz, fn <= f_max_hz
     return F[:no][keep_o], B[:no][keep_o], fn[keep_n], B[no:][keep_n], mixed[keep_o]
