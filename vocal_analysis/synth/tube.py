@@ -182,10 +182,12 @@ def length_function(base: np.ndarray, pg: float = 0.0, pm: float = 0.0, rg: floa
 # ----------------------------------------------------------------------------- acoustics
 
 
-def chain_matrix(s: np.ndarray, shape: TubeShape, loss: float = 1.0) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def chain_matrix(s: np.ndarray, shape: TubeShape, loss: float = 1.0, walls: bool = True
+                 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Glottis-to-lips chain matrix [[A, B], [C, D]] at complex frequencies s (rad/s), any shape.
 
-    loss scales every loss term and the radiation load (0 = lossless tube, open at the lips).
+    loss scales every loss term and the radiation load (0 = lossless tube, open at the lips). walls False leaves the
+    yielding-wall shunt out (bony or cartilaginous tubes: the nasal passages and trachea in `branches`).
     Sections use cosh(gl) and l sinhc(gl) forms, which are entire in gamma^2 = Z Y, so no branch choice is needed.
     All sections are computed at once and their 2x2 matrices multiplied pairwise in order (a tree of about log2(N)
     rounds instead of a loop over N sections: the same product, about 10x faster for the few points a pole search uses).
@@ -196,7 +198,7 @@ def chain_matrix(s: np.ndarray, shape: TubeShape, loss: float = 1.0) -> tuple[np
     perim = shape.perimeter_factor * 2.0 * np.sqrt(np.pi * area)
     z = s * RHO / area + loss * perim / area**2 * np.sqrt(RHO * MU) * rs
     y = (s * area / (RHO * C_CM_S**2) + loss * perim * (ETA - 1) / (RHO * C_CM_S**2) * np.sqrt(LAMBDA_OVER_CP / RHO) * rs
-         + loss * perim / (WALL_B + s * WALL_M + WALL_K / s))
+         + (loss * perim / (WALL_B + s * WALL_M + WALL_K / s) if walls else 0.0))
     g2l2 = z * y * l * l
     g = np.sqrt(g2l2)
     ch = np.cosh(g)

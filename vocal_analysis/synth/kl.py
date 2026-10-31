@@ -36,6 +36,7 @@ from numba import njit
 from scipy.signal import resample_poly
 
 from . import tube
+from .branches import PORT_CLOSED_CM2, Nasal, Subglottal, branched_poles, port_junction
 from .interactive import KT
 from .tube import C_CM_S, ETA, LAMBDA_OVER_CP, MU, RHO, WALL_B, WALL_K, WALL_M, TubeShape, _radiation
 
@@ -119,29 +120,46 @@ def _loss(x, c, i, d, loss_g, loss_z, loss_p, sx, sy):
 
 
 @njit(cache=True)
-def _run(areas, loss_g, loss_z, loss_p, lip, step, ag, p_sub, kv, wall, dt, dx, impulse, coupled=True):
+def _run(areas, loss_g, loss_z, loss_p, lip, step, ag, p_sub, kv, wall, dt, dx, impulse, coupled,
+         sg_areas, sg_g, sg_z, lung, nj, n_areas, n_g, n_z, n_lip, helm):
     """The waveguide at the internal rate (time step dt, section length dx). areas (n_ctrl, N) per control frame, linear
     in between over `step` samples; loss_g (n_ctrl, N), loss_z (n_ctrl, N, K), loss_p (K,): each section's
     per-traversal loss filter (`_loss_filters`), one state per direction; lip (n_ctrl, 3) reflection filter
     coefficients; ag glottal area per sample (cm^2); kv the viscous flow coefficient (12 mu d lg^2); wall (m, b, k, on)
     per unit area; impulse: glottis rigid, a unit volume velocity at sample 0 (for the labels); coupled False: the
     flow from the glottis and subglottal pressure alone (no feedback from the tract; the control for interaction).
-    Returns (lip volume velocity, glottal volume velocity) per sample."""
+
+    Subglottal system (used when coupled and not impulse, and len(sg_areas) > 0): sections glottis first, loss filters
+    sg_g (1, Ns), sg_z (1, Ns, K); the lungs a pressure source p_sub whose reflection is -1 at DC and -lung[0] above a
+    one-pole crossover (coefficient lung[1]). Without it, p_sub acts directly below the glottis, as before.
+    Nasal tract (nj >= 0): joined at oral junction nj by a three-way junction; n_areas (n_ctrl, Nn) port section first
+    (its area the per-frame port opening), n_g / n_z its loss filters, n_lip (n_ctrl, 3) the nostrils' reflection
+    filter; helm (junction, M, R, 1/C): the sinus resonator's neck volume velocity leaves at that nasal junction.
+    Returns (lip volume velocity, glottal volume velocity, nostril volume velocity) per sample."""
     n_ctrl, N = areas.shape
     M = len(ag)
-    fw = np.zeros(N)  # right-going wave arriving at section i's lip end
-    bw = np.zeros(N)  # left-going wave arriving at section i's glottal end
-    nf, nb = np.zeros(N), np.zeros(N)
+    K = len(loss_p)
+    rc = RHO * C_CM_S
+    fw, bw, nf, nb = np.zeros(N), np.zeros(N), np.zeros(N), np.zeros(N)  # fw arrives at a section's lip end, bw at its glottal end
+    sx, sy = np.zeros((2, N, K)), np.zeros((2, N, K))
     wx, wv = np.zeros(N - 1), np.zeros(N - 1)  # wall displacement and velocity per junction
     a = np.empty(N)
-    K = len(loss_p)
-    sx = np.zeros((2, N, K))  # loss-filter states per direction (0 forward, 1 backward), section and shelf
-    sy = np.zeros((2, N, K))
-    lf_x1 = 0.0  # lip filter state: previous input and output
-    lf_y1 = 0.0
-    u_lip = np.zeros(M)
-    u_g = np.zeros(M)
-    rc = RHO * C_CM_S
+    lf_x1, lf_y1 = 0.0, 0.0  # lip filter state: previous input and output
+    Ns = len(sg_areas)
+    has_sg = Ns > 0 and coupled and not impulse
+    Ns1 = max(Ns, 1)
+    tf, tb, ntf, ntb = np.zeros(Ns1), np.zeros(Ns1), np.zeros(Ns1), np.zeros(Ns1)  # tf down-going (lung end), tb up-going
+    tsx, tsy = np.zeros((2, Ns1, K)), np.zeros((2, Ns1, K))
+    lung_lp = 0.0
+    has_n = nj >= 0
+    Nn = n_areas.shape[1]
+    gf, gb, ngf, ngb = np.zeros(Nn), np.zeros(Nn), np.zeros(Nn), np.zeros(Nn)  # gf away from the port, gb towards it
+    gsx, gsy = np.zeros((2, Nn, K)), np.zeros((2, Nn, K))
+    an = np.empty(Nn)
+    nl_x1, nl_y1 = 0.0, 0.0
+    h_at, h_m, h_r, h_cinv = int(helm[0]), helm[1], helm[2], helm[3]
+    hu, hq = 0.0, 0.0  # sinus neck volume velocity and displaced volume
+    u_lip, u_g, u_nose = np.zeros(M), np.zeros(M), np.zeros(M)
     wm, wb, wk, use_wall = wall[0], wall[1], wall[2], wall[3] > 0.0
     for t in range(M):
         c = t // step
@@ -151,31 +169,60 @@ def _run(areas, loss_g, loss_z, loss_p, lip, step, ag, p_sub, kv, wall, dt, dx, 
             w = (t - c * step) / step
         for i in range(N):
             a[i] = areas[c, i] if w == 0.0 else (1.0 - w) * areas[c, i] + w * areas[c + 1, i]
+        if has_n:
+            for k in range(Nn):
+                an[k] = n_areas[c, k] if w == 0.0 else (1.0 - w) * n_areas[c, k] + w * n_areas[c + 1, k]
         b0, b1, a1 = lip[c, 0], lip[c, 1], lip[c, 2]
-        # glottis: KT rho U^2 / (2 Ag^2) + (kv / Ag^3 + rho c / A0) U = p_sub - 2 p-  (Bernoulli + viscous, with the load)
+        # glottis: KT rho U^2 / (2 Ag^2) + (kv / Ag^3 + rho c / A0 [+ rho c / At]) U = p_below - p_above, the pressures
+        # written with the arriving waves: p_sub - 2 p- without a trachea, 2 a_t - 2 p- with one
         p_in = bw[0]
+        a_t = tb[0]
+        zt = rc / sg_areas[0] if has_sg else 0.0
         if impulse:
             ug = 1.0 if t == 0 else 0.0
         else:
             g = ag[t]
-            rhs = p_sub - 2.0 * p_in if coupled else p_sub
+            if not coupled:
+                rhs = p_sub
+            elif has_sg:
+                rhs = 2.0 * a_t - 2.0 * p_in
+            else:
+                rhs = p_sub - 2.0 * p_in
             ug = 0.0
             if g > 1e-9 and rhs != 0.0:
                 qa = KT * RHO / 2.0 / (g * g)
-                qb = kv / (g * g * g) + (rc / a[0] if coupled else 0.0)
+                qb = kv / (g * g * g) + (rc / a[0] + zt if coupled else 0.0)
                 r = abs(rhs)
                 ug = 2.0 * r / (qb + np.sqrt(qb * qb + 4.0 * qa * r))
                 if rhs < 0.0:
                     ug = -ug
         u_g[t] = ug
-        nf[0] = _loss(rc * ug / a[0] + p_in, c, 0, 0, loss_g, loss_z, loss_p, sx, sy)  # GL-3, corrected: a closed glottis (ug = 0) reflects fully
-        # junction i: continuity Y_i (f - nb) = Y_j (nf - b) + u_wall with P = f + nb = nf + b, Y = A / (rho c)
+        nf[0] = _loss(rc * ug / a[0] + p_in, c, 0, 0, loss_g, loss_z, loss_p, sx, sy)  # GL-3: a closed glottis reflects
+        if has_sg:  # trachea: the wave launched down from the glottis, two-port junctions, the lungs
+            ntf[0] = _loss(a_t - zt * ug, 0, 0, 0, sg_g, sg_z, loss_p, tsx, tsy)
+            for i in range(Ns - 1):
+                yi, yj = sg_areas[i], sg_areas[i + 1]
+                p = 2.0 * (yi * tf[i] + yj * tb[i + 1]) / (yi + yj)
+                ntf[i + 1] = _loss(p - tb[i + 1], 0, i + 1, 0, sg_g, sg_z, loss_p, tsx, tsy)
+                ntb[i] = _loss(p - tf[i], 0, i, 1, sg_g, sg_z, loss_p, tsx, tsy)
+            x = tf[Ns - 1]
+            lung_lp += lung[1] * (x - lung_lp)
+            ntb[Ns - 1] = _loss(p_sub - (lung[0] * x + (1.0 - lung[0]) * lung_lp), 0, Ns - 1, 1, sg_g, sg_z, loss_p,
+                                tsx, tsy)
+            for i in range(Ns):
+                tf[i], tb[i] = ntf[i], ntb[i]
+        # junction i: continuity Y_i (f - nb) = Y_j (nf - b) [+ Y_n (out - bn)] + u_wall, with one pressure P there
         for i in range(N - 1):
             yi, yj = a[i] / rc, a[i + 1] / rc
             uw = 0.0
             if use_wall:
                 uw = wv[i] * 2.0 * np.sqrt(np.pi * 0.5 * (a[i] + a[i + 1])) * dx
-            p = (2.0 * (yi * fw[i] + yj * bw[i + 1]) - uw) / (yi + yj)
+            if has_n and i == nj:  # the velopharyngeal port
+                yn = an[0] / rc
+                p = (2.0 * (yi * fw[i] + yj * bw[i + 1] + yn * gb[0]) - uw) / (yi + yj + yn)
+                ngf[0] = _loss(p - gb[0], c, 0, 0, n_g, n_z, loss_p, gsx, gsy)
+            else:
+                p = (2.0 * (yi * fw[i] + yj * bw[i + 1]) - uw) / (yi + yj)
             if use_wall:  # m dv/dt = P - b v - k x per unit area (semi-implicit Euler)
                 wv[i] += dt * (p - wb * wv[i] - wk * wx[i]) / wm
                 wx[i] += dt * wv[i]
@@ -189,7 +236,24 @@ def _run(areas, loss_g, loss_z, loss_p, lip, step, ag, p_sub, kv, wall, dt, dx, 
         u_lip[t] = a[N - 1] * (x0 - y0) / rc
         for i in range(N):
             fw[i], bw[i] = nf[i], nb[i]
-    return u_lip, u_g
+        if has_n:  # nasal passage: two-port junctions (areas for admittances, so the sinus flow is scaled by rho c)
+            for k in range(Nn - 1):
+                yi, yj = an[k], an[k + 1]
+                uh = hu * rc if k == h_at else 0.0
+                p = (2.0 * (yi * gf[k] + yj * gb[k + 1]) - uh) / (yi + yj)
+                if k == h_at:  # M dU/dt = P - R U - q / C, dq/dt = U (semi-implicit Euler)
+                    hu += dt * (p - h_r * hu - h_cinv * hq) / h_m
+                    hq += dt * hu
+                ngf[k + 1] = _loss(p - gb[k + 1], c, k + 1, 0, n_g, n_z, loss_p, gsx, gsy)
+                ngb[k] = _loss(p - gf[k], c, k, 1, n_g, n_z, loss_p, gsx, gsy)
+            x0 = gf[Nn - 1]
+            y0 = n_lip[c, 0] * x0 + n_lip[c, 1] * nl_x1 - n_lip[c, 2] * nl_y1
+            nl_x1, nl_y1 = x0, y0
+            ngb[Nn - 1] = _loss(y0, c, Nn - 1, 1, n_g, n_z, loss_p, gsx, gsy)
+            u_nose[t] = an[Nn - 1] * (x0 - y0) / rc
+            for k in range(Nn):
+                gf[k], gb[k] = ngf[k], ngb[k]
+    return u_lip, u_g, u_nose
 
 
 def glottal_area(f0_hz: np.ndarray, n_samples: int, fs: float, peak_cm2: float, oq: float = 0.6, sq: float = 1.3,
@@ -221,24 +285,64 @@ def _controls(shapes: list[TubeShape], oversample: int) -> tuple[np.ndarray, tup
     return areas, _loss_filters(eps, oversample), lip, n * dx
 
 
+def _no_branches(n_ctrl: int, oversample: int) -> tuple:
+    """_run's subglottal and nasal arguments with both branches off."""
+    k = len(LOSS_CORNERS_HZ)
+    return (np.zeros(0), np.ones((1, 0)), np.zeros((1, 0, k)), np.zeros(2), -1, np.zeros((n_ctrl, 0)),
+            np.ones((n_ctrl, 0)), np.zeros((n_ctrl, 0, k)), np.zeros((n_ctrl, 3)), np.array([-1.0, 1.0, 0.0, 0.0]))
+
+
+def _sub_args(sub: Subglottal | None, oversample: int) -> tuple:
+    if sub is None:
+        return _no_branches(1, oversample)[:4]
+    dx = section_length(oversample)
+    if abs(sub.dx - dx) > 1e-9:
+        raise ValueError("subglottal sections must be the waveguide's (branches.subglottal(..., kl.section_length()))")
+    g, z, _ = _loss_filters(_loss_eps(sub.areas, sub.perimeter_factor, dx)[None, :], oversample)
+    alpha = 1.0 - np.exp(-2.0 * np.pi * sub.lung_fc_hz / (FS * oversample))
+    return sub.areas.astype(float), g, z, np.array([sub.lung_r, alpha])
+
+
+def _nasal_args(nas: Nasal | None, nj: int, port_cm2: np.ndarray | None, n_ctrl: int, oversample: int) -> tuple:
+    """Nasal arguments: n_areas (n_ctrl, 1 + len(nas.areas)) with the port section first (port_cm2 per frame)."""
+    if nas is None:
+        return _no_branches(n_ctrl, oversample)[4:]
+    dx = section_length(oversample)
+    if abs(nas.dx - dx) > 1e-9:
+        raise ValueError("nasal sections must be the waveguide's (branches.nasal(..., kl.section_length()))")
+    port = np.broadcast_to(np.asarray(port_cm2, float), (n_ctrl,))
+    n_areas = np.concatenate([np.maximum(port, 0.0)[:, None], np.broadcast_to(nas.areas, (n_ctrl, len(nas.areas)))], 1)
+    eps = _loss_eps(np.maximum(n_areas, 1e-3), nas.perimeter_factor, dx)
+    g, z, _ = _loss_filters(eps, oversample)
+    n_lip = np.broadcast_to(np.array(_lip_filter(nas.areas[-1], FS * oversample)), (n_ctrl, 3)).copy()
+    m, r, cinv = nas.helmholtz()
+    return int(nj), n_areas, g, z, n_lip, np.array([nas.sinus_at + 1.0, m, r, cinv])  # +1: the port section is first
+
+
 def render(shapes: list[TubeShape], ag_cm2: np.ndarray, pressure: float, glottis_depth_cm: float, glottis_length_cm: float,
-           oversample: int = OVERSAMPLE, walls: bool = True, coupled: bool = True) -> dict:
+           oversample: int = OVERSAMPLE, walls: bool = True, coupled: bool = True, subglottal: Subglottal | None = None,
+           nasal: Nasal | None = None, port_cm: float | None = None, port_cm2: np.ndarray | float = 0.0) -> dict:
     """Synthesise through the waveguide. shapes: one TubeShape per HOP frame (areas move linearly between them);
-    ag_cm2: glottal area per sample at FS; pressure: subglottal pressure, dyn/cm^2; coupled False: no feedback from the
-    tract into the flow. Returns 16 kHz `audio` (d/dt of
-    the lip volume velocity, unnormalised), `ug` (glottal volume velocity), and the tube's `length_cm`."""
+    ag_cm2: glottal area per sample at FS; pressure: subglottal (lung) pressure, dyn/cm^2; coupled False: no feedback
+    from the tract into the flow (the subglottal system is then unused). subglottal: a `branches.Subglottal` below the
+    glottis. nasal: a `branches.Nasal` joined port_cm above the glottis (`branches.port_position_cm`), opened by
+    port_cm2 (per frame or one value; 0 = velum raised). Returns 16 kHz `audio` (d/dt of the lips' plus the nostrils'
+    volume velocity, unnormalised), `ug` (glottal volume velocity), the tube's `length_cm` and the port's junction `nj`
+    (-1 without a nose)."""
     areas, loss, lip, length = _controls(shapes, oversample)
     fs_in = FS * oversample
     m = len(ag_cm2) * oversample
     ag = np.interp(np.arange(m) / fs_in, np.arange(len(ag_cm2)) / FS, ag_cm2)
     kv = 12.0 * MU * glottis_depth_cm * glottis_length_cm**2
     wall = np.array([WALL_M, WALL_B, WALL_K, 1.0 if walls else 0.0])
-    u_lip, u_g = _run(areas, *loss, lip, HOP * oversample, ag, float(pressure), kv, wall, 1.0 / fs_in,
-                      section_length(oversample), False, coupled)
-    rad = np.diff(u_lip, prepend=0.0) * fs_in
+    nj = -1 if nasal is None else port_junction(port_cm, areas.shape[1], section_length(oversample))
+    u_lip, u_g, u_nose = _run(areas, *loss, lip, HOP * oversample, ag, float(pressure), kv, wall, 1.0 / fs_in,
+                              section_length(oversample), False, coupled, *_sub_args(subglottal, oversample),
+                              *_nasal_args(nasal, nj, port_cm2, len(shapes), oversample))
+    rad = np.diff(u_lip + u_nose, prepend=0.0) * fs_in
     audio = resample_poly(rad, 1, oversample)[: len(ag_cm2)]
     return {"audio": audio.astype(np.float32), "ug": resample_poly(u_g, 1, oversample)[: len(ag_cm2)].astype(np.float32),
-            "length_cm": length}
+            "length_cm": length, "nj": nj}
 
 
 def _vector_fit(h: np.ndarray, f: np.ndarray, seed_f: np.ndarray, seed_b: np.ndarray, n_iter: int = 8
@@ -281,26 +385,65 @@ def _vector_fit(h: np.ndarray, f: np.ndarray, seed_f: np.ndarray, seed_b: np.nda
 
 
 def frame_poles(shapes: list[TubeShape], oversample: int = OVERSAMPLE, walls: bool = True, n_ir: int = LABEL_IR_SAMPLES,
-                f_max_hz: float = LABEL_F_MAX_HZ) -> list[tuple[np.ndarray, np.ndarray]]:
+                f_max_hz: float = LABEL_F_MAX_HZ, nasal: Nasal | None = None, port_cm: float | None = None,
+                port_cm2: np.ndarray | float = 0.0) -> list[tuple[np.ndarray, np.ndarray]]:
     """Closed-glottis resonances (F, B per frame, Hz) of the waveguide as `render` builds it: the impulse response of
-    U_lips / U_glottis with the glottis rigid and the frame's shape held, FFT, `_vector_fit` seeded by `tube.poles` of
-    the same discretised tube (so close pairs stay apart and none is missed). Frames with the same
-    areas share one computation."""
+    (U_lips + U_nostrils) / U_glottis with the glottis rigid and the frame's shape held, FFT, `_vector_fit` seeded by
+    the continuous model of the same discretised tube (`tube.poles`; with the port open, every pole of
+    `branches.branched_poles`, oral and nasal), so close pairs stay apart and none is missed. With the port open
+    this returns all poles, unnumbered: the scoring labels are `frame_labels`. Frames with the same areas share one
+    computation."""
     areas, loss, lip, _ = _controls(shapes, oversample)
     fs_in = FS * oversample
+    dx = section_length(oversample)
     wall = np.array([WALL_M, WALL_B, WALL_K, 1.0 if walls else 0.0])
+    nj = -1 if nasal is None else port_junction(port_cm, areas.shape[1], dx)
+    nargs = _nasal_args(nasal, nj, port_cm2, len(shapes), oversample)
     f = np.fft.rfftfreq(n_ir, 1.0 / fs_in)
+    band = (f >= FIT_MIN_HZ) & (f <= f_max_hz + SEED_MARGIN_HZ)
     out, cache = [], {}
     for c in range(len(shapes)):
-        key = areas[c].tobytes()
+        port = float(nargs[1][c, 0]) if nasal is not None else 0.0
+        key = (areas[c].tobytes(), port)
         if key not in cache:
-            u, _ = _run(areas[c : c + 1], loss[0][c : c + 1], loss[1][c : c + 1], loss[2], lip[c : c + 1], n_ir, np.zeros(n_ir), 0.0, 0.0, wall,
-                        1.0 / fs_in, section_length(oversample), True)
-            dx = section_length(oversample)
-            seed_f, seed_b = tube.poles(TubeShape(areas[c], np.full(len(areas[c]), dx), shapes[c].perimeter_factor),
-                                        f_max_hz + SEED_MARGIN_HZ)  # same discretised tube, continuous physics
-            band = (f >= FIT_MIN_HZ) & (f <= f_max_hz + SEED_MARGIN_HZ)
-            F, B = _vector_fit(np.fft.rfft(u)[band], f[band], seed_f, seed_b)
+            na = (nargs[0], nargs[1][c : c + 1], nargs[2][c : c + 1], nargs[3][c : c + 1], nargs[4][c : c + 1], nargs[5])
+            u, _, un = _run(areas[c : c + 1], loss[0][c : c + 1], loss[1][c : c + 1], loss[2], lip[c : c + 1], n_ir,
+                            np.zeros(n_ir), 0.0, 0.0, wall, 1.0 / fs_in, dx, True, True,
+                            *_sub_args(None, oversample), *na)
+            oral = TubeShape(areas[c], np.full(len(areas[c]), dx), shapes[c].perimeter_factor)
+            if nasal is not None and port > PORT_CLOSED_CM2:
+                fo, bo, fn, bn, _ = branched_poles(oral, nj, port, nasal, f_max_hz + SEED_MARGIN_HZ)
+                seed_f, seed_b = np.r_[fo, fn], np.r_[bo, bn]
+            else:
+                seed_f, seed_b = tube.poles(oral, f_max_hz + SEED_MARGIN_HZ)  # same discretised tube, continuous physics
+            F, B = _vector_fit(np.fft.rfft(u + un)[band], f[band], seed_f, seed_b)
             cache[key] = (F[F <= f_max_hz], B[F <= f_max_hz])
+        out.append(cache[key])
+    return out
+
+
+def frame_labels(shapes: list[TubeShape], oversample: int = OVERSAMPLE, f_max_hz: float = LABEL_F_MAX_HZ,
+                 nasal: Nasal | None = None, port_cm: float | None = None, port_cm2: np.ndarray | float = 0.0
+                 ) -> list[tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    """Scoring labels per frame (`docs/considering.md`): F, B of the oral formants by the training definition,
+    `tube.poles` of the same discretised tube, and with the port open `branches.branched_poles` (the oral roots
+    followed as the port opens; the nose's own poles are not numbered), plus `mixed` per formant (an avoided crossing
+    with a nasal pole: mask that label). The waveguide's measured poles (`frame_poles`) are the consistency check."""
+    areas, _, _, _ = _controls(shapes, oversample)
+    dx = section_length(oversample)
+    nj = -1 if nasal is None else port_junction(port_cm, areas.shape[1], dx)
+    port = np.broadcast_to(np.asarray(port_cm2, float), (len(shapes),))
+    out, cache = [], {}
+    for c in range(len(shapes)):
+        p = float(port[c]) if nasal is not None else 0.0
+        key = (areas[c].tobytes(), p)
+        if key not in cache:
+            oral = TubeShape(areas[c], np.full(len(areas[c]), dx), shapes[c].perimeter_factor)
+            if nasal is not None and p > PORT_CLOSED_CM2:
+                F, B, _, _, mixed = branched_poles(oral, nj, p, nasal, f_max_hz)
+            else:
+                F, B = tube.poles(oral, f_max_hz)
+                mixed = np.zeros(len(F), bool)
+            cache[key] = (F, B, mixed)
         out.append(cache[key])
     return out
