@@ -6,7 +6,8 @@ teacher v3.1's frozen trunk, seed means of head seeds 1 and 2. Supported if (A) 
     arm C weight on the label up by >= 0.05 (mean over B1-B4), both on both seeds;
 guards (film - mlp, seed means): Hillenbrand dev F1 <= +4, F2 <= +9, F3 <= +20 Hz (`paired/w400/d054_mlp_s*_vs_d054_film_s*`);
 women's closed-phase F1 |error| <= +5 Hz (as decide_d051.py); resynthesised validation F1-F3 MAE no more than 5 % worse.
-Reported: the flat arm against mlp and against v3.1's own heads, probe 11's slopes, bandwidth errors on the resynthesised
+Amendment 1 (2026-10-31): a futility stop (film seed 1 over 1.5 x mlp seed 1's synthetic
+F1-F4 MAE) ends it as "not supported (futility stop)". Reported: the flat arm against mlp and against v3.1's own heads, probe 11's slopes, bandwidth errors on the resynthesised
 sets, head-seed spreads.
 
     python decide_d054.py <windowed scratch dir>
@@ -85,7 +86,8 @@ def main():
     print("per run: synthetic F1-F4 MAE Hz | resynth F1-F3 MAE Hz | synthetic B1-B4 error c | probe 12 w_label B1-B4 | "
           "probe 11 F1 slope | women's cp F1 bias Hz")
     have_cp = TRUNK in d
-    for r in [TRUNK] + [run(a, s) for a in ("flat", "mlp", "film") for s in SEEDS]:
+    runs = [TRUNK] + [run(a, s) for a in ("flat", "mlp", "film") for s in SEEDS if (Path("runs") / run(a, s) / "ckpt_008000.pt").exists()]
+    for r in runs:
         sc = scale(r) if Path(f"reports/probes/scale/{r}.json").exists() else {}
         wl = w_label(r) if Path(f"reports/probes/bw_evidence/{r}.json").exists() else None
         print(f"  {r:18s} {np.round(syn_f(r), 1)} | {np.round(resynth_f(r), 1)} | {np.round(bw_err(r), 0)} | "
@@ -93,8 +95,15 @@ def main():
               f"{cp_bias(r) if r in d else float('nan'):+.1f}")
     for name in ("zeroth", "vocalset"):
         print(f"  bandwidth error c, {name}: " + "; ".join(f"{r} {np.round(bw_err(r, name), 0)}" for r in
-                                                       [TRUNK] + [run(a, s) for a in ("flat", "mlp", "film") for s in SEEDS]))
+                                                       runs))
     print()
+    if Path("reports/analysis/d054/futility_stop").exists():  # amendment 1
+        f1, m1 = syn_f(run("film", 1)), syn_f(run("mlp", 1))
+        print(f"amendment 1: film seed 1's synthetic F1-F4 MAE {f1.mean():.1f} Hz against mlp seed 1's {m1.mean():.1f} "
+              f"({f1.mean() / m1.mean():.2f} x, stop above 1.5 x); film seed 2 not trained
+")
+        print("DECISION: not supported (futility stop)")
+        return
 
     rel = {s: float(np.mean(syn_f(run("film", s)) / syn_f(run("mlp", s)) - 1)) for s in SEEDS}
     mean_f = {a: np.mean([syn_f(run(a, s)) for s in SEEDS], 0) for a in ("film", "mlp")}
