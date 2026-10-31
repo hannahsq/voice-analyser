@@ -1,0 +1,18 @@
+Probe 'bwhold' (D-050): d056_s1
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  length_bwhold/all/F1       +0.973 [+0.932, +0.995]  null -0.002 [-0.169, +0.180]  n 60/10  ideal 1
+  length_bwhold/all/F2       +0.984 [+0.973, +0.996]  null +0.001 [-0.176, +0.192]  n 60/10  ideal 1
+  length_bwhold/all/F3       +0.992 [+0.986, +0.996]  null +0.001 [-0.171, +0.188]  n 60/10  ideal 1
+  length_bwhold/all/F4       +0.993 [+0.987, +0.999]  null -0.001 [-0.167, +0.197]  n 60/10  ideal 1
+  length_bwhold/all/B1       +0.166 [+0.019, +0.317]  null -0.001 [-0.083, +0.086]  n 60/10  ideal 0
+  length_bwhold/all/B2       -0.008 [-0.118, +0.032]  null +0.001 [-0.103, +0.105]  n 60/10  ideal 0
+  length_bwhold/all/B3       -0.502 [-0.711, -0.437]  null -0.002 [-0.146, +0.141]  n 60/10  ideal 0
+  length_bwhold/all/B4       -0.555 [-0.779, -0.508]  null -0.003 [-0.140, +0.145]  n 60/10  ideal 0
+  length_bwhold/all/VTL      +0.998 [+0.924, +1.029]  null +0.001 [-0.165, +0.172]  n 60/10  ideal 1
+  length_bwhold/all/f0       +0.001 [-0.001, +0.002]  null -0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  length_bwhold/sigma_growth/F1 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:-0.11 alpha=0.92,hold_bw=True:-0.11 alpha=1.09,hold_bw=True:+0.17 alpha=1.18,hold_bw=True:+0.38
+  length_bwhold/sigma_growth/F2 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.02 alpha=0.92,hold_bw=True:+0.05 alpha=1.09,hold_bw=True:+0.19 alpha=1.18,hold_bw=True:+0.41
+  length_bwhold/sigma_growth/F3 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.06 alpha=0.92,hold_bw=True:+0.04 alpha=1.09,hold_bw=True:+0.19 alpha=1.18,hold_bw=True:+0.46
+  length_bwhold/sigma_growth/F4 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.08 alpha=0.92,hold_bw=True:+0.04 alpha=1.09,hold_bw=True:+0.17 alpha=1.18,hold_bw=True:+0.54
+  length_bwhold/sigma_growth/VTL sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.08 alpha=0.92,hold_bw=True:+0.07 alpha=1.09,hold_bw=True:-0.07 alpha=1.18,hold_bw=True:-0.07

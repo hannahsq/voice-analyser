@@ -1,0 +1,28 @@
+  [d054_film_s2/hillenbrand] 400/1668
+  [d054_film_s2/hillenbrand] 800/1668
+  [d054_film_s2/hillenbrand] 1200/1668
+  [d054_film_s2/hillenbrand] 1600/1668
+  [d054_film_s2/ptdb_tug] 250/1579  (RTF 0.029)
+  [d054_film_s2/ptdb_tug] 500/1579  (RTF 0.029)
+  [d054_film_s2/ptdb_tug] 750/1579  (RTF 0.028)
+  [d054_film_s2/ptdb_tug] 1000/1579  (RTF 0.028)
+  [d054_film_s2/ptdb_tug] 1250/1579  (RTF 0.029)
+  [d054_film_s2/ptdb_tug] 1500/1579  (RTF 0.028)
+tiers: dev
+
+Hillenbrand, d054_mlp_s2 vs d054_film_s2 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    44.3    48.1  diff   +3.8 [+0.3, +7.7]  WORSE
+  F1 MAE children:    51.3    47.8  diff   -3.6 [-6.5, -0.7]  better
+  F1 MAE men     :    20.6    19.8  diff   -0.8 [-1.9, +0.5]  within noise
+  F1 MAE all     :    38.9    38.8  diff   -0.1 [-1.9, +1.7]  within noise
+  F2 MAE all     :    43.4    46.1  diff   +2.7 [-0.2, +6.3]  within noise
+  F2 DR  all     :    98.3    98.2  diff   -0.1 [-0.6, +0.3]  within noise
+  F3 MAE all     :    45.1    60.8  diff  +15.7 [+7.6, +23.8]  WORSE
+  F3 DR  all     :    98.3    97.2  diff   -1.1 [-1.8, -0.5]  WORSE
+  F4 MAE all     :    97.9   192.4  diff  +94.4 [+67.7, +124.7]  WORSE
+  F4 DR  all     :    91.8    84.7  diff   -7.1 [-9.8, -4.5]  WORSE
+
+PTDB-TUG f0 RPA, d054_mlp_s2 vs d054_film_s2
+  all frames    :  87.0  87.0  diff  +0.0 [+0.0, +0.0]  within noise  (n 154653)
+  modal         :  93.9  93.9  diff  +0.0 [+0.0, +0.0]  within noise  (n 126992)
+  modal < 85 Hz :  85.9  85.9  diff  +0.0 [+0.0, +0.0]  within noise  (n 11014)
