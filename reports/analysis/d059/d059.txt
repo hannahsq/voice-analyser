@@ -1,0 +1,117 @@
+D-059: realness (decision function of D-045's discriminators, refitted; log-odds real, > 0 = real side)
+per set: median over frames (synthetic sets weighted to the real sex's f0 distribution) [95 % bootstrap over clips / files]; train_v2 and real rows are out-of-fold (5-fold, grouped).
+
+D_h zeroth f (CV AUC 1.000)
+  real (out-of-fold)                +10.47 [+8.71, +12.12]  (9960 frames)
+  train_v2 channel (out-of-fold)    -20.95 [-22.13, -19.72]  (44820 frames)
+  kl_clean                          -18.43 [-19.78, -17.31]  (8520 frames)
+  kl_channel                        -16.87 [-18.56, -15.12]  (8520 frames)
+  tube_clean                        -19.62 [-21.81, -17.54]  (7100 frames)
+  tube_channel                      -17.31 [-19.97, -15.24]  (6662 frames)
+  cascade_clean                     -21.23 [-22.51, -20.11]  (8520 frames)
+  cascade_channel                   -19.55 [-21.53, -17.43]  (8520 frames)
+  OPENGLOT II                        +3.70 [+1.76, +5.81]  (2880 frames)
+  OPENGLOT III                       +2.70 [+1.71, +3.71]  (2582 frames)
+
+D_h zeroth m (CV AUC 1.000)
+  real (out-of-fold)                 +7.28 [+6.53, +10.21]  (8320 frames)
+  train_v2 channel (out-of-fold)    -18.84 [-20.14, -17.43]  (44820 frames)
+  kl_clean                          -14.52 [-17.03, -11.56]  (8520 frames)
+  kl_channel                        -12.97 [-16.11, -9.40]  (8520 frames)
+  tube_clean                        -17.09 [-21.59, -13.40]  (7100 frames)
+  tube_channel                      -14.85 [-20.58, -11.48]  (6662 frames)
+  cascade_clean                     -19.51 [-20.76, -18.08]  (8520 frames)
+  cascade_channel                   -18.61 [-20.04, -16.81]  (8520 frames)
+  OPENGLOT II                        +0.80 [-0.89, +2.31]  (2880 frames)
+  OPENGLOT III                       +2.97 [+2.44, +3.42]  (3442 frames)
+
+D_h so_adult f (CV AUC 0.999)
+  real (out-of-fold)                 +9.75 [+9.13, +10.37]  (19944 frames)
+  train_v2 channel (out-of-fold)    -16.82 [-18.12, -15.65]  (44820 frames)
+  kl_clean                           -9.71 [-11.16, -8.37]  (8520 frames)
+  kl_channel                         -8.65 [-10.12, -7.56]  (8520 frames)
+  tube_clean                        -14.71 [-17.19, -11.72]  (7100 frames)
+  tube_channel                      -12.79 [-16.32, -9.05]  (6662 frames)
+  cascade_clean                     -14.72 [-15.63, -13.68]  (8520 frames)
+  cascade_channel                   -13.72 [-14.96, -12.18]  (8520 frames)
+  OPENGLOT II                        +9.21 [+8.31, +10.20]  (2880 frames)
+  OPENGLOT III                       +2.61 [+1.88, +3.30]  (2582 frames)
+
+D_h so_adult m (CV AUC 0.999)
+  real (out-of-fold)                +15.43 [+14.49, +16.26]  (19992 frames)
+  train_v2 channel (out-of-fold)    -23.24 [-24.74, -21.87]  (44820 frames)
+  kl_clean                          -13.25 [-18.33, -9.02]  (8520 frames)
+  kl_channel                        -11.85 [-17.97, -7.40]  (8520 frames)
+  tube_clean                        -21.10 [-25.10, -15.73]  (7100 frames)
+  tube_channel                      -18.48 [-24.02, -11.50]  (6662 frames)
+  cascade_clean                     -17.55 [-19.58, -14.89]  (8520 frames)
+  cascade_channel                   -17.09 [-19.32, -14.73]  (8520 frames)
+  OPENGLOT II                        +5.53 [+3.21, +8.75]  (2880 frames)
+  OPENGLOT III                       +4.73 [+3.85, +5.55]  (3442 frames)
+
+D_a zeroth f (CV AUC 0.854)
+  real (out-of-fold)                 +0.92 [+0.48, +1.24]  (9960 frames)
+  train_v2 channel (out-of-fold)     -1.56 [-1.76, -1.40]  (44820 frames)
+  kl_clean                           -1.34 [-1.69, -1.01]  (8520 frames)
+  kl_channel                         -1.53 [-1.88, -1.23]  (8520 frames)
+  tube_clean                         -2.11 [-3.08, -1.48]  (7100 frames)
+  tube_channel                       -2.29 [-3.06, -1.62]  (6662 frames)
+  cascade_clean                      -0.06 [-0.59, +0.35]  (8520 frames)
+  cascade_channel                    -0.61 [-1.12, -0.07]  (8520 frames)
+  OPENGLOT II                        +0.84 [+0.54, +1.25]  (2880 frames)
+  OPENGLOT III                       +0.99 [+0.78, +1.26]  (2582 frames)
+
+D_a zeroth m (CV AUC 0.647)
+  real (out-of-fold)                 -0.07 [-0.18, +0.16]  (8320 frames)
+  train_v2 channel (out-of-fold)     -0.61 [-0.75, -0.48]  (44820 frames)
+  kl_clean                           -0.93 [-1.42, -0.59]  (8520 frames)
+  kl_channel                         -0.87 [-1.33, -0.28]  (8520 frames)
+  tube_clean                         -0.99 [-1.46, -0.63]  (7100 frames)
+  tube_channel                       -0.86 [-1.46, -0.51]  (6662 frames)
+  cascade_clean                      -0.57 [-0.77, -0.40]  (8520 frames)
+  cascade_channel                    -0.58 [-0.81, -0.39]  (8520 frames)
+  OPENGLOT II                        -0.44 [-0.64, -0.28]  (2880 frames)
+  OPENGLOT III                       -0.09 [-0.18, -0.00]  (3442 frames)
+
+D_a so_adult f (CV AUC 0.863)
+  real (out-of-fold)                 +1.13 [+0.98, +1.29]  (19944 frames)
+  train_v2 channel (out-of-fold)     -1.33 [-1.49, -1.15]  (44820 frames)
+  kl_clean                           +0.18 [-0.20, +0.54]  (8520 frames)
+  kl_channel                         -0.28 [-0.72, +0.18]  (8520 frames)
+  tube_clean                         -0.50 [-1.66, +0.10]  (7100 frames)
+  tube_channel                       -1.09 [-2.00, -0.41]  (6662 frames)
+  cascade_clean                      -0.57 [-1.01, -0.11]  (8520 frames)
+  cascade_channel                    -1.29 [-1.70, -0.80]  (8520 frames)
+  OPENGLOT II                        +2.21 [+2.06, +2.37]  (2880 frames)
+  OPENGLOT III                       +1.46 [+1.28, +1.61]  (2582 frames)
+
+D_a so_adult m (CV AUC 0.803)
+  real (out-of-fold)                 +0.70 [+0.55, +0.85]  (19992 frames)
+  train_v2 channel (out-of-fold)     -0.75 [-0.90, -0.61]  (44820 frames)
+  kl_clean                           +0.63 [+0.47, +0.85]  (8520 frames)
+  kl_channel                         +0.42 [+0.22, +0.62]  (8520 frames)
+  tube_clean                         +0.60 [+0.11, +1.01]  (7100 frames)
+  tube_channel                       +0.21 [-0.31, +0.79]  (6662 frames)
+  cascade_clean                      -0.99 [-1.28, -0.65]  (8520 frames)
+  cascade_channel                    -0.98 [-1.29, -0.67]  (8520 frames)
+  OPENGLOT II                        +1.39 [+1.14, +1.72]  (2880 frames)
+  OPENGLOT III                       +0.54 [+0.24, +0.87]  (3442 frames)
+
+flag check, women, D_h zeroth: kl_channel - tube_channel +0.45 [-2.21, +3.96] -> no
+flag check, women, D_h zeroth: kl_channel - cascade_channel +2.82 [+0.06, +5.32] -> yes
+flag check, women, D_h so_adult: kl_channel - tube_channel +3.92 [+0.07, +7.70] -> yes
+flag check, women, D_h so_adult: kl_channel - cascade_channel +5.02 [+2.74, +6.73] -> yes
+Flag 'KL closer to real than the training synthesisers': not raised
+
+Measures (median over frames, unweighted): H1-H2  H1-A1  CPP  HNR  tilt  HF  jitter  shimmer  B1  B2  B3
+  real zeroth             1.12    -1.25    19.70    13.89    -7.21   -35.16     0.01     0.12    66.76    86.43   168.62
+  real so_adult          -0.45    -1.58    21.79    14.62    -6.68   -28.46     0.01     0.09    73.04    90.08   156.56
+  train_v2 channel        5.96     0.00    16.88    12.32    -4.27   -28.23     0.01     0.12    78.93    81.05   111.52
+  kl_clean                6.82     0.00    23.49    14.26    -2.36   -16.71     0.01     0.09    97.22    96.72   119.33
+  kl_channel              5.00     0.00    21.28    12.07    -2.64   -17.78     0.01     0.11    96.19    97.29   120.63
+  tube_clean              6.71     0.00    20.89    10.45    -1.07   -10.10     0.01     0.09    87.50    83.91    91.76
+  tube_channel            4.20     0.00    19.17     9.02    -1.87   -12.13     0.01     0.11    89.43    84.34    94.11
+  cascade_clean           8.49     0.00    18.68    14.05    -5.06   -36.95     0.01     0.10    65.99    91.82   207.03
+  cascade_channel         6.28     0.00    16.59    10.92    -4.63   -33.98     0.01     0.13    66.00    91.78   202.66
+  OPENGLOT II            -1.78    -6.18    29.81    26.67    -4.39   -29.02     0.00     0.01    93.55   117.17   149.46
+  OPENGLOT III            2.66     0.00    29.43    39.53    -5.64   -37.27     0.00     0.01    64.48   101.36   172.35
