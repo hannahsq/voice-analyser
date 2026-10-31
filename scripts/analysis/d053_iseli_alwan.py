@@ -146,7 +146,7 @@ def score(ckpt: str, log=print) -> None:
 
     run = Path(ckpt).parent.name
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = load_teacher(ckpt, dev)
+    model, _ = load_teacher(ckpt, dev)
     for name in SETS:
         f = CACHE / f"{name}_{run}.npz"
         if f.exists():
