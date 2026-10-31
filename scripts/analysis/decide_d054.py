@@ -100,8 +100,7 @@ def main():
     if Path("reports/analysis/d054/futility_stop").exists():  # amendment 1
         f1, m1 = syn_f(run("film", 1)), syn_f(run("mlp", 1))
         print(f"amendment 1: film seed 1's synthetic F1-F4 MAE {f1.mean():.1f} Hz against mlp seed 1's {m1.mean():.1f} "
-              f"({f1.mean() / m1.mean():.2f} x, stop above 1.5 x); film seed 2 not trained
-")
+              f"({f1.mean() / m1.mean():.2f} x, stop above 1.5 x); film seed 2 not trained\n")
         print("DECISION: not supported (futility stop)")
         return
 
