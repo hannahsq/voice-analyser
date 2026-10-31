@@ -39,6 +39,7 @@ A register of every hypothesis tested for the upward F1 bias that synthetically 
 | Pretrained real-speech features (Parakeet) | D-033 | Frozen Parakeet layer 5 + a head trained on synthetic labels carries almost none of it; labeller v3 + H5×6 cuts women's |bias| 9.1 → 2.3 (pooled) | Features learned from real speech avoid it |
 | Distilling that property into a small student | D-034 | Students (v2, v4) don't reach their noise control; the property did not survive distillation | No |
 | Frame-level synthetic/real gap | D-045 | D_h separates perfectly (AUC 1.0) but real-ness doesn't track the overread (Spearman −0.01 / +0.01); HNR tracks it weakly (+0.11, all references), mostly in the most harmonic frames | No linear frame-level link |
+| Read-out structure on a frozen trunk (per-bin, FiLM-modulated) | D-054 | Heads on teacher v3.1's h are saturated (flat ≈ MLP ≈ joint heads); a per-bin read-out doubled synthetic MAE (clip-level misreads) but read women's closed-phase F1 +2.8 Hz against +4.2 (one seed) and Hillenbrand F1 within noise | Not shown; an anchored per-bin read-out untested |
 | What makes frames look real | D-045 follow-ups | Renders too periodic below 2 kHz; codec, reverberation, higher f0 look real; resynthesised clips sit between real and synthetic; no band occlusion removes the separation | Realism lead, not a bias lead |
 
 ## Open

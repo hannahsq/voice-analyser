@@ -1,0 +1,15 @@
+D-054: frequency-resolved read-out (film) against MLP heads (mlp) on teacher v3.1's frozen trunk, head seeds 1, 2
+
+per run: synthetic F1-F4 MAE Hz | resynth F1-F3 MAE Hz | synthetic B1-B4 error c | probe 12 w_label B1-B4 | probe 11 F1 slope | women's cp F1 bias Hz
+  d040_5b_s2_b20k    [21.7 40.7 58.7 86.3] | [26.1 86.8 99.6] | [136. 155. 143. 132.] | [0.21 0.34 0.39 0.33] | hillenbrand 0.975, ptdb_tug 1.039 | +4.1
+  d054_flat_s1       [22.  41.3 59.8 86.9] | [ 26.6  89.  101. ] | [133. 153. 142. 134.] | [0.21 0.34 0.39 0.33] | hillenbrand 0.974, ptdb_tug 1.035 | +4.9
+  d054_flat_s2       [22.  41.3 59.6 86.6] | [ 26.6  88.3 101.1] | [133. 153. 143. 134.] | [0.21 0.35 0.39 0.33] | hillenbrand 0.973, ptdb_tug 1.033 | +4.8
+  d054_mlp_s1        [21.4 40.7 58.4 85.9] | [26.7 88.5 97.5] | [135. 153. 142. 132.] | [0.21 0.35 0.4  0.33] | hillenbrand 0.979, ptdb_tug 1.043 | +4.2
+  d054_mlp_s2        [21.5 40.8 58.6 85.6] | [26.7 87.8 97.4] | [133. 154. 141. 132.] | [0.21 0.35 0.39 0.33] | hillenbrand 0.977, ptdb_tug 1.046 | +4.2
+  d054_film_s1       [ 42.9  78.9 116.4 160.1] | [ 37.2 106.4 145.3] | [133. 150. 141. 132.] | [0.21 0.35 0.4  0.35] | hillenbrand 0.999, ptdb_tug 1.030 | +2.8
+  bandwidth error c, zeroth: d040_5b_s2_b20k [230. 184. 159. 176.]; d054_flat_s1 [232. 182. 160. 175.]; d054_flat_s2 [231. 181. 160. 175.]; d054_mlp_s1 [230. 183. 161. 175.]; d054_mlp_s2 [231. 182. 159. 175.]; d054_film_s1 [231. 184. 159. 175.]
+  bandwidth error c, vocalset: d040_5b_s2_b20k [301. 288. 285. 331.]; d054_flat_s1 [302. 289. 285. 333.]; d054_flat_s2 [303. 289. 284. 333.]; d054_mlp_s1 [302. 289. 285. 333.]; d054_mlp_s2 [304. 288. 285. 333.]; d054_film_s1 [302. 288. 285. 334.]
+
+amendment 1: film seed 1's synthetic F1-F4 MAE 99.6 Hz against mlp seed 1's 51.6 (1.93 x, stop above 1.5 x); film seed 2 not trained
+
+DECISION: not supported (futility stop)
