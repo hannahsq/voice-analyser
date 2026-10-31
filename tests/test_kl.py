@@ -6,8 +6,9 @@ from vocal_analysis.synth import kl, tube
 
 def _lossless_ir(n: int, m: int = 1 << 14) -> np.ndarray:
     """Impulse response of a lossless uniform tube (3 cm^2), rigid glottis, ideal open lips (reflection -1)."""
-    areas, loss, lip = np.full((1, n), 3.0), np.ones((1, n)), np.array([[-1.0, 0.0, 0.0]])
-    u, _ = kl._run(areas, loss, lip, m, np.zeros(m), 0.0, 0.0, np.zeros(4), 1.0 / (kl.FS * kl.OVERSAMPLE),
+    areas, lip = np.full((1, n), 3.0), np.array([[-1.0, 0.0, 0.0]])
+    g, z, p = kl._loss_filters(np.zeros((1, n)))
+    u, _ = kl._run(areas, g, z, p, lip, m, np.zeros(m), 0.0, 0.0, np.zeros(4), 1.0 / (kl.FS * kl.OVERSAMPLE),
                    kl.section_length(), True)
     return u
 
@@ -49,15 +50,19 @@ def test_uniform_areas_keep_volume_and_length():
 
 @pytest.mark.parametrize("vowel", ["i", "A", "u", "E"])
 def test_frame_poles_match_the_continuous_tube(vowel):
-    """The waveguide's resonances, measured by vector fitting, against tube.poles of the same discretised tube: F1-F4
-    within 2 % (the discretisation and the frequency-independent viscous loss differ; bandwidths are not compared).
-    /i/'s close F2 / F3 pair must come out as two poles."""
+    """The waveguide's resonances, measured by vector fitting, against tube.poles of the same discretised tube: F2-F4
+    within 1 %, F3 / F4 bandwidths within 12 % (the sqrt(f) losses). F1 within 4 %: a closed vowel's F1 is broad and
+    wall-dominated, and there the continuous model's complex root and a rational fit of its own response differ by
+    up to 5 % (/i/ 306 against 290 Hz), with the waveguide between them. /i/'s close F2 / F3 pair must come out as
+    two poles."""
     s = tube.build_shape(*tube.STORY_VOWELS[vowel], 17.5)
     a = kl.uniform_areas(s)
-    ft, _ = tube.poles(tube.TubeShape(a, np.full(len(a), kl.section_length())), 5000.0)
+    ft, bt = tube.poles(tube.TubeShape(a, np.full(len(a), kl.section_length())), 5000.0)
     (fk, bk), = kl.frame_poles([s])
     assert len(fk) >= 4 and np.all(bk[:4] > 0)
-    assert np.all(np.abs(fk[:4] / ft[:4] - 1) < 0.02)
+    assert abs(fk[0] / ft[0] - 1) < 0.04
+    assert np.all(np.abs(fk[1:4] / ft[1:4] - 1) < 0.01)
+    assert np.all(np.abs(bk[2:4] / bt[2:4] - 1) < 0.12)
 
 
 def test_render_is_finite_and_the_load_lowers_the_flow():

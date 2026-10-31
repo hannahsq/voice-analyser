@@ -13,15 +13,20 @@ feat_bayesian_vtl branch) and rewritten here, with three fixes found on 2026-10-
 Geometry and physics follow `tube.py`, so the same Story area functions (all tiers) drive both: the area function is
 resampled onto equal sections of dx = c / (OVERSAMPLE x 16 kHz) (0.27 cm at 8x, about 65 sections for 17.5 cm);
 yielding walls are a mass-damper-spring per junction (`tube.WALL_*` per unit area, the wall area of one section);
-viscous and heat-conduction losses are a per-section attenuation from `tube.py`'s line constants at LOSS_REF_HZ
-(frequency-independent here, unlike `tube.py`'s sqrt(f): the labels below are measured, so they are exact anyway);
+viscous and heat-conduction losses follow `tube.py`'s line constants, whose attenuation is exactly proportional to
+sqrt(f): each section's traversal goes through a gain and a cascade of first-order shelves with fixed poles
+(LOSS_CORNERS_HZ) whose zeros move with the section's loss, the shelves' weights fitted once so the log magnitude
+follows -eps sqrt(f / LOSS_REF_HZ) over 60 Hz - 8 kHz (eps the section's attenuation at LOSS_REF_HZ; zero loss is an
+exact identity);
 lip radiation is `tube._radiation`'s piston load as a first-order reflection filter (bilinear). Areas move linearly
 between 10 ms control frames. The output is the radiated pressure's shape, d/dt of the lip volume velocity,
 decimated to 16 kHz.
 
 Labels (`frame_poles`): each control frame's closed-glottis resonances, measured from this waveguide itself (its
 impulse response with the glottis rigid, FFT, then the poles of U_lips / U_glottis by vector fitting), so they are
-exact for what is rendered, discretisation and loss model included.
+exact for what is rendered, discretisation and loss model included. F2-F4 agree with `tube.poles` of the same
+geometry within 1 %; a closed vowel's broad F1 within about 3 % (the root of a non-rational response and a rational
+fit of it differ there; `docs/considering.md`), so labels for scoring should use `tube.poles`, the training definition.
 """
 
 from __future__ import annotations
@@ -38,6 +43,8 @@ FS = 16000
 HOP = 160
 OVERSAMPLE = 8
 LOSS_REF_HZ = 1000.0
+LOSS_CORNERS_HZ = (100.0, 400.0, 1600.0, 6400.0)
+LOSS_FIT_HZ = (60.0, 8000.0)
 LABEL_IR_SAMPLES = 1 << 14  # at 8 x 16 kHz: 0.128 s (a 20 Hz bandwidth decays by about 70 dB); vector fitting needs no fine bins
 LABEL_F_MAX_HZ = 7500.0
 SEED_MARGIN_HZ = 1000.0  # poles fitted above the labelled band, so its top edge is not distorted
@@ -59,14 +66,36 @@ def uniform_areas(shape: TubeShape, oversample: int = OVERSAMPLE) -> np.ndarray:
     return np.diff(np.interp(x, edges, vol)) / np.diff(x)
 
 
-def _loss_factor(areas: np.ndarray, perimeter_factor: float, dx: float) -> np.ndarray:
-    """Per-section, per-traversal amplitude factor exp(-alpha dx) from viscous and heat-conduction losses at
-    LOSS_REF_HZ (`tube.chain_matrix`'s series and shunt terms, walls left out: they are modelled separately)."""
+def _loss_eps(areas: np.ndarray, perimeter_factor: float, dx: float) -> np.ndarray:
+    """Per-section, per-traversal attenuation alpha dx (nepers) from viscous and heat-conduction losses at
+    LOSS_REF_HZ (`tube.chain_matrix`'s series and shunt terms, walls left out: they are modelled separately). It
+    scales as sqrt(f) to within 0.1 % over 100 Hz - 7 kHz at any area."""
     s = 2j * np.pi * LOSS_REF_HZ
     perim = perimeter_factor * 2.0 * np.sqrt(np.pi * areas)
     z = s * RHO / areas + perim / areas**2 * np.sqrt(RHO * MU) * np.sqrt(s)
     y = s * areas / (RHO * C_CM_S**2) + perim * (ETA - 1) / (RHO * C_CM_S**2) * np.sqrt(LAMBDA_OVER_CP / RHO) * np.sqrt(s)
-    return np.exp(-np.sqrt(z * y).real * dx)
+    return np.sqrt(z * y).real * dx
+
+
+def _loss_template(oversample: int = OVERSAMPLE) -> tuple[np.ndarray, np.ndarray]:
+    """(poles, weights): weights[0] the log gain and weights[1:] each shelf's zero offset, per neper at LOSS_REF_HZ.
+    Shelf k is (1 - z_k / q) / (1 - p_k / q) with z_k = p_k + eps w_k; to first order in eps its log magnitude is
+    eps w_k Re(-e^-jw / (1 - p_k e^-jw)), so the weights are a linear least-squares fit (log-spaced frequencies) of
+    -sqrt(f / LOSS_REF_HZ)."""
+    fs = FS * oversample
+    f = np.geomspace(*LOSS_FIT_HZ, 400)
+    e = np.exp(-2j * np.pi * f / fs)
+    p = np.exp(-2.0 * np.pi * np.asarray(LOSS_CORNERS_HZ) / fs)
+    basis = np.stack([np.ones_like(f)] + [np.real(-e / (1.0 - pk * e)) for pk in p], 1)
+    w, *_ = np.linalg.lstsq(basis, -np.sqrt(f / LOSS_REF_HZ), rcond=None)
+    return p, w
+
+
+def _loss_filters(eps: np.ndarray, oversample: int = OVERSAMPLE) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """(gain, zeros, poles) of each section's loss filter for attenuations eps (any shape): gain eps.shape, zeros
+    eps.shape + (K,), poles (K,)."""
+    p, w = _loss_template(oversample)
+    return np.exp(w[0] * eps), p + eps[..., None] * w[1:], p
 
 
 def _lip_filter(lip_area: float, fs: float) -> tuple[float, float, float]:
@@ -80,9 +109,20 @@ def _lip_filter(lip_area: float, fs: float) -> tuple[float, float, float]:
 
 
 @njit(cache=True)
-def _run(areas, loss, lip, step, ag, p_sub, kv, wall, dt, dx, impulse, coupled=True):
+def _loss(x, c, i, d, loss_g, loss_z, loss_p, sx, sy):
+    """One sample through section i's loss filter in direction d (control frame c): the shelves, then the gain."""
+    for k in range(len(loss_p)):
+        y = x - loss_z[c, i, k] * sx[d, i, k] + loss_p[k] * sy[d, i, k]
+        sx[d, i, k], sy[d, i, k] = x, y
+        x = y
+    return x * loss_g[c, i]
+
+
+@njit(cache=True)
+def _run(areas, loss_g, loss_z, loss_p, lip, step, ag, p_sub, kv, wall, dt, dx, impulse, coupled=True):
     """The waveguide at the internal rate (time step dt, section length dx). areas (n_ctrl, N) per control frame, linear
-    in between over `step` samples; loss (n_ctrl, N) per-traversal factors; lip (n_ctrl, 3) reflection filter
+    in between over `step` samples; loss_g (n_ctrl, N), loss_z (n_ctrl, N, K), loss_p (K,): each section's
+    per-traversal loss filter (`_loss_filters`), one state per direction; lip (n_ctrl, 3) reflection filter
     coefficients; ag glottal area per sample (cm^2); kv the viscous flow coefficient (12 mu d lg^2); wall (m, b, k, on)
     per unit area; impulse: glottis rigid, a unit volume velocity at sample 0 (for the labels); coupled False: the
     flow from the glottis and subglottal pressure alone (no feedback from the tract; the control for interaction).
@@ -94,6 +134,9 @@ def _run(areas, loss, lip, step, ag, p_sub, kv, wall, dt, dx, impulse, coupled=T
     nf, nb = np.zeros(N), np.zeros(N)
     wx, wv = np.zeros(N - 1), np.zeros(N - 1)  # wall displacement and velocity per junction
     a = np.empty(N)
+    K = len(loss_p)
+    sx = np.zeros((2, N, K))  # loss-filter states per direction (0 forward, 1 backward), section and shelf
+    sy = np.zeros((2, N, K))
     lf_x1 = 0.0  # lip filter state: previous input and output
     lf_y1 = 0.0
     u_lip = np.zeros(M)
@@ -125,7 +168,7 @@ def _run(areas, loss, lip, step, ag, p_sub, kv, wall, dt, dx, impulse, coupled=T
                 if rhs < 0.0:
                     ug = -ug
         u_g[t] = ug
-        nf[0] = (rc * ug / a[0] + p_in) * loss[c, 0]  # GL-3, corrected: a closed glottis (ug = 0) reflects fully
+        nf[0] = _loss(rc * ug / a[0] + p_in, c, 0, 0, loss_g, loss_z, loss_p, sx, sy)  # GL-3, corrected: a closed glottis (ug = 0) reflects fully
         # junction i: continuity Y_i (f - nb) = Y_j (nf - b) + u_wall with P = f + nb = nf + b, Y = A / (rho c)
         for i in range(N - 1):
             yi, yj = a[i] / rc, a[i + 1] / rc
@@ -136,13 +179,13 @@ def _run(areas, loss, lip, step, ag, p_sub, kv, wall, dt, dx, impulse, coupled=T
             if use_wall:  # m dv/dt = P - b v - k x per unit area (semi-implicit Euler)
                 wv[i] += dt * (p - wb * wv[i] - wk * wx[i]) / wm
                 wx[i] += dt * wv[i]
-            nf[i + 1] = (p - bw[i + 1]) * loss[c, i + 1]
-            nb[i] = (p - fw[i]) * loss[c, i]
+            nf[i + 1] = _loss(p - bw[i + 1], c, i + 1, 0, loss_g, loss_z, loss_p, sx, sy)
+            nb[i] = _loss(p - fw[i], c, i, 1, loss_g, loss_z, loss_p, sx, sy)
         # lips: the arriving wave through the reflection filter
         x0 = fw[N - 1]
         y0 = b0 * x0 + b1 * lf_x1 - a1 * lf_y1
         lf_x1, lf_y1 = x0, y0
-        nb[N - 1] = y0 * loss[c, N - 1]
+        nb[N - 1] = _loss(y0, c, N - 1, 1, loss_g, loss_z, loss_p, sx, sy)
         u_lip[t] = a[N - 1] * (x0 - y0) / rc
         for i in range(N):
             fw[i], bw[i] = nf[i], nb[i]
@@ -161,20 +204,21 @@ def glottal_area(f0_hz: np.ndarray, n_samples: int, fs: float, peak_cm2: float, 
     return peak_cm2 * area_pulse(cycles, oq, sq, gap=gap, closure=closure)
 
 
-def _controls(shapes: list[TubeShape], oversample: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
-    """Per control frame: areas on a common section count (the clip's mean length), loss factors, lip filters."""
+def _controls(shapes: list[TubeShape], oversample: int) -> tuple[np.ndarray, tuple, np.ndarray, float]:
+    """Per control frame: areas on a common section count (the clip's mean length), loss filters
+    (`_loss_filters`), lip filters."""
     dx = section_length(oversample)
     n = max(2, int(round(np.mean([s.length_cm for s in shapes]) / dx)))
     areas = np.empty((len(shapes), n))
-    loss = np.empty((len(shapes), n))
+    eps = np.empty((len(shapes), n))
     lip = np.empty((len(shapes), 3))
     for c, s in enumerate(shapes):
         ua = uniform_areas(s, oversample)
         areas[c] = np.interp(np.linspace(0, 1, n), np.linspace(0, 1, len(ua)), ua) if len(ua) != n else ua
         areas[c] = np.maximum(areas[c], 1e-3)
-        loss[c] = _loss_factor(areas[c], s.perimeter_factor, dx)
+        eps[c] = _loss_eps(areas[c], s.perimeter_factor, dx)
         lip[c] = _lip_filter(areas[c, -1], FS * oversample)
-    return areas, loss, lip, n * dx
+    return areas, _loss_filters(eps, oversample), lip, n * dx
 
 
 def render(shapes: list[TubeShape], ag_cm2: np.ndarray, pressure: float, glottis_depth_cm: float, glottis_length_cm: float,
@@ -189,7 +233,7 @@ def render(shapes: list[TubeShape], ag_cm2: np.ndarray, pressure: float, glottis
     ag = np.interp(np.arange(m) / fs_in, np.arange(len(ag_cm2)) / FS, ag_cm2)
     kv = 12.0 * MU * glottis_depth_cm * glottis_length_cm**2
     wall = np.array([WALL_M, WALL_B, WALL_K, 1.0 if walls else 0.0])
-    u_lip, u_g = _run(areas, loss, lip, HOP * oversample, ag, float(pressure), kv, wall, 1.0 / fs_in,
+    u_lip, u_g = _run(areas, *loss, lip, HOP * oversample, ag, float(pressure), kv, wall, 1.0 / fs_in,
                       section_length(oversample), False, coupled)
     rad = np.diff(u_lip, prepend=0.0) * fs_in
     audio = resample_poly(rad, 1, oversample)[: len(ag_cm2)]
@@ -250,7 +294,7 @@ def frame_poles(shapes: list[TubeShape], oversample: int = OVERSAMPLE, walls: bo
     for c in range(len(shapes)):
         key = areas[c].tobytes()
         if key not in cache:
-            u, _ = _run(areas[c : c + 1], loss[c : c + 1], lip[c : c + 1], n_ir, np.zeros(n_ir), 0.0, 0.0, wall,
+            u, _ = _run(areas[c : c + 1], loss[0][c : c + 1], loss[1][c : c + 1], loss[2], lip[c : c + 1], n_ir, np.zeros(n_ir), 0.0, 0.0, wall,
                         1.0 / fs_in, section_length(oversample), True)
             dx = section_length(oversample)
             seed_f, seed_b = tube.poles(TubeShape(areas[c], np.full(len(areas[c]), dx), shapes[c].perimeter_factor),
