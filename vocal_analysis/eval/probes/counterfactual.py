@@ -224,3 +224,40 @@ def chain(audio: np.ndarray, kind: str, value: float) -> np.ndarray:
         z = np.zeros(int(round(value * FS)))
         return np.r_[z, x, z].astype(np.float32)
     raise ValueError(kind)
+
+
+VALLEY_SIGMA = 0.1  # peak width (SD) as a fraction of the F1-F2 distance in log frequency
+VALLEY_EDGE = 0.25  # fill: flat between F1 + 0.25 d and F2 - 0.25 d ...
+VALLEY_RAMP = 0.15  # ... with raised-cosine ramps of 0.15 d outside that
+
+
+def valley(audio: np.ndarray, formants: np.ndarray, kind: str, pos: float, level_db: float) -> np.ndarray:
+    """Probe 14 (D-055): energy added to (or taken from) the F1-F2 valley of a resynthesised clip, frame by frame,
+    placed from that frame's exact F1 and F2 (labels, HOP frames), so the formant peaks themselves are left alone.
+    kind "peak": a Gaussian in log frequency at F1 + pos (F2 - F1) (log), SD VALLEY_SIGMA of the distance, level_db
+    at its centre; "fill": level_db over the middle of the valley (VALLEY_EDGE, VALLEY_RAMP); "null": the same STFT path at
+    0 dB (the processing floor). Zero-phase gain on a 40 ms Hann STFT at the label hop; frames without F1 and F2 unchanged."""
+    from scipy.signal import istft, stft
+
+    x = np.asarray(audio, float)
+    nper = 4 * HOP
+    f, t, Z = stft(x, FS, window="hann", nperseg=nper, noverlap=nper - HOP, boundary="zeros", padded=True)
+    u = np.log2(np.maximum(f, 1.0))
+    g_db = np.zeros(Z.shape)
+    if kind != "null":
+        for k in range(Z.shape[1]):
+            if k >= len(formants) or not np.all(np.isfinite(formants[k, :2])):
+                continue
+            a, b = np.log2(formants[k, 0]), np.log2(formants[k, 1])
+            d = b - a
+            if kind == "peak":
+                g_db[:, k] = level_db * np.exp(-0.5 * ((u - (a + pos * d)) / (VALLEY_SIGMA * d)) ** 2)
+            elif kind == "fill":
+                lo, hi, r = a + VALLEY_EDGE * d, b - VALLEY_EDGE * d, VALLEY_RAMP * d
+                w = np.clip(np.minimum(u - (lo - r), (hi + r) - u) / r, 0.0, 1.0)
+                g_db[:, k] = level_db * 0.5 * (1 - np.cos(np.pi * w))
+            else:
+                raise ValueError(kind)
+    _, y = istft(Z * 10 ** (g_db / 20), FS, window="hann", nperseg=nper, noverlap=nper - HOP, boundary=True)
+    y = np.r_[y, np.zeros(max(0, len(x) - len(y)))][: len(x)]
+    return y.astype(np.float32)

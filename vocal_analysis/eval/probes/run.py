@@ -56,6 +56,11 @@ PROBES = {
     # probe 10: synthetic tube clips; larynx (pg) and lip (pm) changes held fixed, cm at Story's size
     "articulation": [REF] + [{"arm": "larynx", "pg": v} for v in (-0.4, -0.2, 0.2, 0.4)]
                     + [{"arm": "lips", "pm": v} for v in (-0.25, 0.4, 0.8)],
+    # probe 14 (D-055): energy in the F1-F2 valley, placed per frame from the exact F1 and F2 (`cf.valley`); one arm
+    # per condition (change arms report one condition each); "null" is the same STFT path at 0 dB
+    "valley": [REF, {"arm": "null", "valley": ("null", 0.5, 0.0)}]
+              + [{"arm": f"peak{int(100 * p)}_{v:+g}", "valley": ("peak", p, v)} for p in (0.33, 0.5, 0.67) for v in (6.0, -6.0)]
+              + [{"arm": f"fill_{v:+g}", "valley": ("fill", 0.5, v)} for v in (3.0, 6.0, -6.0)],
 }
 ARTIC_ITEMS, ARTIC_SEED = 60, 5052  # seed used by no other set
 VOICE_SEED = 5053
@@ -176,6 +181,8 @@ def render_probe(probe: str, per_group: int = 6, log=print) -> Path:
                     y, lab = cf.render(it, cd.get("alpha", 1.0), cd.get("r", 1.0), cd.get("bw", 1.0), cd.get("extras"),
                                        tuple(cd["shift"]) if "shift" in cd else None, cd.get("stretch", 1.0),
                                        cd.get("hold_bw", False))
+                    if "valley" in cd:  # probe 14: on the reference resynthesis; the labels don't move
+                        y = cf.valley(y, lab["formants"], *cd["valley"])
                 arrays[f"audio_{c}"], arrays[f"scored_{c}"], arrays[f"voiced_{c}"] = y, lab["scored"], lab["voiced"]
                 arrays[f"label_formants_{c}"] = lab["formants"][:, :4].astype(np.float32)
                 arrays[f"label_bandwidths_{c}"] = lab["bandwidths"][:, :4].astype(np.float32)
