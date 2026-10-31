@@ -59,7 +59,8 @@ class TeacherConfig:
     # D-054: how the formant and bandwidth heads read the trunk. "flat": linear heads on the pooled per-frame vector h
     # (every model to D-051); "mlp": the same with one hidden layer of readout_hidden (a capacity control); "film":
     # frequency-resolved (`FreqReadout`): the encoder's conv maps, modulated by h, upsampled back to the VQT's bins, one
-    # logit per bin per formant, and each bandwidth read at its formant's position
+    # logit per bin per formant, and each bandwidth read at its formant's position; "film_residual" (D-056): the flat
+    # heads plus a FreqReadout whose logits and bandwidths are added to theirs, its output layers initialised at zero
     readout: str = "flat"
     readout_channels: int = 32
     readout_hidden: int = 512
@@ -308,7 +309,7 @@ class Teacher(nn.Module):
         self.enc = Encoder(c_in, cfg.channels, (cfg.full_res_dilations, (1, 2, 4, 8), (1, 2)), cfg.embed, cfg.gru_hidden,
                            cfg.gru_layers, cfg.temporal, cfg)
         d = self.enc.out_dim
-        if cfg.readout == "flat":
+        if cfg.readout in ("flat", "film_residual"):
             self.formant_heads = nn.ModuleList([nn.Linear(d + n, FORMANT_AXIS.n_bins) for n in range(N_FORMANTS)])
             self.bw_head = nn.Linear(d, 2 * N_FORMANTS)  # mean and log-variance of log B per formant
         elif cfg.readout == "mlp":
@@ -316,10 +317,14 @@ class Teacher(nn.Module):
             self.formant_heads = nn.ModuleList([nn.Sequential(nn.Linear(d + n, hid), nn.GELU(), nn.Linear(hid, FORMANT_AXIS.n_bins))
                                                 for n in range(N_FORMANTS)])
             self.bw_head = nn.Sequential(nn.Linear(d, hid), nn.GELU(), nn.Linear(hid, 2 * N_FORMANTS))
-        elif cfg.readout == "film":
-            self.readout = FreqReadout(d, cfg.channels, cfg.readout_channels)
-        else:
+        elif cfg.readout != "film":
             raise ValueError(f"unknown readout {cfg.readout!r}")
+        if cfg.readout in ("film", "film_residual"):
+            self.readout = FreqReadout(d, cfg.channels, cfg.readout_channels)
+        if cfg.readout == "film_residual":  # starts exactly at the flat heads' outputs
+            for m in (self.readout.out, *(b[-1] for b in self.readout.bw)):
+                nn.init.zeros_(m.weight)
+                nn.init.zeros_(m.bias)
         self.sonorant_head = nn.Linear(d, 1)
         if cfg.obs_head:
             self.obs_head = nn.Linear(d + N_FORMANTS, N_FORMANTS)
@@ -353,28 +358,29 @@ class Teacher(nn.Module):
                 f0 = comb_f0 if comb_f0 is not None else self.expected_f0(out["f0_logits"].float())
                 vp = comb_voiced if comb_voiced is not None else torch.sigmoid(out["voicing_logit"].float())
             x = torch.cat([x, self.comb(f0, vp).to(x.dtype)], 1)
-        film = self.cfg.readout == "film"
+        film = self.cfg.readout in ("film", "film_residual")
+        flat = self.cfg.readout != "film"
         h, kept = self.enc(x, maps=True) if film else (self.enc(x), None)
         if film:
             fx = self.readout.maps(kept, h)
             raw = self.readout.logits(fx)
         logits, means = [], []
         for n in range(N_FORMANTS):
-            if film:
-                lg = raw[:, n]
-            else:
+            lg = 0.0
+            if flat:
                 inp = torch.cat([h] + [(m / FORMANT_AXIS.n_bins)[..., None].to(h.dtype) for m in means], -1) if means else h
                 lg = self.formant_heads[n](inp).float()
+            if film:
+                lg = lg + raw[:, n]
             if means:  # soft mask below the previous formant
                 below = (means[-1][..., None] - self.cfg.mask_margin_bins - self.fm_bins).clamp_min(0.0)
                 lg = lg - self.cfg.mask_strength * torch.tanh(below / self.cfg.mask_margin_bins)
             logits.append(lg)
             means.append((lg.softmax(-1) * self.fm_bins).sum(-1))  # expected bin index
+        bw = self.bw_head(h).float() if flat else 0.0
         if film:
             pos = FORMANT_AXIS.f_min * torch.exp2(torch.stack(means, -1).detach() * FORMANT_AXIS.cents_per_bin / 1200.0)
-            bw = self.readout.bandwidths(fx, h, pos)
-        else:
-            bw = self.bw_head(h).float()
+            bw = bw + self.readout.bandwidths(fx, h, pos)
         out.update(formant_logits=torch.stack(logits, 2),  # (B, T, N, bins)
                    logb_mean=bw[..., :N_FORMANTS] + 4.5, logb_logvar=bw[..., N_FORMANTS:],
                    sonorant_logit=self.sonorant_head(h)[..., 0].float())
