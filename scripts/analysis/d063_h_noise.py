@@ -219,6 +219,13 @@ def segment_slopes(x, r, segs):
     return out
 
 
+def _teacher(T, x):
+    """teacher v3 on x padded with zeros to whole seconds (a few input shapes, so MIOpen's kernel search runs once
+    per length, not per file); frames past the end are never read"""
+    n = int(np.ceil(len(x) / FS)) * FS
+    return T.file(np.pad(x, (0, n - len(x))).astype(np.float32))
+
+
 def _read16(path):
     import soundfile as sf
     from scipy.signal import resample_poly
@@ -242,12 +249,12 @@ def real(out: Path):
     for k, (fpath, ss) in enumerate(items):
         x = _read16(fpath)
         x = 0.5 * x / (np.abs(x).max() + 1e-12)
-        r = T.file(x.astype(np.float32))
+        r = _teacher(T, x)
         for s, m in zip(ss, segment_slopes(x, r, [(s["s"], s["e"]) for s in ss])):
             if m is not None:
                 rows.append({**{k2: s[k2] for k2 in ("src", "spk", "stratum", "strict")}, "slope": m[0], "raw": m[1],
                              "peak": m[2], "frames": m[3], "F1": m[4], "F2": m[5]})
-        if k % 500 == 0:
+        if k % 200 == 0:
             D.log(f"real: {k}/{len(items)} files, {len(rows)} segments")
     json.dump(rows, open(out / "real.json", "w", encoding="utf-8"))
     D.log(f"real: {len(rows)} segments measured of {len(segs)}")
@@ -299,7 +306,7 @@ def synth(out: Path):
                 mask = np.pad(np.repeat(z["voiced"], 160), (0, max(0, len(x0) - 160 * len(z["voiced"]))))[: len(x0)]
                 xc = augment(x0, np.random.default_rng([SEED, i]), channel, mask, codec_stream=False)[0]
                 for cond, x in (("clean", x0), ("channel", xc)):
-                    r = T.file(x.astype(np.float32))
+                    r = _teacher(T, x)
                     for m in segment_slopes(x, r, hs):
                         if m is not None:
                             rows.append({"engine": e, "tilt": tag(t), "clip": i, "cond": cond, "slope": m[0], "raw": m[1],
