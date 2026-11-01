@@ -28,7 +28,7 @@ import numpy as np
 
 from . import branches, coupling, interactive, kl, sampler, tract, tube
 from .sampler import N_LABEL_FORMANTS, N_SOURCE_HARMONICS, SynthClip
-from .voice import CTRL, FS, Trajectories, tilted_noise
+from .voice import CTRL, FS, Trajectories, tilted_noise, whisper_noise
 
 
 def _base() -> sampler.SynthConfig:
@@ -156,7 +156,7 @@ def generate(index: int, cfg: KLSetConfig | None = None, seed: int = 0, keep_com
     if wa.any():
         white = rng.standard_normal(ns + 1)
         t = sc.whisper_tilt_db_oct  # as the aspiration's: a flow tilt of t - 6 (the waveguide radiates)
-        noise = np.diff(white) if t is None else tilted_noise(white[:ns], t - 6.0, FS)
+        noise = whisper_noise(white, None if t is None else t - 6.0, FS)
         out["whisper"] = kl.render(*args, flow=noise * wa, **common)["audio"][:ns] / FS * 0.05
     fa = _per_sample(traj.fric_amp)[:ns]
     if fa.any():

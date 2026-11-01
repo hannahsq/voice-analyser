@@ -354,7 +354,7 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
     from scipy.signal import butter, sosfilt
 
     from . import filters
-    from .voice import CTRL, _per_sample, tilted_noise
+    from .voice import CTRL, _per_sample, tilted_noise, whisper_noise
 
     n = traj.n_samples
     src = glottal_area_track(traj, glottis, sq, rng, jitter, shimmer_db, fs, closure, ret)
@@ -376,7 +376,7 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
     wa = _per_sample(traj.whisper_amp)
     if wa.any():
         white = rng.standard_normal(n + 1)
-        noise = np.diff(white) if whisper_tilt_db_oct is None else tilted_noise(white[:n], whisper_tilt_db_oct, fs)
+        noise = whisper_noise(white, whisper_tilt_db_oct, fs)
         out["whisper"] = _convolve_tv(noise * wa, h, bt, bw, CTRL) * 0.05
     fa = _per_sample(traj.fric_amp)
     if fa.any():

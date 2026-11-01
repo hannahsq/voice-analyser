@@ -170,11 +170,26 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
     return filters.filter_tv(src, np.concatenate([pf, zf]), np.concatenate([pb, zb]), fs, is_zero)
 
 
-def tilted_noise(white: np.ndarray, tilt_db_oct: float, fs: float = 16000.0) -> np.ndarray:
-    """White noise given a spectral tilt (dB per octave re 1 kHz, flat below 50 Hz), by FFT; same length."""
+# whisper and /h/ noise is not rescaled to a level by the caller (aspiration is, by HNR): with a 50 Hz floor, -12 dB/oct
+# gave +52 dB at 50 Hz re 1 kHz and an /h/ louder than the vowel (D-064). So its tilt stops below 500 Hz and the noise
+# keeps the power of the first difference of unit white noise (variance 2), the default it replaces: only the shape changes
+WHISPER_FLAT_BELOW_HZ = 500.0
+
+
+def whisper_noise(white: np.ndarray, tilt_db_oct: float | None, fs: float = 16000.0) -> np.ndarray:
+    """The whisper / /h/ source from white noise (n + 1 samples): its first difference (tilt None, every set before
+    D-063), or white noise at the tilt (flat below WHISPER_FLAT_BELOW_HZ), scaled to the first difference's power."""
+    if tilt_db_oct is None:
+        return np.diff(white)
+    x = tilted_noise(white[:-1], tilt_db_oct, fs, WHISPER_FLAT_BELOW_HZ)
+    return x * np.sqrt(2.0 / max(np.mean(x * x), 1e-30))
+
+
+def tilted_noise(white: np.ndarray, tilt_db_oct: float, fs: float = 16000.0, flat_below_hz: float = 50.0) -> np.ndarray:
+    """White noise given a spectral tilt (dB per octave re 1 kHz, flat below flat_below_hz), by FFT; same length."""
     n = len(white)
     f = np.fft.rfftfreq(n, 1.0 / fs)
-    gain = 10 ** (tilt_db_oct * np.log2(np.maximum(f, 50.0) / 1000.0) / 20)
+    gain = 10 ** (tilt_db_oct * np.log2(np.maximum(f, flat_below_hz) / 1000.0) / 20)
     return np.fft.irfft(np.fft.rfft(white) * gain, n)
 
 
@@ -231,7 +246,7 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
     wa = _per_sample(traj.whisper_amp)
     if wa.any():
         white = rng.standard_normal(n + 1)
-        noise = np.diff(white) if whisper_tilt_db_oct is None else tilted_noise(white[:n], whisper_tilt_db_oct, fs)
+        noise = whisper_noise(white, whisper_tilt_db_oct, fs)
         out["whisper"] = tract_filter(noise * wa, traj, fs) * 0.05
     fa = _per_sample(traj.fric_amp)
     if fa.any():
