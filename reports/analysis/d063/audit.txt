@@ -1,0 +1,19 @@
+D-063 label audit: first-phone labels of word-initial h-spelled words
+
+zeroth: 21607 words; h 13412 (62 %), ɸʷ 3900 (18 %), ç 2903 (13 %), ɸ 579 (3 %), x 451 (2 %), ɦ 345 (2 %), ʝ 10 (0 %), βʷ 4 (0 %), kʰ 3 (0 %)
+cv: 920 words; h 620 (67 %), ɸʷ 120 (13 %), ç 62 (7 %), x 51 (6 %), ɦ 39 (4 %), ɸ 20 (2 %), spn 5 (1 %), pʲ 1 (0 %), cʰ 1 (0 %), n 1 (0 %)
+so_child: 905 words; h 512 (57 %), ç 359 (40 %), aw 10 (1 %), iː 7 (1 %), ə 6 (1 %), ɚ 5 (1 %), ɪ 3 (0 %), spn 1 (0 %), m̩ 1 (0 %), ɑ 1 (0 %)
+
+segments by stratum: strict / relaxed-only (strict speakers)
+  cv_f_thirties              0 /     1  (0)
+  cv_f_twenties             10 /    42  (5)
+  cv_m_fourties              5 /    20  (2)
+  cv_m_teens                 2 /    11  (2)
+  cv_m_thirties             27 /    57  (5)
+  cv_m_twenties             10 /    19  (8)
+  so_child_f_11-17          24 /   132  (16)
+  so_child_f_5-10           11 /    65  (11)
+  so_child_m_11-17          11 /    54  (7)
+  so_child_m_5-10           50 /   119  (31)
+  zeroth_f                1106 /  2605  (63)
+  zeroth_m                 546 /  1332  (40)

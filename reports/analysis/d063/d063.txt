@@ -1,0 +1,103 @@
+D-063: /h/ noise slope, tract-corrected (dB/oct, 1-5 kHz); real: median over speakers of speaker medians [95 % bootstrap over speakers], SD across speakers (speakers; segments)
+
+D-063 label audit: first-phone labels of word-initial h-spelled words
+
+zeroth: 21607 words; h 13412 (62 %), ɸʷ 3900 (18 %), ç 2903 (13 %), ɸ 579 (3 %), x 451 (2 %), ɦ 345 (2 %), ʝ 10 (0 %), βʷ 4 (0 %), kʰ 3 (0 %)
+cv: 920 words; h 620 (67 %), ɸʷ 120 (13 %), ç 62 (7 %), x 51 (6 %), ɦ 39 (4 %), ɸ 20 (2 %), spn 5 (1 %), pʲ 1 (0 %), cʰ 1 (0 %), n 1 (0 %)
+so_child: 905 words; h 512 (57 %), ç 359 (40 %), aw 10 (1 %), iː 7 (1 %), ə 6 (1 %), ɚ 5 (1 %), ɪ 3 (0 %), spn 1 (0 %), m̩ 1 (0 %), ɑ 1 (0 %)
+
+segments by stratum: strict / relaxed-only (strict speakers)
+  cv_f_thirties              0 /     1  (0)
+  cv_f_twenties             10 /    42  (5)
+  cv_m_fourties              5 /    20  (2)
+  cv_m_teens                 2 /    11  (2)
+  cv_m_thirties             27 /    57  (5)
+  cv_m_twenties             10 /    19  (8)
+  so_child_f_11-17          24 /   132  (16)
+  so_child_f_5-10           11 /    65  (11)
+  so_child_m_11-17          11 /    54  (7)
+  so_child_m_5-10           50 /   119  (31)
+  zeroth_f                1106 /  2605  (63)
+  zeroth_m                 546 /  1332  (40)
+
+Real, strict:
+  cv_f_twenties          +18.09 [+11.33, +23.29] SD 5.92  raw -10.12  residual peak +13.43 dB  (4; 8)
+  cv_m_fourties            +nan [+nan, +nan] SD nan  raw   +nan  residual peak  +nan dB  (2; 3)
+  cv_m_teens               +nan [+nan, +nan] SD nan  raw   +nan  residual peak  +nan dB  (2; 2)
+  cv_m_thirties          +27.44 [+20.99, +32.18] SD 4.72  raw  -7.14  residual peak +20.51 dB  (4; 23)
+  cv_m_twenties          +25.60 [+22.68, +28.96] SD 5.40  raw  -7.43  residual peak +18.13 dB  (7; 8)
+  so_child_f_11-17       +23.25 [+15.65, +24.79] SD 5.59  raw  -3.54  residual peak +11.94 dB  (15; 23)
+  so_child_f_5-10        +17.27 [+13.50, +20.85] SD 4.37  raw  -4.11  residual peak +15.06 dB  (10; 10)
+  so_child_m_11-17       +25.31 [+22.91, +29.28] SD 4.55  raw  -5.51  residual peak +15.33 dB  (7; 10)
+  so_child_m_5-10        +20.12 [+18.73, +21.73] SD 4.51  raw  -5.00  residual peak +14.73 dB  (28; 46)
+  zeroth_f               +13.45 [+12.43, +14.57] SD 3.61  raw -10.58  residual peak +13.52 dB  (63; 608)
+  zeroth_m               +21.47 [+19.58, +22.72] SD 3.91  raw -11.21  residual peak +18.23 dB  (40; 387)
+  zeroth+cv f            +13.57 [+12.43, +14.57] SD 3.86  raw -10.58  residual peak +13.52 dB  (67; 616)
+  zeroth+cv m            +22.15 [+20.34, +23.59] SD 4.71  raw -10.80  residual peak +18.17 dB  (55; 423)
+  so_child all           +21.04 [+19.14, +22.58] SD 5.16  raw  -4.33  residual peak +14.73 dB  (60; 89)
+
+Real, relaxed:
+  cv_f_twenties          +16.20 [+13.53, +23.29] SD 5.44  raw  -8.03  residual peak +14.15 dB  (8; 19)
+  cv_m_fourties            +nan [+nan, +nan] SD nan  raw   +nan  residual peak  +nan dB  (2; 17)
+  cv_m_teens               +nan [+nan, +nan] SD nan  raw   +nan  residual peak  +nan dB  (2; 10)
+  cv_m_thirties          +26.76 [+20.99, +30.78] SD 4.28  raw  -7.59  residual peak +20.52 dB  (4; 55)
+  cv_m_twenties          +25.59 [+23.27, +28.96] SD 5.65  raw  -8.15  residual peak +21.64 dB  (10; 17)
+  so_child_f_11-17       +23.72 [+20.53, +25.75] SD 4.60  raw  -4.24  residual peak +16.35 dB  (27; 125)
+  so_child_f_5-10        +19.35 [+15.94, +23.61] SD 5.63  raw  -1.52  residual peak +12.70 dB  (25; 64)
+  so_child_m_11-17       +25.22 [+21.45, +29.78] SD 5.25  raw  -3.70  residual peak +19.35 dB  (12; 46)
+  so_child_m_5-10        +22.38 [+20.79, +22.79] SD 4.78  raw  -2.98  residual peak +15.73 dB  (47; 134)
+  zeroth_f               +14.26 [+13.55, +15.10] SD 3.34  raw  -9.98  residual peak +13.89 dB  (63; 1331)
+  zeroth_m               +21.48 [+19.91, +23.01] SD 3.37  raw -10.62  residual peak +17.18 dB  (41; 904)
+  zeroth+cv f            +14.49 [+13.55, +15.20] SD 3.77  raw  -9.77  residual peak +13.89 dB  (71; 1350)
+  zeroth+cv m            +22.68 [+21.06, +24.05] SD 4.31  raw -10.47  residual peak +18.13 dB  (59; 1003)
+  so_child all           +22.42 [+21.75, +23.61] SD 5.20  raw  -3.09  residual peak +15.73 dB  (111; 369)
+
+4. children's residual peak +14.73 against Korean adults' +15.84 dB -> glottal-like: used
+
+Synthetic /h/ onsets: segment slope median [bootstrap over clips] (segments), per engine x tilt
+ channel:
+   cascade asis: +20.12 [+17.00, +25.07]  raw  -3.66  peak +13.38  (35)
+   cascade   +0: +14.90 [+11.66, +18.44]  raw  -9.91  peak +13.95  (30)
+   cascade   -6:  +8.35 [+2.29, +13.44]  raw -18.58  peak +17.70  (8)
+   cascade  -12:  +4.69 [+4.69, +4.69]  raw -22.90  peak +19.78  (1)
+   cascade map: measured = 0.85 x tilt +14.41 (R^2 0.974) -> valid
+   tube    asis: +27.56 [+18.26, +40.05]  raw  +6.27  peak +18.20  (23)
+   tube      +0: +26.39 [+15.31, +35.44]  raw  +1.14  peak +19.42  (20)
+   tube      -6: +17.96 [+9.60, +27.46]  raw  -4.36  peak +18.39  (21)
+   tube     -12: +16.49 [+6.88, +22.89]  raw  -6.60  peak +18.36  (22)
+   tube    map: measured = 0.83 x tilt +25.23 (R^2 0.859) -> NOT 1:1
+   kl      asis: +34.35 [+25.05, +41.65]  raw +11.14  peak +18.26  (26)
+   kl        +0: +24.39 [+13.97, +34.34]  raw  -0.27  peak +17.29  (24)
+   kl        -6: +16.81 [+7.64, +24.67]  raw  -5.59  peak +18.01  (21)
+   kl       -12: +16.11 [+5.48, +25.75]  raw  -7.08  peak +18.48  (23)
+   kl      map: measured = 0.69 x tilt +23.25 (R^2 0.813) -> NOT 1:1
+ clean:
+   cascade asis: +20.99 [+18.18, +25.66]  raw  -2.92  peak +13.56  (54)
+   cascade   +0: +14.97 [+12.58, +19.52]  raw  -7.56  peak +11.98  (39)
+   cascade   -6:  +8.42 [+1.61, +14.20]  raw -14.80  peak +17.78  (19)
+   cascade  -12:  +6.82 [-5.38, +24.46]  raw -16.85  peak +19.37  (6)
+   cascade map: measured = 0.68 x tilt +14.15 (R^2 0.890) -> NOT 1:1
+   tube    asis: +30.88 [+25.39, +38.01]  raw  +9.08  peak +18.40  (42)
+   tube      +0: +24.86 [+20.65, +33.51]  raw  +2.99  peak +18.60  (39)
+   tube      -6: +16.90 [+12.22, +25.25]  raw  -5.17  peak +18.38  (45)
+   tube     -12: +12.33 [+6.88, +19.34]  raw  -8.74  peak +18.24  (51)
+   tube    map: measured = 1.04 x tilt +24.30 (R^2 0.976) -> valid
+   kl      asis: +33.08 [+28.11, +37.73]  raw +12.01  peak +16.47  (49)
+   kl        +0: +22.07 [+17.35, +28.61]  raw  +0.66  peak +16.63  (47)
+   kl        -6: +14.00 [+9.94, +19.82]  raw  -5.57  peak +15.93  (48)
+   kl       -12: +11.58 [+8.23, +16.64]  raw  -8.77  peak +16.47  (54)
+   kl      map: measured = 0.87 x tilt +21.13 (R^2 0.912) -> valid
+
+3. Tilt that matches each real stratum (channel mapping; from the strict medians and their intervals)
+  cv_f_twenties          cascade +4.3 [-3.6, +10.4]  tube -8.7 [-16.8, -2.4]  kl -7.5 [-17.3, +0.1]   (speaker SD 5.92 dB/oct)
+  cv_m_thirties          cascade +15.3 [+7.7, +20.9]  tube +2.7 [-5.1, +8.4]  kl +6.1 [-3.3, +12.9]   (speaker SD 4.72 dB/oct)
+  cv_m_twenties          cascade +13.2 [+9.7, +17.1]  tube +0.4 [-3.1, +4.5]  kl +3.4 [-0.8, +8.3]   (speaker SD 5.40 dB/oct)
+  so_child_f_11-17       cascade +10.4 [+1.5, +12.2]  tube -2.4 [-11.6, -0.5]  kl +0.0 [-11.0, +2.2]   (speaker SD 5.59 dB/oct)
+  so_child_f_5-10        cascade +3.4 [-1.1, +7.6]  tube -9.7 [-14.2, -5.3]  kl -8.7 [-14.1, -3.5]   (speaker SD 4.37 dB/oct)
+  so_child_m_11-17       cascade +12.8 [+10.0, +17.5]  tube +0.1 [-2.8, +4.9]  kl +3.0 [-0.5, +8.7]   (speaker SD 4.55 dB/oct)
+  so_child_m_5-10        cascade +6.7 [+5.1, +8.6]  tube -6.2 [-7.9, -4.2]  kl -4.5 [-6.5, -2.2]   (speaker SD 4.51 dB/oct)
+  zeroth_f               cascade -1.1 [-2.3, +0.2]  tube -14.3 [-15.5, -12.9]  kl -14.2 [-15.7, -12.6]   (speaker SD 3.61 dB/oct)
+  zeroth_m               cascade +8.3 [+6.1, +9.8]  tube -4.6 [-6.9, -3.1]  kl -2.6 [-5.3, -0.8]   (speaker SD 3.91 dB/oct)
+  zeroth+cv f            cascade -1.0 [-2.3, +0.2]  tube -14.1 [-15.5, -12.9]  kl -14.0 [-15.7, -12.6]   (speaker SD 3.86 dB/oct)
+  zeroth+cv m            cascade +9.1 [+7.0, +10.8]  tube -3.7 [-5.9, -2.0]  kl -1.6 [-4.2, +0.5]   (speaker SD 4.71 dB/oct)
+  so_child all           cascade +7.8 [+5.6, +9.6]  tube -5.1 [-7.4, -3.2]  kl -3.2 [-5.9, -1.0]   (speaker SD 5.16 dB/oct)
