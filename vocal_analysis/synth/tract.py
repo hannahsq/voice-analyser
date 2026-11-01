@@ -118,9 +118,10 @@ def bandwidth_prior(freqs: np.ndarray, f0: np.ndarray | float) -> np.ndarray:
     return np.where(np.isfinite(freqs), np.maximum(hm, 20.0), np.nan)
 
 
-def sample_bandwidths(rng: np.random.Generator, freqs: np.ndarray, f0: float) -> np.ndarray:
-    """Hawks & Miller x log-uniform(0.6, 1.6) (plan §5.1)."""
-    return bandwidth_prior(freqs, f0) * np.exp(rng.uniform(np.log(0.6), np.log(1.6), len(freqs)))
+def sample_bandwidths(rng: np.random.Generator, freqs: np.ndarray, f0: float,
+                      factor: tuple[float, float] = (0.6, 1.6)) -> np.ndarray:
+    """Hawks & Miller x log-uniform(factor), per formant (plan §5.1: 0.6-1.6)."""
+    return bandwidth_prior(freqs, f0) * np.exp(rng.uniform(np.log(factor[0]), np.log(factor[1]), len(freqs)))
 
 
 def sample_extras(rng: np.random.Generator, length_cm: float, p_nasal: float = 0.15, p_subglottal: float = 0.2) -> dict:

@@ -69,6 +69,11 @@ class SynthConfig:
     # Cascade bandwidths: Hawks & Miller's f0 scaling uses the clip's centre f0 (None), or this fixed f0, which keeps
     # tract bandwidths independent of the source (D-020; 132 Hz is where the scaling is 1)
     bandwidth_f0_hz: float | None = None
+    # D-065: per-formant bandwidth factor, log-uniform and independent of the formants. bw_factor is the cascade's
+    # (plan §5.1's 0.6-1.6); tube_bw_factor multiplies the tube's own bandwidths per formant and target (None: no factor),
+    # drawn from a generator of its own, so every other draw stays the clip's
+    bw_factor: tuple[float, float] = (0.6, 1.6)
+    tube_bw_factor: tuple[float, float] | None = None
     # cascade clips with centre f0 in f1_band_f0_hz: per target, F1 = f0 x log-uniform(f1_band_ratio) with this probability
     p_f1_band: float = 0.3
     f1_band_f0_hz: tuple[float, float] = (150.0, 350.0)
@@ -584,9 +589,12 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
     formants = np.exp(logf)  # NaN poles stay NaN (log(NaN))
     if use_tube:  # the tube's own bandwidths (constraints move only frequencies)
         bw_targets = tube_bws
+        if cfg.tube_bw_factor is not None:
+            lo, hi = np.log(cfg.tube_bw_factor)
+            bw_targets = bw_targets * np.exp(np.random.default_rng([seed, index, 65]).uniform(lo, hi, bw_targets.shape))
     else:
         bw_f0 = centre if cfg.bandwidth_f0_hz is None else cfg.bandwidth_f0_hz
-        bw_targets = np.stack([tract.sample_bandwidths(rng, np.exp(targets[i]), bw_f0) for i in range(len(tt))])
+        bw_targets = np.stack([tract.sample_bandwidths(rng, np.exp(targets[i]), bw_f0, cfg.bw_factor) for i in range(len(tt))])
     logb = np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.log(np.nan_to_num(bw_targets[:, k], nan=100.0)), widths)
                      for k in range(tract.N_POLES)], 1)
     bws = np.where(np.isfinite(formants), np.exp(logb), np.nan)

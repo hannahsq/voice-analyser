@@ -76,6 +76,11 @@ class TrainConfig:
     # out and scored as "eval_extra:<name>". 0 / () = earlier runs' mix exactly
     synth_extra: tuple[str, ...] = ()
     synth_extra_frac: float = 0.0
+    # D-065: the extra sets take the main set's whole share instead (synth_extra_frac unused; the resynthesised sets keep
+    # theirs); the main set is then used only for validation, so synthetic validation stays comparable with earlier runs
+    synth_extra_replace: bool = False
+    # D-065: the channel's gain range for training crops (None: ChannelConfig's); validation keeps the default range
+    channel_gain_db: tuple[float, float] | None = None
     tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT
     # D-036: an anatomical vocal-tract-length head added at a branch. None = none; "new" (initialised with vtl_seed);
     # "frozen:<head.pt>" (D-035's trained head, not updated); "tepid:<head.pt>" (shrink and perturb: 0.5 x D-035's
@@ -495,6 +500,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         start, channel = Path(cfg.branch_from), _saved_channel(Path(cfg.branch_from).parent)
     else:
         start, channel = None, ChannelConfig()
+        if cfg.channel_gain_db is not None:
+            channel = replace(channel, gain_db=tuple(float(g) for g in cfg.channel_gain_db))
+    val_channel = replace(channel, gain_db=ChannelConfig().gain_db)  # == channel for every run before D-065
     ck = torch.load(start, map_location="cpu", weights_only=False) if start else None
     if ck is not None:
         model_cfg = TeacherConfig(**ck["teacher_config"])  # the checkpoint's architecture, whatever was passed
@@ -618,14 +626,20 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             xflat = consolidate(d, log=log)
             n = json.loads((xflat / "done").read_text())["n_clips"]
             xtr, xva = split_ids(n)
-            xparts.append(SynthCrops(xflat, xtr, cfg.n_frames, channel, seed=cfg.seed + 101 + len(xparts), epoch_size=epoch,
+            xseed = cfg.seed if cfg.synth_extra_replace else cfg.seed + 101 + len(xparts)  # replace: the main set's seed
+            xparts.append(SynthCrops(xflat, xtr, cfg.n_frames, channel, seed=xseed, epoch_size=epoch,
                                      observability=obs, vtl=vtl, vtl_inst=vti))
             xsizes.append(len(xtr))
-            extra_val[f"eval_extra:{Path(d).name}"] = SynthCrops(xflat, xva[: cfg.val_clips], cfg.n_frames, channel, seed=12345,
+            extra_val[f"eval_extra:{Path(d).name}"] = SynthCrops(xflat, xva[: cfg.val_clips], cfg.n_frames, val_channel, seed=12345,
                                                                   fixed=True, observability=obs, vtl=vtl, vtl_inst=vti)
         f = cfg.synth_extra_frac
-        weights = [(1.0 - f) * w for w in base_w] + [f * n / sum(xsizes) for n in xsizes]
-        ds = MixedCrops([*base_parts, *xparts], weights, epoch, seed=cfg.seed)
+        if cfg.synth_extra_replace:  # in the main set's place, position and seed: the mix is the usual one with the set swapped
+            if len(xparts) != 1:
+                raise ValueError("synth_extra_replace takes one extra set")
+            f, all_parts, weights = base_w[0], [*xparts, *base_parts[1:]], list(base_w)
+        else:
+            all_parts, weights = [*base_parts, *xparts], [(1.0 - f) * w for w in base_w] + [f * n / sum(xsizes) for n in xsizes]
+        ds = MixedCrops(all_parts, weights, epoch, seed=cfg.seed)
         log(f"extra synthetic: {sum(xsizes):,} clips in {len(xsizes)} sets, {f:.0%} of items")
     common = dict(num_workers=cfg.workers, collate_fn=collate, persistent_workers=True, pin_memory=False, prefetch_factor=4)
     if cfg.crop_frames:
@@ -635,15 +649,15 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     # vtl only adds the label (no random draws), so the crops stay those of runs before it was passed
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti)
-    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, channel, seed=12345, fixed=True, observability=obs, vtl=vtl,
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti)
+    short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl,
                           vtl_inst=vti)
     resynth_val = {}
     for d in cfg.resynth_val:
         rflat = consolidate(d, log=log)
         n = json.loads((rflat / "done").read_text())["n_clips"]
         ids = np.random.default_rng(0).permutation(n)[: cfg.val_clips]  # spread over recordings, fixed
-        resynth_val[f"eval_resynth:{Path(d).name}"] = SynthCrops(rflat, np.sort(ids), cfg.n_frames, channel, seed=12345, fixed=True,
+        resynth_val[f"eval_resynth:{Path(d).name}"] = SynthCrops(rflat, np.sort(ids), cfg.n_frames, val_channel, seed=12345, fixed=True,
                                                                   tract_left_weight=cfg.tract_left_weight)
     vq = TorchVQT(device)
     val_sets = {"eval": cache_batches(DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate), vq, device),

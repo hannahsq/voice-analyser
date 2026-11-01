@@ -1,0 +1,14 @@
+D-065 arm gain: against 5b, seeds paired  [CHECK MODE: not a D-065 result]
+  d051_5c_s1_b20k vs d040_5b_s1_b20k: (P) x0.03 mean |B| 30 -> 15 cents (ratio 0.51), mean |F| 4.3 -> 2.8; reported: x0.3: B 3 -> 7, F 0.5 -> 0.4; x0.1: B 10 -> 13, F 0.7 -> 1.1; x0.01: B 124 -> 86, F 14.0 -> 16.3
+    synthetic F1-F4 -0.1 +1.7 +1.9 +0.8 SE, RPA +0.03 | dev Hillenbrand F1/F2/F3 +0.4/-0.2/-6.7  RPA -0.1  cp women F1 |error| -0.2 (signed bias +4.3 -> +4.4 Hz) | length (s1): [-0.050, +0.010], w/m 0.878, probe excess +5.5 c/oct
+    criteria P/1/2/3 ['no', 'yes', 'no', 'yes']
+  d051_5c_s2_b20k vs d040_5b_s2_b20k: (P) x0.03 mean |B| 28 -> 33 cents (ratio 1.19), mean |F| 5.5 -> 4.1; reported: x0.3: B 5 -> 6, F 0.8 -> 0.3; x0.1: B 7 -> 18, F 2.1 -> 0.7; x0.01: B 95 -> 53, F 14.8 -> 13.7
+    synthetic F1-F4 -1.8 -0.2 +0.2 +0.8 SE, RPA -0.00 | dev Hillenbrand F1/F2/F3 -2.1/+0.9/+0.5  RPA +0.0  cp women F1 |error| +1.4 (signed bias +4.1 -> +6.7 Hz) | length (s2): [-0.090, -0.036], w/m 0.877, probe excess +2.2 c/oct
+    criteria P/1/2/3 ['no', 'yes', 'no', 'yes']
+
+Seed means: (P) B ratio +0.849, F excess -1.431 | synthetic F1-F4 -0.9 +0.8 +1.0 +0.8 SE, RPA +0.01 | dev Hillenbrand F1/F2/F3 -0.9/+0.3/-3.1  RPA -0.1  cp women F1 |error| +0.6 | length (5c-5b): [-0.066, -0.017], w/m 0.878, probe excess +3.9 c/oct
+(P) primary: NO; (1) no formant cost: yes; (2) length not worse: NO; (3) f0 guard: yes
+  reported: d051_5c_s1_b20k eval_extra:train_long_v1 (last eval): F1_mae_hz 17.38, F2_mae_hz 33.01, F3_mae_hz 28.39, F4_mae_hz 48.1
+  reported: d051_5c_s2_b20k eval_extra:train_long_v1 (last eval): F1_mae_hz 17.69, F2_mae_hz 32.22, F3_mae_hz 30.2, F4_mae_hz 49.45
+
+DECISION: arm gain does not join; 5b's recipe stays
