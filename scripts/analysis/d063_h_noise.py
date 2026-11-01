@@ -238,7 +238,8 @@ def real(out: Path):
     for s in segs:
         by[s["file"]].append(s)
     rows = []
-    for k, (fpath, ss) in enumerate(by.items()):
+    items = list(by.items())[: int(os.environ.get("D063_MAXFILES", 10**9))]  # a smaller run, to check the code path
+    for k, (fpath, ss) in enumerate(items):
         x = _read16(fpath)
         x = 0.5 * x / (np.abs(x).max() + 1e-12)
         r = T.file(x.astype(np.float32))
@@ -247,7 +248,7 @@ def real(out: Path):
                 rows.append({**{k2: s[k2] for k2 in ("src", "spk", "stratum", "strict")}, "slope": m[0], "raw": m[1],
                              "peak": m[2], "frames": m[3], "F1": m[4], "F2": m[5]})
         if k % 500 == 0:
-            D.log(f"real: {k}/{len(by)} files, {len(rows)} segments")
+            D.log(f"real: {k}/{len(items)} files, {len(rows)} segments")
     json.dump(rows, open(out / "real.json", "w", encoding="utf-8"))
     D.log(f"real: {len(rows)} segments measured of {len(segs)}")
 
