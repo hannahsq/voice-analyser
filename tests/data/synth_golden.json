@@ -24,7 +24,7 @@
    },
    "meta": "eb3d64cdacc838e08acf6616dc3b0dd3735407ac10ccc028efa43b3d03e65fdb",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "cascade_channel": {
    "audio": "63cb607b65224694b3ffd3683ae019db38ef423749f9bacbf2768064e8cd0e42",
@@ -54,7 +54,7 @@
    },
    "meta": "2072918d0e377561c2d0296d1f5c064f939bbc27fa643721a05b2d8e1459a191",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "cascade_coupled": {
    "audio": "4619b9f063be166b5464b5c4247b858ad9b7e73eb8647f6c9240487d76b00316",
@@ -79,7 +79,7 @@
    },
    "meta": "85e3176e1142f3c3d13146d9d0908d4d0928688c2259017cb14f59129c578cd3",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "cascade_default": {
    "audio": "5561f85ae3a8269913a490e7b03d4d462674587a2a6fba7520c3228cbef205b5",
@@ -104,7 +104,32 @@
    },
    "meta": "141f6139978dbc1aaeddc6c142097f77a9a465478edaf2795324e86e6caacfb1",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+  },
+  "cascade_f0_length": {
+   "audio": "761e38f9f3cf850ed9dee4cea0aa2740821dd86fc3f3a66e4c0518c726978b95",
+   "components": {
+    "aspiration": "eb6d33b0838af102cd75aca6659665554d580a07aea72b894143ac4f27c1dbc4",
+    "cycles": "7e480ce5ccdf765ca0e7477c5530bf8f31af6f4133408546e7ed22317b670d08",
+    "total": "f923ed9262bd7ded0577a473a78ad6d9a440dcbddace37bc37a2e272826bba20",
+    "voiced": "21736cc82b5f0bcf563c0a3e6d66f04807d1ee91cff15b6e4bf5d20bf1a30626"
+   },
+   "labels": {
+    "bandwidths": "4ae5a2db1aea006a6da0ef8edf646f48d01c2e21a2300e3896e31b19e5bdfc02",
+    "f0": "4780dae4ea965f234b3e1ca1672a53133ca96bcfec4680522f0527c655518228",
+    "formants": "6e227f0de0d0e024778e20a131e3bd0c331fdf46ca668fa94d84dd930b7f873e",
+    "length_cm": "f797808a814bc182336c90b001b9780fa15f181c77fd390fdf204c34fdb27ebe",
+    "length_inst_cm": "f797808a814bc182336c90b001b9780fa15f181c77fd390fdf204c34fdb27ebe",
+    "rd": "d5b43ebf37a2cb70e664ab2b162ca816a7ba44bd4c916b7bef2c60c17699d5ed",
+    "sonorant": "e64ce157178748d0cea5ff3ab39fb9d0511275d55fe0ae6fb4b924ab69d890d8",
+    "source_h_db": "b948a44c5acd1742c3dc024a1a749c787ec6de710f3f0e6ed320f9b48eccd9ae",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "e64ce157178748d0cea5ff3ab39fb9d0511275d55fe0ae6fb4b924ab69d890d8",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "c99364a80d97f2b44488ad3d1c3594ddbcc054d964a994b8c46b79a04c21a6a1",
+   "n": 16000,
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "cascade_frication": {
    "audio": "afeefc5047594e15c379549230698074f5059786f7707d37759513b7846c0234",
@@ -130,7 +155,109 @@
    },
    "meta": "5bc6e716457d6f248eb11d0d639042e7649e398a39e26845b1522e90780f1447",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+  },
+  "cascade_h_amp": {
+   "audio": "606519b69db495bf6dd2843fd0267226db5264b83cb3608021d4e37fe63a8494",
+   "components": {
+    "aspiration": "93981cbad3c8ad8a4ac46263657d53f64f24a68e076e53e9fcf07e85a3c122f4",
+    "cycles": "cf2a6b7c35ef84072aaa8b1f5d932048d32955ead8925922a2719a4ef822511a",
+    "total": "00a8cd80211449e3ef3b1b31a41d7d61763f3b3ad408c300b7fb3549a79b04f5",
+    "voiced": "1d44398c7258ac1d40278c760badb4d223519a641a0c9947429e1648f86069f3",
+    "whisper": "2d0a768122e95afca8bd4270dd69d081db01a1af1e07aba56aabd5ab6d5a233a"
+   },
+   "labels": {
+    "bandwidths": "fb572ba6c23cb4b3ffa56102a4f91a4cf6a31029d1ffce0b923fa6ea8007d6d4",
+    "f0": "19cc45274db233eb3c946f12e81ef630275b9ebec8093bb4aed8741061624022",
+    "formants": "86a61065a7cad2a6c9524f1128ccbc1b3ca8beae971b7b797de3f7072f370fb3",
+    "length_cm": "d141f6fe401b695548fe615f3c61e2ac84f36aebb65244922d99799ec8ce2cb0",
+    "length_inst_cm": "d141f6fe401b695548fe615f3c61e2ac84f36aebb65244922d99799ec8ce2cb0",
+    "rd": "5f85c30b0694d7a8a268731d7d705da849a44a36f7917e5ab7060ba16742d3ed",
+    "sonorant": "0028dbbfe280c6be0c081bf4aee0b4b7a46710f834b2c5f8d5d468717c7d461a",
+    "source_h_db": "074aa02f0d3fec6ae87ee26b30a973747445185690a33c644231867c350b0498",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "40b46c30de0a340ddf20839cec2a005b4a1cd1bc7d160d2af2928a0b2b989ddd",
+    "whisper": "31d92103cf1506360e7b92dd1ea388fad6167e17e4c7357f1709de301940b9bd"
+   },
+   "meta": "e824ad7bf53a1fbe13c9a79bf743bdd943ab4f25ea8b0e3a5ca41b22027814ff",
+   "n": 16000,
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+  },
+  "cascade_long": {
+   "audio": "1a4151e9e3a0726d61015d73fd82e213ac1d3c029883c3d90e3f2655dd80197f",
+   "components": {
+    "aspiration": "12eb5809d89396ac1fb8d8bb60c5128d76e929bd217fc03f73131ecd2ec4c2bc",
+    "cycles": "ce65273994a521a74d6340767e6398995c1efcc5e65896649936599f0e94b0e8",
+    "total": "e54dc934755b14da3d959b3d0ee721ac8a700f3eaa2b7a4e8d5d76d67db5d074",
+    "voiced": "03e91554b35d6a93e994c15901875f8a935daf8c1086292781a7dd4223921132",
+    "whisper": "d902678cabdf4d1c348c7d3eb3dfdb8259b07eb75e5a535a66e92edfa5d16417"
+   },
+   "labels": {
+    "bandwidths": "e771d4f46b12ef6d032f913c6de8da0696b5eebcd210b054b70728e0dfc70cdf",
+    "f0": "c9218e4972258db6aaf29aa26f464b3bfe92ce3f50a5754f36125f2b8a19a737",
+    "formants": "2fee879ff385275275393de6612c2608eed9fcf38e6423b4d28629fad2534420",
+    "length_cm": "990f47168e56c5f0ec42b6b37fc5eb9e61451edbe4fc64c40a3386015866b894",
+    "length_inst_cm": "990f47168e56c5f0ec42b6b37fc5eb9e61451edbe4fc64c40a3386015866b894",
+    "rd": "012983262a97ebd5353bc9bdbdc2334a279a41cf1474fa5257b4181077f8bdc3",
+    "sonorant": "b6cfbbea57bf87786088460e8b679d010fc4f2214b03efd830976f25c3f6f1d8",
+    "source_h_db": "30aceb05eaedf2c1713a2e51be554beaaffc81d053400f597f9dbe8d923731e8",
+    "t": "2378d59aab2a9d42a79ca020acfa329bced2d0e2532a88b5abad833654e6ce58",
+    "voiced": "213379898c459e64404d3836ac4ef668122fe46758b8f9c6e42bf66754a5ce80",
+    "whisper": "29e6a5b9d26b41646d5f00c0e1d26c855bf9ba3e7452c9e743fa0b9c77a15e34"
+   },
+   "meta": "98609917fd98c52de43783741837e2fedc1945c0564303bf3f569fd81940b4f9",
+   "n": 48000,
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+  },
+  "cascade_population": {
+   "audio": "3ba9bc8a1b19fde518ab4e41ce4c43a454d2a6abe4fe1eb1afb720dbbe770521",
+   "components": {
+    "aspiration": "6825c0533e762212c7f11abfc9025ab9b5b3762289ebe0fff3bd18eaecfd9659",
+    "cycles": "bf5f52288835151ec537183d375fd519c4b5c0d3f36f9eaafdecfefe50a3b4d9",
+    "total": "e87e15ac3b51d41557ad292ff46b4e1a4a4fc50863f69c3e8096aed6bdcafb74",
+    "voiced": "3170192fdb3b4d044dad65464ea4c2e49501887ca969438084eb929f0bb075b3"
+   },
+   "labels": {
+    "bandwidths": "be4c9e92399f9863121f397f4089b82045c07d64a9706d9a7ea6aad834d4e6cb",
+    "f0": "aeac7f90b7f0f520c8cfd6381b698639c37824b2c042b0b1948a52972d1f70ab",
+    "formants": "d0541f2d04a38803e1ac5cdfd1a922405ee27a436d70cb9215e89ce57950d213",
+    "length_cm": "89fca4e5a602b78375fd0bda4fe3986b51b84953bd31ab9cc6a82a993caa62fc",
+    "length_inst_cm": "89fca4e5a602b78375fd0bda4fe3986b51b84953bd31ab9cc6a82a993caa62fc",
+    "rd": "2aff905b29d14d8d29a35189e03f5462b759aca3866f7403b8604d0e559ba85a",
+    "sonorant": "6f6968d4e858ffe5ce72236cc513bb5a72bb49ceb91cca13d8b0787d80cfc442",
+    "source_h_db": "242131114a845aa6d23f9a4d25a4c47ff80a67c278f88fec7a67fa3f6cac3fc8",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "6f6968d4e858ffe5ce72236cc513bb5a72bb49ceb91cca13d8b0787d80cfc442",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "e50ed68f8684bcc42cb19b240863076a84b4f071c488665c39474184e08eeb6b",
+   "n": 16000,
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+  },
+  "cascade_short_tract": {
+   "audio": "303a26a9dc4e71520859ce014c2b07fc13ae6ffa577181298c2b34ae6e464916",
+   "components": {
+    "aspiration": "d10c45390a0fdc25d085dee2014a890ca6bcc13ccc934bbaf1a9c7c384381e0d",
+    "cycles": "4acacf61ec29e6cabc55086e8584fbe303aeb3d51d9eb463b073e92602c75998",
+    "total": "8d0d0622b26c3a9b789eb9ff3288e72606843f0b5ad9cc080d65d71b062ec3ea",
+    "voiced": "154294470749fdd71ec92fd1b760e8c1c86212c3a6bd7ca00da6abf0f2c1b131"
+   },
+   "labels": {
+    "bandwidths": "adc8c32a28fa23a99b276b259cdb3c31b8588b40e41eca37450b2b6876c92dcb",
+    "f0": "fb75657e78e64a52c72759742eb8514d8ca227aadff2499777fc3d847364420d",
+    "formants": "8f895f4fcd49cc6421286ca60d98841578efdf3a5ad2a14c9a5d1e2391b33ed0",
+    "length_cm": "152aacf8dbc92ea76d0a1ee0e97693b769ba8766b3f34aaec86bf8191ce87fbd",
+    "length_inst_cm": "152aacf8dbc92ea76d0a1ee0e97693b769ba8766b3f34aaec86bf8191ce87fbd",
+    "rd": "2999bbd4dfc4ea8dc4dcb21453b5b18ce595f0cc94da6c3d3effae95916bba4e",
+    "sonorant": "f38ad30015c45b832c11ccf267d57e13301bad94536a0668acffb998dcb8fb39",
+    "source_h_db": "3e5c039f830a220f3df20cfef9082a99746d0900bb98809f0ace46c1d51043fe",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "f38ad30015c45b832c11ccf267d57e13301bad94536a0668acffb998dcb8fb39",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "659ac5fb4fcc8c90f950e4753bb3051711a9ff1208c23da63f3bb7337f5313d0",
+   "n": 16000,
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "cascade_whisper_tilt": {
    "audio": "b625c97d9c784416ed536bdc3871e3d1a0443ee2d4fc31a3921f595bbea68bfe",
@@ -156,7 +283,7 @@
    },
    "meta": "19abd7b21c1cdb2fbf17f98413792a4f8611d81b46ea285afdac2db7e50f96df",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "kl_area_return": {
    "audio": "23d92fb407a1704b06c66ac78361cb60a5074b0db8f65e4ba2600b575f12f603",
@@ -182,7 +309,7 @@
    },
    "meta": "ceb3e35977834537428e3e18792006605978c8ce42b484476e21349aa91f0649",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "kl_default": {
    "audio": "bfc07b8a9d36f9974e2a98e207937c908334f374eb6a4b41fac7cab87f7605fe",
@@ -208,7 +335,34 @@
    },
    "meta": "214050e324cfde37b995fe196a9c907c19bf6eea9558ee373f7176d6c598dcf8",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+  },
+  "kl_long": {
+   "audio": "17f5ce49916a6be7ecd9a292cde1d631e119fd5fba2f544091b0f1a0ff26dcfa",
+   "components": {
+    "aspiration": "ef290b712f99adb14fe74716cd7f8dcaf27e7fca355984feb4169cd41c3a3eea",
+    "cycles": "0dcf44acc7910ee5dac9b2176e604382e957e582b0c1ee9b35e4131dac46cb48",
+    "total": "304b815cf8e6477e756c2e0ea25d9779c7efd967cf91bcda6f0734107598feb8",
+    "voiced": "1eb55f523d7e6f0592b489e24f3fe90ce9b8752c6ca91bb68213d8badeb3dd01",
+    "whisper": "f896dc2d5d79a714eaeead8b896de320c646d40cdbbdade298dc42027ab05b2c"
+   },
+   "labels": {
+    "bandwidths": "0c677c6772cc80d572f0f5c185e5a0deac98c639c22cc94cf24743943d8cd0cf",
+    "f0": "a9f31525930060527d0904abef859ea4aa53a676df3b720ba330071b225a4734",
+    "formants": "39fe25ce255b4dbd3c3a2a579e9f47ad21cd20945b60f74edac7cd9277b86c1b",
+    "formants_mixed": "231aef8611c6c024ef2e4457042ada66cc3fa4c029e065a067ad2a87f427a32f",
+    "length_cm": "0fd4e75336bbc392c636fdd4426cdedc94aba79cb4f65d749357dcbf1d604015",
+    "length_inst_cm": "8a03875ed94aaabc8612f107b8b1601dc16a1fa2316a2191249eeaac1d9d53ea",
+    "rd": "f7e01aa1d843c111620b3a63060c29a6b4ec5c2a9b32510b5a6e9b0419bd9fac",
+    "sonorant": "41f52b18d7a2f0876d92911e410f76f28891dfc9f7204f9471ea8444eaf11be4",
+    "source_h_db": "98d0fbb5201db07735f96ae865d860cfc6abaf5f1848c808a8ec7bf9c0a9c6e3",
+    "t": "46a256635326beb6936ea4f4033907115c25e84991185a67c68b0742f6e50728",
+    "voiced": "cc79726bd43e4b8112fb8b981c94d5816f2d1f0d22f2ab5e9a14282d969f189f",
+    "whisper": "0a619fbecc6c6553ae91b73b559592c0af7530c2e9d05f1e5ad725c148c2b309"
+   },
+   "meta": "5042ac4ea1391f5c041e29fb1cd32b67ce2d8e79a9f99214302665901d032d00",
+   "n": 24000,
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "tube_articulation": {
    "audio": "12bccab66903189821f89bb1e050510c4c5f85fa65fb3dd8e5639723dfd566db",
@@ -234,7 +388,7 @@
    },
    "meta": "938c4fe7ffaba50f17028f20fb5e9e355b49d91dd04a5b1a02fa19da73a704a7",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "tube_default": {
    "audio": "05c4b9694a31eca5815286a5bdbfb92f3a16fe8fc3e85fe590a9168fd5975099",
@@ -259,7 +413,7 @@
    },
    "meta": "c5b77a80923eb25257cab77ad2cdd63773069908c0dd69f452a37a2057929b92",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "tube_extras": {
    "audio": "7770437f64bb1219cf3b26b0c52ee27ba2a2c532fd37d028facdb518ece6b41a",
@@ -284,7 +438,32 @@
    },
    "meta": "bfc9412921cccd474a86103457a797a6b6d62ae17f18cd13b4061383462f63c3",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+  },
+  "tube_long_tract": {
+   "audio": "5d35b9e643f34df5a09b7462febefcd1841532f8ca2247c9ef9bf5fb766e8748",
+   "components": {
+    "aspiration": "ddde5d6109c1656db210b9b5724ed35f8fe6ed2cdbf296e3d18c71061e5aa13e",
+    "cycles": "c40b2942636dd1734f3e0f519183ddf6928275653bfdc5927d045bee09b5b3a0",
+    "total": "b2de1048f17a4dc6aeb6d409eea26363d7a31abc5368bc4374bad498261a6b12",
+    "voiced": "34e9a6663c930ea1a5d5607add3a45ceb64e408c13ea33feb59c355694e22315"
+   },
+   "labels": {
+    "bandwidths": "14bf8d26378d6b361f6183e15454663b04b03bc4995c56c9e13098ee07cd6a0c",
+    "f0": "8de73edc580015809f79d1de406422cf62537322c459fdc0c9c593d3f39f112c",
+    "formants": "913bc36ef8ba50296c1ec71ffa6eadfb1c35cf88240093a7f5971827eb58f155",
+    "length_cm": "f51ae5cf6983006df881e40edf501ab779ae8a8ec07579bac8bcc76c645e4364",
+    "length_inst_cm": "ed4c7f853c52a86f6c8773ab19e8edb5176370721788d39cc2e8add8db271e2c",
+    "rd": "ac76cbdd7119462addad0ae9cc07b307506c1272ba90163c55deba22de589638",
+    "sonorant": "f38ad30015c45b832c11ccf267d57e13301bad94536a0668acffb998dcb8fb39",
+    "source_h_db": "f698861c67f17d8c61133f6d9f64d9f4f0dc76e749f61d53765fa9c8ac6f038b",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "f38ad30015c45b832c11ccf267d57e13301bad94536a0668acffb998dcb8fb39",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "e6818e584abf5ecea83b0e3e762c0bad6f7539d5642b23fba5f4afa50970dd79",
+   "n": 16000,
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "tube_return": {
    "audio": "827644f1b93389e40f149c426bb717e795105401fe9ad414abe21355905e5a2d",
@@ -309,7 +488,7 @@
    },
    "meta": "6c432734c3d5ec6b3987cb9653710bff18e48efdaaf5a08c8b8dbd40d01b84ce",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   },
   "tube_whisper_clip": {
    "audio": "f9ebc5cbff12565ad0c7fd30b2e71b01ac81ad3a5a1a571a5e737b7a4ccbdd54",
@@ -335,10 +514,10 @@
    },
    "meta": "26f1b6ee6432243cc02935bff1093c0cb68884884d0fc6fb48385560ff9130d5",
    "n": 16000,
-   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   }
  },
- "commit": "a41440a",
+ "commit": "819cc9a",
  "env": {
   "numba": "0.68.0",
   "numpy": "2.5.3",
@@ -351,6 +530,11 @@
    "commit": "a41440a",
    "date": "2026-11-01",
    "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  {
+   "commit": "819cc9a",
+   "date": "2026-11-01",
+   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
   }
  ],
  "written": "2026-11-01"

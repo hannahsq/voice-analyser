@@ -1,9 +1,11 @@
-"""Golden clips: the synthesiser's output on a small branch-covering matrix, hashed exactly.
+"""Golden clips: the synthesiser's output on a small branch- and draw-covering matrix, hashed exactly.
 
 Any change to the audio, the labels or the meta of a covered case fails, so a refactor of the
-generator cannot move a default silently. The matrix is kept honest by
-`test_cases_cover_every_config_field`: every `SynthConfig` / `KLSetConfig` field must be either
-set by a case or listed in `IGNORED_FIELDS` with a reason, so adding an option forces a
+generator cannot move a default silently. The matrix covers every branch of the generator, plus
+the draw and length space that decides which branch a real clip takes: 1-3 s clips, fixed short
+and long tracts, the population and f0-coupled length draws, and a fixed /h/ level. It is kept
+honest by `test_cases_cover_every_config_field`: every `SynthConfig` / `KLSetConfig` field must be
+either set by a case or listed in `IGNORED_FIELDS` with a reason, so adding an option forces a
 decision instead of leaving a gap behind a green suite.
 
 Deliberate regeneration (the only way it may change):
@@ -77,6 +79,24 @@ CASES = [
     dict(name="kl_area_return", engine="kl", index=1, seed=111, kl_cfg=dict(area_return=True)),
     # the channel and the int16 quantisation write_set stores
     dict(name="cascade_channel", engine="cascade", index=5, seed=112, channel=CHANNEL, channel_seed=999),
+    # draw and length breadth: the cases above are all 1 s at one drawn tract size, while the
+    # D-059 grid the training sets came from runs 2-4 s over every tract length and both tract types
+    dict(name="cascade_long", engine="cascade", index=0, seed=120, cfg=dict(duration_s=(3.0, 3.0)),
+         expect=dict(components=("voiced", "aspiration"), min_segments=2)),
+    dict(name="tube_long_tract", engine="tube", index=1, seed=121,
+         cfg=dict(length_cm=(18.5, 18.5), p_length_from_f0=0.0), expect=dict(length_cm=18.5)),
+    dict(name="cascade_short_tract", engine="cascade", index=2, seed=122,
+         cfg=dict(length_cm=(11.5, 11.5), p_length_from_f0=0.0), expect=dict(length_cm=11.5)),
+    # the two length branches that do not use `length_cm` uniformly
+    dict(name="cascade_population", engine="cascade", index=3, seed=123,
+         cfg=dict(length_dist="population", p_length_from_f0=0.0)),
+    dict(name="cascade_f0_length", engine="cascade", index=4, seed=124,
+         cfg=dict(p_length_from_f0=1.0, low_f0_hz=(120.0, 120.0), p_high_f0=0.0)),
+    # the /h/ level draw with no tilt: the path the D-064 fix must leave alone
+    dict(name="cascade_h_amp", engine="cascade", index=0, seed=125,
+         cfg=dict(p_h_onset=1.0, h_amp=(3.0, 3.0)), expect=dict(h_onset=True, components=("whisper",))),
+    dict(name="kl_long", engine="kl", index=2, seed=126, cfg=dict(duration_s=(1.5, 1.5)), kl_cfg={},
+         expect=dict(components=("voiced", "aspiration"))),
 ]
 
 
@@ -135,6 +155,12 @@ def _expect(case: dict, clip) -> None:
         assert bool(clip.labels["voiced"].any()) is exp["voiced_any"], f"{case['name']}: voiced frames"
     if exp.get("h_onset"):
         assert any(s.get("kind") == "h_onset" for s in clip.meta["segments"]), f"{case['name']}: no h_onset segment"
+    if "min_segments" in exp:
+        n = len(clip.meta["segments"])
+        assert n >= exp["min_segments"], f"{case['name']}: {n} segments, wanted at least {exp['min_segments']}"
+    if "length_cm" in exp:
+        got = float(clip.meta["length_cm"])
+        assert abs(got - exp["length_cm"]) < 0.01, f"{case['name']}: tract length {got} cm, wanted {exp['length_cm']}"
 
 
 def _record(case: dict) -> dict:
@@ -230,14 +256,14 @@ IGNORED_FIELDS = {
                "hop_s", "target_every_s", "transition_s", "contour_probs_low", "contour_probs_high",
                "p_register_step"),
     **_ignored("tract prior and length draws: change values only; `tube_articulation` and `kl_area_return` cover "
-               "the two tract-side branches", "length_cm", "p_length_from_f0", "length_f0_slope_cm",
-               "length_f0_sd_cm", "length_f0_cap_hz", "length_redraw", "length_dist", "vowel_dist",
+               "the tract-side branches, and the length draws that select a branch are cases",
+               "length_f0_slope_cm", "length_f0_sd_cm", "length_f0_cap_hz", "length_redraw", "vowel_dist",
                "p_uniform_formants", "bandwidth_f0_hz", "bw_factor", "tube_bw_factor", "p_f1_band",
                "f1_band_f0_hz", "f1_band_ratio", "p_cluster", "formant_constraint", "p_tube_constrict"),
-    **_ignored("glottal and coupling scalars: values only; the coupling and interactive branches are cases",
-               "glottal_peak_area_cm2", "glottal_gap_offset", "coupling_scale", "coupling_full_poles",
-               "interactive_coupled", "p_interactive_coupled", "interactive_closure", "interactive_sub_gain",
-               "h_amp"),
+    **_ignored("glottal and coupling scalars: values only; the coupling and interactive branches are cases, "
+               "and the /h/ level draw has its own case", "glottal_peak_area_cm2", "glottal_gap_offset",
+               "coupling_scale", "coupling_full_poles", "interactive_coupled", "p_interactive_coupled",
+               "interactive_closure", "interactive_sub_gain"),
     **_ignored("KL-only draws and the sustained-articulation timing: values only, `kl_*` and "
                "`tube_articulation` cover their branches", "p_lf_pulse", "artic_hold_s", "artic_transition_s",
                "artic_pg_cm", "artic_pm_cm"),
