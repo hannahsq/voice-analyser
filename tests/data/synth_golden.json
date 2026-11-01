@@ -1,0 +1,357 @@
+{
+ "cases": {
+  "cascade_asp_tilt": {
+   "audio": "ff4bcfcb6ed791bf0b0674fea3f3abfb7e69c7a291218da3a756fe5acf98e189",
+   "components": {
+    "aspiration": "71bfc50f04f3707736e7cdf4f6c416ecefd7291008828a6491009f31432c07ce",
+    "cycles": "0ad67b4f0da966aaf2802869c7cd3ebb554822da4e2d783fab3809a3ea5fd059",
+    "total": "dff970184d17e246f51f09baa464edb6b5c811a2f4b9e0cf061bdba20a26ee81",
+    "voiced": "c2476a4643a4850f4cb80085e097d656d44b5cb9cce28cdb6532a65b844d7ab6",
+    "whisper": "31d20cfce52832942a2281afe385c81ccd37b646c20ebce1a46308034c81b005"
+   },
+   "labels": {
+    "bandwidths": "3bee46c7fc21cf886b59cd454cf7375b06a6cf30485514bff280df3ccf4f902d",
+    "f0": "8b60f37bcce770261bd21c07118b69a8685af886adca1fc6fa40a304a5067bf2",
+    "formants": "c68e7cbcf303582eba6dbc26c7ba40ea78f3821abccdb934a9a13d640547b546",
+    "length_cm": "cf19a471421f49f1d86a075815ceb927e7e0324c61a70df37d42b356e6333a62",
+    "length_inst_cm": "cf19a471421f49f1d86a075815ceb927e7e0324c61a70df37d42b356e6333a62",
+    "rd": "1977b20f79326441c3cba25520a0ef904afdd1ac4d9cf1d3cd695a31406025e1",
+    "sonorant": "0e749c8affe7d4fc8d70a1683f99e2adf4f2ba921ab70c66ae9c86edb694b98e",
+    "source_h_db": "74c0abced6110b8d875f2cbf98456832aaa22d227c1ccc4bb8b17a1429fdf384",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "0e749c8affe7d4fc8d70a1683f99e2adf4f2ba921ab70c66ae9c86edb694b98e",
+    "whisper": "94a1883273e464ca30df515608b1518970bd53f3958b44cf2714d03ca78f0581"
+   },
+   "meta": "eb3d64cdacc838e08acf6616dc3b0dd3735407ac10ccc028efa43b3d03e65fdb",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "cascade_channel": {
+   "audio": "63cb607b65224694b3ffd3683ae019db38ef423749f9bacbf2768064e8cd0e42",
+   "channel": {
+    "audio": "db89efcccd936cc4ab5311ecdbd635cfb11a69e88f709b2a0fd7a450d7d42a23",
+    "info": "1b3009b178320727e8ed8eaabf37c4687f729210d9870ec1e11836249d070a39",
+    "n": 16000
+   },
+   "components": {
+    "aspiration": "8a9b7e830e3575b41f183e2c5cafe91c6fb20717bf6aa8d92133af025b66e030",
+    "cycles": "38be8939ae91183e445763a3ba99a79def16e1f646466704ffdf6221cb15228b",
+    "total": "f4400bd5cac846b6e7d404cecd1bd112a582053d5b0c534beb2d04d53898d329",
+    "voiced": "39636591fa6a936161c31994d0f62d47aa03f29b646b73103f1f03fb44ecd7e0"
+   },
+   "labels": {
+    "bandwidths": "5dcbe8a4148215b69750884744614fc1f3adc182f29d4466c6afc4d88d2fb2d0",
+    "f0": "8486b0093ad75e094f16eeb94c881917edae109d05146fed7bbd4f9f0d4deb70",
+    "formants": "994b4ea5038b97e24b64807126150f1bd4dd774900dbd7d5fc8ffe337bf7f802",
+    "length_cm": "34edd7603c72215fee4b03f44e613dea15449376d0b5a917822738448811b6f4",
+    "length_inst_cm": "34edd7603c72215fee4b03f44e613dea15449376d0b5a917822738448811b6f4",
+    "rd": "e7733ce055036b04746f5e6d98612a8194eac247cb331557a93a8f24ce4a10ef",
+    "sonorant": "5378ec1947027efd4df0a59b2cbd3f48be6505ebfb46bb72f155177e2121f498",
+    "source_h_db": "be1de6b24c371ad403202f891c8a0d3c75d3b61eef470e281e728dd9be9f42f6",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "5378ec1947027efd4df0a59b2cbd3f48be6505ebfb46bb72f155177e2121f498",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "2072918d0e377561c2d0296d1f5c064f939bbc27fa643721a05b2d8e1459a191",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "cascade_coupled": {
+   "audio": "4619b9f063be166b5464b5c4247b858ad9b7e73eb8647f6c9240487d76b00316",
+   "components": {
+    "aspiration": "6afa575be8006d83d7517cfe73f21467d7d616287818d5803c6a97d2a066746a",
+    "cycles": "aa391d8a90bd8f7b4f8bcec4029d17b80f52526ff1ffe048b5ad986011801927",
+    "total": "e77b4e7b9e8614a25e9e5e84eaccc4bd936875f08e58e4a20d6c03347eac68bb",
+    "voiced": "2ac12b3614fd6537e0df14965dc8d025fc327a0fe7fb2cb785e823c06222a736"
+   },
+   "labels": {
+    "bandwidths": "48bf4b4fad8459429008cc58c6aede0fac92f2bb7a5032521854ecb53aeaa44f",
+    "f0": "ef4e60cb8a66dbebf38222260b037e73f85be4ff65452d1223f823dab83d556f",
+    "formants": "7c3c876d2cce34626080d4310275fd865fee1198e3d6b8d924e5b28aade810d1",
+    "length_cm": "1caef8c403ba7aa6cdf5b04e856e0d1cc8a3f925e118e1da709356ec92b66879",
+    "length_inst_cm": "1caef8c403ba7aa6cdf5b04e856e0d1cc8a3f925e118e1da709356ec92b66879",
+    "rd": "e9ad2f2be66092b0dd5f5d79c90a194f8b99482654ad9eb33e084ca690ee227a",
+    "sonorant": "e64ce157178748d0cea5ff3ab39fb9d0511275d55fe0ae6fb4b924ab69d890d8",
+    "source_h_db": "66516d9601bb051dca87435b0ff9cd45845760c02ad9639225ab3532587ff989",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "e64ce157178748d0cea5ff3ab39fb9d0511275d55fe0ae6fb4b924ab69d890d8",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "85e3176e1142f3c3d13146d9d0908d4d0928688c2259017cb14f59129c578cd3",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "cascade_default": {
+   "audio": "5561f85ae3a8269913a490e7b03d4d462674587a2a6fba7520c3228cbef205b5",
+   "components": {
+    "aspiration": "902ee9b8e7b679ea40663f885fb5d07a54076c1d347497b8d936261c44ae4b8f",
+    "cycles": "38373f683227d2f56474660f519ac3a56b419bd913bac5c665be2a805b1f8d9f",
+    "total": "72cc47ae5e6e500bf23e2068297ad72ded8db3bb9efcd7310955ba7844d0235b",
+    "voiced": "bb1259d7511ff542bfa80c03ed713b7c07275ac148d5fffffdd791e42b824a65"
+   },
+   "labels": {
+    "bandwidths": "9801249d1a1b08c778d6306cbb911c85e3b573d3992dca03551d99abdb120934",
+    "f0": "a27e7aeccebd2c8501b1b7a1362ee1245bda8d831c777399afdd75d00044253a",
+    "formants": "28413d00c9a1323a5b340344f31c4de0a7dad812bbde4bad9bae3d81398e3537",
+    "length_cm": "53a4affa732543193bd008196c65df7f4aefa6eb83a53562f9a15f792ce80099",
+    "length_inst_cm": "53a4affa732543193bd008196c65df7f4aefa6eb83a53562f9a15f792ce80099",
+    "rd": "9ea407aed6adee6258c257e4cba9bce2c10debd4f2fc2401a694a68d15b5b91a",
+    "sonorant": "ea5fbd80a8782c496b45a43cfe8ad814010ef86cbee267e3a38445808faf476b",
+    "source_h_db": "a038b510fbc75482539aaf3a87bdcd06dc6def7a6845b67d4dac9ad860f6a990",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "ea5fbd80a8782c496b45a43cfe8ad814010ef86cbee267e3a38445808faf476b",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "141f6139978dbc1aaeddc6c142097f77a9a465478edaf2795324e86e6caacfb1",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "cascade_frication": {
+   "audio": "afeefc5047594e15c379549230698074f5059786f7707d37759513b7846c0234",
+   "components": {
+    "aspiration": "8acbe1d98b8ecd3aa60c772d2357dc168e29819d14533fa9c5c08f891ee97eda",
+    "cycles": "1dadac11706c08f2f85975f97ac49350e81b4477f3507fdebfd5a62d2e27a705",
+    "frication": "10924e1a72861fd24b42f38d46e068e6eea876b26f7c9c8d53827b5b26b8e214",
+    "total": "5c7de29e24b9c0b1c5c6fd77c0303b5d0b2181eaa63d2c27b8b933c3cd0cc563",
+    "voiced": "451a3b4a710a8b57c1bef3cf56c6136b3dbcefa88ebcbc7d2f14103448c28f0e"
+   },
+   "labels": {
+    "bandwidths": "7c2e78ac018eec410c755b1cd8d510fb88064be8fe7ee685227cc549d32f9b5f",
+    "f0": "6f50487945414c0ff4b53a09dad22b7254a41328cf9c947a045c7b584e35adb0",
+    "formants": "8b5c0d0e9d30b0aacdec9f1ab39b41221eb8eee8a9bf7965ce94cbbc73829b8b",
+    "length_cm": "eab0dddf25f9ce9c8980a2b6ff995d6593f1a56edf00d6bdb94b998173c33871",
+    "length_inst_cm": "eab0dddf25f9ce9c8980a2b6ff995d6593f1a56edf00d6bdb94b998173c33871",
+    "rd": "dd05adae97eec1cb263fb125e4fbb2f5ee56bc6a89a5d5a07275fe69c8bbfec5",
+    "sonorant": "799eeeaf66050ae0c5ebded56a91bb05e2f34d35d64933cc6827e6d26affb673",
+    "source_h_db": "9b7e147bb9d7236b15ae62601c11e0ad39e2239680acd10565294dc6d8f3891f",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "799eeeaf66050ae0c5ebded56a91bb05e2f34d35d64933cc6827e6d26affb673",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "5bc6e716457d6f248eb11d0d639042e7649e398a39e26845b1522e90780f1447",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "cascade_whisper_tilt": {
+   "audio": "b625c97d9c784416ed536bdc3871e3d1a0443ee2d4fc31a3921f595bbea68bfe",
+   "components": {
+    "aspiration": "618e9fa812bdb034282d4a47827bceefa032acc95f3dbda02aa6a042f39a4fd9",
+    "cycles": "3bd89d54d103a3422fa6635c892f7eaf78aff5bddb1d6b0a7b0deece81472374",
+    "total": "55e99c44b428b5b78496988dbe17751f537f6e904b65a871f95871e88b841b6e",
+    "voiced": "f09c7593bad3908b51257615793d875e0ae199ee277a07c55984e7b0bbd42803",
+    "whisper": "98c5a5a475559a108b0dd55801418e10bd8295afde74b7add0a4d74de8d68bf1"
+   },
+   "labels": {
+    "bandwidths": "1badd013a76ed9926a78d956c6c640d06e6e3205fb98394fdfd0825a23e47f3e",
+    "f0": "8f2f9eb242e4f706a0c2cb31920aa60b61f92f577b6e5703d0935aa394ab8e87",
+    "formants": "9b68ec1e728f03782cb925e39b96429a701eda39061a8e250bfd6a77cda6aaa5",
+    "length_cm": "d3407b19591202c58e3e2f09a6c3ddbde125096efa5a91dc21814b7fe736e7ec",
+    "length_inst_cm": "d3407b19591202c58e3e2f09a6c3ddbde125096efa5a91dc21814b7fe736e7ec",
+    "rd": "0cb1665cfd243bd7ec1bdf0e29cc9a3a96e2ddbe112954915e8c42aa7b5547b9",
+    "sonorant": "5809152ef49f95ba0a2b9671a5d02752d7cc121499e5e7c290c10b93f8432a28",
+    "source_h_db": "63ae5659a9a1e9815716af924c3163b2ca9f8fbda726ab24b23df9a991c9211f",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "3a208697c426e7db9fb4428d27fa40ba0b16f6b801978f0888940a144ed667dc",
+    "whisper": "37df4288e3e60cad551a01db262975f27ea7f349124f0a21fcc81b64e5484012"
+   },
+   "meta": "19abd7b21c1cdb2fbf17f98413792a4f8611d81b46ea285afdac2db7e50f96df",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "kl_area_return": {
+   "audio": "23d92fb407a1704b06c66ac78361cb60a5074b0db8f65e4ba2600b575f12f603",
+   "components": {
+    "aspiration": "30f30c7569e28f77fb161be54af6544ad15b77262dffce7938a5599c686bb924",
+    "cycles": "884f15d7de5efedfb2a26e66607183cf67765b5453617ef538061cef34c222bb",
+    "total": "a24a217579356d334527a38405d21bcccb5c405ea9015b914a56800e942aee41",
+    "voiced": "a17765e99a0276b064f6c9334e7e69890dfea3900b7065b58c006d43ce1d47fc"
+   },
+   "labels": {
+    "bandwidths": "78f242f417c26c97a14b532ec20f2924db00593382635b2be414206845416fe6",
+    "f0": "f27ed4b7b7489c844ac4b1376872c64f0d1ebc13851fab820f21442dc6498f6b",
+    "formants": "bd91b282e581fa2dddb0e41c6f4b8b9b639db59ce93bf6549f5bc28b649220c9",
+    "formants_mixed": "f821bbbd5b5f33cbc1499709e626a0498281e9aac3a8a048083c32e50c93df1f",
+    "length_cm": "3d8f3f2bc8d9cd8e5e2f7b53a200d7fab65957b6fea654fe91059a38fabf406d",
+    "length_inst_cm": "3da372b73881c786ea3f4aab023196d19f2acd2be2e6318187ed316836267276",
+    "rd": "e38df6ac14e8cddbc621be4f9dec3918628b3e981a8d1b0c030142675ef04971",
+    "sonorant": "fc225b457f2c61454d0699914640f80482e77284d645731b7b80f841ec567189",
+    "source_h_db": "f698861c67f17d8c61133f6d9f64d9f4f0dc76e749f61d53765fa9c8ac6f038b",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "fc225b457f2c61454d0699914640f80482e77284d645731b7b80f841ec567189",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "ceb3e35977834537428e3e18792006605978c8ce42b484476e21349aa91f0649",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "kl_default": {
+   "audio": "bfc07b8a9d36f9974e2a98e207937c908334f374eb6a4b41fac7cab87f7605fe",
+   "components": {
+    "aspiration": "6b81893834887e950a1cd4b97132a75f1c84561438dca1b3f0dd165f8d0ff8e9",
+    "cycles": "b4d81e69f76aebcad7703dfed1b764b9eeeb8224e4ac3a86392d5692d09ef093",
+    "total": "263f1e23ac7f046020c2c4fb41525fa478d5dfbe82ac731e9dce2b5dd5299ec7",
+    "voiced": "27f874e98a1ab7410a7e928178c3692be45c8677d97c094551ed1ea4ddf90333"
+   },
+   "labels": {
+    "bandwidths": "7e874ece0230e4dffb2b05a43c9005affa39f140d1c4871bab734534beda011c",
+    "f0": "1a69458d5d02e128607ffee69e138861d7d3c725506f043d99879d61e395c6b5",
+    "formants": "08163e13252718f8e94e923789cdcab8b971db7ee03a01a987ac3e4856117980",
+    "formants_mixed": "ed69aab3eb549522726d1ad28065feb97b8d8641e4a6bcf5eca7738186742fcb",
+    "length_cm": "43945bdc31b904b03d19352031fc16535c3d28fe93e6fab03d6ff8d643c603b5",
+    "length_inst_cm": "9566037e4bb1b445a92fdad387d6175c83da563ed290f2f5dd5d76e4a9d489e9",
+    "rd": "82fb29453bcd8b2dfaacff5072861683be1a6e466de24b41e9f6d9faf2a6ba12",
+    "sonorant": "5e2044f9fbbee28916c8f74bf1449d5bfc2ceed13e658dbef7aafff8f6f4cc3b",
+    "source_h_db": "f698861c67f17d8c61133f6d9f64d9f4f0dc76e749f61d53765fa9c8ac6f038b",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "5e2044f9fbbee28916c8f74bf1449d5bfc2ceed13e658dbef7aafff8f6f4cc3b",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "214050e324cfde37b995fe196a9c907c19bf6eea9558ee373f7176d6c598dcf8",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "tube_articulation": {
+   "audio": "12bccab66903189821f89bb1e050510c4c5f85fa65fb3dd8e5639723dfd566db",
+   "components": {
+    "aspiration": "8fbe90055ac814cefc731c6af84355c73b3fa8faab402a87a417f476d777a8ed",
+    "cycles": "3affb1f04d85b81a697efe82436171afee3ac4bd9fec60e5ec609eebf9eaef19",
+    "total": "6c86cdf986688c55000bb035d8b432f6218c0483857a6d21ebe537fb1b804f83",
+    "voiced": "1d020e2cda694682db7c1d34f1a9b718b1be7187c4e46e1622044598084d0d89",
+    "whisper": "2b735954d4cee0bb5d37c87f1a009082cad3ea56d1dbe036de74250245c61617"
+   },
+   "labels": {
+    "bandwidths": "4623de686d9badc7cba6cc1d99ddb362f3f2ca6a55ff0d03953ef267258816f9",
+    "f0": "865c217d47a21e3818c7aec779e268166c5b4570dbe51ed2ebef6c49acc6d712",
+    "formants": "e090eaf5298cac059bab2ccc7634e6e4930f721012bf4736bd21be5e04300d06",
+    "length_cm": "1f2457721548fd51150a519d698c05859bc1fd8ef202324b2746897f8cafc26b",
+    "length_inst_cm": "b865b0beefb7b98c19dbc598738f5d46f3df5a0722c1410373b830b8a0a0ae21",
+    "rd": "bd0db9a5bfee854104bb0b05eafdc5940b9dc7e96abeef4f3d757291e5688b82",
+    "sonorant": "8ccf0d6ef9bd9e4f2479b5787f4e4501bd6bce51c94158ea42505acde69cbb10",
+    "source_h_db": "f698861c67f17d8c61133f6d9f64d9f4f0dc76e749f61d53765fa9c8ac6f038b",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "78da2b15560c5f4f822ab295587a1177d036622822082cc699fdfe48462295f1",
+    "whisper": "a10ed9eaaa7a674875784d30860d877fb122fc6b742fa8c794230c41ff5834c8"
+   },
+   "meta": "938c4fe7ffaba50f17028f20fb5e9e355b49d91dd04a5b1a02fa19da73a704a7",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "tube_default": {
+   "audio": "05c4b9694a31eca5815286a5bdbfb92f3a16fe8fc3e85fe590a9168fd5975099",
+   "components": {
+    "aspiration": "a71a1614649c35619929549753aaa2d938f6adef6cdbae9baa2970fa5fdfa381",
+    "cycles": "2589ae9ac08cb2330323001a0f4c8e035996f0b3055c0069d4ec4bc4f3c71d80",
+    "total": "96bad6ee17367b4c81dce01f06aea06d8a00d74999b3ab60cd44f0a98e9cd06f",
+    "voiced": "71922ecdd9cce72e9eaf30a731e1b858e1759966a91e6d19b6da84de0364826f"
+   },
+   "labels": {
+    "bandwidths": "513701710bf4067e0e7106adb78ea9d71c48b78be5ea8f735b040198e52c05a5",
+    "f0": "449b47fb26ef27a24e9d583fdadf27970df3301af26601d0e800bf55ca9f017d",
+    "formants": "dfc77013cca9d1cce7a208fbba9a7951eec17dc7ba3f199434c28701134aa23b",
+    "length_cm": "240605682de8531b79874793e3ee3418198995c80c1a23b8acd01121f6b2726f",
+    "length_inst_cm": "fb2d202d907e1d6da85657be21aa7af9a6e939f30de2fa6a3c8594fa4cc003ad",
+    "rd": "d2e368f851e62e0af3a604181424b2a9154809d962ae2af75a0a80958eaf24b1",
+    "sonorant": "78ef0b3a381aaeb4c411194d29d4ff03e350eb2614ff0b315d64798d832d632f",
+    "source_h_db": "f698861c67f17d8c61133f6d9f64d9f4f0dc76e749f61d53765fa9c8ac6f038b",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "78ef0b3a381aaeb4c411194d29d4ff03e350eb2614ff0b315d64798d832d632f",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "c5b77a80923eb25257cab77ad2cdd63773069908c0dd69f452a37a2057929b92",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "tube_extras": {
+   "audio": "7770437f64bb1219cf3b26b0c52ee27ba2a2c532fd37d028facdb518ece6b41a",
+   "components": {
+    "aspiration": "ec8c4ea2c98e514a3e0d1a4d9dc390d366187965de699d4de24c1c924ad8614c",
+    "cycles": "f91a46bca907637d5754eb432b797cf637bc104bc58d7b92056fb18a31fc91c5",
+    "total": "de7699c6f92d251516b99099a2962ef7d6a42894d42e3ac37d3478ba834bfef7",
+    "voiced": "da15ba9b2a4c1e63b6d725a2b31288186042f96d187e0493fa0e01949f85d9cf"
+   },
+   "labels": {
+    "bandwidths": "892df55c2dbe44c6e9d8bc35faa5ec2c212e7a489758d4d859b5412b421d525a",
+    "f0": "d1574633b18774738c6b63f1711a235390b8477801044278d31afd59d0d5a74b",
+    "formants": "7d9242dcb510a04be20fa4b5a3b5229bf92d75f7a34c2935300767ff48b8a318",
+    "length_cm": "1cf6909a44f8c8c7a2c9c353423544d1045f763d531d839335148732318d788c",
+    "length_inst_cm": "ff346eca4e12e0cb769265b7b7aa9ea6bfe683c6cf839b5645d3f1f30d05c4b8",
+    "rd": "500710179f5a21b8fe59584aa5a8ad141aeb7320fafb3f3da19064301178baba",
+    "sonorant": "a1bc842236e96b834162962e9acd293d6fb8c489a3779f4bbb4a565b628f3859",
+    "source_h_db": "f698861c67f17d8c61133f6d9f64d9f4f0dc76e749f61d53765fa9c8ac6f038b",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "a1bc842236e96b834162962e9acd293d6fb8c489a3779f4bbb4a565b628f3859",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "bfc9412921cccd474a86103457a797a6b6d62ae17f18cd13b4061383462f63c3",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "tube_return": {
+   "audio": "827644f1b93389e40f149c426bb717e795105401fe9ad414abe21355905e5a2d",
+   "components": {
+    "aspiration": "7e7c010ac6a170e4b2bd585ba9709cfa1f47bfbb133f29fcb2b1ade1ea81ed5f",
+    "cycles": "474b64574cd9819e9d180585d04f076ed2d2ffd9a84f02cd13a561a7522780a8",
+    "total": "fd0a39cb62116f57f6eb13c5e58c5ec694dfe564d81151e7883cce77f051ae74",
+    "voiced": "6a12c06036ae64398489cb25cc140a478ebe3ff3d924bb8dfd0762d6b26b95b6"
+   },
+   "labels": {
+    "bandwidths": "d80525918487b8cfc6a358d87111c43c0b14e1d50fec2a81ddc41e202e745a2e",
+    "f0": "51365b9dbe0df04228da238c71859baf49420752c846d6fe703eaedbaa589b18",
+    "formants": "e2738478e265c7421736e25e0122b9c4b39a7f97a3a77b85e7e49779062c13bc",
+    "length_cm": "baa44d46a0736b03c91e79372fe628c8a6c1ecde624b9680e0f3bab9c4540830",
+    "length_inst_cm": "648a7802656f79f5c372c11f0ecc4bd128749b218d9ea49caabdde15b8a44d1c",
+    "rd": "5efa5a441c6bcbf4c72f613c99acc13ebe4a48433cd7ffa7cded625f255edb68",
+    "sonorant": "4af20abc91fa7f381d6864872d7cc7e7e322a5e7d4ac6f0e21b87a05a796c94f",
+    "source_h_db": "f698861c67f17d8c61133f6d9f64d9f4f0dc76e749f61d53765fa9c8ac6f038b",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "4af20abc91fa7f381d6864872d7cc7e7e322a5e7d4ac6f0e21b87a05a796c94f",
+    "whisper": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56"
+   },
+   "meta": "6c432734c3d5ec6b3987cb9653710bff18e48efdaaf5a08c8b8dbd40d01b84ce",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  },
+  "tube_whisper_clip": {
+   "audio": "f9ebc5cbff12565ad0c7fd30b2e71b01ac81ad3a5a1a571a5e737b7a4ccbdd54",
+   "components": {
+    "aspiration": "667e38ff2fc4123bbf2c47e90c99d57dde43185a9cc7d7bc591a56e86b0fe333",
+    "cycles": "d3216f0f6323878055058e885fe8c4c570527180ab1d8402491944d742adbb85",
+    "total": "81c27f578e93d5f8fae9ea13a648755cc56161d655be5d83564cc3ea6c499f8c",
+    "voiced": "667e38ff2fc4123bbf2c47e90c99d57dde43185a9cc7d7bc591a56e86b0fe333",
+    "whisper": "81c27f578e93d5f8fae9ea13a648755cc56161d655be5d83564cc3ea6c499f8c"
+   },
+   "labels": {
+    "bandwidths": "7d5fe0aa6742100599c4c587d0209e97936be5ad127276a5003cf711fd607e43",
+    "f0": "18950a12acbe0258354cba47b06673b791a797d2727aed5e25886f373fd33e39",
+    "formants": "3d5a57755ca29bf2a09d0342c9817466e63eb7a9f8c51699c7a61a9a0bbc8115",
+    "length_cm": "04cc85a692f8c2a257b4e128a7d0f20a13794dd5144b7daabd8f531a9a19f6bc",
+    "length_inst_cm": "039370ce8e0698c5d0841f41f5f3d303310e99fb854aad19fca329575bb16049",
+    "rd": "20b007606ce50a89d6fa8009fb6d13bb2200704ee8f57455eeaadcd23cd1c713",
+    "sonorant": "68aae8526884d269b0a289c7e8d36b076a9aaa46759f0b56b99e83bd1142d995",
+    "source_h_db": "f698861c67f17d8c61133f6d9f64d9f4f0dc76e749f61d53765fa9c8ac6f038b",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "f6d3cdefa34c3495af669e0a2fe332246dcddd14ddf2541f4ceb4303c3c77d56",
+    "whisper": "68aae8526884d269b0a289c7e8d36b076a9aaa46759f0b56b99e83bd1142d995"
+   },
+   "meta": "26f1b6ee6432243cc02935bff1093c0cb68884884d0fc6fb48385560ff9130d5",
+   "n": 16000,
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  }
+ },
+ "commit": "a41440a",
+ "env": {
+  "numba": "0.68.0",
+  "numpy": "2.5.3",
+  "python": "3.13.15",
+  "scipy": "1.18.1"
+ },
+ "format": 1,
+ "history": [
+  {
+   "commit": "a41440a",
+   "date": "2026-11-01",
+   "reason": "initial manifest: pre-D-064 behaviour of the noise components and the /h/ level"
+  }
+ ],
+ "written": "2026-11-01"
+}
