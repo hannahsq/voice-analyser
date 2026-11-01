@@ -183,7 +183,8 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
 
 def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
                hnr_db: float | None = None, fs: float = FS, coupling: dict | None = None,
-               asp_tilt_db_oct: float | None = None, whisper_tilt_db_oct: float | None = None) -> dict[str, np.ndarray]:
+               asp_tilt_db_oct: float | None = None, whisper_tilt_db_oct: float | None = None,
+               whisper_level: str = "as-is") -> dict[str, np.ndarray]:
     """Render the components. Returns dict of float64 arrays (same length) and 'cycles' (glottal phase).
 
     jitter: SD of the per-period relative period perturbation; shimmer_db: SD of per-period amplitude (dB).
@@ -228,7 +229,7 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
         white = rng.standard_normal(n + 1)
         out["whisper"] = whisper_component(
             white, wa, tilt_db_oct=whisper_tilt_db_oct, tract=lambda x: tract_filter(x, traj, fs), fs=fs,
-            level="legacy")
+            level=whisper_level)
     fa = _per_sample(traj.fric_amp)
     if fa.any():
         sos = butter(4, rng.uniform(2000, 5000), "highpass", fs=fs, output="sos")

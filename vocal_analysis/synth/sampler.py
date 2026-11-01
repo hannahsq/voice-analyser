@@ -46,6 +46,8 @@ class SynthConfig:
     hnr_db: tuple[float, float] | None = (5.0, 40.0)  # None: no aspiration
     asp_tilt_db_oct: float | None = None  # aspiration tilt before the tract, fixed (no draw); None: +6 dB/oct difference (D-048)
     whisper_tilt_db_oct: float | None = None  # the same for whisper and /h/ onsets (D-063); None: as before
+    whisper_level: str = "as-is"  # "as-is": the tilt moves only the whisper's shape, its level matched to the as-is
+    # render in 1-3.5 kHz (D-064); "legacy": the tilt moves the level too (every set before D-064)
     vibrato_rate_hz: tuple[float, float] = (4.0, 8.0)
     vibrato_extent_cents: tuple[float, float] = (40.0, 100.0)  # bulk; see p_vibrato_wide
     p_vibrato_wide: float = 0.3  # extent from (0, 150) instead
@@ -147,6 +149,7 @@ V1_SETTINGS = {
     "p_whisper_clip": 0.0, "p_h_onset": 0.0, "h_amp": (1.5, 5.0), "sonorant_includes_whisper": False,
     "asp_tilt_db_oct": None,
     "whisper_tilt_db_oct": None,
+    "whisper_level": "legacy",  # the sets before D-064 were rendered with the tilt moving the level too
 }
 
 
@@ -631,10 +634,13 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
         comps = interactive_source.synthesize(traj, kf_shapes, kf_block, kf_w, glottis, area_sq, rng, jitter=jitter,
                                               shimmer_db=shimmer, hnr_db=hnr, extras=extras,
                                               coupled=feedback, closure=closure, ret=cfg.interactive_return,
-                                              asp_tilt_db_oct=cfg.asp_tilt_db_oct, whisper_tilt_db_oct=cfg.whisper_tilt_db_oct)
+                                              asp_tilt_db_oct=cfg.asp_tilt_db_oct,
+                                              whisper_tilt_db_oct=cfg.whisper_tilt_db_oct,
+                                              whisper_level=cfg.whisper_level)
     else:
         comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled,
-                           asp_tilt_db_oct=cfg.asp_tilt_db_oct, whisper_tilt_db_oct=cfg.whisper_tilt_db_oct)
+                           asp_tilt_db_oct=cfg.asp_tilt_db_oct, whisper_tilt_db_oct=cfg.whisper_tilt_db_oct,
+                           whisper_level=cfg.whisper_level)
     audio = comps["total"]
     peak = np.max(np.abs(audio)) + 1e-12
     gain = 0.5 / peak

@@ -77,6 +77,10 @@ CASES = [
     dict(name="tube_extras", engine="tube", index=3, seed=110, cfg=dict(p_nasal=1.0, p_subglottal=1.0)),
     dict(name="tube_articulation", engine="tube", index=4, seed=113, cfg=dict(articulation="sustained")),
     dict(name="kl_area_return", engine="kl", index=1, seed=111, kl_cfg=dict(area_return=True)),
+    # the pre-D-064 level policy: the tilt moves the whisper's level as well as its shape
+    dict(name="cascade_whisper_legacy", engine="cascade", index=3, seed=128,
+         cfg=dict(whisper_tilt_db_oct=-12.0, p_h_onset=1.0, whisper_level="legacy"),
+         expect=dict(h_onset=True, components=("whisper",))),
     # the channel and the int16 quantisation write_set stores
     dict(name="cascade_channel", engine="cascade", index=5, seed=112, channel=CHANNEL, channel_seed=999),
     # draw and length breadth: the cases above are all 1 s at one drawn tract size, while the

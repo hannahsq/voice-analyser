@@ -155,7 +155,7 @@ def generate(index: int, cfg: KLSetConfig | None = None, seed: int = 0, keep_com
         out["whisper"] = whisper_component(
             white, wa, tilt_db_oct=sc.whisper_tilt_db_oct,
             tract=lambda x: kl.render(*args, flow=x, **common)["audio"][:ns] / FS, fs=FS, offset_db=-6.0,
-            level="legacy")
+            level=sc.whisper_level)
     fa = _per_sample(traj.fric_amp)[:ns]
     if fa.any():
         from scipy.signal import butter, sosfilt

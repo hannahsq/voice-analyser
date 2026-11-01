@@ -24,7 +24,7 @@
    },
    "meta": "eb3d64cdacc838e08acf6616dc3b0dd3735407ac10ccc028efa43b3d03e65fdb",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_channel": {
    "audio": "63cb607b65224694b3ffd3683ae019db38ef423749f9bacbf2768064e8cd0e42",
@@ -54,7 +54,7 @@
    },
    "meta": "2072918d0e377561c2d0296d1f5c064f939bbc27fa643721a05b2d8e1459a191",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_coupled": {
    "audio": "4619b9f063be166b5464b5c4247b858ad9b7e73eb8647f6c9240487d76b00316",
@@ -79,7 +79,7 @@
    },
    "meta": "85e3176e1142f3c3d13146d9d0908d4d0928688c2259017cb14f59129c578cd3",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_default": {
    "audio": "5561f85ae3a8269913a490e7b03d4d462674587a2a6fba7520c3228cbef205b5",
@@ -104,7 +104,7 @@
    },
    "meta": "141f6139978dbc1aaeddc6c142097f77a9a465478edaf2795324e86e6caacfb1",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_f0_length": {
    "audio": "761e38f9f3cf850ed9dee4cea0aa2740821dd86fc3f3a66e4c0518c726978b95",
@@ -129,7 +129,7 @@
    },
    "meta": "c99364a80d97f2b44488ad3d1c3594ddbcc054d964a994b8c46b79a04c21a6a1",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_frication": {
    "audio": "afeefc5047594e15c379549230698074f5059786f7707d37759513b7846c0234",
@@ -155,7 +155,7 @@
    },
    "meta": "5bc6e716457d6f248eb11d0d639042e7649e398a39e26845b1522e90780f1447",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_h_amp": {
    "audio": "606519b69db495bf6dd2843fd0267226db5264b83cb3608021d4e37fe63a8494",
@@ -181,7 +181,7 @@
    },
    "meta": "e824ad7bf53a1fbe13c9a79bf743bdd943ab4f25ea8b0e3a5ca41b22027814ff",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_long": {
    "audio": "1a4151e9e3a0726d61015d73fd82e213ac1d3c029883c3d90e3f2655dd80197f",
@@ -207,7 +207,7 @@
    },
    "meta": "98609917fd98c52de43783741837e2fedc1945c0564303bf3f569fd81940b4f9",
    "n": 48000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_population": {
    "audio": "3ba9bc8a1b19fde518ab4e41ce4c43a454d2a6abe4fe1eb1afb720dbbe770521",
@@ -232,7 +232,7 @@
    },
    "meta": "e50ed68f8684bcc42cb19b240863076a84b4f071c488665c39474184e08eeb6b",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_short_tract": {
    "audio": "303a26a9dc4e71520859ce014c2b07fc13ae6ffa577181298c2b34ae6e464916",
@@ -257,16 +257,43 @@
    },
    "meta": "659ac5fb4fcc8c90f950e4753bb3051711a9ff1208c23da63f3bb7337f5313d0",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
+  },
+  "cascade_whisper_legacy": {
+   "audio": "d4df1bb2e9d214825baadc857524bfc09bbedf7182e8158c630f0c5ce7db19fc",
+   "components": {
+    "aspiration": "5e5acb5a6c408dde538c67fc68d032fd620a3acca7b8eb05d3261a4a1c4d86f2",
+    "cycles": "6537114e0e9e30c69fc3aaf723da7aaa5159aa20f10b4fdd57b2e7726a1d57e7",
+    "frication": "05a6c1c3e653e2e5bf7d73dad439c1c6ca8e3d123b3c0b275fed417a1b28d7b3",
+    "total": "05a04b8a41749f03c4bf6617c7f5c86516d2c85b1958aabf769b139cd180df0d",
+    "voiced": "576259e40c1df2d0bad091ac46db5cb8cad10bbadaab17fb06829fe927409c59",
+    "whisper": "bdfa4be9817a477723a8089f020501c3b5d3f966f4b69b6d87747f4080985ff9"
+   },
+   "labels": {
+    "bandwidths": "5215b99587d246e64587d57652b3eabb798b73bb27a5fdec4b183d9e4bf86ee5",
+    "f0": "34839673b1bab30f030fd682b053575d4cf14f01e99467885436b0ea16945360",
+    "formants": "f0e19debaf5a806d12cea6bb66c9139fdd044d655cdb365d6299598f4fe5966d",
+    "length_cm": "5b3890178c637478a41c69d4b588083b2e2915f72b64387e811a5db77f2df654",
+    "length_inst_cm": "5b3890178c637478a41c69d4b588083b2e2915f72b64387e811a5db77f2df654",
+    "rd": "df6a7bc67b3a4e5a9582d6c7e5664e35e58dca22b380a9ff35478b6596d49b54",
+    "sonorant": "9d03c44fa664ce8306bb2916266ff705fa674d3db8fb85d679909bd65c3c0e5d",
+    "source_h_db": "75b668fc86e39045e3aaa963ebeb4fc4045032a9cb06ca759f4a8f38cec5714f",
+    "t": "8b4508990952cb871f8bc6df70f15e94382830399c09f9f62a6eec42590c7c1e",
+    "voiced": "2f441e2223998ad7935b7ce396ec58428b4b5250e1fb59442121ffbbcf8f1bd7",
+    "whisper": "47b5c9381be697c4f7c86f24be4225b7f32a97d163ec9a288b18a7d4a305a2f1"
+   },
+   "meta": "eeb2505414a1b87cde92f35fe840f8d1bfe8b23a8adc510a29e479eecdeb6faf",
+   "n": 16000,
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "cascade_whisper_tilt": {
-   "audio": "b625c97d9c784416ed536bdc3871e3d1a0443ee2d4fc31a3921f595bbea68bfe",
+   "audio": "6c29f0cbf1bab7623db517457cde461004b9b7bc5fc0e87ebd654f65217d68ad",
    "components": {
     "aspiration": "618e9fa812bdb034282d4a47827bceefa032acc95f3dbda02aa6a042f39a4fd9",
     "cycles": "3bd89d54d103a3422fa6635c892f7eaf78aff5bddb1d6b0a7b0deece81472374",
-    "total": "55e99c44b428b5b78496988dbe17751f537f6e904b65a871f95871e88b841b6e",
+    "total": "8c4cf14a28a8b83f8af516c7dbaf5125e894a6c9a18f2a9d62a72c64fe584b07",
     "voiced": "f09c7593bad3908b51257615793d875e0ae199ee277a07c55984e7b0bbd42803",
-    "whisper": "98c5a5a475559a108b0dd55801418e10bd8295afde74b7add0a4d74de8d68bf1"
+    "whisper": "2565bfdebb9e92d1ab71b562347ecdfeba58e1e6b968fd710acd5225af1cb5ea"
    },
    "labels": {
     "bandwidths": "1badd013a76ed9926a78d956c6c640d06e6e3205fb98394fdfd0825a23e47f3e",
@@ -281,9 +308,9 @@
     "voiced": "3a208697c426e7db9fb4428d27fa40ba0b16f6b801978f0888940a144ed667dc",
     "whisper": "37df4288e3e60cad551a01db262975f27ea7f349124f0a21fcc81b64e5484012"
    },
-   "meta": "19abd7b21c1cdb2fbf17f98413792a4f8611d81b46ea285afdac2db7e50f96df",
+   "meta": "3c341f042217c300d7d91755b7da63fb020275198741a25aab8989ea2cca2f65",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "kl_area_return": {
    "audio": "23d92fb407a1704b06c66ac78361cb60a5074b0db8f65e4ba2600b575f12f603",
@@ -309,7 +336,7 @@
    },
    "meta": "ceb3e35977834537428e3e18792006605978c8ce42b484476e21349aa91f0649",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "kl_default": {
    "audio": "bfc07b8a9d36f9974e2a98e207937c908334f374eb6a4b41fac7cab87f7605fe",
@@ -335,7 +362,7 @@
    },
    "meta": "214050e324cfde37b995fe196a9c907c19bf6eea9558ee373f7176d6c598dcf8",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "kl_long": {
    "audio": "17f5ce49916a6be7ecd9a292cde1d631e119fd5fba2f544091b0f1a0ff26dcfa",
@@ -362,7 +389,7 @@
    },
    "meta": "5042ac4ea1391f5c041e29fb1cd32b67ce2d8e79a9f99214302665901d032d00",
    "n": 24000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "tube_articulation": {
    "audio": "12bccab66903189821f89bb1e050510c4c5f85fa65fb3dd8e5639723dfd566db",
@@ -388,7 +415,7 @@
    },
    "meta": "938c4fe7ffaba50f17028f20fb5e9e355b49d91dd04a5b1a02fa19da73a704a7",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "tube_default": {
    "audio": "05c4b9694a31eca5815286a5bdbfb92f3a16fe8fc3e85fe590a9168fd5975099",
@@ -413,7 +440,7 @@
    },
    "meta": "c5b77a80923eb25257cab77ad2cdd63773069908c0dd69f452a37a2057929b92",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "tube_extras": {
    "audio": "7770437f64bb1219cf3b26b0c52ee27ba2a2c532fd37d028facdb518ece6b41a",
@@ -438,7 +465,7 @@
    },
    "meta": "bfc9412921cccd474a86103457a797a6b6d62ae17f18cd13b4061383462f63c3",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "tube_long_tract": {
    "audio": "5d35b9e643f34df5a09b7462febefcd1841532f8ca2247c9ef9bf5fb766e8748",
@@ -463,7 +490,7 @@
    },
    "meta": "e6818e584abf5ecea83b0e3e762c0bad6f7539d5642b23fba5f4afa50970dd79",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "tube_return": {
    "audio": "827644f1b93389e40f149c426bb717e795105401fe9ad414abe21355905e5a2d",
@@ -488,7 +515,7 @@
    },
    "meta": "6c432734c3d5ec6b3987cb9653710bff18e48efdaaf5a08c8b8dbd40d01b84ce",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   },
   "tube_whisper_clip": {
    "audio": "f9ebc5cbff12565ad0c7fd30b2e71b01ac81ad3a5a1a571a5e737b7a4ccbdd54",
@@ -514,10 +541,10 @@
    },
    "meta": "26f1b6ee6432243cc02935bff1093c0cb68884884d0fc6fb48385560ff9130d5",
    "n": 16000,
-   "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   }
  },
- "commit": "819cc9a",
+ "commit": "b074882",
  "env": {
   "numba": "0.68.0",
   "numpy": "2.5.3",
@@ -535,6 +562,16 @@
    "commit": "819cc9a",
    "date": "2026-11-01",
    "reason": "breadth: longer clips, fixed short and long tracts, the population and f0-coupled length draws, and a fixed /h/ level"
+  },
+  {
+   "commit": "b074882",
+   "date": "2026-11-01",
+   "reason": "D-064: whisper level fix"
+  },
+  {
+   "commit": "b074882",
+   "date": "2026-11-01",
+   "reason": "D-064: whisper level fix, anchored to the as-is render's broadband power"
   }
  ],
  "written": "2026-11-01"

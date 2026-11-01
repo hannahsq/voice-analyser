@@ -209,6 +209,49 @@ def test_aspiration_tilt_changes_only_the_aspiration():
     assert low_share(b.components["aspiration"]) > low_share(a.components["aspiration"])
 
 
+def _low_share(x, hz=1000.0):
+    p = np.abs(np.fft.rfft(x)) ** 2
+    return p[np.fft.rfftfreq(len(x), 1 / FS) < hz].sum() / p.sum()
+
+
+def _whisper_clip(tilt=None, level="as-is", **over):
+    from dataclasses import replace
+
+    from vocal_analysis.synth import noise
+
+    cfg = SynthConfig(duration_s=(1.0, 1.0), p_h_onset=1.0, whisper_level=level, **over)
+    cfg = replace(cfg, **({} if tilt is None else {"whisper_tilt_db_oct": tilt}))
+    i = next(i for i in range(20) if "whisper" in generate(i, cfg, seed=2, keep_components=True).components)
+    return generate(i, cfg, seed=2, keep_components=True), noise
+
+
+def test_whisper_tilt_changes_only_the_whisper():
+    """D-064: with its level matched to the as-is render, a tilted whisper keeps every other component and label
+    (same random draws), keeps its power, and moves it out of the top octaves into the low band"""
+    a, noise = _whisper_clip()
+    b, _ = _whisper_clip(-12.0)
+    assert np.array_equal(a.components["voiced"], b.components["voiced"])
+    assert all(np.array_equal(a.labels[k], b.labels[k], equal_nan=True) for k in a.labels)
+    assert not np.array_equal(a.components["whisper"], b.components["whisper"])
+    assert np.isclose(np.mean(a.components["whisper"] ** 2), np.mean(b.components["whisper"] ** 2), rtol=0.05)
+    # the tilt is shape-only, so the in-band level has to have moved: down here, since the low band gains
+    assert noise.band_energy(b.components["whisper"]) < noise.band_energy(a.components["whisper"])
+    assert _low_share(b.components["whisper"]) > _low_share(a.components["whisper"])
+
+
+def test_legacy_whisper_tilt_moves_the_level():
+    """the pre-D-064 policy, kept for the sets rendered with it: it leaves the tilt's effect on the level in, which
+    "as-is" removes. The residual is small here because D-063's source normalisation already held the power to
+    within a few dB, and the tract's weighting of the redistributed spectrum is what is left; on train_v2's own
+    config it reaches a few dB (D-064). Every other component and label is unaffected by the policy."""
+    a, _ = _whisper_clip(-12.0, level="as-is")
+    b, _ = _whisper_clip(-12.0, level="legacy")
+    ratio_db = 10 * np.log10(np.mean(b.components["whisper"] ** 2) / np.mean(a.components["whisper"] ** 2))
+    assert abs(ratio_db) > 0.25
+    assert np.array_equal(a.components["voiced"], b.components["voiced"])
+    assert all(np.array_equal(a.labels[k], b.labels[k], equal_nan=True) for k in a.labels)
+
+
 @pytest.mark.parametrize("how", ["f1_near_h1", "f1_near_h2", "f2_f3_close"])
 def test_constraints_keep_formants_ordered(how):
     clip = generate(5, SynthConfig(formant_constraint=how, p_register_step=0))
