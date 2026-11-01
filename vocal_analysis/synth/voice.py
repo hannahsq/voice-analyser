@@ -28,6 +28,11 @@ from scipy.signal import butter, sosfilt
 from . import filters
 from .glottal import source_coefficients
 
+# the noise sources live in `noise.py` (D-064); imported here because this module's noise components
+# and every caller used to read them from `voice`
+from .noise import (ASPIRATION_FLAT_BELOW_HZ, WHISPER_FLAT_BELOW_HZ, aspiration_component, band_energy,  # noqa: F401
+                    level_gain, noise_source, tilted_noise, whisper_component, whisper_noise)
+
 FS = 16000
 CTRL = 16  # samples per control point (1 ms)
 NYQ_TAPER_HZ = (7400.0, 7800.0)  # harmonics fade out across this band
@@ -173,24 +178,7 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
 # whisper and /h/ noise is not rescaled to a level by the caller (aspiration is, by HNR): with a 50 Hz floor, -12 dB/oct
 # gave +52 dB at 50 Hz re 1 kHz and an /h/ louder than the vowel (D-064). So its tilt stops below 500 Hz and the noise
 # keeps the power of the first difference of unit white noise (variance 2), the default it replaces: only the shape changes
-WHISPER_FLAT_BELOW_HZ = 500.0
-
-
-def whisper_noise(white: np.ndarray, tilt_db_oct: float | None, fs: float = 16000.0) -> np.ndarray:
-    """The whisper / /h/ source from white noise (n + 1 samples): its first difference (tilt None, every set before
-    D-063), or white noise at the tilt (flat below WHISPER_FLAT_BELOW_HZ), scaled to the first difference's power."""
-    if tilt_db_oct is None:
-        return np.diff(white)
-    x = tilted_noise(white[:-1], tilt_db_oct, fs, WHISPER_FLAT_BELOW_HZ)
-    return x * np.sqrt(2.0 / max(np.mean(x * x), 1e-30))
-
-
-def tilted_noise(white: np.ndarray, tilt_db_oct: float, fs: float = 16000.0, flat_below_hz: float = 50.0) -> np.ndarray:
-    """White noise given a spectral tilt (dB per octave re 1 kHz, flat below flat_below_hz), by FFT; same length."""
-    n = len(white)
-    f = np.fft.rfftfreq(n, 1.0 / fs)
-    gain = 10 ** (tilt_db_oct * np.log2(np.maximum(f, flat_below_hz) / 1000.0) / 20)
-    return np.fft.irfft(np.fft.rfft(white) * gain, n)
+# (WHISPER_FLAT_BELOW_HZ and both sources are in `noise.py`; D-064 moved them there from here)
 
 
 def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
@@ -232,22 +220,15 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
         te_s = _per_sample(te)
         mod = np.where(frac < te_s, 0.25 + 0.75 * np.sin(np.pi * frac / te_s) ** 2, 0.25)
         white = rng.standard_normal(n + 1)
-        if asp_tilt_db_oct is None:
-            src = np.diff(white) * mod * va
-        else:
-            src = tilted_noise(white[:n], asp_tilt_db_oct, fs) * mod * va
-        asp = tract_filter(src, traj, fs)
-        on = va > 0.5 * va.max() if va.max() > 0 else np.zeros(n, bool)
-        if on.any():
-            ev, ea = np.mean(voiced[on] ** 2), np.mean(asp[on] ** 2)
-            if ea > 0:
-                asp *= np.sqrt(ev / ea / 10 ** (hnr_db / 10))
-        out["aspiration"] = asp
+        out["aspiration"] = aspiration_component(
+            white, mod, va, voiced, tilt_db_oct=asp_tilt_db_oct, tract=lambda x: tract_filter(x, traj, fs),
+            hnr_db=hnr_db, fs=fs)
     wa = _per_sample(traj.whisper_amp)
     if wa.any():
         white = rng.standard_normal(n + 1)
-        noise = whisper_noise(white, whisper_tilt_db_oct, fs)
-        out["whisper"] = tract_filter(noise * wa, traj, fs) * 0.05
+        out["whisper"] = whisper_component(
+            white, wa, tilt_db_oct=whisper_tilt_db_oct, tract=lambda x: tract_filter(x, traj, fs), fs=fs,
+            level="legacy")
     fa = _per_sample(traj.fric_amp)
     if fa.any():
         sos = butter(4, rng.uniform(2000, 5000), "highpass", fs=fs, output="sos")

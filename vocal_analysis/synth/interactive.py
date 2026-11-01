@@ -354,7 +354,8 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
     from scipy.signal import butter, sosfilt
 
     from . import filters
-    from .voice import CTRL, _per_sample, tilted_noise, whisper_noise
+    from .noise import aspiration_component, whisper_component
+    from .voice import CTRL, _per_sample
 
     n = traj.n_samples
     src = glottal_area_track(traj, glottis, sq, rng, jitter, shimmer_db, fs, closure, ret)
@@ -364,20 +365,15 @@ def synthesize(traj, responses: list[TractResponses], block_target: np.ndarray, 
     h = np.stack([r.h for r in responses])
     if hnr_db is not None:
         white = rng.standard_normal(n + 1)
-        noise = np.diff(white) if asp_tilt_db_oct is None else tilted_noise(white[:n], asp_tilt_db_oct, fs)
-        src = noise * (0.25 + 0.75 * pulse) * va
-        asp = _convolve_tv(src, h, bt, bw, CTRL)
-        on = va > 0.5 * va.max() if va.max() > 0 else np.zeros(n, bool)
-        if on.any():
-            ev, ea = np.mean(out["voiced"][on] ** 2), np.mean(asp[on] ** 2)
-            if ea > 0:
-                asp *= np.sqrt(ev / ea / 10 ** (hnr_db / 10))
-        out["aspiration"] = asp
+        out["aspiration"] = aspiration_component(
+            white, 0.25 + 0.75 * pulse, va, out["voiced"], tilt_db_oct=asp_tilt_db_oct,
+            tract=lambda x: _convolve_tv(x, h, bt, bw, CTRL), hnr_db=hnr_db, fs=fs)
     wa = _per_sample(traj.whisper_amp)
     if wa.any():
         white = rng.standard_normal(n + 1)
-        noise = whisper_noise(white, whisper_tilt_db_oct, fs)
-        out["whisper"] = _convolve_tv(noise * wa, h, bt, bw, CTRL) * 0.05
+        out["whisper"] = whisper_component(
+            white, wa, tilt_db_oct=whisper_tilt_db_oct, tract=lambda x: _convolve_tv(x, h, bt, bw, CTRL), fs=fs,
+            level="legacy")
     fa = _per_sample(traj.fric_amp)
     if fa.any():
         sos = butter(4, rng.uniform(2000, 5000), "highpass", fs=fs, output="sos")

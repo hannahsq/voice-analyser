@@ -27,8 +27,9 @@ from dataclasses import asdict, dataclass, field, replace
 import numpy as np
 
 from . import branches, coupling, interactive, kl, sampler, tract, tube
+from .noise import aspiration_component, whisper_component
 from .sampler import N_LABEL_FORMANTS, N_SOURCE_HARMONICS, SynthClip
-from .voice import CTRL, FS, Trajectories, tilted_noise, whisper_noise
+from .voice import CTRL, FS, Trajectories
 
 
 def _base() -> sampler.SynthConfig:
@@ -141,23 +142,20 @@ def generate(index: int, cfg: KLSetConfig | None = None, seed: int = 0, keep_com
         # the waveguide radiates (d/dt) its flow, so the cascade's source tilt t is a flow tilt of t - 6 dB/oct; None:
         # the first difference of white noise as flow (radiated, about +12 dB/oct: every set before D-062)
         white = rng.standard_normal(ns + 1)
-        t = sc.asp_tilt_db_oct
-        noise = (np.diff(white) if t is None else tilted_noise(white[:ns], t - 6.0, FS)) * (0.25 + 0.75 * src["pulse"][:ns]) * va
-        asp = kl.render(*args, flow=noise, **common)["audio"][:ns] / FS
-        on = va > 0.5 * va.max() if va.max() > 0 else np.zeros(ns, bool)
-        if on.any():
-            ev, ea = np.mean(out["voiced"][on] ** 2), np.mean(asp[on] ** 2)
-            if ea > 0:
-                asp *= np.sqrt(ev / ea / 10 ** (hnr / 10))
-        out["aspiration"] = asp
+        out["aspiration"] = aspiration_component(
+            white, 0.25 + 0.75 * src["pulse"][:ns], va, out["voiced"], tilt_db_oct=sc.asp_tilt_db_oct,
+            tract=lambda x: kl.render(*args, flow=x, **common)["audio"][:ns] / FS, hnr_db=hnr, fs=FS,
+            offset_db=-6.0)
     from .voice import _per_sample
 
     wa = _per_sample(traj.whisper_amp)[:ns]
     if wa.any():
         white = rng.standard_normal(ns + 1)
-        t = sc.whisper_tilt_db_oct  # as the aspiration's: a flow tilt of t - 6 (the waveguide radiates)
-        noise = whisper_noise(white, None if t is None else t - 6.0, FS)
-        out["whisper"] = kl.render(*args, flow=noise * wa, **common)["audio"][:ns] / FS * 0.05
+        # as the aspiration's: a flow tilt of t - 6 (the waveguide radiates)
+        out["whisper"] = whisper_component(
+            white, wa, tilt_db_oct=sc.whisper_tilt_db_oct,
+            tract=lambda x: kl.render(*args, flow=x, **common)["audio"][:ns] / FS, fs=FS, offset_db=-6.0,
+            level="legacy")
     fa = _per_sample(traj.fric_amp)[:ns]
     if fa.any():
         from scipy.signal import butter, sosfilt
