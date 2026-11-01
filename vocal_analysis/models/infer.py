@@ -15,6 +15,10 @@ from .teacher import Teacher, TeacherConfig
 
 def load_teacher(path: str | Path, device):
     """path "<ckpt>#ema" loads the checkpoint's moving average of the weights instead of the weights."""
+    # Inference runs convolutions through MIOpen (it doesn't go through `setup_device`'s policy). Without fast find,
+    # MIOpen searches kernels for every new input length: va analyse 1.5-2x slower, scripts over many files ~30x
+    # (D-063). Outputs are unchanged; an explicit setting wins.
+    os.environ.setdefault("MIOPEN_FIND_MODE", "FAST")
     import torch
 
     path = str(path)
