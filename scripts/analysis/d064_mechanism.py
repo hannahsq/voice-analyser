@@ -12,6 +12,11 @@ captured impulse response h). If predicted tracks measured, the mechanism is the
 by the tract.
 
     python scripts/analysis/d064_mechanism.py [clips per cell, default 4]
+
+Note (2026-11-01, after 7c8ded9): numbers from before the level fix were read from this script's output as they came;
+after the fix the KL row first read +0.0 at every tilt because it took `cap["flows"][-1]`, and the fix renders the
+as-is reference after the tilted render, so that flow is tilt-independent by construction. The KL branch now asks
+`generate(..., keep_components=True)` for the rendered components instead, as the cascade and tube branches do.
 """
 import sys
 from pathlib import Path
@@ -85,7 +90,8 @@ def _clip(args):
 
     base = replace(H._load("d059_realness").synth_config(), p_h_onset=1.0, asp_tilt_db_oct=t, whisper_tilt_db_oct=t)
     if engine == "kl":
-        c = K.generate(i, replace(K.KLSetConfig(), synth=replace(base, p_tube=1.0), p_lf_pulse=0.0), H.SEED)
+        c = K.generate(i, replace(K.KLSetConfig(), synth=replace(base, p_tube=1.0), p_lf_pulse=0.0), H.SEED,
+                       keep_components=True)
     elif engine == "tube":
         c = S.generate(i, replace(base, p_tube=1.0, p_interactive=1.0), H.SEED)
     else:
@@ -95,9 +101,10 @@ def _clip(args):
           g["end_s"] - g["start_s"] >= 0.06]
     x = np.asarray(c.audio, float)
     if engine == "kl":
-        ns = len(c.audio)
-        voiced = cap["flows"][0][1][:ns].astype(float) / FS
-        whisper = cap["flows"][-1][1][:ns].astype(float) / FS * 0.05
+        # the rendered components, not the last captured flow: D-064's level anchor renders the as-is reference
+        # after the tilted one, so `cap["flows"][-1]` is tilt-independent by construction
+        voiced = np.asarray(c.components["voiced"], float)
+        whisper = np.asarray(c.components["whisper"], float)
         h_row = None
     else:
         voiced = np.asarray(cap["comps"]["voiced"], float)
