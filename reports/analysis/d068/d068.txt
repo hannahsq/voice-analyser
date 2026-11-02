@@ -1,0 +1,25 @@
+D-068: USC 75-speaker MRI audio (dev speakers, passages r1 and r2) against PTDB-TUG dev (studio), label-free.
+Teacher v3.1 seeds 2 and 1, seed mean per file; sonorant voiced frames. No per-speaker length is shown.
+
+usc women: 19 speakers, 190 files (of 190; files with < 50 sonorant voiced frames left out)
+  sonorant voiced fraction (median file) 0.54; VTL sigma (median, log2) 0.061; formant sigma F1-F4 (cents) 172 / 83 / 64 / 118
+  within-speaker SD 2.17 % [1.77, 2.58]; between-speaker SD 4.15 % [2.77, 5.14]; reliability 0.78 [0.58, 0.88]
+  same passage, r1 against r2: median |difference| 1.13 % (95 pairs)
+
+usc men: 15 speakers, 142 files (of 142; files with < 50 sonorant voiced frames left out)
+  sonorant voiced fraction (median file) 0.50; VTL sigma (median, log2) 0.044; formant sigma F1-F4 (cents) 131 / 76 / 75 / 65
+  within-speaker SD 2.58 % [0.97, 4.07]; between-speaker SD 2.32 % [1.50, 2.85]; reliability 0.45 [0.14, 0.88]
+  same passage, r1 against r2: median |difference| 0.73 % (71 pairs)
+
+ptdb women: 6 speakers, 60 files (of 60; files with < 50 sonorant voiced frames left out)
+  sonorant voiced fraction (median file) 0.21; VTL sigma (median, log2) 0.036; formant sigma F1-F4 (cents) 111 / 50 / 35 / 35
+  within-speaker SD 2.45 % [1.91, 2.89]; between-speaker SD 3.99 % [0.69, 5.30]; reliability 0.73 [0.05, 0.85]
+
+ptdb men: 6 speakers, 60 files (of 60; files with < 50 sonorant voiced frames left out)
+  sonorant voiced fraction (median file) 0.21; VTL sigma (median, log2) 0.041; formant sigma F1-F4 (cents) 83 / 44 / 39 / 47
+  within-speaker SD 2.70 % [2.15, 3.04]; between-speaker SD 3.36 % [1.26, 4.29]; reliability 0.61 [0.15, 0.78]
+
+women: within-SD ratio USC / PTDB 0.89, USC reliability 0.78, sigma ratio 1.67 -> doubtful
+men: within-SD ratio USC / PTDB 0.96, USC reliability 0.45, sigma ratio 1.09 -> usable
+
+VERDICT: the MRI audio is doubtful for checking vocal-tract length
