@@ -31,8 +31,8 @@ LOCKBOX = ("mocha_timit",)  # not yet looked at, too small to split
 # Single speakers kept in the lockbox whatever their corpus's split (D-035): the USC 75-speaker MRI set's 16 speakers
 # with hand-drawn contours in 75-Speaker Annot-16, its best anatomical (MRI midline) VTL references
 LOCKBOX_SPEAKERS = frozenset(f"usc75:sub{n:03d}" for n in (9, 13, 22, 23, 28, 30, 34, 43, 47, 61, 64, 68, 70, 71, 72, 74))
-# The USC set's other 59 speakers (D-066): semi-private are the 25 that vtl-mri's V-012 keeps test-only (its labels are
-# never trained on, so their MRI lengths are the cleanest); the other 34 are dev. Taken from V-012's split (seeded,
+# The USC set's other 59 speakers (D-066): semi-private are the 25 in vtl-mri's evaluation set (V-012), which get dense
+# hand labels; the other 34, sparsely labelled, are dev. Taken from V-012's split (seeded,
 # stratified by sex, fixed before any of them was labelled or measured) rather than drawn again, so the tiers nest.
 USC75_SEMI = frozenset(f"usc75:sub{n:03d}" for n in (2, 3, 4, 5, 7, 20, 21, 25, 27, 31, 32, 35, 36, 38, 41, 45, 46, 48,
                                                      49, 50, 53, 62, 69, 73, 75))

@@ -2350,8 +2350,10 @@ sex (no per-speaker lengths were looked at for choosing anything). Set now, befo
   069, 073, 075; 11 men, 14 women); **dev** are the other 34; the 16 Annot-16 speakers stay **lockbox** (D-035).
 - *Why V-012's split and not a fresh draw*: V-012 drew it with a seed, stratified by sex, and committed it (vtl-mri
   `4b4582a`, 2026-11-01) before any of these speakers was labelled or measured, so it was not chosen knowing any
-  length. Reusing it makes the tiers nest: semi-private speakers' MRI lengths come from labels the contour model is
-  never trained on, which is what a confirmation set needs; dev speakers' labels may be trained on, which is fine for
-  the set every decision is made on. An independent draw would put trained-on speakers into semi-private. 34 / 59 is
-  0.58, close to `DEV_FRAC`.
+  length. Reusing it gives each tier its references by how well the lengths are known (Hannah): the lockbox's 16
+  have the densest hand labels; the 25 semi-private speakers are vtl-mri's evaluation set and will be densely
+  hand-labelled for its acceptance, so their lengths are measured largely by hand; the 34 dev speakers have sparse
+  labels, with lengths measured mostly by the contour model. Whether the contour model trained on a speaker's images
+  does not matter here: it makes that speaker's length no worse, and "held out" only matters for vtl-mri's own
+  accuracy estimate. 34 / 59 is 0.58, close to `DEV_FRAC`.
 - *Not changed*: the audio rule. No voice model has been run on any of these speakers.
