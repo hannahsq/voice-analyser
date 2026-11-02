@@ -14,6 +14,7 @@ A voice analyser: f0, voicing, formants F1–F4 with bandwidths, and related mea
 ## Running
 
 - Tests: `.venv/Scripts/python.exe -m pytest -q` (Windows venv; GPU via ROCm, `VA_DEVICE=cuda`). The default run is the full suite; `-m "not slow"` skips tests marked `@pytest.mark.slow` (over ~10 s each) for a quick loop.
+- **Golden synthesiser tests** (`tests/test_synth_golden.py`): hashes of 13+ clips across every engine and noise branch. Cascade and tube are a frozen contract (train_v1, train_v2 and suite_v1 were rendered from them): a synthesis change must leave their default cases identical. KL has never been used for training, so its cases record current behaviour and may be regenerated. Regenerate only on purpose, with a reason: `.venv/Scripts/python.exe tests/test_synth_golden.py write --reason "D-xxx: what changed"`.
 - Training and evaluation: `va train teacher ...`, `va eval teacher ...`, `va baselines ...` (`--tiers`, dev by default).
 
 ## Rules that are not optional
@@ -41,3 +42,13 @@ A voice analyser: f0, voicing, formants F1–F4 with bandwidths, and related mea
 - **Check a hypothesis can hold before pre-registering it**: estimate the measure's noise floor (e.g. a shuffle null; a small effect seen once may be sampling noise), and trace the code path to confirm the proposed cause can reach what is measured.
 - **Committed reports are immutable.** A correction or a new layout goes into a new file, with a dated note in the decision log or plan pointing to it; the original stays as the record of what was reported then (the git history is to be archived with a DOI).
 - **Commit messages** say what changed and why, referencing D-xxx.
+
+## Sandboxed agents
+
+Some agents run in a sandbox where every write or run outside the workspace needs an elevation request. For them:
+
+- **`scratchpad/`** (in `.git/info/exclude`, so local only): working notes, handovers and throwaway checks. Nothing there is a record; a conclusion moves into `docs/decisions.md` (and any script a decision cites into `scripts/analysis/`).
+- **Tests**: `-p no:cacheprovider --basetemp=scratchpad/pytest`, since the sandbox can't use the system temp folder (`tmp_path`) and strands undeletable `pytest-cache-files-*` folders. Don't use `--basetemp` from two sessions at once: pytest clears it at the start of each run.
+- **No process pools**: `ProcessPoolExecutor` and other multiprocessing fail there (`WinError 5` creating the workers' pipes); run such scripts serially (e.g. `d064_level.py --serial`) or ask Hannah to run them.
+- No `os.mkdir(..., 0o700)` or `tempfile.mkdtemp()` in tool-run Python.
+- **Stay off the GPU while a chain is running** (`runs/orchestrator.log`), and never run GPU work after a permissions elevation: on 2026-11-01 that left every GPU process segfaulting until a reboot, and it stopped D-065.
