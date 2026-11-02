@@ -67,3 +67,14 @@ def test_suite_report_reads_only_the_named_tiers(tmp_path, capsys):
     assert "semi-private" in report._tiers_line(["dev", "semi"]) and "every gold speaker" in report._tiers_line(None)
     assert _tiers_arg("dev") == ("dev",) and "Log this use" not in capsys.readouterr().out
     assert _tiers_arg("semi,dev") == ("dev", "semi") and "Log this use" in capsys.readouterr().out
+
+
+def test_usc75_tiers_nest_with_vtl_mri_split():
+    """D-066: the 16 Annot-16 speakers lockbox, vtl-mri V-012's 25 test-only speakers semi, the other 34 dev."""
+    ids = [f"usc75:sub{n:03d}" for n in range(1, 76)]
+    a = tiers.assign(ids)
+    assert {s for s in ids if a[s] == "lockbox"} == tiers.LOCKBOX_SPEAKERS
+    assert {s for s in ids if a[s] == "semi"} == tiers.USC75_SEMI and len(tiers.USC75_SEMI) == 25
+    assert sum(a[s] == "dev" for s in ids) == 34
+    t = tiers.load()
+    assert {s: t[s] for s in ids} == a

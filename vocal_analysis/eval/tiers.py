@@ -31,6 +31,11 @@ LOCKBOX = ("mocha_timit",)  # not yet looked at, too small to split
 # Single speakers kept in the lockbox whatever their corpus's split (D-035): the USC 75-speaker MRI set's 16 speakers
 # with hand-drawn contours in 75-Speaker Annot-16, its best anatomical (MRI midline) VTL references
 LOCKBOX_SPEAKERS = frozenset(f"usc75:sub{n:03d}" for n in (9, 13, 22, 23, 28, 30, 34, 43, 47, 61, 64, 68, 70, 71, 72, 74))
+# The USC set's other 59 speakers (D-066): semi-private are the 25 that vtl-mri's V-012 keeps test-only (its labels are
+# never trained on, so their MRI lengths are the cleanest); the other 34 are dev. Taken from V-012's split (seeded,
+# stratified by sex, fixed before any of them was labelled or measured) rather than drawn again, so the tiers nest.
+USC75_SEMI = frozenset(f"usc75:sub{n:03d}" for n in (2, 3, 4, 5, 7, 20, 21, 25, 27, 31, 32, 35, 36, 38, 41, 45, 46, 48,
+                                                     49, 50, 53, 62, 69, 73, 75))
 
 
 def _group(speaker_id: str) -> str:
@@ -44,12 +49,16 @@ def _group(speaker_id: str) -> str:
 
 def assign(speakers: Iterable[str], dev_frac: float = DEV_FRAC, seed: int = SEED) -> dict[str, str]:
     """Gold speakers -> tier. Within each corpus and group, a seeded shuffle; the first round(dev_frac * n) are dev,
-    the rest semi. DEV_ONLY corpora are all dev, LOCKBOX corpora and LOCKBOX_SPEAKERS all lockbox."""
+    the rest semi. DEV_ONLY corpora are all dev, LOCKBOX corpora and LOCKBOX_SPEAKERS all lockbox; the USC set's
+    other speakers follow USC75_SEMI."""
     groups: dict[tuple[str, str], list[str]] = defaultdict(list)
     out: dict[str, str] = {}
     for s in sorted(set(speakers)):
         if s in LOCKBOX_SPEAKERS:
             out[s] = "lockbox"
+            continue
+        if s.startswith("usc75:"):
+            out[s] = "semi" if s in USC75_SEMI else "dev"
             continue
         groups[(s.split(":", 1)[0], _group(s))].append(s)
     for (corpus, grp), members in sorted(groups.items()):

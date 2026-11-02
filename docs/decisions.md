@@ -2338,3 +2338,20 @@ D-045's follow-ups: renders are too periodic below 2 kHz (women's 1–2 kHz band
 - *Consequences for the D-063 follow-up*: at -12 dB/oct the cascade's /h/ is 14.6 dB down in 1-3.5 kHz, which is the band D-063 fits the slope in. The arm must therefore floor each /h/ segment against the vowel's tail (or report the bands it can still fit), or its steepest tilt will be measuring the vowel.
 - *Notes under D-062, as D-063 promised*: (1) D-048's aspiration shape boosts the low frequencies, so after HNR normalisation its high-frequency aspiration is lower too - part of what moved the slope; (2) KL's default flow noise is the first difference as flow, so +12 dB/oct radiated against +6 elsewhere (it was a copy of the tube's noise line), and the tilt switch has a below-500 Hz mismatch: the whisper floor is 500 Hz, the aspiration's is 50 Hz, so one number gives two different low-frequency shapes.
 
+
+## D-066 (2026-11-02, Hannah; seen: vtl-mri's model lengths for 34 of the 59 speakers, as aggregates by sex): tiers for the USC 75-speaker MRI set's other 59 speakers
+
+D-035 says the 59 speakers without Annot-16 contours get their tiers "before any of them is measured". That has
+slipped: vtl-mri's V-014 ran its contour model over 32 frames each of 34 of them and recorded length aggregates by
+sex (no per-speaker lengths were looked at for choosing anything). Set now, before any per-speaker use.
+
+- *Assignment* (`tiers.USC75_SEMI`, `tiers.json`): **semi-private** are the 25 speakers vtl-mri's V-012 keeps test-only
+  (sub002, 003, 004, 005, 007, 020, 021, 025, 027, 031, 032, 035, 036, 038, 041, 045, 046, 048, 049, 050, 053, 062,
+  069, 073, 075; 11 men, 14 women); **dev** are the other 34; the 16 Annot-16 speakers stay **lockbox** (D-035).
+- *Why V-012's split and not a fresh draw*: V-012 drew it with a seed, stratified by sex, and committed it (vtl-mri
+  `4b4582a`, 2026-11-01) before any of these speakers was labelled or measured, so it was not chosen knowing any
+  length. Reusing it makes the tiers nest: semi-private speakers' MRI lengths come from labels the contour model is
+  never trained on, which is what a confirmation set needs; dev speakers' labels may be trained on, which is fine for
+  the set every decision is made on. An independent draw would put trained-on speakers into semi-private. 34 / 59 is
+  0.58, close to `DEV_FRAC`.
+- *Not changed*: the audio rule. No voice model has been run on any of these speakers.
