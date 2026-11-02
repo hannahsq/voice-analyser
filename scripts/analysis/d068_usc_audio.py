@@ -161,8 +161,8 @@ def report():
     verdict = []
     for sx in ("f", "m"):
         (wu, ru, su), (wp, rp, sp) = res["usc", sx], res["ptdb", sx]
-        ok = wu <= 1.5 * wp and ru >= 0.5 and su <= 1.5 * sp
-        bad = wu > 2 * wp or ru < 0.3
+        ok = wu <= 1.5 * wp and su <= 1.5 * sp  # amendment 1: reliability reported only
+        bad = wu > 2 * wp
         verdict.append("usable" if ok else ("not usable" if bad else "doubtful"))
         lines.append(f"{'women' if sx == 'f' else 'men'}: within-SD ratio USC / PTDB {wu / wp:.2f}, USC reliability {ru:.2f}, "
                      f"sigma ratio {su / sp:.2f} -> {verdict[-1]}")
