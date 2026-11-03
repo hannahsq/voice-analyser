@@ -2409,3 +2409,26 @@ here it goes into `ATTRIBUTION.md`.
   and method building, not for between-speaker figures (those stay with USC dev). Supersedes D-069's first rule for
   these two speakers; ArtSpeech goes into `ATTRIBUTION.md` before its audio is used.
 
+
+## D-070 (registered 2026-11-03, Hannah and Claude; nothing of ArtSpeech measured here): is ArtSpeech's MRI audio usable for checking vocal-tract length? (dev speakers P1 and P7)
+
+*Why*: D-068 asked this of USC's scanner audio (repeatable, wider sigma for women: "doubtful"). ArtSpeech is a second
+lab, scanner, denoiser and language (French), and its eight lockbox speakers are the length claim's independent check
+(D-069). Before anyone spends labelling time on that check, the two dev speakers (D-069 amendment 1) can say whether
+the audio holds up. Label-free: no length is compared with MRI, and no per-speaker length is printed or committed.
+
+- *Data*: P1 (man) and P7 (woman), all 16 sessions each (`OTHER/S<k>/DENOISED_SOUND_P<n>_S<k>.wav`, 16 kHz mono,
+  about 44 s of read French; different sentences per session, the same texts for both speakers), read from the zips
+  without unpacking. Seen before registration: file names, sizes, wav headers and the transcripts' text only.
+- *Measures* (as D-068, `scripts/analysis/d070_artspeech_audio.py`): per session, sonorant voiced frames
+  (voiced_p and sonorant_p > 0.5) of teacher v3.1 seeds 2 and 1 (seed mean): median anatomical length, its median
+  sigma, median formant sigma F1-F4. Per speaker: within-speaker SD of per-session log length (%), with a bootstrap
+  over sessions, and the median sigma. References: PTDB-TUG dev of the same sex, and USC dev of the same sex, from
+  D-068's per-file cache (same models).
+- *Rule* (per speaker, against PTDB-TUG dev of the same sex, as D-068 amendment 1): **usable** if within-speaker SD
+  <= 1.5x and median length sigma <= 1.5x; **not usable** if within-speaker SD > 2x; otherwise **doubtful**. Overall:
+  usable if both are; not usable if either is. The USC ratios are reported beside it.
+- *Caveats, written beforehand*: ArtSpeech sessions are longer than PTDB-TUG's files, which lowers a per-file SD and
+  flatters the within-speaker ratio (USC's passages share this; the USC ratio is the like-for-like one). One speaker
+  per sex, so a "doubtful" carried by one speaker is not a sex difference. Language and recording setup are
+  confounded. Between-speaker figures are not computed (two speakers).
