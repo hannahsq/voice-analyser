@@ -2432,3 +2432,15 @@ the audio holds up. Label-free: no length is compared with MRI, and no per-speak
   flatters the within-speaker ratio (USC's passages share this; the USC ratio is the like-for-like one). One speaker
   per sex, so a "doubtful" carried by one speaker is not a sex difference. Language and recording setup are
   confounded. Between-speaker figures are not computed (two speakers).
+- *Result (2026-11-03; `reports/analysis/d070/d070.txt`; all 32 sessions kept)*: **usable by the rule, for both
+  speakers.**
+  - *Stability*: within-speaker SD across sessions, P1 (man) 0.90 % [0.48, 1.16], P7 (woman) 1.80 % [1.10, 2.26];
+    ratios against PTDB-TUG dev 0.33 / 0.73, against USC dev 0.35 / 0.83. Part of that is the longer files (the
+    caveat above), but the USC ratio, like for like in length, is under 1 too.
+  - *Uncertainty*: median length sigma ratio against PTDB-TUG 1.07 (P1) and 1.42 (P7, under the 1.5 bar, close to
+    it); against USC 0.97 / 0.85. Formant sigma F1-F4 131 / 66 / 73 / 65 cents (P1) and 149 / 56 / 53 / 91 (P7):
+    between the studio and USC, with F1 the widest, as on USC.
+  - *Reading*: the woman's wider sigma recurs on a second scanner and denoiser, a little smaller than on USC; with one
+    speaker per sex it may be the speaker, not the sex. ArtSpeech's audio is at least as repeatable as USC's, so the
+    lockbox check across labs and languages (D-069) is worth its labels. Whether the lengths are *right* is still
+    untested by design.

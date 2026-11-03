@@ -1,0 +1,17 @@
+D-070: ArtSpeech MRI audio, dev speakers P1 (man) and P7 (woman), 16 sessions each, label-free.
+Teacher v3.1 seeds 2 and 1, seed mean per session; sonorant voiced frames. No per-speaker length is shown.
+References: PTDB-TUG dev and USC dev of the same sex (D-068's cache, same models).
+
+P1 (man): 16 sessions (of 16; < 50 sonorant voiced frames left out)
+  sonorant voiced fraction (median session) 0.27; VTL sigma (median, log2) 0.043; formant sigma F1-F4 (cents) 131 / 66 / 73 / 65
+  within-speaker SD 0.90 % [0.48, 1.16]
+  against PTDB-TUG man: within-SD ratio 0.33 (2.70 %), sigma ratio 1.07 (0.041) -> usable
+  against USC man (reported): within-SD ratio 0.35 (2.58 %), sigma ratio 0.97 (0.044)
+
+P7 (woman): 16 sessions (of 16; < 50 sonorant voiced frames left out)
+  sonorant voiced fraction (median session) 0.27; VTL sigma (median, log2) 0.051; formant sigma F1-F4 (cents) 149 / 56 / 53 / 91
+  within-speaker SD 1.80 % [1.10, 2.26]
+  against PTDB-TUG woman: within-SD ratio 0.73 (2.45 %), sigma ratio 1.42 (0.036) -> usable
+  against USC woman (reported): within-SD ratio 0.83 (2.17 %), sigma ratio 0.85 (0.061)
+
+VERDICT: ArtSpeech's MRI audio is usable for checking vocal-tract length
