@@ -2499,10 +2499,19 @@ high-pitched Korean speech (item 10's note) showed F2's sigma at +-40-50 cents w
   wide" factor); for probabilities, a reliability diagram (10 bins) and expected calibration error. Every cell split
   by f0 band (`f0_band_labels`: < 150, 150-300, 300-500, > 500 Hz) and, on the gold sets, by sex. Intervals by a
   bootstrap over clips (frames within a clip are correlated).
-- *Flags* (stage A, v3.1): a head is **miscalibrated** in a band if its 1-sigma coverage is outside [0.60, 0.76] or
-  its 2-sigma coverage outside [0.91, 0.98], with the clip-bootstrap interval excluding nominal and at least 20 clips
-  in the cell; a probability head if its ECE exceeds 0.05. Training minimises a proper scoring rule on train_v2, so
-  near-nominal coverage there is expected; the hard cases and resynthesised sets are the real tests.
+- *Flags* (stage A, v3.1; revised in draft 2026-11-03, before anything was measured): the threshold is stated in
+  the quantity it is about, the **sigma scale factor** s per head and f0 band: the multiplier on the model's sigma
+  that makes 1-sigma coverage nominal (s = 1 / z_q, with z_q the 0.683 quantile of |z|), the RMS of z as a
+  cross-check. A Gaussian head is **miscalibrated** in a cell if s is outside [0.87, 1.15] (more than 15 % too wide
+  or too narrow, symmetric in log), with the clip-bootstrap interval excluding 1 and at least 20 clips in the cell;
+  a probability head if its ECE exceeds 0.05.
+  - Coverage at 1 and 2 sigma is reported with the bounds +-15 % implies, 0.615-0.750 and 0.918-0.979. They are
+    asymmetric about nominal (0.683 / 0.954) because coverage saturates towards 1, not by choice.
+  - A 2-sigma coverage that disagrees with the 1-sigma-based s (beyond its interval) is reported as **non-Gaussian
+    tails**, its own flag: expected where a heat map is multimodal (a competing peak, as in item 10's Korean F2
+    case), and it means one scale factor per cell cannot fix that cell.
+  - Training minimises a proper scoring rule on train_v2, so near-nominal coverage there is expected; the hard
+    cases and resynthesised sets are the real tests.
 - *What follows*: a flagged head gets a post-hoc variance scale per head and f0 band, fitted on synthetic or
   resynthesised data only (never gold), as its own entry. D-068's and D-070's sigma comparisons are re-read in the
   light of the stage A result (a note under each, not a rerun).
