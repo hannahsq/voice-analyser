@@ -1,0 +1,11 @@
+Time reversal across a speaker change (D-050, probe 5): d065_bw_s2_b20k
+median |forward - reversed| (cents) by distance from the join (frames); cross-speaker, same-speaker, difference
+  F1  0-10: 57/42/+16  10-25: 23/39/-16  25-50: 40/40/-0  50-100: 39/43/-4  100-200: 42/43/-1  200-end: 41/42/-1
+  F2  0-10: 6/23/-18  10-25: 15/21/-6  25-50: 27/20/+7  50-100: 20/19/+1  100-200: 20/20/-0  200-end: 20/20/-1
+  F3  0-10: 2/6/-4  10-25: 6/8/-1  25-50: 11/9/+2  50-100: 8/9/-1  100-200: 9/9/-1  200-end: 9/9/+0
+  VTL 0-10: 26/9/+16  10-25: 16/10/+6  25-50: 13/10/+3  50-100: 13/10/+3  100-200: 13/9/+3  200-end: 12/9/+3
+direction arm (amendment 3): probe 1's reference resynthesis, |error| against exact labels (cents, median over items)
+  F1  forward 30  reversed 41  reversed - forward +12.3 [+8.6, +13.9]  |forward - reversed| 26  (60 items)
+  F2  forward 12  reversed 13  reversed - forward +1.0 [+0.5, +1.5]  |forward - reversed| 9  (60 items)
+  F3  forward 7  reversed 8  reversed - forward -0.3 [-0.5, +0.1]  |forward - reversed| 4  (60 items)
+  F4  forward 9  reversed 9  reversed - forward +0.4 [-0.2, +0.7]  |forward - reversed| 4  (60 items)

@@ -1,0 +1,63 @@
+Probe 'shift' (D-050): d065_bw_s2_b20k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  shiftF1/all/F1             +0.966 [+0.914, +0.997]  null -0.004 [-0.165, +0.178]  n 60/10  ideal 1
+  shiftF1/all/F2             -0.000 [-0.006, +0.003]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  shiftF1/all/F3             +0.001 [-0.001, +0.004]  null -0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  shiftF1/all/F4             +0.002 [+0.001, +0.004]  null +0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  shiftF1/all/B1             -0.281 [-0.459, -0.093]  null +0.003 [-0.102, +0.113]  n 60/10  ideal 0
+  shiftF1/all/B2             -0.092 [-0.137, -0.049]  null -0.000 [-0.023, +0.023]  n 60/10  ideal 0
+  shiftF1/all/B3             -0.056 [-0.113, -0.022]  null -0.000 [-0.019, +0.017]  n 60/10  ideal 0
+  shiftF1/all/B4             +0.003 [-0.049, +0.043]  null +0.000 [-0.015, +0.015]  n 60/10  ideal 0
+  shiftF1/all/VTL            -0.100 [-0.118, -0.082]  null +0.000 [-0.017, +0.017]  n 60/10  ideal 0
+  shiftF1/all/f0             +0.001 [+0.000, +0.003]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  shiftF1/sigma_growth/F1    sigma log2 change: ref:+0.00 shift=[0, 0.9]:+0.19 shift=[0, 0.95]:+0.09 shift=[0, 1.05]:-0.09 shift=[0, 1.1]:-0.12
+  shiftF1/sigma_growth/F2    sigma log2 change: ref:+0.00 shift=[0, 0.9]:+0.03 shift=[0, 0.95]:+0.01 shift=[0, 1.05]:-0.01 shift=[0, 1.1]:-0.02
+  shiftF1/sigma_growth/F3    sigma log2 change: ref:+0.00 shift=[0, 0.9]:+0.02 shift=[0, 0.95]:+0.01 shift=[0, 1.05]:-0.01 shift=[0, 1.1]:-0.03
+  shiftF1/sigma_growth/F4    sigma log2 change: ref:+0.00 shift=[0, 0.9]:+0.01 shift=[0, 0.95]:+0.00 shift=[0, 1.05]:-0.00 shift=[0, 1.1]:-0.01
+  shiftF1/sigma_growth/VTL   sigma log2 change: ref:+0.00 shift=[0, 0.9]:+0.05 shift=[0, 0.95]:+0.02 shift=[0, 1.05]:-0.02 shift=[0, 1.1]:-0.03
+  shiftF2/all/F1             -0.005 [-0.011, -0.002]  null +0.000 [-0.003, +0.004]  n 60/10  ideal 0
+  shiftF2/all/F2             +0.975 [+0.958, +0.997]  null -0.007 [-0.170, +0.188]  n 60/10  ideal 1
+  shiftF2/all/F3             +0.001 [-0.001, +0.007]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  shiftF2/all/F4             +0.001 [-0.002, +0.003]  null +0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  shiftF2/all/B1             +0.007 [-0.009, +0.041]  null +0.001 [-0.022, +0.024]  n 60/10  ideal 0
+  shiftF2/all/B2             +0.115 [-0.192, +0.337]  null -0.002 [-0.141, +0.144]  n 60/10  ideal 0
+  shiftF2/all/B3             -0.128 [-0.153, -0.056]  null -0.001 [-0.028, +0.026]  n 60/10  ideal 0
+  shiftF2/all/B4             -0.020 [-0.062, +0.009]  null +0.001 [-0.020, +0.022]  n 60/10  ideal 0
+  shiftF2/all/VTL            -0.079 [-0.096, -0.063]  null +0.000 [-0.014, +0.014]  n 60/10  ideal 0
+  shiftF2/all/f0             +0.002 [+0.000, +0.003]  null -0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  shiftF2/sigma_growth/F1    sigma log2 change: ref:+0.00 shift=[1, 0.9]:-0.00 shift=[1, 0.95]:+0.00 shift=[1, 1.05]:-0.00 shift=[1, 1.1]:-0.01
+  shiftF2/sigma_growth/F2    sigma log2 change: ref:+0.00 shift=[1, 0.9]:+0.16 shift=[1, 0.95]:+0.04 shift=[1, 1.05]:-0.01 shift=[1, 1.1]:-0.03
+  shiftF2/sigma_growth/F3    sigma log2 change: ref:+0.00 shift=[1, 0.9]:+0.03 shift=[1, 0.95]:+0.01 shift=[1, 1.05]:+0.00 shift=[1, 1.1]:-0.02
+  shiftF2/sigma_growth/F4    sigma log2 change: ref:+0.00 shift=[1, 0.9]:+0.04 shift=[1, 0.95]:+0.01 shift=[1, 1.05]:-0.00 shift=[1, 1.1]:+0.02
+  shiftF2/sigma_growth/VTL   sigma log2 change: ref:+0.00 shift=[1, 0.9]:+0.01 shift=[1, 0.95]:+0.00 shift=[1, 1.05]:+0.00 shift=[1, 1.1]:+0.00
+  shiftF3/all/F1             +0.010 [-0.014, +0.039]  null +0.000 [-0.007, +0.008]  n 60/10  ideal 0
+  shiftF3/all/F2             +0.011 [-0.008, +0.030]  null +0.000 [-0.008, +0.007]  n 60/10  ideal 0
+  shiftF3/all/F3             +0.973 [+0.953, +0.995]  null -0.010 [-0.180, +0.178]  n 60/10  ideal 1
+  shiftF3/all/F4             +0.006 [+0.000, +0.019]  null +0.000 [-0.003, +0.003]  n 60/10  ideal 0
+  shiftF3/all/B1             -0.092 [-0.145, +0.008]  null +0.001 [-0.025, +0.025]  n 60/10  ideal 0
+  shiftF3/all/B2             -0.016 [-0.098, +0.043]  null -0.001 [-0.026, +0.027]  n 60/10  ideal 0
+  shiftF3/all/B3             +0.438 [+0.319, +0.581]  null +0.008 [-0.196, +0.215]  n 60/10  ideal 0
+  shiftF3/all/B4             -0.061 [-0.187, +0.177]  null -0.001 [-0.052, +0.054]  n 60/10  ideal 0
+  shiftF3/all/VTL            -0.147 [-0.177, -0.118]  null -0.001 [-0.028, +0.027]  n 60/10  ideal 0
+  shiftF3/all/f0             -0.004 [-0.011, -0.002]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  shiftF3/sigma_growth/F1    sigma log2 change: ref:+0.00 shift=[2, 0.9]:+0.01 shift=[2, 0.95]:+0.01 shift=[2, 1.05]:-0.01 shift=[2, 1.1]:-0.01
+  shiftF3/sigma_growth/F2    sigma log2 change: ref:+0.00 shift=[2, 0.9]:-0.00 shift=[2, 0.95]:-0.02 shift=[2, 1.05]:+0.03 shift=[2, 1.1]:+0.07
+  shiftF3/sigma_growth/F3    sigma log2 change: ref:+0.00 shift=[2, 0.9]:+0.25 shift=[2, 0.95]:+0.10 shift=[2, 1.05]:-0.00 shift=[2, 1.1]:+0.16
+  shiftF3/sigma_growth/F4    sigma log2 change: ref:+0.00 shift=[2, 0.9]:+0.20 shift=[2, 0.95]:+0.07 shift=[2, 1.05]:-0.02 shift=[2, 1.1]:+0.00
+  shiftF3/sigma_growth/VTL   sigma log2 change: ref:+0.00 shift=[2, 0.9]:+0.02 shift=[2, 0.95]:-0.00 shift=[2, 1.05]:+0.02 shift=[2, 1.1]:+0.04
+  shiftF4/all/F1             -0.009 [-0.036, +0.003]  null +0.000 [-0.007, +0.008]  n 60/10  ideal 0
+  shiftF4/all/F2             -0.001 [-0.015, +0.020]  null +0.000 [-0.005, +0.005]  n 60/10  ideal 0
+  shiftF4/all/F3             +0.014 [+0.006, +0.027]  null +0.000 [-0.003, +0.003]  n 60/10  ideal 0
+  shiftF4/all/F4             +0.929 [+0.915, +0.962]  null -0.001 [-0.171, +0.172]  n 60/10  ideal 1
+  shiftF4/all/B1             +0.089 [+0.040, +0.140]  null +0.000 [-0.025, +0.022]  n 60/10  ideal 0
+  shiftF4/all/B2             +0.072 [-0.027, +0.188]  null -0.000 [-0.030, +0.030]  n 60/10  ideal 0
+  shiftF4/all/B3             +0.380 [+0.276, +0.514]  null -0.001 [-0.068, +0.062]  n 60/10  ideal 0
+  shiftF4/all/B4             +0.295 [+0.109, +0.587]  null +0.004 [-0.142, +0.143]  n 60/10  ideal 0
+  shiftF4/all/VTL            -0.268 [-0.292, -0.231]  null +0.000 [-0.034, +0.032]  n 60/10  ideal 0
+  shiftF4/all/f0             +0.003 [+0.000, +0.009]  null -0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  shiftF4/sigma_growth/F1    sigma log2 change: ref:+0.00 shift=[3, 0.9]:-0.04 shift=[3, 0.95]:-0.02 shift=[3, 1.05]:+0.00 shift=[3, 1.1]:+0.01
+  shiftF4/sigma_growth/F2    sigma log2 change: ref:+0.00 shift=[3, 0.9]:-0.04 shift=[3, 0.95]:-0.01 shift=[3, 1.05]:-0.02 shift=[3, 1.1]:-0.01
+  shiftF4/sigma_growth/F3    sigma log2 change: ref:+0.00 shift=[3, 0.9]:+0.07 shift=[3, 0.95]:+0.01 shift=[3, 1.05]:+0.01 shift=[3, 1.1]:+0.10
+  shiftF4/sigma_growth/F4    sigma log2 change: ref:+0.00 shift=[3, 0.9]:+0.84 shift=[3, 0.95]:+0.24 shift=[3, 1.05]:+0.22 shift=[3, 1.1]:+0.75
+  shiftF4/sigma_growth/VTL   sigma log2 change: ref:+0.00 shift=[3, 0.9]:+0.24 shift=[3, 0.95]:+0.10 shift=[3, 1.05]:-0.05 shift=[3, 1.1]:+0.00

@@ -1,0 +1,78 @@
+Probe 'gain' (D-050): d065_gain_s2_b20k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  gain_0.01/change/F1        -0.0003 [-0.0126, +0.0034]  ideal 0
+  gain_0.01/change/F2        +0.0020 [-0.0001, +0.0054]  ideal 0
+  gain_0.01/change/F3        +0.0029 [+0.0003, +0.0078]  ideal 0
+  gain_0.01/change/F4        +0.0059 [+0.0019, +0.0173]  ideal 0
+  gain_0.01/change/B1        -0.0114 [-0.0552, +0.0265]  ideal 0
+  gain_0.01/change/B2        -0.0235 [-0.0351, +0.0008]  ideal 0
+  gain_0.01/change/B3        -0.0211 [-0.0475, -0.0002]  ideal 0
+  gain_0.01/change/B4        +0.0052 [-0.0340, +0.0397]  ideal 0
+  gain_0.01/change/VTL       -0.0037 [-0.0134, -0.0008]  ideal 0
+  gain_0.01/change/f0        -0.0001 [-0.0005, +0.0007]  ideal 0
+  gain_0.01/sigma_growth/F1  sigma log2 change: ref:+0.00 chain=['gain', 0.01]:+0.03
+  gain_0.01/sigma_growth/F2  sigma log2 change: ref:+0.00 chain=['gain', 0.01]:+0.05
+  gain_0.01/sigma_growth/F3  sigma log2 change: ref:+0.00 chain=['gain', 0.01]:+0.10
+  gain_0.01/sigma_growth/F4  sigma log2 change: ref:+0.00 chain=['gain', 0.01]:+0.21
+  gain_0.01/sigma_growth/VTL sigma log2 change: ref:+0.00 chain=['gain', 0.01]:+0.06
+  gain_0.03/change/F1        -0.0002 [-0.0030, +0.0005]  ideal 0
+  gain_0.03/change/F2        +0.0004 [-0.0011, +0.0015]  ideal 0
+  gain_0.03/change/F3        +0.0006 [-0.0000, +0.0011]  ideal 0
+  gain_0.03/change/F4        +0.0023 [+0.0010, +0.0036]  ideal 0
+  gain_0.03/change/B1        +0.0063 [-0.0032, +0.0214]  ideal 0
+  gain_0.03/change/B2        +0.0013 [-0.0020, +0.0088]  ideal 0
+  gain_0.03/change/B3        -0.0051 [-0.0136, +0.0035]  ideal 0
+  gain_0.03/change/B4        +0.0028 [-0.0109, +0.0190]  ideal 0
+  gain_0.03/change/VTL       -0.0012 [-0.0025, +0.0008]  ideal 0
+  gain_0.03/change/f0        -0.0000 [-0.0006, +0.0003]  ideal 0
+  gain_0.03/sigma_growth/F1  sigma log2 change: ref:+0.00 chain=['gain', 0.03]:+0.00
+  gain_0.03/sigma_growth/F2  sigma log2 change: ref:+0.00 chain=['gain', 0.03]:-0.03
+  gain_0.03/sigma_growth/F3  sigma log2 change: ref:+0.00 chain=['gain', 0.03]:+0.03
+  gain_0.03/sigma_growth/F4  sigma log2 change: ref:+0.00 chain=['gain', 0.03]:+0.04
+  gain_0.03/sigma_growth/VTL sigma log2 change: ref:+0.00 chain=['gain', 0.03]:-0.00
+  gain_0.1/change/F1         -0.0000 [-0.0004, +0.0003]  ideal 0
+  gain_0.1/change/F2         +0.0005 [-0.0004, +0.0016]  ideal 0
+  gain_0.1/change/F3         +0.0005 [-0.0001, +0.0010]  ideal 0
+  gain_0.1/change/F4         +0.0009 [+0.0006, +0.0019]  ideal 0
+  gain_0.1/change/B1         +0.0155 [+0.0115, +0.0192]  ideal 0
+  gain_0.1/change/B2         +0.0083 [+0.0016, +0.0117]  ideal 0
+  gain_0.1/change/B3         -0.0014 [-0.0090, +0.0044]  ideal 0
+  gain_0.1/change/B4         +0.0107 [-0.0021, +0.0188]  ideal 0
+  gain_0.1/change/VTL        -0.0001 [-0.0010, +0.0012]  ideal 0
+  gain_0.1/change/f0         +0.0000 [-0.0001, +0.0003]  ideal 0
+  gain_0.1/sigma_growth/F1   sigma log2 change: ref:+0.00 chain=['gain', 0.1]:-0.00
+  gain_0.1/sigma_growth/F2   sigma log2 change: ref:+0.00 chain=['gain', 0.1]:-0.03
+  gain_0.1/sigma_growth/F3   sigma log2 change: ref:+0.00 chain=['gain', 0.1]:-0.00
+  gain_0.1/sigma_growth/F4   sigma log2 change: ref:+0.00 chain=['gain', 0.1]:+0.02
+  gain_0.1/sigma_growth/VTL  sigma log2 change: ref:+0.00 chain=['gain', 0.1]:-0.01
+  gain_0.3/change/F1         -0.0001 [-0.0003, +0.0001]  ideal 0
+  gain_0.3/change/F2         +0.0001 [-0.0003, +0.0005]  ideal 0
+  gain_0.3/change/F3         +0.0000 [-0.0001, +0.0004]  ideal 0
+  gain_0.3/change/F4         +0.0006 [+0.0001, +0.0009]  ideal 0
+  gain_0.3/change/B1         +0.0068 [+0.0043, +0.0086]  ideal 0
+  gain_0.3/change/B2         +0.0040 [+0.0020, +0.0062]  ideal 0
+  gain_0.3/change/B3         -0.0021 [-0.0052, +0.0021]  ideal 0
+  gain_0.3/change/B4         +0.0030 [-0.0025, +0.0065]  ideal 0
+  gain_0.3/change/VTL        -0.0002 [-0.0007, +0.0003]  ideal 0
+  gain_0.3/change/f0         +0.0000 [-0.0002, +0.0002]  ideal 0
+  gain_0.3/sigma_growth/F1   sigma log2 change: ref:+0.00 chain=['gain', 0.3]:-0.00
+  gain_0.3/sigma_growth/F2   sigma log2 change: ref:+0.00 chain=['gain', 0.3]:-0.02
+  gain_0.3/sigma_growth/F3   sigma log2 change: ref:+0.00 chain=['gain', 0.3]:-0.01
+  gain_0.3/sigma_growth/F4   sigma log2 change: ref:+0.00 chain=['gain', 0.3]:+0.01
+  gain_0.3/sigma_growth/VTL  sigma log2 change: ref:+0.00 chain=['gain', 0.3]:-0.01
+  gain_2.0/change/F1         +0.0001 [-0.0001, +0.0002]  ideal 0
+  gain_2.0/change/F2         -0.0002 [-0.0005, +0.0000]  ideal 0
+  gain_2.0/change/F3         -0.0000 [-0.0002, +0.0001]  ideal 0
+  gain_2.0/change/F4         -0.0002 [-0.0004, -0.0000]  ideal 0
+  gain_2.0/change/B1         -0.0045 [-0.0059, -0.0027]  ideal 0
+  gain_2.0/change/B2         -0.0007 [-0.0014, +0.0008]  ideal 0
+  gain_2.0/change/B3         +0.0027 [+0.0015, +0.0035]  ideal 0
+  gain_2.0/change/B4         -0.0000 [-0.0011, +0.0015]  ideal 0
+  gain_2.0/change/VTL        +0.0001 [-0.0001, +0.0004]  ideal 0
+  gain_2.0/change/f0         -0.0001 [-0.0001, +0.0000]  ideal 0
+  gain_2.0/sigma_growth/F1   sigma log2 change: ref:+0.00 chain=['gain', 2.0]:-0.00
+  gain_2.0/sigma_growth/F2   sigma log2 change: ref:+0.00 chain=['gain', 2.0]:+0.01
+  gain_2.0/sigma_growth/F3   sigma log2 change: ref:+0.00 chain=['gain', 2.0]:+0.00
+  gain_2.0/sigma_growth/F4   sigma log2 change: ref:+0.00 chain=['gain', 2.0]:-0.01
+  gain_2.0/sigma_growth/VTL  sigma log2 change: ref:+0.00 chain=['gain', 2.0]:+0.00

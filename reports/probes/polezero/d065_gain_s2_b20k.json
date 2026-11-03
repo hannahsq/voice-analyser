@@ -1,0 +1,272 @@
+{
+ "nasal/change/F1": {
+  "point": 0.0012688525772759363,
+  "low": -0.00017366103375060504,
+  "high": 0.006066512904950317,
+  "ideal": 0.0
+ },
+ "nasal/change/F2": {
+  "point": -0.0005196640935727359,
+  "low": -0.0010846622026647879,
+  "high": -5.132947439534519e-05,
+  "ideal": 0.0
+ },
+ "nasal/change/F3": {
+  "point": -0.0005185070011188841,
+  "low": -0.0007788858232622431,
+  "high": -0.0003250928652152041,
+  "ideal": 0.0
+ },
+ "nasal/change/F4": {
+  "point": -7.3103883404535e-05,
+  "low": -0.0005435040915919842,
+  "high": 0.00012483540766439205,
+  "ideal": 0.0
+ },
+ "nasal/change/B1": {
+  "point": 0.012005090713500977,
+  "low": -0.05895495414733887,
+  "high": 0.034713029861450195,
+  "ideal": 0.0
+ },
+ "nasal/change/B2": {
+  "point": 0.03478646278381348,
+  "low": 0.01841425895690918,
+  "high": 0.048275452852248886,
+  "ideal": 0.0
+ },
+ "nasal/change/B3": {
+  "point": 0.0034432411193847656,
+  "low": -0.007297039031982422,
+  "high": 0.01119089126586914,
+  "ideal": 0.0
+ },
+ "nasal/change/B4": {
+  "point": -0.007905960083007812,
+  "low": -0.02109050750732422,
+  "high": 0.004395961761474609,
+  "ideal": 0.0
+ },
+ "nasal/change/VTL": {
+  "point": 0.0009555816650390625,
+  "low": -0.0016431808471679688,
+  "high": 0.0035927295684814453,
+  "ideal": 0.0
+ },
+ "nasal/change/f0": {
+  "point": 0.00016203428361194483,
+  "low": -3.2188497574547866e-05,
+  "high": 0.0005377378323725424,
+  "ideal": 0.0
+ },
+ "nasal/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   0.31498132207551743
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "nasal/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   0.15111579894346147
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "nasal/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.07473202329526892
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "nasal/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.12682432055714515
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "nasal/sigma_growth/VTL": {
+  "per_condition_median": [
+   0.0,
+   0.04058343044881051
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "nasal",
+    "extras": "nasal"
+   }
+  ]
+ },
+ "subglottal/change/F1": {
+  "point": 0.0009429081978611364,
+  "low": -0.0004346336063871803,
+  "high": 0.0023530824860493738,
+  "ideal": 0.0
+ },
+ "subglottal/change/F2": {
+  "point": -0.004218804646013652,
+  "low": -0.005669863905322536,
+  "high": -0.0011115895188638092,
+  "ideal": 0.0
+ },
+ "subglottal/change/F3": {
+  "point": 0.0013752887178171136,
+  "low": 0.000525201802477504,
+  "high": 0.003269483656422878,
+  "ideal": 0.0
+ },
+ "subglottal/change/F4": {
+  "point": 0.0003769658238415019,
+  "low": -0.00019194593164240104,
+  "high": 0.0010794154115423282,
+  "ideal": 0.0
+ },
+ "subglottal/change/B1": {
+  "point": -0.08743906021118164,
+  "low": -0.1049647331237793,
+  "high": -0.06418650150299077,
+  "ideal": 0.0
+ },
+ "subglottal/change/B2": {
+  "point": -0.023715734481811523,
+  "low": -0.05165505409240723,
+  "high": -0.0014181137084960938,
+  "ideal": 0.0
+ },
+ "subglottal/change/B3": {
+  "point": 0.1431293487548828,
+  "low": 0.13532590866088867,
+  "high": 0.15983009338378906,
+  "ideal": 0.0
+ },
+ "subglottal/change/B4": {
+  "point": -0.06403088569641113,
+  "low": -0.09323358535766602,
+  "high": -0.04253864288330078,
+  "ideal": 0.0
+ },
+ "subglottal/change/VTL": {
+  "point": -0.0022672414779663086,
+  "low": -0.004840254783630371,
+  "high": -0.0010776519775390625,
+  "ideal": 0.0
+ },
+ "subglottal/change/f0": {
+  "point": 3.2693893960988873e-06,
+  "low": -5.406025100536114e-05,
+  "high": 0.0001837375379913908,
+  "ideal": 0.0
+ },
+ "subglottal/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   0.043514516950411
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ },
+ "subglottal/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   0.09034345442075661
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ },
+ "subglottal/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.13751537250558618
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ },
+ "subglottal/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.0543528626670966
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ },
+ "subglottal/sigma_growth/VTL": {
+  "per_condition_median": [
+   0.0,
+   0.018134803989929504
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "subglottal",
+    "extras": "subglottal"
+   }
+  ]
+ }
+}

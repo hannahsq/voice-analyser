@@ -1,0 +1,33 @@
+Probe 'articulation' (D-050): d065_gain_s1_b20k
+items 60; beta median +nan, |beta| < 0.2: 0
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  larynx/all/F1              +0.565 [+0.176, +0.838]  null -0.001 [-0.329, +0.314]  n 60/60  ideal 1
+  larynx/all/F2              +1.088 [+0.967, +1.197]  null -0.022 [-0.221, +0.210]  n 60/60  ideal 1
+  larynx/all/F3              +1.022 [+0.969, +1.054]  null -0.021 [-0.182, +0.187]  n 60/60  ideal 1
+  larynx/all/F4              +0.999 [+0.994, +1.009]  null -0.034 [-0.176, +0.183]  n 60/60  ideal 1
+  larynx/all/B1              -0.977 [-2.199, -0.618]  null +0.010 [-0.433, +0.476]  n 60/60  ideal 1
+  larynx/all/B2              +1.061 [-0.140, +3.474]  null +0.024 [-0.639, +0.764]  n 60/60  ideal 1
+  larynx/all/B3              +1.146 [+0.853, +1.464]  null -0.012 [-0.258, +0.239]  n 60/60  ideal 1
+  larynx/all/B4              +0.526 [+0.400, +0.632]  null -0.007 [-0.128, +0.109]  n 60/60  ideal 1
+  larynx/all/VTL             +1.109 [+1.040, +1.249]  null -0.004 [-0.193, +0.198]  n 60/60  ideal 0
+  larynx/all/f0              +0.001 [-0.001, +0.004]  null +0.000 [-0.001, +0.002]  n 59/59  ideal 0
+  larynx/sigma_growth/F1     sigma log2 change: ref:+0.00 pg=-0.4:-0.00 pg=-0.2:-0.01 pg=0.2:+0.00 pg=0.4:+0.02
+  larynx/sigma_growth/F2     sigma log2 change: ref:+0.00 pg=-0.4:+0.01 pg=-0.2:+0.00 pg=0.2:-0.01 pg=0.4:+0.01
+  larynx/sigma_growth/F3     sigma log2 change: ref:+0.00 pg=-0.4:+0.03 pg=-0.2:-0.00 pg=0.2:-0.03 pg=0.4:-0.04
+  larynx/sigma_growth/F4     sigma log2 change: ref:+0.00 pg=-0.4:-0.07 pg=-0.2:-0.04 pg=0.2:+0.06 pg=0.4:+0.04
+  larynx/sigma_growth/VTL    sigma log2 change: ref:+0.00 pg=-0.4:+0.03 pg=-0.2:+0.00 pg=0.2:+0.01 pg=0.4:+0.03
+  lips/all/F1                +1.050 [+0.998, +1.075]  null -0.022 [-0.231, +0.212]  n 60/60  ideal 1
+  lips/all/F2                +0.984 [+0.948, +1.019]  null -0.029 [-0.219, +0.208]  n 60/60  ideal 1
+  lips/all/F3                +1.042 [+0.943, +1.138]  null -0.030 [-0.245, +0.213]  n 60/60  ideal 1
+  lips/all/F4                +1.003 [+0.952, +1.040]  null -0.055 [-0.233, +0.212]  n 60/60  ideal 1
+  lips/all/B1                +1.235 [+0.809, +1.478]  null -0.025 [-0.249, +0.245]  n 60/60  ideal 1
+  lips/all/B2                +0.184 [-0.019, +0.338]  null -0.009 [-0.170, +0.158]  n 60/60  ideal 1
+  lips/all/B3                +0.739 [+0.641, +0.863]  null +0.004 [-0.176, +0.177]  n 60/60  ideal 1
+  lips/all/B4                +0.641 [+0.337, +1.081]  null -0.010 [-0.221, +0.210]  n 60/60  ideal 1
+  lips/all/VTL               +0.856 [+0.814, +0.907]  null -0.014 [-0.186, +0.200]  n 60/60  ideal 0
+  lips/all/f0                +0.001 [-0.001, +0.002]  null -0.000 [-0.001, +0.001]  n 59/59  ideal 0
+  lips/sigma_growth/F1       sigma log2 change: ref:+0.00 pm=-0.25:-0.03 pm=0.4:+0.04 pm=0.8:+0.08
+  lips/sigma_growth/F2       sigma log2 change: ref:+0.00 pm=-0.25:+0.04 pm=0.4:-0.03 pm=0.8:-0.05
+  lips/sigma_growth/F3       sigma log2 change: ref:+0.00 pm=-0.25:+0.04 pm=0.4:-0.04 pm=0.8:-0.05
+  lips/sigma_growth/F4       sigma log2 change: ref:+0.00 pm=-0.25:-0.02 pm=0.4:+0.06 pm=0.8:+0.15
+  lips/sigma_growth/VTL      sigma log2 change: ref:+0.00 pm=-0.25:+0.01 pm=0.4:+0.00 pm=0.8:+0.01
