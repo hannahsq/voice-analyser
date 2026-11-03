@@ -1,0 +1,14 @@
+D-065 arm bw: against 5b, seeds paired
+  d065_bw_s1_b20k vs d040_5b_s1_b20k: (P) arm C w_label 0.335 -> 0.704 (0.58 0.77 0.78 0.69); probe 7 slope 0.574 -> 0.631 (0.55 0.65 0.69 0.64)
+    synthetic F1-F4 +0.0 -1.2 +0.2 -1.3 SE, RPA +0.00 | dev Hillenbrand F1/F2/F3 +0.6/+1.4/-5.5  RPA -0.7  cp women F1 |error| -1.1 (signed bias +4.3 -> +7.1 Hz) | length (s1): [-0.003, +0.048], w/m 0.861, probe excess +0.5 c/oct
+    criteria P/1/2/3 ['no', 'yes', 'yes', 'yes']
+  d065_bw_s2_b20k vs d040_5b_s2_b20k: (P) arm C w_label 0.317 -> 0.687 (0.55 0.76 0.75 0.69); probe 7 slope 0.571 -> 0.643 (0.54 0.68 0.72 0.64)
+    synthetic F1-F4 -1.1 -2.3 -2.4 -1.2 SE, RPA +0.01 | dev Hillenbrand F1/F2/F3 +0.8/+0.6/+3.5  RPA +0.3  cp women F1 |error| -0.7 (signed bias +4.1 -> +4.8 Hz) | length (s2): [-0.045, +0.010], w/m 0.854, probe excess -0.1 c/oct
+    criteria P/1/2/3 ['no', 'yes', 'no', 'yes']
+
+Seed means: (P) w_label +0.369, probe7 slope +0.065 | synthetic F1-F4 -0.6 -1.7 -1.1 -1.3 SE, RPA +0.01 | dev Hillenbrand F1/F2/F3 +0.7/+1.0/-1.0  RPA -0.2  cp women F1 |error| -0.9 | length (bw-5b): [-0.015, +0.020], w/m 0.857, probe excess +0.2 c/oct
+(P) primary: NO; (1) no formant cost: yes; (2) length not worse: yes; (3) f0 guard: yes
+  reported: d065_bw_s1_b20k eval_extra:train_bw_v1 (last eval): F1_mae_hz 21.78, F2_mae_hz 42.09, F3_mae_hz 61.41, F4_mae_hz 89.78
+  reported: d065_bw_s2_b20k eval_extra:train_bw_v1 (last eval): F1_mae_hz 21.91, F2_mae_hz 43.17, F3_mae_hz 59.6, F4_mae_hz 87.24
+
+DECISION: arm bw does not join; 5b's recipe stays (NOT ROBUST TO THE SEED: the seeds disagree on a criterion)

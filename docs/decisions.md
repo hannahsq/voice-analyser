@@ -2326,6 +2326,25 @@ D-045's follow-ups: renders are too periodic below 2 kHz (women's 1–2 kHz band
   - *Reported, deciding nothing*: women's signed closed-phase F1 bias per seed (the register's 1 kHz lead: wider training bandwidths make the envelope peak and the pole disagree more often); probe 13 at x0.3, x0.1 and x0.01; every other probe in the suite.
 - *Order and cost*: gain s1, gain s2, then bw s1, bw s2, about 8.7 h each; the bw set renders on 6 CPU workers during gain's training (about 100,000 clips; D-051's long set, the same amount of audio, took about 2 h on 12), which may slow that training by the 15-36 % seen under CPU load. Gain's scoring overlaps bw's training. About 37 h in all.
 - *Restart (2026-11-02)*: gain s1's 16,000 steps finished (2026-11-01 18:04), but its decay branch segfaulted at start-up, as did every GPU process at that time (another agent's sandbox, run after a permissions elevation; not this entry's code). The bw set had finished cleanly at 16:30, before the D-064 synthesis changes, which leave default renders byte-identical anyway. Both chains restarted from the decay step, unchanged; the scoring chain now reads the closed-phase cache at `cache/m3w` (moved from the session scratchpad, which keeps a junction to it). No result had been seen. The first restart (2026-11-02 20:22) segfaulted the same way: every torch GPU call failed with an access violation. Running after a reboot, with the sandbox's explicit low-integrity labels on `C:\github` and the repos set back to medium, the GPU test passed and the decay branch ran (from 20:33).
+- *Result (2026-11-03; `reports/analysis/d065/decide_d065_{gain,bw}.txt`, `vtl_joint_{gain,bw}.txt`)*: **neither arm
+  joins; 5b's recipe stays. Hannah: logged, to revisit later.** Both decisions are flagged NOT ROBUST TO THE SEED.
+  - *gain*: the primary holds clearly (probe 13 at x0.03, mean |B| ratio 0.30 on seed means, 0.43 / 0.17 by seed;
+    mean |F| excess -3.9 cents; at x0.01 B falls from about 110 to 20 cents), formants and f0 hold, but **(2) length
+    fails narrowly**: Hillenbrand reliability against 5b [-0.030, +0.002] (bar -0.02), carried by seed 2 (s1
+    [-0.019, +0.032], s2 [-0.056, -0.014]); the seeds also disagree on (1).
+  - *bw*: the guards hold (length [-0.015, +0.020], w/m 0.857; formants within margins), but **the primary fails on
+    one half**: probe 12's weight on the true bandwidth more than doubles (0.33 -> 0.70, +0.37; bar +0.10), while probe
+    7's bandwidth slope rises only +0.065 (bar +0.10). Seed 2 also fails (2) alone.
+  - *Seed spread, found after the decision (Hannah asked whether gain's length failure is real)*: 5b's own seeds differ
+    by +0.034 [+0.005, +0.060] in Hillenbrand reliability (s2 - s1, `vtl_joint_gain.txt`), the size of gain s2's
+    "failure" against 5b s2 (-0.035); both gain seeds sit close to 5b s1 (+0.008, -0.002), and gain's seeds agree with
+    each other within 0.01. So the paired design matched gain s2 with 5b's good draw; the result stands under the rule.
+  - *Reported*: women's signed closed-phase F1 bias, 5b -> arm, s1 / s2: gain +4.3 -> +6.2 / +4.1 -> +3.5 Hz; bw +4.3
+    -> +7.1 / +4.1 -> +4.8 Hz (no consistent direction for gain; bw up on both seeds, a weak lead for the register's
+    bandwidth idea).
+  - *For a revisit (not registered)*: a third seed of 5b and of gain, decided on three-seed means with the same rule
+    (5b s3 would also tighten every comparison against 5b); for bw, whether probe 7's bar was set too high for a
+    resynthesis probe whose slope moves less than probe 12's on the same change.
 
 ## D-064 (2026-11-01, registered after the fact: a code and level-policy change, checked against the goldens, D-059's clips and D-063's tilt grid; no experiment arm runs yet): the whisper and /h/ level is anchored to the as-is render after the tract, so a spectral tilt moves only the shape
 
