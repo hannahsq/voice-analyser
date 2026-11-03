@@ -2369,7 +2369,34 @@ sex (no per-speaker lengths were looked at for choosing anything). Set now, befo
 - *Per frame* (from vtl-mri's export): midline length, glottis height and lip protrusion against fixed landmarks, timestamp and audio offset, QC values. Scored against a model's instantaneous output on sonorant voiced 10 ms frames within each MRI frame's span.
 - *Per speaker, anatomical*: each frame's length adjusted to a reference posture, L_adj = L - b_g (g - g_ref) - b_l (p - p_ref), with g glottis height and p lip protrusion, g_ref / p_ref per-sex medians, and b_g / b_l fitted within speaker on **dev** only (pooled over speakers, so the slope isn't any one speaker's); then the median of L_adj over frames that pass QC. This matches the synthetic labels' definition (anatomical length fixed while `pg_cm` / `pm_cm` move the instantaneous length). The plain median of L is reported beside it.
 - *Masking*, fixed before any voice model is run on these speakers, and never from a voice model's output (that would bias the reference towards the model): vtl-mri's QC (shape checks, jumps against neighbouring frames, the contour model's own spread), thresholds chosen on vtl-mri's hand-labelled frames by errors caught against good frames dropped; then here, frames more than 3 robust SDs from the speaker's L_adj median. The fraction masked is reported per speaker; a speaker who loses more than half their frames is excluded and named.
-- *Use by tier*: dev, the calibration (formant-derived and head lengths to MRI) and the choice of estimator; semi-private, one logged confirmation; lockbox (the 16), once at the milestone acceptance that ships a length output.
+- *Use by tier* (revised 2026-11-03, after D-069 amendment 1 and D-070; replaces the line first drafted here):
+  - *Dev* (USC's 34, ArtSpeech P1 and P7): build the methods (frame matching, masking, posture adjustment, effective
+    against anatomical, per frame against speaker medians), each change logged. Frame-level methods are checked on P1
+    and P7 first (in-sample reference, the most accurate per frame); between-speaker figures (women / men ratio,
+    within-sex correlation, calibration slope) come from USC dev. Once settled, a dev length score joins the probe
+    suite as a guard-rail for training arms; MRI audio is never trained on and never fits synthesis priors.
+  - *Semi-private* (USC's 25, vtl-mri's densely hand-labelled eval set): one logged confirmation per candidate model
+    or settled method version, never a choice between arms; scored against the hand labels and vtl-mri's model, which
+    also measures what the model reference costs.
+  - *Lockbox*, once per milestone, rule set beforehand, two claims reported separately: same lab (USC's 16; say
+    whether their reference avoids Annot-16's labels) and across labs and languages (ArtSpeech's 8, D-069; D-070 found
+    the audio usable).
+  - *Order*: vtl-mri's eval set and reference error; this entry registered with thresholds from it; dev work; the dev
+    probe; semi at a release candidate; lockbox at the milestone.
+- *Pooling across tiers* (2026-11-03): dev is where the methods are tuned, so dev figures are optimistic for any
+  measure that depends on those choices.
+  - The primary result is the untouched tier alone (semi at semi use, lockbox at lockbox use); pass or fail is decided
+    there.
+  - Pooled figures ({dev, semi} at semi use, {dev, semi, lockbox} at lockbox use) are secondary and descriptive, for
+    precision, labelled as pooled with each tier's speaker count.
+  - Each pooled figure is reported beside a tier-difference check; if the held-out tier is clearly worse than dev (its
+    interval excludes dev's estimate), the pooled figure isn't quoted and the gap is the finding.
+  - Exception: a measure fully specified before dev was looked at, with nothing tuned against it (e.g. the
+    reference's error from hand labels), may pool freely, if its registration says so.
+  - *Power first*: before registration, estimate what each tier can detect given the reference noise (about 17
+    speakers per sex in USC dev and 12 in semi: a within-sex correlation of about 0.5 or more). A test that can't
+    reach its effect size even pooled is descriptive, not a criterion. More labs (each its own claim, most likely
+    lockbox, after a D-070-style audio check) add independence; pooling only adds speakers from the same setups.
 - *Criteria, to set before semi-private is opened* (shapes only; values against the reference's noise floor): Spearman correlation within sex above a floor; calibrated median absolute error per speaker below a fraction of the between-speaker SD; women / men ratio inside the MRI's interval; interval coverage near nominal; and, if an instantaneous output is proposed, per-frame tracking of L - L_adj (larynx and lips) with a slope near 1. Clean-speech checks alongside, since the scanner audio is noise-cancelled AAC.
 
 ## D-068 (2026-11-02, registered before any of this audio was extracted or analysed; descriptive, with one verdict): is the USC 75-speaker MRI audio usable for checking vocal-tract length?
