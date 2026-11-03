@@ -80,8 +80,10 @@ def test_usc75_tiers_nest_with_vtl_mri_split():
     assert {s: t[s] for s in ids} == a
 
 
-def test_artspeech_all_lockbox():
-    """D-069: ArtSpeech's 10 speakers are all lockbox, whatever their sex."""
+def test_artspeech_tiers():
+    """D-069 amendment 1: ArtSpeech's P1 and P7 (vtl-mri's training speakers) are dev, the other 8 lockbox."""
     ids = [f"artspeech:P{n}" for n in range(1, 11)]
-    assert set(tiers.assign(ids).values()) == {"lockbox"}
-    assert all(tiers.tier_of(s, {}) == "lockbox" for s in ids)
+    dev = {"artspeech:P1", "artspeech:P7"}
+    want = {s: "dev" if s in dev else "lockbox" for s in ids}
+    assert tiers.assign(ids) == want
+    assert {s: tiers.tier_of(s, {}) for s in ids} == want

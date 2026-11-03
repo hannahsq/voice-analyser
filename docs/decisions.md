@@ -2398,3 +2398,14 @@ set beforehand. vtl-mri may train its contour model on the *images* of two of th
 with a seed, one per sex), as it does with the USC lockbox speakers' images (D-035). Before ArtSpeech audio is used
 here it goes into `ATTRIBUTION.md`.
 
+- *Amendment 1 (2026-11-03, Hannah and Claude; still nothing of ArtSpeech measured here: no audio decoded, no model
+  run, no length compared)*: **P1 and P7, the two speakers whose images vtl-mri trains on, move to dev; the other
+  eight stay lockbox** (`tiers.ARTSPEECH_DEV`). vtl-mri never sees audio, and all ten speakers will get hand-labelled
+  frames, so what differs is the per-frame model output: in-sample for P1 and P7, held-out for the eight. The lockbox
+  should be the pessimistic case, like the general use at acceptance: a held-out reference whose error vtl-mri's eval
+  labels measure, so the slope correction for reference error applies as estimated. Dev, where masking, posture
+  adjustment and frame matching get built, gains the most accurate per-frame reference, and absorbs any selection in
+  the training pair. Two dev speakers suffice for within-speaker checks (a D-068-style repeatability and sigma check)
+  and method building, not for between-speaker figures (those stay with USC dev). Supersedes D-069's first rule for
+  these two speakers; ArtSpeech goes into `ATTRIBUTION.md` before its audio is used.
+

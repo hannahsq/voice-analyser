@@ -36,6 +36,9 @@ LOCKBOX_SPEAKERS = frozenset(f"usc75:sub{n:03d}" for n in (9, 13, 22, 23, 28, 30
 # stratified by sex, fixed before any of them was labelled or measured) rather than drawn again, so the tiers nest.
 USC75_SEMI = frozenset(f"usc75:sub{n:03d}" for n in (2, 3, 4, 5, 7, 20, 21, 25, 27, 31, 32, 35, 36, 38, 41, 45, 46, 48,
                                                      49, 50, 53, 62, 69, 73, 75))
+# ArtSpeech's two speakers whose images vtl-mri trains on (its V-023), dev here (D-069 amendment 1): their MRI reference
+# is in-sample, so they serve method building on dev and the held-out eight keep the lockbox pessimistic
+ARTSPEECH_DEV = frozenset(("artspeech:P1", "artspeech:P7"))
 
 
 def _group(speaker_id: str) -> str:
@@ -49,13 +52,16 @@ def _group(speaker_id: str) -> str:
 
 def assign(speakers: Iterable[str], dev_frac: float = DEV_FRAC, seed: int = SEED) -> dict[str, str]:
     """Gold speakers -> tier. Within each corpus and group, a seeded shuffle; the first round(dev_frac * n) are dev,
-    the rest semi. DEV_ONLY corpora are all dev, LOCKBOX corpora and LOCKBOX_SPEAKERS all lockbox; the USC set's
+    the rest semi. DEV_ONLY corpora are all dev, LOCKBOX corpora and LOCKBOX_SPEAKERS all lockbox (except ARTSPEECH_DEV); the USC set's
     other speakers follow USC75_SEMI."""
     groups: dict[tuple[str, str], list[str]] = defaultdict(list)
     out: dict[str, str] = {}
     for s in sorted(set(speakers)):
         if s in LOCKBOX_SPEAKERS:
             out[s] = "lockbox"
+            continue
+        if s in ARTSPEECH_DEV:
+            out[s] = "dev"
             continue
         if s.startswith("usc75:"):
             out[s] = "semi" if s in USC75_SEMI else "dev"
@@ -79,10 +85,12 @@ def load(path: str | Path = TIER_FILE) -> dict[str, str]:
 
 def tier_of(speaker_id: str, tiers: dict[str, str] | None = None) -> str:
     """A gold speaker's tier. Corpora missing from the file are an error, except DEV_ONLY and LOCKBOX corpora;
-    LOCKBOX_SPEAKERS are lockbox whatever the file says."""
+    LOCKBOX_SPEAKERS are lockbox and ARTSPEECH_DEV dev whatever the file says."""
     tiers = load() if tiers is None else tiers
     if speaker_id in LOCKBOX_SPEAKERS:
         return "lockbox"
+    if speaker_id in ARTSPEECH_DEV:
+        return "dev"
     if speaker_id in tiers:
         return tiers[speaker_id]
     corpus = speaker_id.split(":", 1)[0]
