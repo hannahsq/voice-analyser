@@ -2472,7 +2472,7 @@ the audio holds up. Label-free: no length is compared with MRI, and no per-speak
     lockbox check across labs and languages (D-069) is worth its labels. Whether the lengths are *right* is still
     untested by design.
 
-## D-071 (2026-11-03, draft for Hannah, not registered; nothing measured): roadmap item 10, uncertainty calibration of teacher v3.1's non-f0 heads
+## D-071 (registered 2026-11-03, stage A; seen beforehand: a 2-clip smoke run per set, for function only): roadmap item 10, uncertainty calibration of teacher v3.1's non-f0 heads
 
 *Why*: item 10 is due before M3's acceptance. D-068 and D-070 already judged audio partly by sigma ratios, M4's
 sigma gating (D-027) and the back end's Monte Carlo corrections assume the bands mean what they say, and a smoke run on
@@ -2486,29 +2486,33 @@ high-pitched Korean speech (item 10's note) showed F2's sigma at +-40-50 cents w
   observability head.) f0's sigma reported only.
 - *Data, stage A (exact labels; decides the flags)*: train_v2's held-out validation clips (the training run's own
   split, 512 clips), the hard-case suite `suite_v1` (each case separately), and the resynthesised validation sets
-  (`vocalset_val_d16k`, `zeroth_korean_val_d16k`: real sources, exact tracts). Formants and bandwidths on sonorant
-  voiced frames with labels; length on frames with a valid length label (D-035's mask); voicing and sonorant on
-  every frame.
-- *Data, stage B (dev gold, descriptive only)*: Hillenbrand dev (formants), PTDB-TUG dev (formants against the
+  (`vocalset_val_d16k`, `zeroth_korean_val_d16k`: real sources, exact tracts). Each item is the trainer's fixed
+  validation crop (its seed and the run's validation channel) at 400 frames, D-028's window, so train_v2's 2-4 s
+  clips are whole, run through `infer.analyse` as `va analyse` would. Formants and bandwidths on sonorant frames
+  with a label (as the trainer's eval; the whisper case has no voiced frames; resynthesised clips with a formant
+  weight below 0.5 left out); length on train_v2's frames with D-035's label (the suite's lengths are not masked
+  that way); voicing and sonorant on every frame of the synthetic sets only (the resynthesised sets' f0 and voicing
+  are the tracker's).
+- *Data, stage B (dev gold, descriptive only; registered in detail before it runs, after stage A)*: Hillenbrand dev (formants), PTDB-TUG dev (formants against the
   closed-phase reference, voicing against the laryngograph). The references have their own error, so instead of
   assuming one, each cell reports the **reference SD that would make 1-sigma coverage nominal** (solving
   coverage(sqrt(sigma^2 + s_ref^2)) = 0.683), to set beside what is known of the reference (D-043, D-046).
   Windowed analysis, as everywhere.
-- *Measures*: for the Gaussian heads, 1-sigma and 2-sigma interval coverage (ideal 0.683 / 0.954), the z-score
-  distribution (PIT histogram, 10 bins), Gaussian NLL, and the ratio of the RMS z to 1 (a single "too narrow / too
-  wide" factor); for probabilities, a reliability diagram (10 bins) and expected calibration error. Every cell split
-  by f0 band (`f0_band_labels`: < 150, 150-300, 300-500, > 500 Hz) and, on the gold sets, by sex. Intervals by a
-  bootstrap over clips (frames within a clip are correlated).
+- *Measures*: for the Gaussian heads, the scale factor s (below), 1-sigma and 2-sigma interval coverage (ideal
+  0.683 / 0.954) and the RMS of z; for probabilities, expected calibration error (10 equal-width bins). Every cell
+  is a set (each suite case apart) by f0 band (`f0_band_labels` on the label's f0: < 150, 150-300, 300-500,
+  > 500 Hz, "unvoiced" for whispered sonorant frames) plus "all"; on the gold sets also by sex. Intervals by a
+  bootstrap over clips (1,000 resamples; frames within a clip are correlated).
 - *Flags* (stage A, v3.1; revised in draft 2026-11-03, before anything was measured): the threshold is stated in
   the quantity it is about, the **sigma scale factor** s per head and f0 band: the multiplier on the model's sigma
-  that makes 1-sigma coverage nominal (s = 1 / z_q, with z_q the 0.683 quantile of |z|), the RMS of z as a
+  that makes 1-sigma coverage nominal (s = the 0.683 quantile of |z|; s > 1: sigma too narrow), the RMS of z as a
   cross-check. A Gaussian head is **miscalibrated** in a cell if s is outside [0.87, 1.15] (more than 15 % too wide
   or too narrow, symmetric in log), with the clip-bootstrap interval excluding 1 and at least 20 clips in the cell;
   a probability head if its ECE exceeds 0.05.
   - Coverage at 1 and 2 sigma is reported with the bounds +-15 % implies, 0.615-0.750 and 0.918-0.979. They are
     asymmetric about nominal (0.683 / 0.954) because coverage saturates towards 1, not by choice.
-  - A 2-sigma coverage that disagrees with the 1-sigma-based s (beyond its interval) is reported as **non-Gaussian
-    tails**, its own flag: expected where a heat map is multimodal (a competing peak, as in item 10's Korean F2
+  - A 2-sigma coverage that disagrees with the one s implies (2 Phi(2 / s) - 1; the clip-bootstrap interval of the
+    difference excludes 0 and the difference exceeds 0.01) is reported as **non-Gaussian tails**, its own flag: expected where a heat map is multimodal (a competing peak, as in item 10's Korean F2
     case), and it means one scale factor per cell cannot fix that cell.
   - Training minimises a proper scoring rule on train_v2, so near-nominal coverage there is expected; the hard
     cases and resynthesised sets are the real tests.
