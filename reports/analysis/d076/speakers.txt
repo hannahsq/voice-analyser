@@ -1,0 +1,19 @@
+D-076 addendum (2026-11-04; reported, deciding nothing): per speaker, the CQ slope of v3.1's F1 error (Hz per 0.1 CQ, controlling closed-phase F1 and log f0) with its OLS standard error; CQ median and SD; the closed phase's median duration (the reference's window); the error's median
+
+speaker  sex frames   slope    SE      t  CQ med  CQ SD closed ms error med error SD
+F01      f      579   +2.14  3.52  +0.61   0.461  0.109      2.19      +1.7    102.2
+F02      f      716   -3.71  2.64  -1.40   0.401  0.090      1.33      -6.5     70.0
+F04      f      644   +5.64  3.52  +1.60   0.501  0.091      2.71      +0.6     70.1
+F08      f      519   -4.22  6.43  -0.66   0.406  0.073      1.97      +6.2    142.9
+F09      f      969  -10.14  4.57  -2.22   0.416  0.061      1.83     +11.6    117.3
+F10      f      440   +1.37  3.70  +0.37   0.410  0.125      1.57     +14.4    160.0
+M01      m      705   +0.81  1.32  +0.62   0.530  0.076      4.46      +6.7     26.1
+M02      m      727   +6.70  3.74  +1.79   0.405  0.068      3.81     +11.5     75.1
+M03      m      378   -0.32  0.96  -0.33   0.572  0.098      6.12      -5.0     19.8
+M04      m      904   +2.68  1.35  +1.98   0.460  0.053      4.20      +3.7     22.8
+M07      m      554   +6.14  1.36  +4.53   0.475  0.071      3.25      +6.1     22.8
+M09      m      608   -3.34  1.59  -2.10   0.448  0.063      4.00      +8.5     24.8
+
+women: inverse-variance mean -0.87 +- 1.49; heterogeneity Q 10.0 on 5 df; slopes below 0 / above 0: 3 / 3
+men: inverse-variance mean +1.28 +- 0.56; heterogeneity Q 27.3 on 5 df; slopes below 0 / above 0: 2 / 4
+Note: frames within a speaker are not independent (neighbouring frames share cycles and utterances), so the OLS SEs are too small; read the t values as relative, not as tests.
