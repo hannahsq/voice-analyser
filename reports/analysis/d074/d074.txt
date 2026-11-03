@@ -1,0 +1,55 @@
+D-074: which resonance does v3.1's gap growth on KL renders follow? (seed mean of v3.1 s2 / s1; D-060's files)
+
+candidate shifts, Hz (CL leaky closed phase / CM cycle mean), gaps 0 / 0.1 / 0.2 / 0.3
+  Male   i    +0.0/+21.7   +0.7/+23.5   +4.6/+27.0  +11.1/+31.8
+  Male   I    +0.0/+18.6   +0.8/+20.4   +7.4/+24.9  +17.8/+31.0
+  Male   E    +0.0/ +9.0   +1.1/+10.3   +7.5/+13.8  +13.3/+16.8
+  Male   ae   +0.0/+26.4   +1.4/+29.1  +11.4/+35.8  +26.3/+44.4
+  Male   V    +0.0/ +7.8   +1.7/ +9.6  +14.7/+16.9  +36.4/+26.6  (continuation not monotonic)
+  Male   A    +0.0/+24.8   +3.2/+28.4  +23.3/+39.1  +39.0/+47.1
+  Male   O    +0.0/ -4.9   +1.9/ -3.6  +14.8/ +2.1  +37.8/+11.0  (continuation not monotonic)
+  Male   U    +0.0/+20.5   +1.3/+22.7  +11.0/+28.8  +24.7/+36.3
+  Male   o    +0.0/+27.4   +0.9/+29.8   +6.9/+34.7  +17.8/+42.0
+  Male   u    +0.0/+28.1   +0.8/+30.4   +5.5/+34.7  +13.5/+40.8
+  Female i    +0.0/+15.1   +0.2/+16.3   +1.9/+18.2   +5.3/+21.1
+  Female I    +0.0/+17.3   +0.2/+18.6   +2.9/+21.3   +9.1/+25.7
+  Female E    +0.0/+10.3   +0.3/+11.3   +3.7/+13.7  +10.2/+17.4
+  Female ae   +0.0/+23.7   +0.4/+25.6   +5.1/+29.8  +15.3/+36.4
+  Female V    +0.0/+32.9   +0.5/+35.5   +6.4/+40.9  +19.8/+49.9
+  Female A    +0.0/+24.9   +0.9/+27.2  +11.8/+34.3  +30.0/+44.1
+  Female O    +0.0/ +9.1   +0.6/+10.3   +6.6/+14.4  +20.1/+21.2  (continuation not monotonic)
+  Female U    +0.0/+20.7   +0.3/+22.3   +4.3/+25.9  +13.7/+32.0
+  Female o    +0.0/+22.4   +0.3/+24.1   +2.7/+27.0   +8.3/+31.6
+  Female u    +0.0/+19.3   +0.3/+20.7   +2.3/+23.1   +6.4/+26.7
+
+growth residual (teacher gap 0.3 - 0, minus the candidate's), median [95 %], all ten vowels (decides)
+  Male   C0:  +12.9 [  +8.0,  +21.7] Hz -> does not
+  Male   CL:   -3.4 [ -11.1,   -0.5] Hz -> does not
+  Male   CM:   +1.9 [  -3.5,   +7.0] Hz -> accounts
+  Female C0:  +12.0 [  +7.4,  +18.7] Hz -> does not
+  Female CL:   -1.5 [  -4.3,   +5.8] Hz -> accounts
+  Female CM:   +2.2 [  -3.6,   +6.9] Hz -> accounts
+
+growth residual (teacher gap 0.3 - 0, minus the candidate's), median [95 %], without V and O (reported)
+  Male   C0:   +8.2 [  +3.4,  +12.9] Hz -> does not
+  Male   CL:   -7.8 [ -14.4,   -3.1] Hz -> does not
+  Male   CM:   -3.5 [  -9.7,   +1.0] Hz -> accounts
+  Female C0:   +7.6 [  +2.6,  +12.8] Hz -> does not
+  Female CL:   -3.7 [  -6.8,   +1.2] Hz -> accounts
+  Female CM:   -3.0 [  -5.8,   +3.1] Hz -> accounts
+
+level residual (teacher error - candidate), median over files, gaps 0 / 0.1 / 0.2 / 0.3 (reported)
+  Male   C0: +23.2 / +23.9 / +35.0 / +41.1
+  Male   CL: +23.2 / +22.2 / +24.1 / +19.6
+  Male   CM: +3.1 / +2.4 / +7.1 / +2.5
+  Female C0: +30.1 / +31.3 / +40.9 / +49.5
+  Female CL: +30.1 / +30.9 / +36.1 / +36.0
+  Female CM: +11.2 / +9.7 / +14.4 / +16.7
+
+Spearman over vowels, the teacher's mean growth against the candidate's (reported)
+  Male   CL: +0.58
+  Male   CM: +0.55
+  Female CL: +0.60
+  Female CM: +0.71
+
+DECISION: the sexes disagree; reported, no reading

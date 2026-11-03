@@ -1,0 +1,16 @@
+D-075: F1 coupling shifts as the sampler draws them (2000 tube targets, train_v2c's glottal settings, draws as coupling_dist.py). Hz; percentiles 10 / 25 / 50 / 75 / 90
+
+short tract <15.5 cm (n=946): median gap 0.32, <a> 0.57, F1 643 Hz; quasi-static continuation failed on 0
+  (1) cascade leak, scale 1      +0.0 /   +3.1 /  +14.9 /  +29.0 /  +43.0   as v2c (x sc):   +0.0 /   +0.6 /   +5.3 /  +13.9 /  +24.7
+  (2) cascade mean, scale 1      -0.2 /  +16.0 /  +29.2 /  +47.3 /  +66.0   as v2c (x sc):   -0.1 /   +3.8 /  +11.7 /  +23.4 /  +39.2
+  (3) quasi-static leak, sc. 1   +0.0 /   +1.9 /  +13.1 /  +35.7 /  +61.0   as v2c (x sc):   +0.0 /   +0.4 /   +4.1 /  +15.6 /  +32.1
+  (4) quasi-static mean, sc. 1   +7.6 /  +15.5 /  +29.6 /  +52.0 /  +74.4   as v2c (x sc):   +1.4 /   +4.7 /  +12.0 /  +24.8 /  +41.8
+  cascade / quasi-static leak, median ratio per clip (|quasi-static| > 0.5 Hz, n=778): 0.94 -> within 30 %
+
+long tract >=15.5 cm (n=1054): median gap 0.32, <a> 0.58, F1 562 Hz; quasi-static continuation failed on 0
+  (1) cascade leak, scale 1      -5.0 /   +0.6 /  +11.5 /  +21.9 /  +32.8   as v2c (x sc):   -1.5 /   +0.1 /   +3.6 /  +10.9 /  +20.5
+  (2) cascade mean, scale 1     -11.2 /  +10.2 /  +22.4 /  +35.9 /  +48.3   as v2c (x sc):   -3.9 /   +2.0 /   +8.2 /  +18.5 /  +31.3
+  (3) quasi-static leak, sc. 1   +0.0 /   +1.4 /  +11.1 /  +29.8 /  +50.8   as v2c (x sc):   +0.0 /   +0.3 /   +3.6 /  +12.7 /  +27.0
+  (4) quasi-static mean, sc. 1   +1.4 /  +12.0 /  +22.8 /  +40.5 /  +57.1   as v2c (x sc):   +0.1 /   +3.1 /   +9.1 /  +19.2 /  +35.5
+  cascade / quasi-static leak, median ratio per clip (|quasi-static| > 0.5 Hz, n=870): 0.78 -> within 30 %
+
