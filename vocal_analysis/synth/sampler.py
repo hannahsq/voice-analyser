@@ -101,6 +101,10 @@ class SynthConfig:
     # the lowest this many coupled poles take the model's full shift (scale 1) instead: F1 and B1's are checked against
     # Barney et al. (2007) and Hanson's B1 increases, unlike F2-F3's (D-024, train_v2c2); 0 = all scaled (train_v2c)
     coupling_full_poles: int = 0
+    # D-078: on coupled clips, also label "formants_acoustic", each coupled pole at its cycle mean over the frame,
+    # F (1 + df <a>), <a> the rendered opening's mean over the frame's 10 ms (the cascade's own trajectory). No draw;
+    # False (no such label) reproduces earlier sets
+    acoustic_labels: bool = False
     # Interactive source (D-026), per tube clip: glottal flow from the glottal area and the tract's load
     # (`interactive`), so the tract shapes the source. Replaces the quasi-static coupling on those clips. Labels are
     # the tube's closed-glottis poles, with the area function interpolated through transitions (keyframes at quarter
@@ -536,6 +540,24 @@ def clip_tract(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> tup
     return v.length, v.length_from_f0, bool(use_tube)
 
 
+def _acoustic_formants(traj: Trajectories, cycles: np.ndarray, coupled: dict, formants: np.ndarray,
+                       fi: np.ndarray) -> np.ndarray:
+    """D-078's acoustic label: each coupled pole at its cycle mean, F (1 + df <a>), <a> the opening (as
+    `voice._voiced_coupled` renders it) averaged over the frame's 10 ms; poles above the coupled ones as labelled."""
+    from .voice import _open_phase_te, glottal_opening
+
+    te_s = _open_phase_te(traj)
+    a = glottal_opening(cycles, te_s, coupling.gap_from_open_quotient(te_s, coupled["gap_offset"]))
+    c = np.concatenate([[0.0], np.cumsum(a)])
+    lo = np.clip(fi * CTRL - 5 * CTRL, 0, len(a))
+    hi = np.clip(fi * CTRL + 5 * CTRL, 0, len(a))
+    a_mean = (c[hi] - c[lo]) / np.maximum(hi - lo, 1)
+    out = formants.copy()
+    m = min(coupling.N_COUPLED, out.shape[1])
+    out[:, :m] *= 1.0 + coupled["df"][fi, :m] * a_mean[:, None]
+    return out
+
+
 def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_components: bool = False) -> SynthClip:
     """Clip `index` of a set. keep_components: also return the rendered components (voiced, aspiration, whisper,
     frication, total; scale before the clip's normalisation, meta["gain"]) for observability (D-027); no extra draws."""
@@ -668,6 +690,9 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
         "length_inst_cm": (_raised_cosine_steps(n, np.array(tt[1:]), np.array([d[2]["length_cm"] for d in drawn]), widths)[fi]
                            if use_tube else np.full(len(fi), length)),
     }
+    if cfg.acoustic_labels:
+        labels["formants_acoustic"] = (_acoustic_formants(traj, comps["cycles"], coupled, labels["formants"], fi)
+                                       if coupled is not None else labels["formants"].copy())
     meta = {
         "index": index, "seed": seed, "fs": FS, "duration_s": len(audio) / FS, "length_cm": length, "length_group": length_group,
         "length_from_f0": v.length_from_f0,

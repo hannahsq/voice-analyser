@@ -251,6 +251,8 @@ def _ignored(reason: str, *names: str) -> dict[str, str]:
 
 
 IGNORED_FIELDS = {
+    **_ignored("adds a label only (D-078), no draw and no audio change: test_coupling checks it leaves audio, draws "
+               "and the closed-glottis labels unchanged", "acoustic_labels"),
     **_ignored("f0, vibrato, jitter and shimmer draws: change the values, not a branch; the default cases "
                "hash their labels and source", "p_high_f0", "low_f0_hz", "high_f0_hz", "f0_limits_hz", "rd",
                "rd_wander_sd", "jitter", "shimmer_db", "vibrato_rate_hz", "vibrato_extent_cents",

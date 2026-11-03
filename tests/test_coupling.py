@@ -66,3 +66,23 @@ def test_coupled_clips_are_deterministic_and_keep_closed_glottis_labels():
     assert c.meta["tube"] == a.meta["tube"] and np.array_equal(c.labels["formants"], a.labels["formants"], equal_nan=True)
     assert not np.array_equal(c.audio, a.audio)
     assert FS == 16000
+
+
+def test_acoustic_labels_are_the_cycle_mean_and_change_nothing_else():
+    """D-078: acoustic_labels adds "formants_acoustic" = F (1 + df <a>) on coupled poles; audio, draws and the closed-glottis
+    labels stay as without it."""
+    cfg = SynthConfig(p_tube=1.0, p_coupling=1.0, coupling_scale=(1.0, 1.0), duration_s=(1.0, 1.0))
+    a = generate(3, cfg, 7)
+    b = generate(3, SynthConfig(**{**cfg.__dict__, "acoustic_labels": True}), 7)
+    assert "formants_acoustic" not in a.labels
+    assert np.array_equal(a.audio, b.audio) and a.meta["tube"] == b.meta["tube"]
+    assert np.array_equal(a.labels["formants"], b.labels["formants"], equal_nan=True)
+    f, fa = b.labels["formants"], b.labels["formants_acoustic"]
+    rel = fa[:, :coupling.N_COUPLED] / f[:, :coupling.N_COUPLED] - 1
+    df1 = np.array([tg["open_df"][0] for tg in b.meta["tube"]["targets"]])
+    # F1 moves by df times a mean opening between 0 and 1 (df interpolated between the targets'), in df's direction
+    assert np.all(np.abs(rel[:, 0]) <= np.abs(df1).max() + 1e-9) and np.median(rel[:, 0]) * np.median(df1) > 0
+    assert np.array_equal(f[:, coupling.N_COUPLED:], fa[:, coupling.N_COUPLED:], equal_nan=True)
+    # an uncoupled clip's acoustic label is its closed-glottis label
+    u = generate(3, SynthConfig(p_tube=1.0, duration_s=(1.0, 1.0), acoustic_labels=True), 7)
+    assert np.array_equal(u.labels["formants_acoustic"], u.labels["formants"], equal_nan=True)

@@ -23,6 +23,8 @@ from ..synth.channel import ChannelConfig, apply_channel, augment, draw_channel
 from ..synth.shards import INT16_SCALE, ShardReader
 
 LABEL_KEYS = ("f0", "voiced", "sonorant", "whisper", "formants", "bandwidths", "rd", "source_h_db")
+# labels only some sets carry, consolidated when the shards have them (D-078: the cycle-mean acoustic formants)
+OPTIONAL_LABEL_KEYS = ("formants_acoustic",)
 N_TRAIN_FORMANTS = 4
 TRACT_LEFT_WEIGHT = (0.15, 0.5)
 OBS_MARGIN = 20  # frames each side of a crop for observability's temporal pooling (4 x 50 ms reaches 0.02 weight)  # formant loss weight 1 up to this |tract_left|, falling linearly to 0 at that
@@ -62,7 +64,7 @@ def consolidate(root: str | Path, log=print) -> Path:
                 clip_tl.extend(m["qc"]["tract_left_median"] if m["qc"]["tract_left_median"] is not None else np.nan
                                for m in json.loads(str(z["meta"])))
             audio[a_pos : a_pos + len(a)] = a
-            for key in LABEL_KEYS:
+            for key in (*LABEL_KEYS, *(k for k in OPTIONAL_LABEL_KEYS if f"label_{k}" in z.files)):
                 arr = z[f"label_{key}"]
                 if key not in labels:
                     labels[key] = np.lib.format.open_memmap(out / f"label_{key}.npy", "w+", arr.dtype, (n_frames,) + arr.shape[1:])
@@ -104,7 +106,8 @@ class SynthCrops:
                  channel: ChannelConfig | None = ChannelConfig(), seed: int = 0, epoch_size: int | None = None,
                  fixed: bool = False, tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT,
                  observability: bool = False, obs_config=None, obs_floor: str = "recording",
-                 obs_rec_snr_db: float | None = None, vtl: bool = False, vtl_inst: bool = False):
+                 obs_rec_snr_db: float | None = None, vtl: bool = False, vtl_inst: bool = False,
+                 formant_label: str = "formants"):
         self.dir = Path(flat_dir)
         self.clip_ids = np.asarray(clip_ids)
         self.n_frames = n_frames
@@ -124,6 +127,8 @@ class SynthCrops:
         # D-051: per-frame instantaneous length ("vtl_inst", log2 cm; scripts/analysis/inst_labels.py's
         # label_length_inst_cm.npy), on the same clips as "vtl"; NaN elsewhere
         self.vtl_inst = vtl_inst
+        # D-078: the label served as "formants" (an OPTIONAL_LABEL_KEYS file beside flat/); "formants" = the closed-glottis poles
+        self.formant_label = formant_label
         self._arrays = None
 
     def _open(self):
@@ -132,6 +137,8 @@ class SynthCrops:
             self._arrays = {"audio": load("audio.npy"), "a_off": np.load(self.dir / "audio_offsets.npy"),
                             "f_off": np.load(self.dir / "frame_offsets.npy"),
                             **{k: load(f"label_{k}.npy") for k in LABEL_KEYS}}
+            if self.formant_label != "formants":
+                self._arrays["formants"] = load(f"label_{self.formant_label}.npy")
             if self.observability and (self.dir / "obs_sig.npy").exists():
                 self._arrays.update(obs_sig=load("obs_sig.npy"), obs_noise=load("obs_noise.npy"), obs_peak=load("obs_peak.npy"))
             if self.vtl and (self.dir / "label_length_cm.npy").exists():

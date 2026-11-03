@@ -92,6 +92,9 @@ class TrainConfig:
     # VTL head's parameter group, gate and schedule; labels train.data's "vtl_inst"; loss weight loss_weights["vtl_inst"]
     vtl_inst: bool = False
     vtl_seed: int = 0
+    # D-078: the main set's label trained (and validated) as "formants": "formants" (closed-glottis poles) or a
+    # `train.data.OPTIONAL_LABEL_KEYS` label the set carries ("formants_acoustic"); resynthesised and extra sets keep theirs
+    formant_label: str = "formants"
     vtl_warmup: int = 300
     vtl_detach: int = 300
     vtl_gate_ramp: int = 700
@@ -623,7 +626,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         raise FileNotFoundError(f"obs_head needs {flat}'s observability store (obs_store.write_store)")
     vtl, vti = bool(cfg.vtl), bool(cfg.vtl_inst)
     ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs, vtl=vtl,
-                    vtl_inst=vti)
+                    vtl_inst=vti, formant_label=cfg.formant_label)
     if cfg.resynth:
         parts, sizes = [], []
         for d in cfg.resynth:
@@ -668,9 +671,10 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     # vtl only adds the label (no random draws), so the crops stay those of runs before it was passed
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti)
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti,
+                        formant_label=cfg.formant_label)
     short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl,
-                          vtl_inst=vti)
+                          vtl_inst=vti, formant_label=cfg.formant_label)
     resynth_val = {}
     for d in cfg.resynth_val:
         rflat = consolidate(d, log=log)
