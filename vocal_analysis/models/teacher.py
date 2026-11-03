@@ -64,6 +64,14 @@ class TeacherConfig:
     readout: str = "flat"
     readout_channels: int = 32
     readout_hidden: int = 512
+    # D-072: a path beside the main encoder's flatten, added after its GELU with its output layer at zero (so a model
+    # starts exactly as without it): "retrieve" (side_queries learned queries cross-attend over the last conv map's
+    # bins, keys with a learned absolute position per bin) or "factorised" (each channel compressed along frequency to
+    # side_bins by one Linear shared across channels, then mixed); "" = none (every model before D-072)
+    proj_side: str = ""
+    side_queries: int = 8
+    side_dim: int = 64
+    side_bins: int = 9
 
 
 class _GradGate(torch.autograd.Function):
@@ -181,12 +189,46 @@ class DilatedConv1d(nn.Module):
         return h.transpose(1, 2)
 
 
+class ProjSide(nn.Module):
+    """D-072: a path beside the flatten, (B, C, F, T) conv map -> (B, T, embed), its output Linear at zero."""
+
+    def __init__(self, kind: str, c: int, n_freq: int, embed: int, cfg: TeacherConfig):
+        super().__init__()
+        self.kind = kind
+        if kind == "retrieve":
+            d, q = cfg.side_dim, cfg.side_queries
+            self.q = nn.Parameter(torch.randn(q, d) / d ** 0.5)
+            self.k = nn.Linear(c, d)
+            self.v = nn.Linear(c, d)
+            self.pos = nn.Parameter(torch.randn(n_freq, d) / d ** 0.5)  # absolute position per bin, in the keys
+            n_out = q * d
+        elif kind == "factorised":
+            self.squeeze = nn.Linear(n_freq, cfg.side_bins)  # shared across channels
+            n_out = c * cfg.side_bins
+        else:
+            raise ValueError(f"unknown proj_side {kind!r}")
+        self.out = nn.Linear(n_out, embed)
+        nn.init.zeros_(self.out.weight)
+        nn.init.zeros_(self.out.bias)
+
+    def forward(self, x):  # (B, C, F, T)
+        b, c, f, t = x.shape
+        if self.kind == "factorised":
+            s = Fn.gelu(self.squeeze(x.permute(0, 3, 1, 2)))  # (B, T, C, side_bins)
+            return self.out(s.reshape(b, t, -1))
+        xs = x.permute(0, 3, 2, 1)  # (B, T, F, C)
+        k = self.k(xs) + self.pos.to(xs.dtype)
+        att = torch.einsum("btfd,qd->btqf", k, self.q.to(k.dtype)) / k.shape[-1] ** 0.5
+        o = torch.einsum("btqf,btfd->btqd", att.softmax(-1), self.v(xs))
+        return self.out(o.reshape(b, t, -1))
+
+
 class Encoder(nn.Module):
     """Dilated 2-D conv stack (full frequency resolution first), flatten, then a temporal module: a BiGRU, Conformer
     blocks or dilated 1-D convolutions."""
 
     def __init__(self, c_in: int, chans: tuple[int, ...], dil_sets: tuple[tuple[int, ...], ...], embed: int,
-                 hidden: int, layers: int, temporal: str = "gru", cfg: TeacherConfig | None = None):
+                 hidden: int, layers: int, temporal: str = "gru", cfg: TeacherConfig | None = None, side: str = ""):
         super().__init__()
         mods: list[nn.Module] = []
         c = c_in
@@ -200,6 +242,8 @@ class Encoder(nn.Module):
         self.convs = nn.Sequential(*mods)
         self.n_freq = _freq_after(vqt.N_BINS, len(chans) - 1)
         self.proj = nn.Linear(c * self.n_freq, embed)
+        if side:  # D-072
+            self.side = ProjSide(side, c, self.n_freq, embed, cfg)
         self.temporal = temporal
         if temporal == "gru":
             self.gru = nn.GRU(embed, hidden, layers, batch_first=True, bidirectional=True)
@@ -227,7 +271,10 @@ class Encoder(nn.Module):
             h = m(h)
         kept.append(h)
         b, c, f, t = h.shape
+        m = h
         h = Fn.gelu(self.proj(h.permute(0, 3, 1, 2).reshape(b, t, c * f)))
+        if hasattr(self, "side"):
+            h = h + self.side(m)
         if self.temporal == "gru":
             h = self.gru(h)[0]  # (B, T, 2 * hidden)
         elif self.temporal == "conformer":
@@ -307,7 +354,7 @@ class Teacher(nn.Module):
         self.voicing_head = nn.Linear(self.f0_net.out_dim, 1)
         c_in = 3 if cfg.comb else 2
         self.enc = Encoder(c_in, cfg.channels, (cfg.full_res_dilations, (1, 2, 4, 8), (1, 2)), cfg.embed, cfg.gru_hidden,
-                           cfg.gru_layers, cfg.temporal, cfg)
+                           cfg.gru_layers, cfg.temporal, cfg, side=cfg.proj_side)
         d = self.enc.out_dim
         if cfg.readout in ("flat", "film_residual"):
             self.formant_heads = nn.ModuleList([nn.Linear(d + n, FORMANT_AXIS.n_bins) for n in range(N_FORMANTS)])

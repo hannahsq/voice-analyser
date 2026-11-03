@@ -2522,7 +2522,7 @@ high-pitched Korean speech (item 10's note) showed F2's sigma at +-40-50 cents w
 - *Code*: `scripts/analysis/d071_calibration.py` (inference cached per model and set; CPU aggregation). GPU about
   an hour, alongside D-065's scoring (Hannah, 2026-11-03: overlapping is fine).
 
-## D-072 (2026-11-03, draft for Hannah, not registered; nothing built; revised the same day, before anything was built): an attention retrieve beside the trunk's flatten, with a factorised control, in 5b's decay branch
+## D-072 (registered 2026-11-03; seen beforehand: the zero-start check and a 40-step smoke run of each arm, for function only): an attention retrieve beside the trunk's flatten, with a factorised control, in 5b's decay branch
 
 *Why*: D-054 found the formant heads saturated on h (mlp at 5.6 x the parameters gains about 1 %), and D-056's
 anchored read-out converged to the flat heads, so the limit sits in h or before it. The main encoder's flatten
@@ -2537,18 +2537,21 @@ structure"). Question: **do the conv maps hold information h is missing, that a 
   by their content, which can follow a formant peak that moves from frame to frame.
 - *Arm B, the arm of interest* (`TeacherConfig.proj_side = "retrieve"`): per frame, 8 learned queries (dimension 64)
   cross-attend over the 91 bins of the last conv map; keys and values are 1x1 projections of the 64 channels, the
-  keys carrying a log-frequency position encoding that is both relative (rotary along log frequency) and absolute
-  (a learned embedding per bin), since D-054's free read-out showed what is lost without an absolute anchor. The 8
-  outputs are concatenated (512) and projected to 384 by a Linear initialised at zero, added after the flatten's
-  GELU: h = GELU(proj(x)) + retrieve(x). About 0.2 M parameters; multiply-adds about +3 % per frame.
+  keys carrying a learned absolute position per bin (D-054's free read-out showed what is lost without an absolute
+  anchor; a rotary encoding would be relative only if the queries had positions, and these don't). The 8 outputs
+  are concatenated (512) and projected to 384 by a Linear initialised at zero, added after the flatten's GELU:
+  h = GELU(proj(x)) + retrieve(x). 211,648 parameters; multiply-adds about +3 % per frame.
 - *Arm A, its control* (`proj_side = "factorised"`): each channel compressed along frequency by one Linear shared
-  across channels (91 -> k bins), GELU, mixed to 384 by a Linear initialised at zero and added in the same place; k
-  chosen so its parameter count matches arm B's (within 10 %). Same capacity and the same late-added route, no
+  across channels (91 -> 9 bins), GELU, mixed to 384 by a Linear initialised at zero and added in the same place:
+  222,396 parameters (arm B + 5.1 %; 8 bins would be - 6.6 %). Same capacity and the same late-added route, no
   content-dependent selection.
-- Both start exactly at 5b (checked before running: maximum output difference at step 0 is 0). The f0 network's
-  flatten is unchanged.
-- *Training*: `va train teacher --branch-from runs/d040_5b_s{s}/ckpt_016000.pt --decay-steps 4000` with the new path
-  in the trunk's own optimiser groups (as the flatten), everything else 5b's; paired control `d040_5b_s{s}_b20k`
+- Both start exactly at 5b (checked on `d040_5b_s1/ckpt_016000.pt`: maximum output difference 0.0 in every output).
+  The f0 network's flatten is unchanged. Code: `TeacherConfig.proj_side` (`ProjSide`), `TrainConfig.proj_side` /
+  `side_lr`.
+- *Training*: `va train teacher --branch-from runs/d040_5b_s{s}/ckpt_016000.pt --decay-steps 4000 --train-set
+  proj_side=<arm> --train-set side_lr=0.001`: the new path in its own AdamW group at 1e-3 x the model's decay
+  (weight decay 0.01), as D-056's read-out and D-040's VTL head (it cannot join the trunk's Muon / Adan groups,
+  whose saved state at the branch point does not include it); everything else 5b's; paired control `d040_5b_s{s}_b20k`
   (same start, schedule and data seeds). Seeds 2, then 1, for B then A; about 1.5-2 h each, about 7 h in all.
 - *Measures and rule* (arm B against `d040_5b_s{s}_b20k`): D-056's, unchanged (non-inferior on D-040's margins, and
   a gain on at least one of: synthetic F1-F4 MAE lower by >= 3 %; women's closed-phase F1 |error| lower by >= 2 Hz;

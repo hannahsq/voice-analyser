@@ -124,6 +124,24 @@ def test_teacher_forward_shapes_and_comb():
     assert float(m.comb(torch.full((1, 3), 200.0), torch.zeros(1, 3)).abs().max()) == 0.0  # unvoiced: no comb
 
 
+@pytest.mark.parametrize("side", ["retrieve", "factorised"])
+def test_proj_side_starts_at_the_model_without_it(side):
+    """D-072: a path added beside the flatten leaves every output unchanged until it trains."""
+    from dataclasses import replace
+
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+
+    cfg = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, temporal="conformer", conformer_dim=16, f0_conv_dim=16)
+    base = Teacher(cfg).eval()
+    m = Teacher(replace(cfg, proj_side=side)).eval()
+    missing, unexpected = m.load_state_dict(base.state_dict(), strict=False)
+    assert not unexpected and missing and all(k.startswith("enc.side.") for k in missing)
+    lp = torch.randn(2, vqt.N_BINS, 30)
+    with torch.no_grad():
+        a, b = base(lp), m(lp)
+    assert all(torch.equal(a[k], b[k]) for k in a)
+
+
 def test_wsd_schedule_and_branch_config(tmp_path):
     import json
     import math

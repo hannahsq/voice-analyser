@@ -121,6 +121,10 @@ class TrainConfig:
     readout: str | None = None
     add_from: str | None = None
     readout_lr: float | None = None
+    # D-072: a decay branch may add a path beside the flatten (TeacherConfig.proj_side; modules "enc.side.*", fresh,
+    # output at zero), in its own AdamW at side_lr x the model's schedule (weight decay 0.01), as D-056's read-out
+    proj_side: str | None = None
+    side_lr: float | None = None
 
 
 def _git() -> dict:
@@ -200,7 +204,8 @@ def _optimizer(model, cfg: "TrainConfig"):
             return Adan(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
         return torch.optim.AdamW(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
 
-    own = VTL_PREFIXES + (READOUT_PREFIX if cfg.readout_lr is not None else ())  # their own groups, added by the trainer
+    own = (VTL_PREFIXES + (READOUT_PREFIX if cfg.readout_lr is not None else ())
+           + (SIDE_PREFIX if cfg.side_lr is not None else ()))  # their own groups, added by the trainer
     if cfg.optimizer in ("adamw", "adan"):  # the VTL head (D-036) gets its own group, added by the trainer
         return rest([p for n, p in model.named_parameters() if not n.startswith(own)])
     if cfg.optimizer in ("muon", "muon_adan"):
@@ -284,20 +289,23 @@ def _vtl_gate(step: int, cfg: TrainConfig) -> float:
 
 VTL_PREFIXES = ("vtl_head.", "vtl_inst_head.")  # D-036 / D-051: the heads in the VTL parameter group
 READOUT_PREFIX = ("readout.",)  # D-056: a frequency-resolved read-out's modules
+SIDE_PREFIX = ("enc.side.",)  # D-072: the path beside the flatten
 
 
-def _add_readout_group(opt, params: list, cfg: TrainConfig) -> None:
-    """D-056: the read-out's own AdamW (weight decay 0.01) at readout_lr x the model's schedule."""
+def _add_readout_group(opt, params: list, cfg: TrainConfig, lr: float | None = None) -> None:
+    """D-056: the read-out's own AdamW (weight decay 0.01) at readout_lr x the model's schedule (D-072: lr instead,
+    for the side path's group)."""
     import torch
 
     if not params:
         return
+    scale = (cfg.readout_lr if lr is None else lr) / cfg.lr
     own = torch.optim.AdamW(params, lr=0.0, weight_decay=0.01)
-    own.param_groups[0]["lr_scale"] = cfg.readout_lr / cfg.lr
+    own.param_groups[0]["lr_scale"] = scale
     if isinstance(opt, _Combined):
         opt.add(own)
     elif isinstance(opt, torch.optim.AdamW):
-        opt.add_param_group({"params": params, "lr": 0.0, "weight_decay": 0.01, "lr_scale": cfg.readout_lr / cfg.lr})
+        opt.add_param_group({"params": params, "lr": 0.0, "weight_decay": 0.01, "lr_scale": scale})
     else:
         raise NotImplementedError("readout_lr beside a single non-AdamW optimiser")
 
@@ -510,6 +518,11 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     new_readout = bool(cfg.readout) and model_cfg.readout != cfg.readout  # D-056: changed at this branch
     if cfg.readout:
         model_cfg = replace(model_cfg, readout=cfg.readout)
+    new_side = bool(cfg.proj_side) and model_cfg.proj_side != cfg.proj_side  # D-072: added at this branch
+    if cfg.proj_side:
+        if cfg.side_lr is None:
+            raise ValueError("proj_side needs side_lr (its own AdamW group)")
+        model_cfg = replace(model_cfg, proj_side=cfg.proj_side)
     new_vtl = bool(cfg.vtl) and not model_cfg.vtl_head  # D-036: the head is added at this branch
     if cfg.vtl:
         if cfg.optimizer not in ("adamw", "adan", "muon", "muon_adan"):  # D-040: Muon runs keep it out of Muon
@@ -554,10 +567,13 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     ro_params = [p for n, p in model.named_parameters() if n.startswith(READOUT_PREFIX)] if cfg.readout_lr is not None else []
     if ro_params and not new_readout:
         _add_readout_group(opt, ro_params, cfg)  # resuming: as the VTL group
+    side_params = [p for n, p in model.named_parameters() if n.startswith(SIDE_PREFIX)] if cfg.side_lr is not None else []
+    if side_params and not new_side:
+        _add_readout_group(opt, side_params, cfg, lr=cfg.side_lr)  # resuming
     if ck is not None:
-        if new_vtl or new_readout:
+        if new_vtl or new_readout or new_side:
             missing, unexpected = model.load_state_dict(ck["model"], strict=False)
-            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX) for k in missing), (missing, unexpected)
+            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX) for k in missing), (missing, unexpected)
         else:
             model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
@@ -576,6 +592,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             assert not unexpected and not [k for k in missing if k.startswith(READOUT_PREFIX)], (missing, unexpected)
             log(f"read-out {cfg.readout}: {len(part)} tensors from {cfg.add_from}")
         _add_readout_group(opt, ro_params, cfg)
+    if new_side:
+        _add_readout_group(opt, side_params, cfg, lr=cfg.side_lr)
+        log(f"side path {cfg.proj_side}: {sum(p.numel() for p in side_params):,} parameters, output at zero")
     if cfg.ema_decay > 0:  # from the checkpoint's average if it has one, else from the current weights
         import copy
 
