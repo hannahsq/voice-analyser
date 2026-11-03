@@ -2471,3 +2471,65 @@ the audio holds up. Label-free: no length is compared with MRI, and no per-speak
     speaker per sex it may be the speaker, not the sex. ArtSpeech's audio is at least as repeatable as USC's, so the
     lockbox check across labs and languages (D-069) is worth its labels. Whether the lengths are *right* is still
     untested by design.
+
+## D-071 (2026-11-03, draft for Hannah, not registered; nothing measured): roadmap item 10, uncertainty calibration of teacher v3.1's non-f0 heads
+
+*Why*: item 10 is due before M3's acceptance. D-068 and D-070 already judged audio partly by sigma ratios, M4's
+sigma gating (D-027) and the back end's Monte Carlo corrections assume the bands mean what they say, and a smoke run on
+high-pitched Korean speech (item 10's note) showed F2's sigma at +-40-50 cents where the spectrum allowed a peak
+200 Hz away. Descriptive, with flags; no training.
+
+- *Models*: teacher v3.1 (`d040_5b_s2_b20k`) decides the flags; `d040_5b_s1_b20k` reported beside it (a flag carried
+  by one seed only is marked).
+- *Heads*: formants F1-F4 (`formant_sigma_cents`), bandwidths B1-B4 (`bandwidth_log_sd`), anatomical length
+  (`vtl_sigma`, log2), and the probabilities voicing (`voiced_p`) and sonorant (`sonorant_p`). (v3.1 has no
+  observability head.) f0's sigma reported only.
+- *Data, stage A (exact labels; decides the flags)*: train_v2's held-out validation clips (the training run's own
+  split, 512 clips), the hard-case suite `suite_v1` (each case separately), and the resynthesised validation sets
+  (`vocalset_val_d16k`, `zeroth_korean_val_d16k`: real sources, exact tracts). Formants and bandwidths on sonorant
+  voiced frames with labels; length on frames with a valid length label (D-035's mask); voicing and sonorant on
+  every frame.
+- *Data, stage B (dev gold, descriptive only)*: Hillenbrand dev (formants), PTDB-TUG dev (formants against the
+  closed-phase reference, voicing against the laryngograph). The references have their own error, so instead of
+  assuming one, each cell reports the **reference SD that would make 1-sigma coverage nominal** (solving
+  coverage(sqrt(sigma^2 + s_ref^2)) = 0.683), to set beside what is known of the reference (D-043, D-046).
+  Windowed analysis, as everywhere.
+- *Measures*: for the Gaussian heads, 1-sigma and 2-sigma interval coverage (ideal 0.683 / 0.954), the z-score
+  distribution (PIT histogram, 10 bins), Gaussian NLL, and the ratio of the RMS z to 1 (a single "too narrow / too
+  wide" factor); for probabilities, a reliability diagram (10 bins) and expected calibration error. Every cell split
+  by f0 band (`f0_band_labels`: < 150, 150-300, 300-500, > 500 Hz) and, on the gold sets, by sex. Intervals by a
+  bootstrap over clips (frames within a clip are correlated).
+- *Flags* (stage A, v3.1): a head is **miscalibrated** in a band if its 1-sigma coverage is outside [0.60, 0.76] or
+  its 2-sigma coverage outside [0.91, 0.98], with the clip-bootstrap interval excluding nominal and at least 20 clips
+  in the cell; a probability head if its ECE exceeds 0.05. Training minimises a proper scoring rule on train_v2, so
+  near-nominal coverage there is expected; the hard cases and resynthesised sets are the real tests.
+- *What follows*: a flagged head gets a post-hoc variance scale per head and f0 band, fitted on synthetic or
+  resynthesised data only (never gold), as its own entry. D-068's and D-070's sigma comparisons are re-read in the
+  light of the stage A result (a note under each, not a rerun).
+- *Code*: `scripts/analysis/d071_calibration.py` (inference cached per model and set; CPU aggregation). GPU about
+  an hour, alongside D-065's scoring (Hannah, 2026-11-03: overlapping is fine).
+
+## D-072 (2026-11-03, draft for Hannah, not registered; nothing built): a factorised side path around the trunk's flatten, in 5b's decay branch
+
+*Why*: D-054 found the formant heads saturated on h (mlp at 5.6 x the parameters gains about 1 %), and D-056's
+anchored read-out converged to the flat heads, so the limit sits in h or before it. The main encoder's flatten
+(64 channels x 91 bins -> 384, then GELU) is the one non-residual layer between the conv stack and the Conformer and
+holds 53 % of the parameters (considering.md, "Trunk structure").
+- *Why not a plain skip*: the flatten is already a full linear map of rank up to 384; a linear skip around it would
+  only bypass the GELU. A path with a different structure is the useful test, and one added at zero starts exactly at
+  5b, so it can be screened in a decay branch as D-056 was.
+- *Arm* (`TeacherConfig.proj_side = 16`): beside the flatten, each channel compressed along frequency by one Linear
+  shared across channels (91 -> 16 bins), GELU, then mixed (64 x 16 = 1,024 -> 384) by a Linear initialised at zero,
+  added after the flatten's GELU: h = GELU(proj(x)) + side(x). About 0.4 M parameters (the flatten has 2.2 M); the
+  f0 network's flatten unchanged. Checked before running: maximum output difference at step 0 is 0.
+- *Training*: `va train teacher --branch-from runs/d040_5b_s{s}/ckpt_016000.pt --decay-steps 4000` with the side path
+  added in the trunk's own optimiser groups (as the flatten), everything else 5b's; paired control
+  `d040_5b_s{s}_b20k` (same start, schedule and data seeds). Seeds 2, then 1; about 1.5-2 h each.
+- *Measures and rule*: D-056's, unchanged (non-inferior on D-040's margins, and a gain on at least one of: synthetic
+  F1-F4 MAE lower by >= 3 %; women's closed-phase F1 |error| lower by >= 2 Hz; probe 11's F1 scale error halved on
+  Hillenbrand and PTDB-TUG), plus D-051's length guard (2) and f0 guard (3), as 5b has the VTL head. Seed means,
+  both seeds in the same direction; otherwise "not robust to the seed". The length guard's paired seed means carry
+  5b s2's good draw (D-065's note), which is reported beside the guard.
+- *Reading*: a gain makes the bottleneck the next lever (a from-scratch arm with a parameter-matched control would
+  follow: a late-added path may be used differently, and capacity is not separated here); none makes it unlikely and
+  points the encoder work elsewhere (the Conformer's width of 128 after `t_in` is the other narrow point).
