@@ -2509,27 +2509,81 @@ high-pitched Korean speech (item 10's note) showed F2's sigma at +-40-50 cents w
 - *Code*: `scripts/analysis/d071_calibration.py` (inference cached per model and set; CPU aggregation). GPU about
   an hour, alongside D-065's scoring (Hannah, 2026-11-03: overlapping is fine).
 
-## D-072 (2026-11-03, draft for Hannah, not registered; nothing built): a factorised side path around the trunk's flatten, in 5b's decay branch
+## D-072 (2026-11-03, draft for Hannah, not registered; nothing built; revised the same day, before anything was built): an attention retrieve beside the trunk's flatten, with a factorised control, in 5b's decay branch
 
 *Why*: D-054 found the formant heads saturated on h (mlp at 5.6 x the parameters gains about 1 %), and D-056's
 anchored read-out converged to the flat heads, so the limit sits in h or before it. The main encoder's flatten
-(64 channels x 91 bins -> 384, then GELU) is the one non-residual layer between the conv stack and the Conformer and
-holds 53 % of the parameters (considering.md, "Trunk structure").
-- *Why not a plain skip*: the flatten is already a full linear map of rank up to 384; a linear skip around it would
-  only bypass the GELU. A path with a different structure is the useful test, and one added at zero starts exactly at
-  5b, so it can be screened in a decay branch as D-056 was.
-- *Arm* (`TeacherConfig.proj_side = 16`): beside the flatten, each channel compressed along frequency by one Linear
-  shared across channels (91 -> 16 bins), GELU, then mixed (64 x 16 = 1,024 -> 384) by a Linear initialised at zero,
-  added after the flatten's GELU: h = GELU(proj(x)) + side(x). About 0.4 M parameters (the flatten has 2.2 M); the
-  f0 network's flatten unchanged. Checked before running: maximum output difference at step 0 is 0.
-- *Training*: `va train teacher --branch-from runs/d040_5b_s{s}/ckpt_016000.pt --decay-steps 4000` with the side path
-  added in the trunk's own optimiser groups (as the flatten), everything else 5b's; paired control
-  `d040_5b_s{s}_b20k` (same start, schedule and data seeds). Seeds 2, then 1; about 1.5-2 h each.
-- *Measures and rule*: D-056's, unchanged (non-inferior on D-040's margins, and a gain on at least one of: synthetic
-  F1-F4 MAE lower by >= 3 %; women's closed-phase F1 |error| lower by >= 2 Hz; probe 11's F1 scale error halved on
-  Hillenbrand and PTDB-TUG), plus D-051's length guard (2) and f0 guard (3), as 5b has the VTL head. Seed means,
-  both seeds in the same direction; otherwise "not robust to the seed". The length guard's paired seed means carry
-  5b s2's good draw (D-065's note), which is reported beside the guard.
-- *Reading*: a gain makes the bottleneck the next lever (a from-scratch arm with a parameter-matched control would
-  follow: a late-added path may be used differently, and capacity is not separated here); none makes it unlikely and
-  points the encoder work elsewhere (the Conformer's width of 128 after `t_in` is the other narrow point).
+(64 channels x 91 bins -> 384, then GELU) is the one non-residual layer between the conv stack and the Conformer,
+holds 53 % of the parameters, and is the only place the frequency axis is collapsed (considering.md, "Trunk
+structure"). Question: **do the conv maps hold information h is missing, that a content-dependent route can fetch?**
+
+- *Why these paths*: a plain skip around the flatten would have to be a second full projection (5,824 -> 384; the
+  sizes differ, so there is no identity), testing only the GELU and adding capacity of the same kind. A factorised
+  path is a restricted linear map the flatten can already express (apart from its GELU), so in a branch from a
+  trained flatten it is mostly structured extra capacity. Attention adds what the trunk lacks: a selection of bins
+  by their content, which can follow a formant peak that moves from frame to frame.
+- *Arm B, the arm of interest* (`TeacherConfig.proj_side = "retrieve"`): per frame, 8 learned queries (dimension 64)
+  cross-attend over the 91 bins of the last conv map; keys and values are 1x1 projections of the 64 channels, the
+  keys carrying a log-frequency position encoding that is both relative (rotary along log frequency) and absolute
+  (a learned embedding per bin), since D-054's free read-out showed what is lost without an absolute anchor. The 8
+  outputs are concatenated (512) and projected to 384 by a Linear initialised at zero, added after the flatten's
+  GELU: h = GELU(proj(x)) + retrieve(x). About 0.2 M parameters; multiply-adds about +3 % per frame.
+- *Arm A, its control* (`proj_side = "factorised"`): each channel compressed along frequency by one Linear shared
+  across channels (91 -> k bins), GELU, mixed to 384 by a Linear initialised at zero and added in the same place; k
+  chosen so its parameter count matches arm B's (within 10 %). Same capacity and the same late-added route, no
+  content-dependent selection.
+- Both start exactly at 5b (checked before running: maximum output difference at step 0 is 0). The f0 network's
+  flatten is unchanged.
+- *Training*: `va train teacher --branch-from runs/d040_5b_s{s}/ckpt_016000.pt --decay-steps 4000` with the new path
+  in the trunk's own optimiser groups (as the flatten), everything else 5b's; paired control `d040_5b_s{s}_b20k`
+  (same start, schedule and data seeds). Seeds 2, then 1, for B then A; about 1.5-2 h each, about 7 h in all.
+- *Measures and rule* (arm B against `d040_5b_s{s}_b20k`): D-056's, unchanged (non-inferior on D-040's margins, and
+  a gain on at least one of: synthetic F1-F4 MAE lower by >= 3 %; women's closed-phase F1 |error| lower by >= 2 Hz;
+  probe 11's F1 scale error halved on Hillenbrand and PTDB-TUG), plus D-051's length guard (2) and f0 guard (3), as
+  5b has the VTL head. Seed means, both seeds in the same direction; otherwise "not robust to the seed". The length
+  guard's paired seed means carry 5b s2's good draw (D-065's note), reported beside the guard.
+- *Attribution* (reported, decides nothing): arm A against the same control, and B against A. A gain in B and not
+  in A is the content-dependent selection's; a gain in both is the late-added capacity's.
+- *Reported only*: where arm B's queries attend (attention over the 91 bins by f0 band and sex; whether any query
+  tracks a formant across frames).
+- *Reading*: a gain in B makes the retrieve a from-scratch candidate, and a write-back update (h's context placed
+  back into the conv map before a second retrieve) the next screen; none makes the flatten unlikely to be the limit
+  (the Conformer's width of 128 after `t_in` is the other narrow point). Either way it does not gate D-073, which
+  tests the read-out's behaviour rather than missing information.
+
+## D-073 (2026-11-03, draft for Hannah, not registered; nothing built): learned formant queries as the read-out, on teacher v3.1's frozen trunk
+
+*Why*: D-054's free per-bin read-out ("film") read women's closed-phase F1 lower (+0.1 / +2.8 Hz bias against mlp's
++4.2) with F1 scale slopes near 1 (1.005 / 1.014), but misread scale clip by clip (synthetic F1-F4 about 1.9 x mlp's),
+because the same read-out at every bin has no absolute frequency; anchored on the flat heads (D-056) it converged to
+them. Learned queries split the jobs (considering.md, "Learned formant queries"): the bins give equivariance, the
+queries formant identity, and the keys can carry an absolute anchor without the flat heads' per-bin weights.
+Question: **can a query read-out keep film's equivariance and lower closed-phase bias without its scale misreads?**
+Independent of D-072 (the read-out's behaviour, not missing information); the two may run at once.
+
+- *Trunk* (frozen, as D-054): `d040_5b_s2_b20k`; only the formant and bandwidth read-out trains.
+- *Read-out* (`TeacherConfig.readout = "queries"`): D-054's `FreqReadout` maps unchanged (FiLM by h, upsampled to the
+  VQT's 363 bins with U-Net skips), so film is the exact comparison and the read-out the one change. Four formant
+  queries (dimension 32), each a learned vector plus a projection of h; one self-attention layer among the four;
+  formant n's logits are query n's scaled dot product with the keys at every bin (a 1x1 projection of the maps plus
+  the position encoding), interpolated onto the formant axis as film's. The cascade's soft mask is kept (dropping it
+  would be a second change; self-attention among the queries is part of the read-out). Bandwidths as film's (read at
+  each formant's position).
+- *Arms*: **Q-rel** (rotary log-frequency encoding only: relative, so the read-out stays shift-equivariant and
+  identity must come from the queries and context) and **Q-abs** (rotary plus a learned absolute embedding per bin in
+  the keys). Head seeds 1 and 2 each; four runs.
+- *Training*: D-054's exactly (5b's data mix and channel, AdamW 1e-3, weight decay 0.01, 300 warm-up steps, cosine
+  over 8,000 steps; comb from the frozen f0 network). About 1.5 h a run.
+- *Measures*: D-054's (synthetic F1-F4 and resynthesised F1-F3 MAE; bandwidth error and probe 12; probe 11's slopes;
+  Hillenbrand dev F1-F3, paired; women's closed-phase F1 bias and |error|), against D-054's existing mlp and film
+  runs (same trunk, data and head seeds).
+- *Rule* (per arm, seed means, both seeds in the same direction; against mlp): **supported** if (1) synthetic F1-F4
+  MAE (mean of the four) is at most 1.15 x mlp's (film was 1.93 x) and (2) probe 11's F1 scale error |1 - slope| is
+  at most half mlp's on both Hillenbrand and PTDB-TUG, with D-054's guards (Hillenbrand dev F1 <= +4, F2 <= +9,
+  F3 <= +20 Hz against mlp; resynthesised F1-F3 MAE no more than 5 % worse). Women's closed-phase F1 bias reported
+  with its paired speaker interval (power-limited, not a criterion). Futility stop as D-054 amendment 1: if an arm's
+  seed 1 synthetic F1-F4 MAE exceeds 1.5 x mlp seed 1's, its seed 2 is not trained.
+- *Reading*: supported makes a query read-out a full-size candidate (end to end, and combined with D-072's retrieve
+  if that gains: retrieve, Conformer, query read-out, as in Perceiver IO). Q-rel against Q-abs says how much absolute
+  frequency the identity needs. Not supported, with Q-abs near mlp and no equivariance, says the anchor costs the
+  equivariance in this form too.
