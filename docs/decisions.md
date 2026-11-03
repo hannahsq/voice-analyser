@@ -2521,6 +2521,34 @@ high-pitched Korean speech (item 10's note) showed F2's sigma at +-40-50 cents w
   light of the stage A result (a note under each, not a rerun).
 - *Code*: `scripts/analysis/d071_calibration.py` (inference cached per model and set; CPU aggregation). GPU about
   an hour, alongside D-065's scoring (Hannah, 2026-11-03: overlapping is fine).
+- *Result, stage A (2026-11-03; `reports/analysis/d071/d071_stage_a.txt`; both seeds agree on every pattern below)*:
+  **formant sigma flagged almost everywhere, as too wide in the core and too narrow in the tails; bandwidths, length's
+  shape and the probabilities are close to calibrated.**
+  - *Formants*: s below the band in nearly every set, train_v2's own validation included (v3.1, all bands: F1-F4
+    0.85 / 0.75 / 0.70 / 0.71; the suite's reference case 0.74 / 0.63 / 0.67 / 0.72; resynthesised Zeroth 0.90 /
+    0.79 / 0.82 / 0.88, VocalSet 0.87 / 0.72 / 0.92 / 0.88), so 1-sigma intervals are 15-40 % wider than they need to
+    be. Yet 2-sigma coverage sits below what that s implies (train_v2 F1-F4 0.96 against 0.98-1.00): **non-Gaussian
+    tails** in nearly every cell. Errors are mostly well inside sigma, with a heavier tail of misses than a Gaussian
+    of that width; one scale factor per cell cannot fix that.
+  - *The exception is F1 near a harmonic*: `f1_near_h1` F1 s 1.92 (seed 1: 2.44) and B1 1.46, `f1_near_h2` F1 1.67:
+    there sigma is far too narrow, so the model is confidently wrong where F1 sits on a harmonic (the overread's
+    regime). Also `f2_f3_close`: F4 0.56, B3 1.50.
+  - *Bandwidths*: in distribution calibrated (train_v2 B1-B4 0.97-1.00, no flags); on the hard cases and VocalSet
+    slightly too narrow (s 1.03-1.15, a few cells just over 1.15).
+  - *Length*: s 0.79 (seed 1: 0.75), 2-sigma coverage consistent with it (no tails flag): vtl_sigma about 25 % too
+    wide, Gaussian in shape.
+  - *Voicing and sonorant*: ECE 0.000-0.030 in every synthetic set; calibrated.
+  - *Why the formants differ from what training implies*: the heat maps are trained with a proper scoring rule, but
+    `formant_sigma_cents` is a summary of them (`bins.decode`: the RMS distance of the whole distribution from the
+    decoded value, the targets' blur removed in quadrature). Small mass far from the mode inflates an RMS, so the
+    summary is wide where the distribution is sharp with thin far tails, which is what the errors show.
+  - *Reading for D-068 / D-070*: their sigma comparisons were ratios between corpora under the same model, so a common
+    scale cancels; the length head's Gaussian shape means those ratios read as intended. The formant sigma ratios
+    there (reported, not ruled on) inherit the summary's shape.
+  - *What follows (not decided here)*: a per-cell variance scale would not fix the formants. Candidates, each its own
+    entry: report formant intervals as heat-map quantiles (the central 68 % / 95 % mass) instead of an RMS-based
+    sigma, scored the same way; a scale for vtl_sigma (about 0.77); stage B on the gold sets, registered in detail
+    first.
 
 ## D-072 (registered 2026-11-03; seen beforehand: the zero-start check and a 40-step smoke run of each arm, for function only): an attention retrieve beside the trunk's flatten, with a factorised control, in 5b's decay branch
 

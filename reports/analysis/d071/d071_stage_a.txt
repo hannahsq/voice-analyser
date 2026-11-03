@@ -1,0 +1,1735 @@
+D-071 stage A: calibration on exact labels. s = sigma scale factor making 1-sigma coverage nominal (flag
+outside 0.87-1.15 with the clip-bootstrap interval excluding 1, >= 20 clips); coverage at 1 / 2 sigma
+(+-15 % implies 0.615-0.750 / 0.918-0.979); 'tails': 2-sigma coverage off the s-implied value (interval excludes 0,
+beyond 0.01). Probabilities: ECE (10 bins; flag > 0.05). The first run decides; others reported.
+
+== d040_5b_s2_b20k
+  resynth_vocalset_val_d16k        F1   all       s 0.871 [0.826, 0.926]  cover 0.733 / 0.930 (s-implied 0.978)  rms z 1.22  465 clips TAILS
+  resynth_vocalset_val_d16k        F1   150-300   s 0.847 [0.792, 0.914]  cover 0.745 / 0.936 (s-implied 0.982)  rms z 1.14  363 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F1   300-500   s 0.935 [0.837, 1.039]  cover 0.709 / 0.912 (s-implied 0.968)  rms z 1.41  249 clips TAILS
+  resynth_vocalset_val_d16k        F1   <150      s 0.872 [0.777, 0.990]  cover 0.733 / 0.945 (s-implied 0.978)  rms z 1.16  195 clips TAILS
+  resynth_vocalset_val_d16k        F1   >500      s 0.862 [0.735, 1.051]  cover 0.731 / 0.915 (s-implied 0.980)  rms z 1.24  121 clips TAILS
+  resynth_vocalset_val_d16k        F1   unvoiced  s 0.685 [0.572, 0.854]  cover 0.800 / 0.967 (s-implied 0.997)  rms z 0.98  118 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   all       s 0.716 [0.673, 0.762]  cover 0.789 / 0.928 (s-implied 0.995)  rms z 2.75  465 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   150-300   s 0.723 [0.676, 0.778]  cover 0.792 / 0.942 (s-implied 0.994)  rms z 2.70  363 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   300-500   s 0.815 [0.687, 0.975]  cover 0.740 / 0.872 (s-implied 0.986)  rms z 3.53  249 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   <150      s 0.621 [0.551, 0.700]  cover 0.839 / 0.961 (s-implied 0.999)  rms z 1.17  195 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   >500      s 0.694 [0.604, 0.808]  cover 0.795 / 0.939 (s-implied 0.996)  rms z 2.88  121 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   unvoiced  s 0.599 [0.508, 0.699]  cover 0.856 / 0.963 (s-implied 0.999)  rms z 0.82  118 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F3   all       s 0.920 [0.874, 0.974]  cover 0.714 / 0.898 (s-implied 0.970)  rms z 1.65  465 clips TAILS
+  resynth_vocalset_val_d16k        F3   150-300   s 0.922 [0.869, 0.983]  cover 0.715 / 0.921 (s-implied 0.970)  rms z 1.37  363 clips TAILS
+  resynth_vocalset_val_d16k        F3   300-500   s 0.971 [0.871, 1.102]  cover 0.694 / 0.855 (s-implied 0.960)  rms z 2.15  249 clips TAILS
+  resynth_vocalset_val_d16k        F3   <150      s 0.839 [0.739, 0.940]  cover 0.745 / 0.912 (s-implied 0.983)  rms z 1.37  195 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F3   >500      s 0.933 [0.742, 1.194]  cover 0.706 / 0.873 (s-implied 0.968)  rms z 1.89  121 clips TAILS
+  resynth_vocalset_val_d16k        F3   unvoiced  s 0.980 [0.736, 1.334]  cover 0.687 / 0.899 (s-implied 0.959)  rms z 1.25  118 clips TAILS
+  resynth_vocalset_val_d16k        F4   all       s 0.878 [0.823, 0.938]  cover 0.728 / 0.907 (s-implied 0.977)  rms z 1.81  456 clips TAILS
+  resynth_vocalset_val_d16k        F4   150-300   s 0.876 [0.818, 0.936]  cover 0.732 / 0.924 (s-implied 0.978)  rms z 1.66  356 clips TAILS
+  resynth_vocalset_val_d16k        F4   300-500   s 0.954 [0.832, 1.108]  cover 0.697 / 0.890 (s-implied 0.964)  rms z 2.18  240 clips TAILS
+  resynth_vocalset_val_d16k        F4   <150      s 0.796 [0.691, 0.929]  cover 0.755 / 0.906 (s-implied 0.988)  rms z 1.58  194 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F4   >500      s 0.863 [0.698, 1.089]  cover 0.730 / 0.877 (s-implied 0.979)  rms z 1.94  117 clips TAILS
+  resynth_vocalset_val_d16k        F4   unvoiced  s 0.841 [0.668, 1.156]  cover 0.732 / 0.908 (s-implied 0.983)  rms z 1.31  114 clips TAILS
+  resynth_vocalset_val_d16k        B1   all       s 1.082 [1.018, 1.149]  cover 0.640 / 0.964 (s-implied 0.935)  rms z 1.01  465 clips TAILS
+  resynth_vocalset_val_d16k        B1   150-300   s 0.996 [0.910, 1.082]  cover 0.685 / 0.966 (s-implied 0.955)  rms z 0.96  363 clips
+  resynth_vocalset_val_d16k        B1   300-500   s 1.224 [1.113, 1.336]  cover 0.551 / 0.966 (s-implied 0.898)  rms z 1.10  249 clips FLAG TAILS
+  resynth_vocalset_val_d16k        B1   <150      s 1.011 [0.882, 1.137]  cover 0.676 / 0.947 (s-implied 0.952)  rms z 1.00  195 clips
+  resynth_vocalset_val_d16k        B1   >500      s 1.185 [0.992, 1.332]  cover 0.593 / 0.975 (s-implied 0.909)  rms z 1.04  121 clips TAILS
+  resynth_vocalset_val_d16k        B1   unvoiced  s 1.281 [0.969, 1.479]  cover 0.585 / 0.949 (s-implied 0.881)  rms z 1.14  118 clips
+  resynth_vocalset_val_d16k        B2   all       s 1.081 [1.011, 1.153]  cover 0.644 / 0.936 (s-implied 0.936)  rms z 1.20  465 clips
+  resynth_vocalset_val_d16k        B2   150-300   s 1.035 [0.955, 1.124]  cover 0.665 / 0.948 (s-implied 0.947)  rms z 1.10  363 clips
+  resynth_vocalset_val_d16k        B2   300-500   s 1.152 [1.037, 1.280]  cover 0.603 / 0.897 (s-implied 0.917)  rms z 1.45  249 clips FLAG
+  resynth_vocalset_val_d16k        B2   <150      s 1.105 [0.966, 1.253]  cover 0.633 / 0.956 (s-implied 0.930)  rms z 1.04  195 clips
+  resynth_vocalset_val_d16k        B2   >500      s 1.066 [0.884, 1.332]  cover 0.659 / 0.930 (s-implied 0.939)  rms z 1.25  121 clips
+  resynth_vocalset_val_d16k        B2   unvoiced  s 1.066 [0.810, 1.334]  cover 0.662 / 0.981 (s-implied 0.939)  rms z 0.99  118 clips
+  resynth_vocalset_val_d16k        B3   all       s 1.141 [1.073, 1.209]  cover 0.614 / 0.931 (s-implied 0.920)  rms z 1.12  465 clips
+  resynth_vocalset_val_d16k        B3   150-300   s 1.084 [0.994, 1.171]  cover 0.639 / 0.940 (s-implied 0.935)  rms z 1.07  363 clips
+  resynth_vocalset_val_d16k        B3   300-500   s 1.217 [1.097, 1.332]  cover 0.575 / 0.926 (s-implied 0.900)  rms z 1.16  249 clips FLAG
+  resynth_vocalset_val_d16k        B3   <150      s 1.199 [1.089, 1.307]  cover 0.579 / 0.942 (s-implied 0.905)  rms z 1.14  195 clips FLAG TAILS
+  resynth_vocalset_val_d16k        B3   >500      s 1.079 [0.825, 1.365]  cover 0.650 / 0.885 (s-implied 0.936)  rms z 1.16  121 clips TAILS
+  resynth_vocalset_val_d16k        B3   unvoiced  s 1.228 [1.060, 1.354]  cover 0.556 / 0.914 (s-implied 0.897)  rms z 1.17  118 clips FLAG
+  resynth_vocalset_val_d16k        B4   all       s 1.131 [1.067, 1.197]  cover 0.618 / 0.933 (s-implied 0.923)  rms z 1.14  456 clips
+  resynth_vocalset_val_d16k        B4   150-300   s 1.111 [1.029, 1.188]  cover 0.627 / 0.952 (s-implied 0.928)  rms z 1.06  356 clips TAILS
+  resynth_vocalset_val_d16k        B4   300-500   s 1.146 [1.025, 1.273]  cover 0.614 / 0.905 (s-implied 0.919)  rms z 1.25  240 clips
+  resynth_vocalset_val_d16k        B4   <150      s 1.218 [1.080, 1.390]  cover 0.574 / 0.919 (s-implied 0.899)  rms z 1.19  194 clips FLAG
+  resynth_vocalset_val_d16k        B4   >500      s 1.048 [0.827, 1.250]  cover 0.664 / 0.932 (s-implied 0.944)  rms z 1.11  117 clips
+  resynth_vocalset_val_d16k        B4   unvoiced  s 1.148 [0.932, 1.319]  cover 0.614 / 0.940 (s-implied 0.918)  rms z 1.10  114 clips
+  resynth_zeroth_korean_val_d16k   F1   all       s 0.900 [0.884, 0.917]  cover 0.731 / 0.956 (s-implied 0.974)  rms z 0.97  512 clips TAILS
+  resynth_zeroth_korean_val_d16k   F1   150-300   s 0.899 [0.883, 0.918]  cover 0.733 / 0.959 (s-implied 0.974)  rms z 0.95  405 clips TAILS
+  resynth_zeroth_korean_val_d16k   F1   300-500   s 0.947 [0.870, 1.049]  cover 0.707 / 0.932 (s-implied 0.965)  rms z 1.09  128 clips TAILS
+  resynth_zeroth_korean_val_d16k   F1   <150      s 0.914 [0.885, 0.944]  cover 0.724 / 0.955 (s-implied 0.971)  rms z 0.98  286 clips TAILS
+  resynth_zeroth_korean_val_d16k   F1   unvoiced  s 0.834 [0.790, 0.889]  cover 0.753 / 0.950 (s-implied 0.983)  rms z 0.96  478 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   all       s 0.790 [0.774, 0.806]  cover 0.776 / 0.958 (s-implied 0.989)  rms z 0.99  512 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   150-300   s 0.801 [0.781, 0.820]  cover 0.769 / 0.957 (s-implied 0.987)  rms z 0.99  405 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   300-500   s 0.748 [0.691, 0.821]  cover 0.787 / 0.950 (s-implied 0.992)  rms z 0.98  128 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   <150      s 0.791 [0.764, 0.820]  cover 0.779 / 0.961 (s-implied 0.989)  rms z 1.00  286 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   unvoiced  s 0.733 [0.692, 0.775]  cover 0.799 / 0.957 (s-implied 0.994)  rms z 0.99  478 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   all       s 0.822 [0.804, 0.838]  cover 0.763 / 0.951 (s-implied 0.985)  rms z 1.05  512 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   150-300   s 0.840 [0.818, 0.861]  cover 0.754 / 0.949 (s-implied 0.983)  rms z 1.04  405 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   300-500   s 0.848 [0.756, 0.947]  cover 0.744 / 0.951 (s-implied 0.982)  rms z 1.36  128 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   <150      s 0.772 [0.747, 0.797]  cover 0.789 / 0.961 (s-implied 0.990)  rms z 0.99  286 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   unvoiced  s 0.907 [0.860, 0.967]  cover 0.722 / 0.920 (s-implied 0.972)  rms z 1.18  478 clips TAILS
+  resynth_zeroth_korean_val_d16k   F4   all       s 0.877 [0.857, 0.898]  cover 0.737 / 0.948 (s-implied 0.977)  rms z 1.07  512 clips TAILS
+  resynth_zeroth_korean_val_d16k   F4   150-300   s 0.878 [0.853, 0.907]  cover 0.737 / 0.948 (s-implied 0.977)  rms z 1.08  405 clips TAILS
+  resynth_zeroth_korean_val_d16k   F4   300-500   s 0.874 [0.785, 0.995]  cover 0.733 / 0.938 (s-implied 0.978)  rms z 1.03  128 clips TAILS
+  resynth_zeroth_korean_val_d16k   F4   <150      s 0.860 [0.825, 0.899]  cover 0.745 / 0.951 (s-implied 0.980)  rms z 1.03  286 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F4   unvoiced  s 0.942 [0.879, 0.999]  cover 0.709 / 0.932 (s-implied 0.966)  rms z 1.21  478 clips TAILS
+  resynth_zeroth_korean_val_d16k   B1   all       s 0.934 [0.875, 0.999]  cover 0.715 / 0.975 (s-implied 0.968)  rms z 0.91  512 clips
+  resynth_zeroth_korean_val_d16k   B1   150-300   s 0.971 [0.892, 1.049]  cover 0.697 / 0.970 (s-implied 0.961)  rms z 0.94  405 clips
+  resynth_zeroth_korean_val_d16k   B1   300-500   s 1.028 [0.822, 1.204]  cover 0.672 / 0.961 (s-implied 0.948)  rms z 0.99  128 clips
+  resynth_zeroth_korean_val_d16k   B1   <150      s 0.870 [0.786, 0.963]  cover 0.746 / 0.983 (s-implied 0.979)  rms z 0.86  286 clips FLAG
+  resynth_zeroth_korean_val_d16k   B1   unvoiced  s 0.913 [0.840, 1.000]  cover 0.727 / 0.981 (s-implied 0.971)  rms z 0.89  478 clips
+  resynth_zeroth_korean_val_d16k   B2   all       s 0.895 [0.839, 0.954]  cover 0.736 / 0.978 (s-implied 0.974)  rms z 0.89  512 clips
+  resynth_zeroth_korean_val_d16k   B2   150-300   s 0.852 [0.786, 0.910]  cover 0.761 / 0.981 (s-implied 0.981)  rms z 0.85  405 clips FLAG
+  resynth_zeroth_korean_val_d16k   B2   300-500   s 0.958 [0.820, 1.114]  cover 0.704 / 0.978 (s-implied 0.963)  rms z 0.93  128 clips
+  resynth_zeroth_korean_val_d16k   B2   <150      s 0.971 [0.879, 1.072]  cover 0.698 / 0.973 (s-implied 0.961)  rms z 0.94  286 clips
+  resynth_zeroth_korean_val_d16k   B2   unvoiced  s 0.880 [0.807, 0.950]  cover 0.745 / 0.982 (s-implied 0.977)  rms z 0.88  478 clips
+  resynth_zeroth_korean_val_d16k   B3   all       s 0.960 [0.909, 1.010]  cover 0.703 / 0.971 (s-implied 0.963)  rms z 0.94  512 clips
+  resynth_zeroth_korean_val_d16k   B3   150-300   s 0.940 [0.881, 0.998]  cover 0.716 / 0.970 (s-implied 0.967)  rms z 0.93  405 clips
+  resynth_zeroth_korean_val_d16k   B3   300-500   s 0.898 [0.793, 1.033]  cover 0.733 / 0.959 (s-implied 0.974)  rms z 0.95  128 clips
+  resynth_zeroth_korean_val_d16k   B3   <150      s 1.001 [0.912, 1.085]  cover 0.682 / 0.974 (s-implied 0.954)  rms z 0.95  286 clips TAILS
+  resynth_zeroth_korean_val_d16k   B3   unvoiced  s 0.980 [0.898, 1.050]  cover 0.693 / 0.962 (s-implied 0.959)  rms z 0.97  478 clips
+  resynth_zeroth_korean_val_d16k   B4   all       s 0.991 [0.939, 1.052]  cover 0.687 / 0.961 (s-implied 0.956)  rms z 0.98  512 clips
+  resynth_zeroth_korean_val_d16k   B4   150-300   s 0.986 [0.908, 1.061]  cover 0.689 / 0.956 (s-implied 0.958)  rms z 0.99  405 clips
+  resynth_zeroth_korean_val_d16k   B4   300-500   s 1.147 [0.946, 1.331]  cover 0.614 / 0.944 (s-implied 0.919)  rms z 1.07  128 clips
+  resynth_zeroth_korean_val_d16k   B4   <150      s 1.010 [0.923, 1.103]  cover 0.678 / 0.970 (s-implied 0.952)  rms z 0.97  286 clips TAILS
+  resynth_zeroth_korean_val_d16k   B4   unvoiced  s 0.907 [0.854, 0.967]  cover 0.739 / 0.969 (s-implied 0.973)  rms z 0.93  478 clips
+  suite_adult_high_f0              F1   all       s 0.785 [0.743, 0.828]  cover 0.794 / 0.975 (s-implied 0.989)  rms z 0.85  64 clips FLAG TAILS
+  suite_adult_high_f0              F1   150-300   s 0.779 [0.734, 0.829]  cover 0.799 / 0.974 (s-implied 0.990)  rms z 0.84  64 clips FLAG TAILS
+  suite_adult_high_f0              F1   300-500   s 0.822 [0.697, 0.954]  cover 0.774 / 0.989 (s-implied 0.985)  rms z 0.80  28 clips FLAG
+  suite_adult_high_f0              F1   <150      s 0.815 [0.705, 1.051]  cover 0.748 / 0.964 (s-implied 0.986)  rms z 0.96  25 clips
+  suite_adult_high_f0              F2   all       s 0.726 [0.681, 0.776]  cover 0.804 / 0.951 (s-implied 0.994)  rms z 1.31  64 clips FLAG TAILS
+  suite_adult_high_f0              F2   150-300   s 0.727 [0.684, 0.775]  cover 0.804 / 0.949 (s-implied 0.994)  rms z 1.36  64 clips FLAG TAILS
+  suite_adult_high_f0              F2   300-500   s 0.829 [0.665, 0.961]  cover 0.776 / 0.953 (s-implied 0.984)  rms z 0.96  28 clips FLAG TAILS
+  suite_adult_high_f0              F2   <150      s 0.654 [0.570, 0.740]  cover 0.835 / 0.972 (s-implied 0.998)  rms z 0.89  25 clips FLAG TAILS
+  suite_adult_high_f0              F3   all       s 0.756 [0.705, 0.823]  cover 0.786 / 0.955 (s-implied 0.992)  rms z 1.22  64 clips FLAG TAILS
+  suite_adult_high_f0              F3   150-300   s 0.769 [0.710, 0.836]  cover 0.782 / 0.955 (s-implied 0.991)  rms z 1.25  64 clips FLAG TAILS
+  suite_adult_high_f0              F3   300-500   s 0.810 [0.628, 1.042]  cover 0.760 / 0.942 (s-implied 0.986)  rms z 1.20  28 clips TAILS
+  suite_adult_high_f0              F3   <150      s 0.587 [0.477, 0.686]  cover 0.873 / 0.975 (s-implied 0.999)  rms z 0.80  25 clips FLAG TAILS
+  suite_adult_high_f0              F4   all       s 0.803 [0.756, 0.846]  cover 0.770 / 0.954 (s-implied 0.987)  rms z 1.19  64 clips FLAG TAILS
+  suite_adult_high_f0              F4   150-300   s 0.823 [0.770, 0.879]  cover 0.759 / 0.950 (s-implied 0.985)  rms z 1.22  64 clips FLAG TAILS
+  suite_adult_high_f0              F4   300-500   s 0.794 [0.653, 0.904]  cover 0.810 / 0.978 (s-implied 0.988)  rms z 1.04  28 clips FLAG
+  suite_adult_high_f0              F4   <150      s 0.624 [0.549, 0.701]  cover 0.853 / 0.979 (s-implied 0.999)  rms z 0.78  25 clips FLAG TAILS
+  suite_adult_high_f0              B1   all       s 1.115 [1.066, 1.161]  cover 0.624 / 0.961 (s-implied 0.927)  rms z 1.04  64 clips TAILS
+  suite_adult_high_f0              B1   150-300   s 1.109 [1.051, 1.161]  cover 0.627 / 0.961 (s-implied 0.929)  rms z 1.04  64 clips TAILS
+  suite_adult_high_f0              B1   300-500   s 1.069 [0.857, 1.260]  cover 0.655 / 0.972 (s-implied 0.939)  rms z 1.01  28 clips
+  suite_adult_high_f0              B1   <150      s 1.230 [1.073, 1.368]  cover 0.541 / 0.955 (s-implied 0.896)  rms z 1.08  25 clips FLAG TAILS
+  suite_adult_high_f0              B2   all       s 1.033 [0.972, 1.107]  cover 0.666 / 0.962 (s-implied 0.947)  rms z 1.01  64 clips TAILS
+  suite_adult_high_f0              B2   150-300   s 1.017 [0.949, 1.086]  cover 0.674 / 0.964 (s-implied 0.951)  rms z 0.99  64 clips TAILS
+  suite_adult_high_f0              B2   300-500   s 1.103 [0.743, 1.532]  cover 0.645 / 0.958 (s-implied 0.930)  rms z 1.03  28 clips
+  suite_adult_high_f0              B2   <150      s 1.245 [0.962, 1.427]  cover 0.586 / 0.941 (s-implied 0.892)  rms z 1.19  25 clips
+  suite_adult_high_f0              B3   all       s 1.079 [1.010, 1.152]  cover 0.644 / 0.947 (s-implied 0.936)  rms z 1.06  64 clips
+  suite_adult_high_f0              B3   150-300   s 1.082 [1.010, 1.163]  cover 0.644 / 0.947 (s-implied 0.936)  rms z 1.07  64 clips
+  suite_adult_high_f0              B3   300-500   s 1.070 [0.847, 1.309]  cover 0.641 / 0.937 (s-implied 0.938)  rms z 1.10  28 clips
+  suite_adult_high_f0              B3   <150      s 1.060 [0.803, 1.292]  cover 0.649 / 0.970 (s-implied 0.941)  rms z 0.97  25 clips
+  suite_adult_high_f0              B4   all       s 0.971 [0.905, 1.028]  cover 0.698 / 0.971 (s-implied 0.961)  rms z 0.94  64 clips
+  suite_adult_high_f0              B4   150-300   s 0.980 [0.915, 1.047]  cover 0.692 / 0.970 (s-implied 0.959)  rms z 0.95  64 clips
+  suite_adult_high_f0              B4   300-500   s 0.856 [0.744, 1.002]  cover 0.767 / 0.995 (s-implied 0.980)  rms z 0.82  28 clips
+  suite_adult_high_f0              B4   <150      s 1.004 [0.827, 1.239]  cover 0.679 / 0.950 (s-implied 0.954)  rms z 1.02  25 clips
+  suite_adult_high_f0              voicing   ECE 0.001
+  suite_adult_high_f0              sonorant  ECE 0.019
+  suite_breathy                    F1   all       s 0.832 [0.790, 0.878]  cover 0.759 / 0.967 (s-implied 0.984)  rms z 0.93  64 clips FLAG TAILS
+  suite_breathy                    F1   150-300   s 0.762 [0.706, 0.827]  cover 0.809 / 0.988 (s-implied 0.991)  rms z 0.78  23 clips FLAG
+  suite_breathy                    F1   300-500   s 0.745 [0.625, 0.869]  cover 0.799 / 0.972 (s-implied 0.993)  rms z 0.82  25 clips FLAG TAILS
+  suite_breathy                    F1   <150      s 0.862 [0.775, 0.941]  cover 0.746 / 0.964 (s-implied 0.980)  rms z 1.02  24 clips FLAG TAILS
+  suite_breathy                    F1   >500      s 0.919 [0.837, 0.997]  cover 0.721 / 0.954 (s-implied 0.970)  rms z 0.96  29 clips
+  suite_breathy                    F2   all       s 0.641 [0.590, 0.689]  cover 0.833 / 0.968 (s-implied 0.998)  rms z 0.91  64 clips FLAG TAILS
+  suite_breathy                    F2   150-300   s 0.711 [0.595, 0.816]  cover 0.796 / 0.945 (s-implied 0.995)  rms z 1.15  23 clips FLAG TAILS
+  suite_breathy                    F2   300-500   s 0.702 [0.612, 0.815]  cover 0.808 / 0.956 (s-implied 0.996)  rms z 1.11  25 clips FLAG TAILS
+  suite_breathy                    F2   <150      s 0.521 [0.451, 0.600]  cover 0.866 / 0.976 (s-implied 1.000)  rms z 0.75  24 clips FLAG TAILS
+  suite_breathy                    F2   >500      s 0.669 [0.594, 0.749]  cover 0.836 / 0.978 (s-implied 0.997)  rms z 0.79  29 clips FLAG TAILS
+  suite_breathy                    F3   all       s 0.654 [0.602, 0.712]  cover 0.831 / 0.972 (s-implied 0.998)  rms z 0.88  64 clips FLAG TAILS
+  suite_breathy                    F3   150-300   s 0.733 [0.600, 0.853]  cover 0.799 / 0.945 (s-implied 0.994)  rms z 1.12  23 clips FLAG TAILS
+  suite_breathy                    F3   300-500   s 0.694 [0.602, 0.793]  cover 0.816 / 0.968 (s-implied 0.996)  rms z 0.95  25 clips FLAG TAILS
+  suite_breathy                    F3   <150      s 0.534 [0.466, 0.604]  cover 0.878 / 0.982 (s-implied 1.000)  rms z 0.74  23 clips FLAG TAILS
+  suite_breathy                    F3   >500      s 0.708 [0.610, 0.838]  cover 0.814 / 0.979 (s-implied 0.995)  rms z 0.80  29 clips FLAG TAILS
+  suite_breathy                    F4   all       s 0.708 [0.659, 0.757]  cover 0.813 / 0.969 (s-implied 0.995)  rms z 0.94  64 clips FLAG TAILS
+  suite_breathy                    F4   150-300   s 0.747 [0.642, 0.870]  cover 0.793 / 0.960 (s-implied 0.993)  rms z 1.00  23 clips FLAG TAILS
+  suite_breathy                    F4   300-500   s 0.773 [0.663, 0.897]  cover 0.791 / 0.981 (s-implied 0.990)  rms z 1.07  25 clips FLAG
+  suite_breathy                    F4   <150      s 0.597 [0.524, 0.664]  cover 0.861 / 0.974 (s-implied 0.999)  rms z 0.82  24 clips FLAG TAILS
+  suite_breathy                    F4   >500      s 0.736 [0.659, 0.844]  cover 0.794 / 0.964 (s-implied 0.993)  rms z 0.94  29 clips FLAG TAILS
+  suite_breathy                    B1   all       s 1.103 [1.050, 1.150]  cover 0.627 / 0.971 (s-implied 0.930)  rms z 1.01  64 clips TAILS
+  suite_breathy                    B1   150-300   s 1.118 [1.010, 1.271]  cover 0.613 / 0.944 (s-implied 0.926)  rms z 1.07  23 clips
+  suite_breathy                    B1   300-500   s 1.073 [0.912, 1.175]  cover 0.640 / 0.973 (s-implied 0.938)  rms z 0.98  25 clips
+  suite_breathy                    B1   <150      s 1.169 [1.101, 1.221]  cover 0.592 / 0.975 (s-implied 0.913)  rms z 1.04  24 clips FLAG TAILS
+  suite_breathy                    B1   >500      s 1.045 [0.963, 1.128]  cover 0.659 / 0.982 (s-implied 0.944)  rms z 0.97  29 clips TAILS
+  suite_breathy                    B2   all       s 1.114 [1.050, 1.177]  cover 0.628 / 0.950 (s-implied 0.927)  rms z 1.06  64 clips TAILS
+  suite_breathy                    B2   150-300   s 0.971 [0.856, 1.075]  cover 0.702 / 0.949 (s-implied 0.961)  rms z 1.02  23 clips
+  suite_breathy                    B2   300-500   s 1.048 [0.929, 1.169]  cover 0.656 / 0.959 (s-implied 0.944)  rms z 1.01  25 clips
+  suite_breathy                    B2   <150      s 1.075 [0.986, 1.167]  cover 0.643 / 0.955 (s-implied 0.937)  rms z 1.04  24 clips
+  suite_breathy                    B2   >500      s 1.251 [1.143, 1.342]  cover 0.558 / 0.940 (s-implied 0.890)  rms z 1.14  29 clips FLAG TAILS
+  suite_breathy                    B3   all       s 1.102 [1.046, 1.175]  cover 0.629 / 0.948 (s-implied 0.931)  rms z 1.07  64 clips TAILS
+  suite_breathy                    B3   150-300   s 0.988 [0.873, 1.076]  cover 0.691 / 0.957 (s-implied 0.957)  rms z 0.99  23 clips
+  suite_breathy                    B3   300-500   s 1.111 [0.975, 1.265]  cover 0.622 / 0.950 (s-implied 0.928)  rms z 1.05  25 clips
+  suite_breathy                    B3   <150      s 1.106 [1.007, 1.214]  cover 0.624 / 0.955 (s-implied 0.929)  rms z 1.05  24 clips TAILS
+  suite_breathy                    B3   >500      s 1.180 [1.071, 1.299]  cover 0.604 / 0.934 (s-implied 0.910)  rms z 1.15  29 clips FLAG TAILS
+  suite_breathy                    B4   all       s 1.063 [0.987, 1.142]  cover 0.652 / 0.962 (s-implied 0.940)  rms z 1.02  64 clips TAILS
+  suite_breathy                    B4   150-300   s 0.958 [0.866, 1.079]  cover 0.716 / 0.974 (s-implied 0.963)  rms z 0.94  23 clips
+  suite_breathy                    B4   300-500   s 1.086 [0.923, 1.259]  cover 0.644 / 0.955 (s-implied 0.934)  rms z 1.03  25 clips
+  suite_breathy                    B4   <150      s 1.048 [0.933, 1.162]  cover 0.657 / 0.972 (s-implied 0.944)  rms z 0.99  24 clips
+  suite_breathy                    B4   >500      s 1.151 [1.006, 1.289]  cover 0.616 / 0.949 (s-implied 0.918)  rms z 1.08  29 clips FLAG TAILS
+  suite_breathy                    voicing   ECE 0.001
+  suite_breathy                    sonorant  ECE 0.022
+  suite_codec                      F1   all       s 0.738 [0.691, 0.790]  cover 0.806 / 0.968 (s-implied 0.993)  rms z 0.87  64 clips FLAG TAILS
+  suite_codec                      F1   150-300   s 0.728 [0.647, 0.824]  cover 0.814 / 0.965 (s-implied 0.994)  rms z 0.95  28 clips FLAG TAILS
+  suite_codec                      F1   300-500   s 0.714 [0.610, 0.862]  cover 0.813 / 0.979 (s-implied 0.995)  rms z 0.81  27 clips FLAG TAILS
+  suite_codec                      F1   <150      s 0.723 [0.657, 0.800]  cover 0.813 / 0.973 (s-implied 0.994)  rms z 0.81  29 clips FLAG TAILS
+  suite_codec                      F1   >500      s 0.775 [0.682, 0.861]  cover 0.788 / 0.954 (s-implied 0.990)  rms z 0.93  29 clips FLAG TAILS
+  suite_codec                      F2   all       s 0.651 [0.606, 0.696]  cover 0.832 / 0.973 (s-implied 0.998)  rms z 1.07  64 clips FLAG TAILS
+  suite_codec                      F2   150-300   s 0.680 [0.606, 0.831]  cover 0.804 / 0.959 (s-implied 0.997)  rms z 1.65  28 clips FLAG TAILS
+  suite_codec                      F2   300-500   s 0.665 [0.601, 0.748]  cover 0.826 / 0.980 (s-implied 0.997)  rms z 0.85  27 clips FLAG TAILS
+  suite_codec                      F2   <150      s 0.651 [0.577, 0.728]  cover 0.837 / 0.971 (s-implied 0.998)  rms z 1.00  29 clips FLAG TAILS
+  suite_codec                      F2   >500      s 0.620 [0.515, 0.722]  cover 0.850 / 0.979 (s-implied 0.999)  rms z 0.74  29 clips FLAG TAILS
+  suite_codec                      F3   all       s 0.781 [0.730, 0.834]  cover 0.781 / 0.959 (s-implied 0.990)  rms z 1.05  64 clips FLAG TAILS
+  suite_codec                      F3   150-300   s 0.764 [0.634, 0.877]  cover 0.798 / 0.957 (s-implied 0.991)  rms z 1.23  28 clips FLAG TAILS
+  suite_codec                      F3   300-500   s 0.824 [0.722, 0.982]  cover 0.748 / 0.953 (s-implied 0.985)  rms z 1.11  27 clips FLAG TAILS
+  suite_codec                      F3   <150      s 0.723 [0.654, 0.784]  cover 0.806 / 0.964 (s-implied 0.994)  rms z 0.96  29 clips FLAG TAILS
+  suite_codec                      F3   >500      s 0.843 [0.734, 0.939]  cover 0.763 / 0.960 (s-implied 0.982)  rms z 0.96  29 clips FLAG TAILS
+  suite_codec                      F4   all       s 0.795 [0.726, 0.887]  cover 0.770 / 0.955 (s-implied 0.988)  rms z 1.01  64 clips FLAG TAILS
+  suite_codec                      F4   150-300   s 0.836 [0.697, 0.953]  cover 0.774 / 0.976 (s-implied 0.983)  rms z 0.91  28 clips FLAG
+  suite_codec                      F4   300-500   s 0.779 [0.658, 0.981]  cover 0.770 / 0.966 (s-implied 0.990)  rms z 0.91  27 clips FLAG
+  suite_codec                      F4   <150      s 0.784 [0.658, 0.961]  cover 0.773 / 0.949 (s-implied 0.989)  rms z 1.07  29 clips FLAG TAILS
+  suite_codec                      F4   >500      s 0.789 [0.674, 0.982]  cover 0.762 / 0.939 (s-implied 0.989)  rms z 1.06  29 clips FLAG TAILS
+  suite_codec                      B1   all       s 1.117 [1.065, 1.169]  cover 0.619 / 0.966 (s-implied 0.927)  rms z 1.05  64 clips TAILS
+  suite_codec                      B1   150-300   s 1.180 [1.086, 1.257]  cover 0.574 / 0.955 (s-implied 0.910)  rms z 1.10  28 clips FLAG TAILS
+  suite_codec                      B1   300-500   s 1.085 [0.959, 1.223]  cover 0.631 / 0.965 (s-implied 0.935)  rms z 1.11  27 clips
+  suite_codec                      B1   <150      s 1.146 [1.067, 1.231]  cover 0.602 / 0.963 (s-implied 0.919)  rms z 1.04  29 clips TAILS
+  suite_codec                      B1   >500      s 1.040 [0.913, 1.158]  cover 0.665 / 0.981 (s-implied 0.946)  rms z 0.96  29 clips TAILS
+  suite_codec                      B2   all       s 1.072 [1.016, 1.135]  cover 0.645 / 0.955 (s-implied 0.938)  rms z 1.03  64 clips
+  suite_codec                      B2   150-300   s 1.039 [0.916, 1.185]  cover 0.661 / 0.948 (s-implied 0.946)  rms z 1.01  28 clips
+  suite_codec                      B2   300-500   s 0.985 [0.849, 1.121]  cover 0.690 / 0.970 (s-implied 0.958)  rms z 0.97  27 clips
+  suite_codec                      B2   <150      s 1.162 [1.043, 1.281]  cover 0.601 / 0.946 (s-implied 0.915)  rms z 1.08  29 clips FLAG TAILS
+  suite_codec                      B2   >500      s 1.052 [0.958, 1.150]  cover 0.654 / 0.959 (s-implied 0.943)  rms z 1.01  29 clips
+  suite_codec                      B3   all       s 1.058 [0.990, 1.132]  cover 0.655 / 0.962 (s-implied 0.941)  rms z 1.01  64 clips TAILS
+  suite_codec                      B3   150-300   s 0.940 [0.758, 1.187]  cover 0.712 / 0.969 (s-implied 0.967)  rms z 0.94  28 clips
+  suite_codec                      B3   300-500   s 1.018 [0.911, 1.135]  cover 0.674 / 0.976 (s-implied 0.951)  rms z 0.96  27 clips TAILS
+  suite_codec                      B3   <150      s 1.186 [1.064, 1.337]  cover 0.594 / 0.949 (s-implied 0.908)  rms z 1.09  29 clips FLAG TAILS
+  suite_codec                      B3   >500      s 1.018 [0.938, 1.118]  cover 0.674 / 0.961 (s-implied 0.951)  rms z 1.00  29 clips
+  suite_codec                      B4   all       s 1.087 [1.004, 1.163]  cover 0.640 / 0.961 (s-implied 0.934)  rms z 1.03  64 clips TAILS
+  suite_codec                      B4   150-300   s 1.099 [0.891, 1.263]  cover 0.642 / 0.970 (s-implied 0.931)  rms z 1.02  28 clips
+  suite_codec                      B4   300-500   s 1.101 [0.950, 1.278]  cover 0.627 / 0.956 (s-implied 0.931)  rms z 1.03  27 clips
+  suite_codec                      B4   <150      s 1.055 [0.925, 1.216]  cover 0.655 / 0.954 (s-implied 0.942)  rms z 1.05  29 clips
+  suite_codec                      B4   >500      s 1.101 [0.970, 1.207]  cover 0.628 / 0.966 (s-implied 0.931)  rms z 1.02  29 clips TAILS
+  suite_codec                      voicing   ECE 0.003
+  suite_codec                      sonorant  ECE 0.015
+  suite_f1_near_h1                 F1   all       s 1.921 [1.522, 2.409]  cover 0.456 / 0.697 (s-implied 0.702)  rms z 5.85  64 clips FLAG
+  suite_f1_near_h1                 F1   150-300   s 1.989 [1.433, 4.073]  cover 0.379 / 0.687 (s-implied 0.685)  rms z 4.68  28 clips FLAG
+  suite_f1_near_h1                 F1   300-500   s 0.897 [0.740, 1.136]  cover 0.731 / 0.947 (s-implied 0.974)  rms z 0.98  25 clips TAILS
+  suite_f1_near_h1                 F1   >500      s 1.388 [0.989, 1.912]  cover 0.575 / 0.796 (s-implied 0.850)  rms z 1.66  33 clips TAILS
+  suite_f1_near_h1                 F2   all       s 0.651 [0.574, 0.742]  cover 0.822 / 0.949 (s-implied 0.998)  rms z 1.90  64 clips FLAG TAILS
+  suite_f1_near_h1                 F2   150-300   s 0.605 [0.509, 0.702]  cover 0.843 / 0.971 (s-implied 0.999)  rms z 1.36  28 clips FLAG TAILS
+  suite_f1_near_h1                 F2   300-500   s 0.685 [0.585, 0.782]  cover 0.823 / 0.954 (s-implied 0.996)  rms z 1.07  25 clips FLAG TAILS
+  suite_f1_near_h1                 F2   >500      s 0.744 [0.634, 0.878]  cover 0.794 / 0.945 (s-implied 0.993)  rms z 0.97  33 clips FLAG TAILS
+  suite_f1_near_h1                 F3   all       s 0.657 [0.593, 0.740]  cover 0.821 / 0.960 (s-implied 0.998)  rms z 1.11  64 clips FLAG TAILS
+  suite_f1_near_h1                 F3   150-300   s 0.692 [0.605, 0.803]  cover 0.806 / 0.955 (s-implied 0.996)  rms z 1.10  28 clips FLAG TAILS
+  suite_f1_near_h1                 F3   300-500   s 0.640 [0.575, 0.727]  cover 0.844 / 0.961 (s-implied 0.998)  rms z 0.90  25 clips FLAG TAILS
+  suite_f1_near_h1                 F3   >500      s 0.711 [0.611, 0.802]  cover 0.811 / 0.979 (s-implied 0.995)  rms z 0.82  33 clips FLAG TAILS
+  suite_f1_near_h1                 F4   all       s 0.705 [0.632, 0.784]  cover 0.799 / 0.953 (s-implied 0.995)  rms z 1.12  64 clips FLAG TAILS
+  suite_f1_near_h1                 F4   150-300   s 0.678 [0.549, 0.802]  cover 0.811 / 0.967 (s-implied 0.997)  rms z 0.89  28 clips FLAG TAILS
+  suite_f1_near_h1                 F4   300-500   s 0.651 [0.543, 0.770]  cover 0.824 / 0.968 (s-implied 0.998)  rms z 0.88  25 clips FLAG TAILS
+  suite_f1_near_h1                 F4   >500      s 0.773 [0.672, 0.912]  cover 0.776 / 0.952 (s-implied 0.990)  rms z 0.95  33 clips FLAG TAILS
+  suite_f1_near_h1                 B1   all       s 1.462 [1.287, 1.689]  cover 0.498 / 0.821 (s-implied 0.829)  rms z 1.56  64 clips FLAG
+  suite_f1_near_h1                 B1   150-300   s 1.555 [1.292, 1.844]  cover 0.474 / 0.808 (s-implied 0.802)  rms z 1.47  28 clips FLAG
+  suite_f1_near_h1                 B1   300-500   s 1.211 [1.039, 1.431]  cover 0.584 / 0.946 (s-implied 0.901)  rms z 1.12  25 clips FLAG TAILS
+  suite_f1_near_h1                 B1   >500      s 1.122 [1.015, 1.259]  cover 0.620 / 0.969 (s-implied 0.925)  rms z 1.04  33 clips TAILS
+  suite_f1_near_h1                 B2   all       s 1.071 [1.000, 1.148]  cover 0.646 / 0.959 (s-implied 0.938)  rms z 1.02  64 clips TAILS
+  suite_f1_near_h1                 B2   150-300   s 1.145 [1.023, 1.248]  cover 0.606 / 0.963 (s-implied 0.919)  rms z 1.06  28 clips TAILS
+  suite_f1_near_h1                 B2   300-500   s 1.133 [1.035, 1.260]  cover 0.614 / 0.954 (s-implied 0.923)  rms z 1.05  25 clips TAILS
+  suite_f1_near_h1                 B2   >500      s 1.036 [0.939, 1.164]  cover 0.665 / 0.962 (s-implied 0.947)  rms z 1.00  33 clips
+  suite_f1_near_h1                 B3   all       s 1.037 [0.987, 1.088]  cover 0.663 / 0.957 (s-implied 0.946)  rms z 1.02  64 clips
+  suite_f1_near_h1                 B3   150-300   s 1.039 [0.941, 1.188]  cover 0.664 / 0.941 (s-implied 0.946)  rms z 1.10  28 clips
+  suite_f1_near_h1                 B3   300-500   s 1.127 [1.031, 1.240]  cover 0.610 / 0.935 (s-implied 0.924)  rms z 1.10  25 clips
+  suite_f1_near_h1                 B3   >500      s 1.001 [0.916, 1.106]  cover 0.682 / 0.966 (s-implied 0.954)  rms z 0.98  33 clips
+  suite_f1_near_h1                 B4   all       s 1.073 [1.000, 1.150]  cover 0.647 / 0.954 (s-implied 0.938)  rms z 1.03  64 clips TAILS
+  suite_f1_near_h1                 B4   150-300   s 1.114 [0.985, 1.267]  cover 0.620 / 0.952 (s-implied 0.927)  rms z 1.05  28 clips TAILS
+  suite_f1_near_h1                 B4   300-500   s 1.054 [0.874, 1.293]  cover 0.662 / 0.942 (s-implied 0.942)  rms z 1.06  25 clips
+  suite_f1_near_h1                 B4   >500      s 1.045 [0.925, 1.150]  cover 0.658 / 0.969 (s-implied 0.944)  rms z 1.00  33 clips TAILS
+  suite_f1_near_h1                 voicing   ECE 0.001
+  suite_f1_near_h1                 sonorant  ECE 0.015
+  suite_f1_near_h2                 F1   all       s 1.670 [1.206, 2.657]  cover 0.541 / 0.722 (s-implied 0.769)  rms z 7.01  64 clips FLAG
+  suite_f1_near_h2                 F1   150-300   s 0.778 [0.671, 0.868]  cover 0.804 / 0.968 (s-implied 0.990)  rms z 0.86  25 clips FLAG TAILS
+  suite_f1_near_h2                 F1   300-500   s 0.802 [0.677, 0.924]  cover 0.776 / 0.964 (s-implied 0.987)  rms z 0.88  26 clips FLAG TAILS
+  suite_f1_near_h2                 F1   <150      s 1.711 [1.243, 2.593]  cover 0.484 / 0.740 (s-implied 0.758)  rms z 10.51  25 clips FLAG
+  suite_f1_near_h2                 F1   >500      s 4.743 [2.670, 6.607]  cover 0.327 / 0.437 (s-implied 0.327)  rms z 6.31  30 clips FLAG
+  suite_f1_near_h2                 F2   all       s 1.016 [0.754, 1.395]  cover 0.678 / 0.829 (s-implied 0.951)  rms z 4.61  64 clips TAILS
+  suite_f1_near_h2                 F2   150-300   s 0.750 [0.655, 0.858]  cover 0.784 / 0.937 (s-implied 0.992)  rms z 1.89  25 clips FLAG TAILS
+  suite_f1_near_h2                 F2   300-500   s 0.659 [0.540, 0.790]  cover 0.828 / 0.937 (s-implied 0.998)  rms z 1.98  26 clips FLAG TAILS
+  suite_f1_near_h2                 F2   <150      s 0.463 [0.363, 0.670]  cover 0.851 / 0.924 (s-implied 1.000)  rms z 3.64  25 clips FLAG TAILS
+  suite_f1_near_h2                 F2   >500      s 2.249 [1.684, 2.978]  cover 0.384 / 0.629 (s-implied 0.626)  rms z 6.82  30 clips FLAG
+  suite_f1_near_h2                 F3   all       s 0.984 [0.737, 1.538]  cover 0.686 / 0.810 (s-implied 0.958)  rms z 3.93  64 clips TAILS
+  suite_f1_near_h2                 F3   150-300   s 0.753 [0.629, 0.963]  cover 0.767 / 0.939 (s-implied 0.992)  rms z 1.28  25 clips FLAG TAILS
+  suite_f1_near_h2                 F3   300-500   s 0.689 [0.554, 0.872]  cover 0.807 / 0.945 (s-implied 0.996)  rms z 2.31  26 clips FLAG TAILS
+  suite_f1_near_h2                 F3   <150      s 0.578 [0.474, 0.804]  cover 0.822 / 0.929 (s-implied 0.999)  rms z 2.95  25 clips FLAG TAILS
+  suite_f1_near_h2                 F3   >500      s 3.872 [1.359, 6.208]  cover 0.454 / 0.559 (s-implied 0.395)  rms z 5.87  30 clips FLAG
+  suite_f1_near_h2                 F4   all       s 0.867 [0.684, 1.251]  cover 0.719 / 0.830 (s-implied 0.979)  rms z 2.50  64 clips TAILS
+  suite_f1_near_h2                 F4   150-300   s 0.735 [0.635, 0.851]  cover 0.807 / 0.965 (s-implied 0.993)  rms z 1.26  25 clips FLAG TAILS
+  suite_f1_near_h2                 F4   300-500   s 0.643 [0.554, 0.767]  cover 0.841 / 0.957 (s-implied 0.998)  rms z 1.00  26 clips FLAG TAILS
+  suite_f1_near_h2                 F4   <150      s 0.571 [0.464, 0.717]  cover 0.837 / 0.936 (s-implied 1.000)  rms z 1.94  25 clips FLAG TAILS
+  suite_f1_near_h2                 F4   >500      s 3.210 [1.007, 4.269]  cover 0.497 / 0.593 (s-implied 0.467)  rms z 3.71  30 clips FLAG
+  suite_f1_near_h2                 B1   all       s 1.336 [1.183, 1.542]  cover 0.526 / 0.850 (s-implied 0.866)  rms z 1.63  64 clips FLAG
+  suite_f1_near_h2                 B1   150-300   s 1.055 [0.884, 1.191]  cover 0.658 / 0.986 (s-implied 0.942)  rms z 0.97  25 clips TAILS
+  suite_f1_near_h2                 B1   300-500   s 1.199 [1.070, 1.328]  cover 0.550 / 0.960 (s-implied 0.905)  rms z 1.08  26 clips FLAG TAILS
+  suite_f1_near_h2                 B1   <150      s 1.365 [1.139, 1.693]  cover 0.525 / 0.839 (s-implied 0.857)  rms z 1.48  25 clips FLAG
+  suite_f1_near_h2                 B1   >500      s 1.740 [1.267, 3.045]  cover 0.438 / 0.726 (s-implied 0.750)  rms z 2.20  30 clips FLAG
+  suite_f1_near_h2                 B2   all       s 1.131 [1.039, 1.263]  cover 0.620 / 0.906 (s-implied 0.923)  rms z 1.23  64 clips
+  suite_f1_near_h2                 B2   150-300   s 0.981 [0.879, 1.098]  cover 0.690 / 0.966 (s-implied 0.958)  rms z 0.96  25 clips
+  suite_f1_near_h2                 B2   300-500   s 0.975 [0.883, 1.072]  cover 0.700 / 0.956 (s-implied 0.960)  rms z 1.02  26 clips
+  suite_f1_near_h2                 B2   <150      s 1.081 [0.996, 1.187]  cover 0.644 / 0.938 (s-implied 0.936)  rms z 1.07  25 clips
+  suite_f1_near_h2                 B2   >500      s 1.452 [1.150, 1.834]  cover 0.513 / 0.814 (s-implied 0.832)  rms z 1.56  30 clips FLAG
+  suite_f1_near_h2                 B3   all       s 1.272 [1.115, 1.476]  cover 0.575 / 0.857 (s-implied 0.884)  rms z 1.43  64 clips FLAG TAILS
+  suite_f1_near_h2                 B3   150-300   s 1.093 [0.915, 1.285]  cover 0.646 / 0.942 (s-implied 0.933)  rms z 1.08  25 clips
+  suite_f1_near_h2                 B3   300-500   s 0.948 [0.829, 1.090]  cover 0.712 / 0.961 (s-implied 0.965)  rms z 1.04  26 clips
+  suite_f1_near_h2                 B3   <150      s 1.108 [0.994, 1.232]  cover 0.630 / 0.934 (s-implied 0.929)  rms z 1.09  25 clips
+  suite_f1_near_h2                 B3   >500      s 2.032 [1.343, 2.579]  cover 0.408 / 0.677 (s-implied 0.675)  rms z 1.98  30 clips FLAG
+  suite_f1_near_h2                 B4   all       s 1.235 [1.100, 1.406]  cover 0.581 / 0.872 (s-implied 0.895)  rms z 1.35  64 clips FLAG
+  suite_f1_near_h2                 B4   150-300   s 0.899 [0.805, 0.996]  cover 0.733 / 0.974 (s-implied 0.974)  rms z 0.88  25 clips
+  suite_f1_near_h2                 B4   300-500   s 1.068 [0.921, 1.209]  cover 0.650 / 0.943 (s-implied 0.939)  rms z 1.07  26 clips
+  suite_f1_near_h2                 B4   <150      s 1.029 [0.905, 1.186]  cover 0.669 / 0.939 (s-implied 0.948)  rms z 1.08  25 clips
+  suite_f1_near_h2                 B4   >500      s 1.855 [1.485, 2.340]  cover 0.369 / 0.711 (s-implied 0.719)  rms z 1.85  30 clips FLAG
+  suite_f1_near_h2                 voicing   ECE 0.001
+  suite_f1_near_h2                 sonorant  ECE 0.023
+  suite_f2_f3_close                F1   all       s 0.751 [0.698, 0.813]  cover 0.790 / 0.969 (s-implied 0.992)  rms z 0.85  64 clips FLAG TAILS
+  suite_f2_f3_close                F1   150-300   s 0.688 [0.591, 0.779]  cover 0.839 / 0.984 (s-implied 0.996)  rms z 0.76  30 clips FLAG TAILS
+  suite_f2_f3_close                F1   300-500   s 0.732 [0.628, 0.910]  cover 0.782 / 0.964 (s-implied 0.994)  rms z 0.89  26 clips FLAG TAILS
+  suite_f2_f3_close                F1   >500      s 0.855 [0.777, 0.945]  cover 0.748 / 0.963 (s-implied 0.981)  rms z 0.91  31 clips FLAG TAILS
+  suite_f2_f3_close                F2   all       s 1.022 [0.906, 1.136]  cover 0.675 / 0.891 (s-implied 0.950)  rms z 1.61  64 clips TAILS
+  suite_f2_f3_close                F2   150-300   s 1.269 [1.068, 1.473]  cover 0.589 / 0.841 (s-implied 0.885)  rms z 1.57  30 clips FLAG TAILS
+  suite_f2_f3_close                F2   300-500   s 1.278 [1.038, 1.539]  cover 0.601 / 0.832 (s-implied 0.883)  rms z 1.67  26 clips FLAG TAILS
+  suite_f2_f3_close                F2   >500      s 1.054 [0.921, 1.207]  cover 0.665 / 0.915 (s-implied 0.942)  rms z 1.93  31 clips TAILS
+  suite_f2_f3_close                F3   all       s 0.725 [0.598, 0.907]  cover 0.745 / 0.834 (s-implied 0.994)  rms z 5.16  64 clips FLAG TAILS
+  suite_f2_f3_close                F3   150-300   s 0.621 [0.478, 0.955]  cover 0.773 / 0.840 (s-implied 0.999)  rms z 8.72  30 clips FLAG TAILS
+  suite_f2_f3_close                F3   300-500   s 0.717 [0.474, 1.440]  cover 0.732 / 0.817 (s-implied 0.995)  rms z 4.79  26 clips TAILS
+  suite_f2_f3_close                F3   >500      s 0.830 [0.611, 1.247]  cover 0.725 / 0.846 (s-implied 0.984)  rms z 1.66  31 clips TAILS
+  suite_f2_f3_close                F4   all       s 0.556 [0.489, 0.651]  cover 0.829 / 0.952 (s-implied 1.000)  rms z 0.91  64 clips FLAG TAILS
+  suite_f2_f3_close                F4   150-300   s 0.552 [0.419, 0.756]  cover 0.826 / 0.933 (s-implied 1.000)  rms z 1.16  30 clips FLAG TAILS
+  suite_f2_f3_close                F4   300-500   s 0.571 [0.413, 0.772]  cover 0.823 / 0.960 (s-implied 1.000)  rms z 0.80  26 clips FLAG TAILS
+  suite_f2_f3_close                F4   >500      s 0.732 [0.592, 0.926]  cover 0.773 / 0.936 (s-implied 0.994)  rms z 0.94  31 clips FLAG TAILS
+  suite_f2_f3_close                B1   all       s 1.081 [1.007, 1.146]  cover 0.639 / 0.973 (s-implied 0.936)  rms z 1.01  64 clips TAILS
+  suite_f2_f3_close                B1   150-300   s 1.065 [0.922, 1.217]  cover 0.646 / 0.967 (s-implied 0.940)  rms z 1.00  30 clips
+  suite_f2_f3_close                B1   300-500   s 1.071 [0.949, 1.168]  cover 0.644 / 0.962 (s-implied 0.938)  rms z 1.02  26 clips
+  suite_f2_f3_close                B1   >500      s 1.050 [0.949, 1.129]  cover 0.658 / 0.984 (s-implied 0.943)  rms z 0.98  31 clips TAILS
+  suite_f2_f3_close                B2   all       s 1.191 [1.096, 1.298]  cover 0.591 / 0.915 (s-implied 0.907)  rms z 1.17  64 clips FLAG
+  suite_f2_f3_close                B2   150-300   s 1.335 [1.127, 1.528]  cover 0.541 / 0.900 (s-implied 0.866)  rms z 1.27  30 clips FLAG
+  suite_f2_f3_close                B2   300-500   s 1.365 [1.180, 1.594]  cover 0.505 / 0.874 (s-implied 0.857)  rms z 1.30  26 clips FLAG
+  suite_f2_f3_close                B2   >500      s 1.079 [0.958, 1.241]  cover 0.642 / 0.922 (s-implied 0.936)  rms z 1.10  31 clips
+  suite_f2_f3_close                B3   all       s 1.499 [1.395, 1.677]  cover 0.476 / 0.810 (s-implied 0.818)  rms z 1.64  64 clips FLAG
+  suite_f2_f3_close                B3   150-300   s 1.692 [1.355, 2.171]  cover 0.455 / 0.748 (s-implied 0.763)  rms z 1.82  30 clips FLAG
+  suite_f2_f3_close                B3   300-500   s 1.543 [1.243, 2.123]  cover 0.493 / 0.784 (s-implied 0.805)  rms z 1.94  26 clips FLAG
+  suite_f2_f3_close                B3   >500      s 1.376 [1.257, 1.526]  cover 0.497 / 0.861 (s-implied 0.854)  rms z 1.38  31 clips FLAG
+  suite_f2_f3_close                B4   all       s 1.011 [0.940, 1.091]  cover 0.677 / 0.951 (s-implied 0.952)  rms z 1.06  64 clips
+  suite_f2_f3_close                B4   150-300   s 0.925 [0.790, 1.090]  cover 0.715 / 0.956 (s-implied 0.969)  rms z 1.01  30 clips
+  suite_f2_f3_close                B4   300-500   s 0.968 [0.834, 1.218]  cover 0.696 / 0.949 (s-implied 0.961)  rms z 1.09  26 clips
+  suite_f2_f3_close                B4   >500      s 1.067 [0.941, 1.265]  cover 0.649 / 0.943 (s-implied 0.939)  rms z 1.08  31 clips
+  suite_f2_f3_close                voicing   ECE 0.001
+  suite_f2_f3_close                sonorant  ECE 0.022
+  suite_high_f0                    F1   all       s 0.737 [0.692, 0.781]  cover 0.810 / 0.972 (s-implied 0.993)  rms z 0.83  64 clips FLAG TAILS
+  suite_high_f0                    F1   300-500   s 0.701 [0.609, 0.794]  cover 0.836 / 0.985 (s-implied 0.996)  rms z 0.75  33 clips FLAG TAILS
+  suite_high_f0                    F1   >500      s 0.747 [0.701, 0.800]  cover 0.803 / 0.969 (s-implied 0.993)  rms z 0.85  64 clips FLAG TAILS
+  suite_high_f0                    F2   all       s 0.669 [0.623, 0.710]  cover 0.843 / 0.977 (s-implied 0.997)  rms z 0.80  64 clips FLAG TAILS
+  suite_high_f0                    F2   300-500   s 0.625 [0.577, 0.698]  cover 0.862 / 0.974 (s-implied 0.999)  rms z 0.80  33 clips FLAG TAILS
+  suite_high_f0                    F2   >500      s 0.681 [0.631, 0.734]  cover 0.838 / 0.977 (s-implied 0.997)  rms z 0.81  64 clips FLAG TAILS
+  suite_high_f0                    F3   all       s 0.715 [0.662, 0.776]  cover 0.813 / 0.971 (s-implied 0.995)  rms z 0.85  64 clips FLAG TAILS
+  suite_high_f0                    F3   300-500   s 0.657 [0.561, 0.751]  cover 0.838 / 0.986 (s-implied 0.998)  rms z 0.76  33 clips FLAG TAILS
+  suite_high_f0                    F3   >500      s 0.732 [0.677, 0.794]  cover 0.805 / 0.967 (s-implied 0.994)  rms z 0.88  64 clips FLAG TAILS
+  suite_high_f0                    F4   all       s 0.796 [0.734, 0.873]  cover 0.778 / 0.958 (s-implied 0.988)  rms z 0.92  64 clips FLAG TAILS
+  suite_high_f0                    F4   300-500   s 0.689 [0.606, 0.767]  cover 0.831 / 0.979 (s-implied 0.996)  rms z 0.83  33 clips FLAG TAILS
+  suite_high_f0                    F4   >500      s 0.829 [0.757, 0.905]  cover 0.762 / 0.952 (s-implied 0.984)  rms z 0.94  64 clips FLAG TAILS
+  suite_high_f0                    B1   all       s 1.131 [1.056, 1.206]  cover 0.612 / 0.959 (s-implied 0.923)  rms z 1.06  64 clips TAILS
+  suite_high_f0                    B1   300-500   s 1.083 [0.948, 1.200]  cover 0.638 / 0.966 (s-implied 0.935)  rms z 1.02  33 clips
+  suite_high_f0                    B1   >500      s 1.145 [1.053, 1.237]  cover 0.605 / 0.957 (s-implied 0.919)  rms z 1.07  64 clips TAILS
+  suite_high_f0                    B2   all       s 1.072 [1.011, 1.136]  cover 0.643 / 0.959 (s-implied 0.938)  rms z 1.03  64 clips TAILS
+  suite_high_f0                    B2   300-500   s 1.125 [0.976, 1.282]  cover 0.633 / 0.929 (s-implied 0.924)  rms z 1.10  33 clips
+  suite_high_f0                    B2   >500      s 1.059 [0.988, 1.128]  cover 0.647 / 0.968 (s-implied 0.941)  rms z 1.01  64 clips TAILS
+  suite_high_f0                    B3   all       s 1.045 [0.978, 1.113]  cover 0.662 / 0.964 (s-implied 0.944)  rms z 1.00  64 clips TAILS
+  suite_high_f0                    B3   300-500   s 0.992 [0.866, 1.121]  cover 0.687 / 0.976 (s-implied 0.956)  rms z 0.94  33 clips
+  suite_high_f0                    B3   >500      s 1.058 [0.980, 1.131]  cover 0.656 / 0.961 (s-implied 0.941)  rms z 1.01  64 clips TAILS
+  suite_high_f0                    B4   all       s 1.101 [1.034, 1.168]  cover 0.635 / 0.956 (s-implied 0.931)  rms z 1.04  64 clips TAILS
+  suite_high_f0                    B4   300-500   s 1.112 [1.010, 1.212]  cover 0.627 / 0.953 (s-implied 0.928)  rms z 1.04  33 clips
+  suite_high_f0                    B4   >500      s 1.098 [1.026, 1.179]  cover 0.637 / 0.957 (s-implied 0.931)  rms z 1.04  64 clips TAILS
+  suite_high_f0                    voicing   ECE 0.001
+  suite_high_f0                    sonorant  ECE 0.015
+  suite_low_snr                    F1   all       s 0.735 [0.680, 0.794]  cover 0.811 / 0.972 (s-implied 0.994)  rms z 0.85  64 clips FLAG TAILS
+  suite_low_snr                    F1   150-300   s 0.701 [0.631, 0.793]  cover 0.841 / 0.985 (s-implied 0.996)  rms z 0.76  31 clips FLAG TAILS
+  suite_low_snr                    F1   300-500   s 0.731 [0.624, 0.842]  cover 0.808 / 0.985 (s-implied 0.994)  rms z 0.82  26 clips FLAG
+  suite_low_snr                    F1   >500      s 0.772 [0.659, 0.893]  cover 0.784 / 0.957 (s-implied 0.990)  rms z 0.90  32 clips FLAG TAILS
+  suite_low_snr                    F2   all       s 0.665 [0.607, 0.725]  cover 0.816 / 0.973 (s-implied 0.997)  rms z 0.82  64 clips FLAG TAILS
+  suite_low_snr                    F2   150-300   s 0.637 [0.548, 0.700]  cover 0.837 / 0.981 (s-implied 0.998)  rms z 0.76  31 clips FLAG TAILS
+  suite_low_snr                    F2   300-500   s 0.630 [0.545, 0.725]  cover 0.839 / 0.978 (s-implied 0.999)  rms z 0.76  26 clips FLAG TAILS
+  suite_low_snr                    F2   >500      s 0.735 [0.623, 0.833]  cover 0.790 / 0.971 (s-implied 0.994)  rms z 0.87  32 clips FLAG TAILS
+  suite_low_snr                    F3   all       s 0.905 [0.828, 1.003]  cover 0.726 / 0.945 (s-implied 0.973)  rms z 1.03  64 clips TAILS
+  suite_low_snr                    F3   150-300   s 0.935 [0.797, 1.056]  cover 0.721 / 0.960 (s-implied 0.968)  rms z 0.97  31 clips
+  suite_low_snr                    F3   300-500   s 0.976 [0.783, 1.217]  cover 0.691 / 0.951 (s-implied 0.960)  rms z 1.04  26 clips
+  suite_low_snr                    F3   >500      s 0.899 [0.800, 1.083]  cover 0.728 / 0.929 (s-implied 0.974)  rms z 1.10  32 clips TAILS
+  suite_low_snr                    F4   all       s 0.888 [0.774, 1.011]  cover 0.727 / 0.937 (s-implied 0.976)  rms z 1.10  64 clips TAILS
+  suite_low_snr                    F4   150-300   s 0.875 [0.692, 1.099]  cover 0.744 / 0.956 (s-implied 0.978)  rms z 1.01  31 clips
+  suite_low_snr                    F4   300-500   s 0.843 [0.732, 0.996]  cover 0.749 / 0.938 (s-implied 0.982)  rms z 1.02  26 clips FLAG TAILS
+  suite_low_snr                    F4   >500      s 0.969 [0.768, 1.176]  cover 0.695 / 0.934 (s-implied 0.961)  rms z 1.18  32 clips
+  suite_low_snr                    B1   all       s 1.102 [1.034, 1.160]  cover 0.627 / 0.980 (s-implied 0.930)  rms z 1.00  64 clips TAILS
+  suite_low_snr                    B1   150-300   s 1.272 [1.165, 1.343]  cover 0.545 / 0.981 (s-implied 0.884)  rms z 1.08  31 clips FLAG TAILS
+  suite_low_snr                    B1   300-500   s 1.158 [1.061, 1.280]  cover 0.581 / 0.995 (s-implied 0.916)  rms z 1.01  26 clips FLAG TAILS
+  suite_low_snr                    B1   >500      s 1.002 [0.893, 1.117]  cover 0.680 / 0.974 (s-implied 0.954)  rms z 0.98  32 clips
+  suite_low_snr                    B2   all       s 1.155 [1.085, 1.220]  cover 0.604 / 0.952 (s-implied 0.917)  rms z 1.08  64 clips FLAG TAILS
+  suite_low_snr                    B2   150-300   s 1.087 [0.957, 1.231]  cover 0.643 / 0.958 (s-implied 0.934)  rms z 1.04  31 clips
+  suite_low_snr                    B2   300-500   s 1.085 [0.947, 1.227]  cover 0.632 / 0.955 (s-implied 0.935)  rms z 1.04  26 clips
+  suite_low_snr                    B2   >500      s 1.165 [1.043, 1.325]  cover 0.598 / 0.939 (s-implied 0.914)  rms z 1.11  32 clips FLAG
+  suite_low_snr                    B3   all       s 1.083 [1.002, 1.166]  cover 0.640 / 0.955 (s-implied 0.935)  rms z 1.04  64 clips TAILS
+  suite_low_snr                    B3   150-300   s 1.057 [0.963, 1.178]  cover 0.650 / 0.944 (s-implied 0.942)  rms z 1.04  31 clips
+  suite_low_snr                    B3   300-500   s 1.069 [0.881, 1.213]  cover 0.647 / 0.979 (s-implied 0.939)  rms z 0.99  26 clips TAILS
+  suite_low_snr                    B3   >500      s 1.087 [0.917, 1.220]  cover 0.643 / 0.954 (s-implied 0.934)  rms z 1.05  32 clips
+  suite_low_snr                    B4   all       s 1.080 [0.998, 1.172]  cover 0.639 / 0.974 (s-implied 0.936)  rms z 0.99  64 clips TAILS
+  suite_low_snr                    B4   150-300   s 1.049 [0.925, 1.170]  cover 0.660 / 0.979 (s-implied 0.944)  rms z 0.96  31 clips TAILS
+  suite_low_snr                    B4   300-500   s 0.949 [0.745, 1.125]  cover 0.700 / 0.994 (s-implied 0.965)  rms z 0.88  26 clips
+  suite_low_snr                    B4   >500      s 1.125 [0.955, 1.257]  cover 0.605 / 0.969 (s-implied 0.925)  rms z 1.01  32 clips TAILS
+  suite_low_snr                    voicing   ECE 0.015
+  suite_low_snr                    sonorant  ECE 0.030
+  suite_nasal                      F1   all       s 0.861 [0.789, 0.939]  cover 0.742 / 0.941 (s-implied 0.980)  rms z 1.02  64 clips FLAG TAILS
+  suite_nasal                      F1   150-300   s 0.834 [0.709, 0.988]  cover 0.762 / 0.960 (s-implied 0.983)  rms z 0.93  24 clips FLAG TAILS
+  suite_nasal                      F1   300-500   s 0.795 [0.678, 0.993]  cover 0.763 / 0.931 (s-implied 0.988)  rms z 1.02  23 clips FLAG TAILS
+  suite_nasal                      F1   >500      s 0.983 [0.862, 1.127]  cover 0.689 / 0.925 (s-implied 0.958)  rms z 1.13  34 clips TAILS
+  suite_nasal                      F2   all       s 0.655 [0.597, 0.707]  cover 0.833 / 0.965 (s-implied 0.998)  rms z 0.95  64 clips FLAG TAILS
+  suite_nasal                      F2   150-300   s 0.638 [0.546, 0.763]  cover 0.835 / 0.973 (s-implied 0.998)  rms z 1.14  24 clips FLAG TAILS
+  suite_nasal                      F2   300-500   s 0.554 [0.454, 0.671]  cover 0.878 / 0.977 (s-implied 1.000)  rms z 0.76  23 clips FLAG TAILS
+  suite_nasal                      F2   >500      s 0.724 [0.649, 0.811]  cover 0.802 / 0.957 (s-implied 0.994)  rms z 0.92  34 clips FLAG TAILS
+  suite_nasal                      F3   all       s 0.713 [0.667, 0.771]  cover 0.810 / 0.961 (s-implied 0.995)  rms z 1.19  64 clips FLAG TAILS
+  suite_nasal                      F3   150-300   s 0.759 [0.682, 0.843]  cover 0.797 / 0.953 (s-implied 0.992)  rms z 1.03  24 clips FLAG TAILS
+  suite_nasal                      F3   300-500   s 0.668 [0.559, 0.788]  cover 0.835 / 0.977 (s-implied 0.997)  rms z 1.46  23 clips FLAG TAILS
+  suite_nasal                      F3   >500      s 0.728 [0.656, 0.835]  cover 0.797 / 0.962 (s-implied 0.994)  rms z 0.97  34 clips FLAG TAILS
+  suite_nasal                      F4   all       s 0.778 [0.715, 0.846]  cover 0.781 / 0.958 (s-implied 0.990)  rms z 3.26  64 clips FLAG TAILS
+  suite_nasal                      F4   150-300   s 0.686 [0.612, 0.758]  cover 0.829 / 0.971 (s-implied 0.996)  rms z 7.11  24 clips FLAG TAILS
+  suite_nasal                      F4   300-500   s 0.701 [0.628, 0.769]  cover 0.845 / 0.976 (s-implied 0.996)  rms z 1.08  23 clips FLAG TAILS
+  suite_nasal                      F4   >500      s 0.944 [0.811, 1.079]  cover 0.710 / 0.940 (s-implied 0.966)  rms z 1.05  34 clips TAILS
+  suite_nasal                      B1   all       s 1.145 [1.092, 1.201]  cover 0.607 / 0.963 (s-implied 0.919)  rms z 1.06  64 clips TAILS
+  suite_nasal                      B1   150-300   s 1.077 [1.008, 1.157]  cover 0.630 / 0.961 (s-implied 0.937)  rms z 1.01  24 clips
+  suite_nasal                      B1   300-500   s 1.175 [1.076, 1.274]  cover 0.561 / 0.975 (s-implied 0.911)  rms z 1.06  23 clips FLAG TAILS
+  suite_nasal                      B1   >500      s 1.163 [1.048, 1.272]  cover 0.619 / 0.964 (s-implied 0.915)  rms z 1.07  34 clips FLAG TAILS
+  suite_nasal                      B2   all       s 1.034 [0.988, 1.084]  cover 0.663 / 0.975 (s-implied 0.947)  rms z 0.97  64 clips TAILS
+  suite_nasal                      B2   150-300   s 1.011 [0.916, 1.111]  cover 0.676 / 0.979 (s-implied 0.952)  rms z 0.95  24 clips TAILS
+  suite_nasal                      B2   300-500   s 1.095 [0.970, 1.227]  cover 0.635 / 0.975 (s-implied 0.932)  rms z 1.02  23 clips TAILS
+  suite_nasal                      B2   >500      s 1.009 [0.937, 1.074]  cover 0.678 / 0.975 (s-implied 0.953)  rms z 0.95  34 clips TAILS
+  suite_nasal                      B3   all       s 1.075 [1.001, 1.150]  cover 0.644 / 0.965 (s-implied 0.937)  rms z 1.01  64 clips TAILS
+  suite_nasal                      B3   150-300   s 1.010 [0.841, 1.155]  cover 0.678 / 0.958 (s-implied 0.952)  rms z 0.98  24 clips
+  suite_nasal                      B3   300-500   s 0.976 [0.792, 1.136]  cover 0.696 / 0.980 (s-implied 0.960)  rms z 0.92  23 clips
+  suite_nasal                      B3   >500      s 1.157 [1.076, 1.244]  cover 0.590 / 0.963 (s-implied 0.916)  rms z 1.06  34 clips FLAG TAILS
+  suite_nasal                      B4   all       s 1.042 [0.981, 1.113]  cover 0.659 / 0.969 (s-implied 0.945)  rms z 0.99  64 clips TAILS
+  suite_nasal                      B4   150-300   s 1.152 [0.951, 1.296]  cover 0.611 / 0.946 (s-implied 0.918)  rms z 1.08  24 clips
+  suite_nasal                      B4   300-500   s 1.096 [0.968, 1.315]  cover 0.634 / 0.960 (s-implied 0.932)  rms z 1.06  23 clips
+  suite_nasal                      B4   >500      s 1.045 [0.968, 1.123]  cover 0.654 / 0.976 (s-implied 0.944)  rms z 0.97  34 clips TAILS
+  suite_nasal                      voicing   ECE 0.001
+  suite_nasal                      sonorant  ECE 0.019
+  suite_phone                      F1   all       s 0.811 [0.750, 0.870]  cover 0.770 / 0.967 (s-implied 0.986)  rms z 0.93  64 clips FLAG TAILS
+  suite_phone                      F1   150-300   s 0.781 [0.678, 0.877]  cover 0.785 / 0.970 (s-implied 0.990)  rms z 0.90  31 clips FLAG TAILS
+  suite_phone                      F1   300-500   s 0.744 [0.650, 0.857]  cover 0.807 / 0.979 (s-implied 0.993)  rms z 0.79  31 clips FLAG TAILS
+  suite_phone                      F1   <150      s 0.830 [0.723, 0.920]  cover 0.763 / 0.953 (s-implied 0.984)  rms z 1.01  21 clips FLAG TAILS
+  suite_phone                      F1   >500      s 0.871 [0.769, 0.984]  cover 0.742 / 0.968 (s-implied 0.978)  rms z 0.96  29 clips
+  suite_phone                      F2   all       s 0.677 [0.626, 0.738]  cover 0.812 / 0.962 (s-implied 0.997)  rms z 1.09  64 clips FLAG TAILS
+  suite_phone                      F2   150-300   s 0.667 [0.604, 0.758]  cover 0.825 / 0.976 (s-implied 0.997)  rms z 0.85  31 clips FLAG TAILS
+  suite_phone                      F2   300-500   s 0.714 [0.617, 0.921]  cover 0.789 / 0.958 (s-implied 0.995)  rms z 1.02  31 clips FLAG TAILS
+  suite_phone                      F2   <150      s 0.629 [0.548, 0.732]  cover 0.847 / 0.971 (s-implied 0.999)  rms z 1.31  21 clips FLAG TAILS
+  suite_phone                      F2   >500      s 0.700 [0.599, 0.827]  cover 0.788 / 0.948 (s-implied 0.996)  rms z 1.08  29 clips FLAG TAILS
+  suite_phone                      F3   all       s 0.897 [0.818, 1.008]  cover 0.719 / 0.918 (s-implied 0.974)  rms z 1.18  64 clips TAILS
+  suite_phone                      F3   150-300   s 0.912 [0.736, 1.126]  cover 0.719 / 0.928 (s-implied 0.972)  rms z 1.13  31 clips TAILS
+  suite_phone                      F3   300-500   s 0.981 [0.753, 1.254]  cover 0.689 / 0.915 (s-implied 0.958)  rms z 1.14  31 clips TAILS
+  suite_phone                      F3   <150      s 0.713 [0.579, 0.836]  cover 0.786 / 0.950 (s-implied 0.995)  rms z 1.24  21 clips FLAG TAILS
+  suite_phone                      F3   >500      s 1.000 [0.880, 1.157]  cover 0.682 / 0.886 (s-implied 0.954)  rms z 1.20  29 clips TAILS
+  suite_phone                      F4   all       s 0.915 [0.833, 0.995]  cover 0.723 / 0.953 (s-implied 0.971)  rms z 1.05  64 clips TAILS
+  suite_phone                      F4   150-300   s 0.902 [0.812, 1.004]  cover 0.728 / 0.962 (s-implied 0.973)  rms z 1.06  31 clips
+  suite_phone                      F4   300-500   s 1.018 [0.881, 1.231]  cover 0.672 / 0.940 (s-implied 0.950)  rms z 1.16  31 clips
+  suite_phone                      F4   <150      s 0.837 [0.708, 0.983]  cover 0.749 / 0.954 (s-implied 0.983)  rms z 1.01  21 clips FLAG
+  suite_phone                      F4   >500      s 0.916 [0.772, 1.089]  cover 0.729 / 0.953 (s-implied 0.971)  rms z 1.01  29 clips
+  suite_phone                      B1   all       s 1.070 [1.004, 1.128]  cover 0.647 / 0.954 (s-implied 0.939)  rms z 1.02  64 clips
+  suite_phone                      B1   150-300   s 1.036 [0.905, 1.174]  cover 0.667 / 0.953 (s-implied 0.946)  rms z 1.00  31 clips
+  suite_phone                      B1   300-500   s 1.065 [0.938, 1.176]  cover 0.643 / 0.940 (s-implied 0.940)  rms z 1.06  31 clips
+  suite_phone                      B1   <150      s 1.140 [0.996, 1.234]  cover 0.622 / 0.944 (s-implied 0.921)  rms z 1.06  21 clips
+  suite_phone                      B1   >500      s 1.053 [0.909, 1.162]  cover 0.657 / 0.972 (s-implied 0.942)  rms z 0.98  29 clips
+  suite_phone                      B2   all       s 1.088 [1.026, 1.156]  cover 0.637 / 0.952 (s-implied 0.934)  rms z 1.06  64 clips
+  suite_phone                      B2   150-300   s 1.177 [1.021, 1.334]  cover 0.594 / 0.950 (s-implied 0.911)  rms z 1.10  31 clips FLAG
+  suite_phone                      B2   300-500   s 1.052 [0.896, 1.217]  cover 0.660 / 0.934 (s-implied 0.943)  rms z 1.05  31 clips
+  suite_phone                      B2   <150      s 1.110 [1.013, 1.223]  cover 0.623 / 0.961 (s-implied 0.929)  rms z 1.05  21 clips TAILS
+  suite_phone                      B2   >500      s 1.035 [0.925, 1.145]  cover 0.665 / 0.955 (s-implied 0.947)  rms z 1.05  29 clips
+  suite_phone                      B3   all       s 1.115 [1.041, 1.215]  cover 0.627 / 0.952 (s-implied 0.927)  rms z 1.07  64 clips TAILS
+  suite_phone                      B3   150-300   s 1.135 [0.942, 1.324]  cover 0.620 / 0.946 (s-implied 0.922)  rms z 1.08  31 clips
+  suite_phone                      B3   300-500   s 1.106 [1.009, 1.242]  cover 0.621 / 0.974 (s-implied 0.930)  rms z 1.01  31 clips TAILS
+  suite_phone                      B3   <150      s 1.081 [0.988, 1.196]  cover 0.644 / 0.950 (s-implied 0.936)  rms z 1.07  21 clips
+  suite_phone                      B3   >500      s 1.141 [0.987, 1.366]  cover 0.621 / 0.945 (s-implied 0.920)  rms z 1.09  29 clips TAILS
+  suite_phone                      B4   all       s 1.042 [0.962, 1.130]  cover 0.660 / 0.970 (s-implied 0.945)  rms z 0.98  64 clips TAILS
+  suite_phone                      B4   150-300   s 1.167 [0.972, 1.356]  cover 0.606 / 0.942 (s-implied 0.913)  rms z 1.08  31 clips
+  suite_phone                      B4   300-500   s 0.936 [0.839, 1.069]  cover 0.722 / 0.987 (s-implied 0.967)  rms z 0.88  31 clips TAILS
+  suite_phone                      B4   <150      s 1.053 [0.941, 1.165]  cover 0.655 / 0.965 (s-implied 0.943)  rms z 1.01  21 clips
+  suite_phone                      B4   >500      s 1.032 [0.891, 1.179]  cover 0.662 / 0.984 (s-implied 0.947)  rms z 0.95  29 clips TAILS
+  suite_phone                      voicing   ECE 0.003
+  suite_phone                      sonorant  ECE 0.019
+  suite_reference                  F1   all       s 0.742 [0.702, 0.795]  cover 0.804 / 0.975 (s-implied 0.993)  rms z 0.99  64 clips FLAG TAILS
+  suite_reference                  F1   150-300   s 0.734 [0.666, 0.813]  cover 0.815 / 0.981 (s-implied 0.994)  rms z 0.89  30 clips FLAG TAILS
+  suite_reference                  F1   300-500   s 0.746 [0.654, 0.853]  cover 0.809 / 0.986 (s-implied 0.993)  rms z 0.77  23 clips FLAG
+  suite_reference                  F1   <150      s 0.746 [0.662, 0.860]  cover 0.794 / 0.968 (s-implied 0.993)  rms z 1.22  25 clips FLAG TAILS
+  suite_reference                  F1   >500      s 0.745 [0.662, 0.840]  cover 0.802 / 0.971 (s-implied 0.993)  rms z 0.90  24 clips FLAG TAILS
+  suite_reference                  F2   all       s 0.626 [0.581, 0.673]  cover 0.841 / 0.968 (s-implied 0.999)  rms z 0.86  64 clips FLAG TAILS
+  suite_reference                  F2   150-300   s 0.629 [0.531, 0.784]  cover 0.828 / 0.955 (s-implied 0.999)  rms z 0.98  30 clips FLAG TAILS
+  suite_reference                  F2   300-500   s 0.768 [0.671, 0.872]  cover 0.791 / 0.964 (s-implied 0.991)  rms z 0.92  23 clips FLAG TAILS
+  suite_reference                  F2   <150      s 0.508 [0.448, 0.594]  cover 0.881 / 0.979 (s-implied 1.000)  rms z 0.73  25 clips FLAG TAILS
+  suite_reference                  F2   >500      s 0.662 [0.609, 0.717]  cover 0.836 / 0.966 (s-implied 0.997)  rms z 0.86  24 clips FLAG TAILS
+  suite_reference                  F3   all       s 0.665 [0.605, 0.728]  cover 0.836 / 0.971 (s-implied 0.997)  rms z 0.88  64 clips FLAG TAILS
+  suite_reference                  F3   150-300   s 0.674 [0.595, 0.787]  cover 0.815 / 0.954 (s-implied 0.997)  rms z 0.97  30 clips FLAG TAILS
+  suite_reference                  F3   300-500   s 0.784 [0.687, 0.903]  cover 0.787 / 0.954 (s-implied 0.989)  rms z 1.02  23 clips FLAG TAILS
+  suite_reference                  F3   <150      s 0.474 [0.423, 0.557]  cover 0.905 / 0.986 (s-implied 1.000)  rms z 0.75  25 clips FLAG TAILS
+  suite_reference                  F3   >500      s 0.750 [0.666, 0.844]  cover 0.810 / 0.977 (s-implied 0.992)  rms z 0.85  24 clips FLAG TAILS
+  suite_reference                  F4   all       s 0.722 [0.671, 0.772]  cover 0.809 / 0.966 (s-implied 0.994)  rms z 1.18  64 clips FLAG TAILS
+  suite_reference                  F4   150-300   s 0.715 [0.638, 0.816]  cover 0.809 / 0.967 (s-implied 0.995)  rms z 1.67  30 clips FLAG TAILS
+  suite_reference                  F4   300-500   s 0.661 [0.589, 0.752]  cover 0.829 / 0.956 (s-implied 0.998)  rms z 0.95  23 clips FLAG TAILS
+  suite_reference                  F4   <150      s 0.616 [0.552, 0.669]  cover 0.846 / 0.972 (s-implied 0.999)  rms z 1.13  25 clips FLAG TAILS
+  suite_reference                  F4   >500      s 0.841 [0.767, 0.927]  cover 0.759 / 0.966 (s-implied 0.983)  rms z 0.92  24 clips FLAG
+  suite_reference                  B1   all       s 1.121 [1.061, 1.175]  cover 0.620 / 0.971 (s-implied 0.926)  rms z 1.02  64 clips TAILS
+  suite_reference                  B1   150-300   s 1.022 [0.921, 1.133]  cover 0.667 / 0.975 (s-implied 0.950)  rms z 0.96  30 clips
+  suite_reference                  B1   300-500   s 1.043 [0.893, 1.205]  cover 0.664 / 0.958 (s-implied 0.945)  rms z 1.00  23 clips
+  suite_reference                  B1   <150      s 1.096 [0.994, 1.199]  cover 0.632 / 0.972 (s-implied 0.932)  rms z 1.02  25 clips TAILS
+  suite_reference                  B1   >500      s 1.230 [1.161, 1.299]  cover 0.548 / 0.974 (s-implied 0.896)  rms z 1.08  24 clips FLAG TAILS
+  suite_reference                  B2   all       s 1.096 [1.035, 1.165]  cover 0.630 / 0.964 (s-implied 0.932)  rms z 1.02  64 clips TAILS
+  suite_reference                  B2   150-300   s 1.139 [1.020, 1.242]  cover 0.600 / 0.975 (s-implied 0.921)  rms z 1.04  30 clips TAILS
+  suite_reference                  B2   300-500   s 1.091 [0.997, 1.246]  cover 0.639 / 0.964 (s-implied 0.933)  rms z 1.03  23 clips TAILS
+  suite_reference                  B2   <150      s 1.127 [1.006, 1.256]  cover 0.620 / 0.959 (s-implied 0.924)  rms z 1.04  25 clips TAILS
+  suite_reference                  B2   >500      s 1.044 [0.957, 1.141]  cover 0.655 / 0.961 (s-implied 0.945)  rms z 0.99  24 clips
+  suite_reference                  B3   all       s 0.993 [0.941, 1.037]  cover 0.687 / 0.972 (s-implied 0.956)  rms z 0.95  64 clips TAILS
+  suite_reference                  B3   150-300   s 0.938 [0.836, 1.029]  cover 0.719 / 0.981 (s-implied 0.967)  rms z 0.91  30 clips
+  suite_reference                  B3   300-500   s 0.932 [0.814, 1.009]  cover 0.723 / 0.981 (s-implied 0.968)  rms z 0.90  23 clips
+  suite_reference                  B3   <150      s 1.035 [0.913, 1.140]  cover 0.667 / 0.959 (s-implied 0.947)  rms z 1.00  25 clips
+  suite_reference                  B3   >500      s 1.030 [0.967, 1.086]  cover 0.665 / 0.976 (s-implied 0.948)  rms z 0.95  24 clips TAILS
+  suite_reference                  B4   all       s 1.006 [0.930, 1.089]  cover 0.680 / 0.965 (s-implied 0.953)  rms z 0.98  64 clips
+  suite_reference                  B4   150-300   s 1.042 [0.894, 1.181]  cover 0.662 / 0.949 (s-implied 0.945)  rms z 1.02  30 clips
+  suite_reference                  B4   300-500   s 0.887 [0.744, 1.015]  cover 0.743 / 0.976 (s-implied 0.976)  rms z 0.87  23 clips
+  suite_reference                  B4   <150      s 0.939 [0.827, 1.073]  cover 0.720 / 0.976 (s-implied 0.967)  rms z 0.93  25 clips
+  suite_reference                  B4   >500      s 1.154 [1.022, 1.268]  cover 0.612 / 0.959 (s-implied 0.917)  rms z 1.05  24 clips FLAG TAILS
+  suite_reference                  voicing   ECE 0.001
+  suite_reference                  sonorant  ECE 0.020
+  suite_tube                       F1   all       s 0.779 [0.722, 0.851]  cover 0.795 / 0.974 (s-implied 0.990)  rms z 0.85  64 clips FLAG TAILS
+  suite_tube                       F1   150-300   s 0.780 [0.679, 0.883]  cover 0.809 / 0.994 (s-implied 0.990)  rms z 0.77  26 clips FLAG
+  suite_tube                       F1   300-500   s 0.760 [0.647, 0.864]  cover 0.805 / 0.974 (s-implied 0.992)  rms z 0.80  31 clips FLAG TAILS
+  suite_tube                       F1   <150      s 0.690 [0.627, 0.755]  cover 0.852 / 0.988 (s-implied 0.996)  rms z 0.74  20 clips FLAG
+  suite_tube                       F1   >500      s 0.875 [0.756, 1.057]  cover 0.741 / 0.955 (s-implied 0.978)  rms z 0.98  32 clips TAILS
+  suite_tube                       F2   all       s 0.605 [0.569, 0.642]  cover 0.862 / 0.977 (s-implied 0.999)  rms z 0.91  64 clips FLAG TAILS
+  suite_tube                       F2   150-300   s 0.648 [0.572, 0.712]  cover 0.853 / 0.967 (s-implied 0.998)  rms z 1.13  26 clips FLAG TAILS
+  suite_tube                       F2   300-500   s 0.610 [0.550, 0.677]  cover 0.856 / 0.980 (s-implied 0.999)  rms z 0.97  31 clips FLAG TAILS
+  suite_tube                       F2   <150      s 0.588 [0.513, 0.662]  cover 0.868 / 0.979 (s-implied 0.999)  rms z 0.83  20 clips FLAG TAILS
+  suite_tube                       F2   >500      s 0.586 [0.531, 0.653]  cover 0.867 / 0.977 (s-implied 0.999)  rms z 0.82  32 clips FLAG TAILS
+  suite_tube                       F3   all       s 0.568 [0.512, 0.622]  cover 0.869 / 0.967 (s-implied 1.000)  rms z 0.89  64 clips FLAG TAILS
+  suite_tube                       F3   150-300   s 0.590 [0.481, 0.696]  cover 0.856 / 0.958 (s-implied 0.999)  rms z 0.85  26 clips FLAG TAILS
+  suite_tube                       F3   300-500   s 0.495 [0.436, 0.562]  cover 0.896 / 0.973 (s-implied 1.000)  rms z 0.74  31 clips FLAG TAILS
+  suite_tube                       F3   <150      s 0.544 [0.437, 0.692]  cover 0.880 / 0.969 (s-implied 1.000)  rms z 0.77  20 clips FLAG TAILS
+  suite_tube                       F3   >500      s 0.622 [0.557, 0.698]  cover 0.852 / 0.966 (s-implied 0.999)  rms z 1.05  32 clips FLAG TAILS
+  suite_tube                       F4   all       s 0.625 [0.570, 0.688]  cover 0.838 / 0.951 (s-implied 0.999)  rms z 1.37  62 clips FLAG TAILS
+  suite_tube                       F4   150-300   s 0.524 [0.464, 0.651]  cover 0.870 / 0.961 (s-implied 1.000)  rms z 1.25  26 clips FLAG TAILS
+  suite_tube                       F4   300-500   s 0.744 [0.590, 0.950]  cover 0.780 / 0.918 (s-implied 0.993)  rms z 1.76  30 clips FLAG TAILS
+  suite_tube                       F4   <150      s 0.502 [0.451, 0.557]  cover 0.899 / 0.977 (s-implied 1.000)  rms z 0.90  20 clips FLAG TAILS
+  suite_tube                       F4   >500      s 0.730 [0.660, 0.811]  cover 0.806 / 0.944 (s-implied 0.994)  rms z 1.47  31 clips FLAG TAILS
+  suite_tube                       B1   all       s 0.883 [0.776, 1.014]  cover 0.733 / 0.968 (s-implied 0.976)  rms z 0.91  64 clips
+  suite_tube                       B1   150-300   s 0.813 [0.677, 1.006]  cover 0.778 / 0.996 (s-implied 0.986)  rms z 0.81  26 clips
+  suite_tube                       B1   300-500   s 1.041 [0.837, 1.200]  cover 0.659 / 0.952 (s-implied 0.945)  rms z 1.01  31 clips
+  suite_tube                       B1   <150      s 0.767 [0.623, 0.956]  cover 0.794 / 0.986 (s-implied 0.991)  rms z 0.80  20 clips FLAG
+  suite_tube                       B1   >500      s 0.903 [0.698, 1.261]  cover 0.716 / 0.953 (s-implied 0.973)  rms z 0.96  32 clips
+  suite_tube                       B2   all       s 0.967 [0.883, 1.053]  cover 0.697 / 0.957 (s-implied 0.961)  rms z 0.98  64 clips
+  suite_tube                       B2   150-300   s 0.962 [0.792, 1.102]  cover 0.702 / 0.952 (s-implied 0.962)  rms z 0.99  26 clips
+  suite_tube                       B2   300-500   s 1.044 [0.896, 1.176]  cover 0.667 / 0.950 (s-implied 0.945)  rms z 1.03  31 clips
+  suite_tube                       B2   <150      s 0.845 [0.682, 1.000]  cover 0.751 / 0.960 (s-implied 0.982)  rms z 0.92  20 clips
+  suite_tube                       B2   >500      s 1.021 [0.867, 1.208]  cover 0.675 / 0.960 (s-implied 0.950)  rms z 0.99  32 clips
+  suite_tube                       B3   all       s 0.918 [0.842, 1.009]  cover 0.720 / 0.933 (s-implied 0.971)  rms z 1.08  64 clips TAILS
+  suite_tube                       B3   150-300   s 0.883 [0.779, 1.031]  cover 0.745 / 0.972 (s-implied 0.976)  rms z 0.92  26 clips
+  suite_tube                       B3   300-500   s 0.951 [0.779, 1.113]  cover 0.704 / 0.947 (s-implied 0.965)  rms z 1.06  31 clips
+  suite_tube                       B3   <150      s 0.941 [0.798, 1.220]  cover 0.709 / 0.915 (s-implied 0.966)  rms z 1.17  20 clips TAILS
+  suite_tube                       B3   >500      s 0.900 [0.765, 1.059]  cover 0.725 / 0.919 (s-implied 0.974)  rms z 1.08  32 clips TAILS
+  suite_tube                       B4   all       s 0.972 [0.892, 1.074]  cover 0.695 / 0.949 (s-implied 0.960)  rms z 1.05  62 clips
+  suite_tube                       B4   150-300   s 0.922 [0.807, 1.053]  cover 0.727 / 0.964 (s-implied 0.970)  rms z 1.03  26 clips
+  suite_tube                       B4   300-500   s 1.044 [0.863, 1.243]  cover 0.666 / 0.930 (s-implied 0.945)  rms z 1.07  30 clips
+  suite_tube                       B4   <150      s 1.021 [0.857, 1.165]  cover 0.673 / 0.946 (s-implied 0.950)  rms z 1.12  20 clips
+  suite_tube                       B4   >500      s 0.935 [0.809, 1.097]  cover 0.713 / 0.957 (s-implied 0.968)  rms z 1.00  31 clips
+  suite_tube                       voicing   ECE 0.001
+  suite_tube                       sonorant  ECE 0.016
+  suite_whisper                    F1   all       s 0.716 [0.673, 0.755]  cover 0.818 / 0.979 (s-implied 0.995)  rms z 0.79  64 clips FLAG TAILS
+  suite_whisper                    F1   unvoiced  s 0.716 [0.673, 0.755]  cover 0.818 / 0.979 (s-implied 0.995)  rms z 0.79  64 clips FLAG TAILS
+  suite_whisper                    F2   all       s 0.608 [0.563, 0.657]  cover 0.856 / 0.977 (s-implied 0.999)  rms z 0.82  64 clips FLAG TAILS
+  suite_whisper                    F2   unvoiced  s 0.608 [0.559, 0.655]  cover 0.856 / 0.977 (s-implied 0.999)  rms z 0.82  64 clips FLAG TAILS
+  suite_whisper                    F3   all       s 0.682 [0.636, 0.745]  cover 0.823 / 0.969 (s-implied 0.997)  rms z 0.98  64 clips FLAG TAILS
+  suite_whisper                    F3   unvoiced  s 0.682 [0.636, 0.751]  cover 0.823 / 0.969 (s-implied 0.997)  rms z 0.98  64 clips FLAG TAILS
+  suite_whisper                    F4   all       s 0.704 [0.656, 0.754]  cover 0.819 / 0.965 (s-implied 0.996)  rms z 1.18  64 clips FLAG TAILS
+  suite_whisper                    F4   unvoiced  s 0.704 [0.656, 0.753]  cover 0.819 / 0.965 (s-implied 0.996)  rms z 1.18  64 clips FLAG TAILS
+  suite_whisper                    B1   all       s 1.007 [0.947, 1.072]  cover 0.679 / 0.989 (s-implied 0.953)  rms z 0.92  64 clips TAILS
+  suite_whisper                    B1   unvoiced  s 1.007 [0.955, 1.068]  cover 0.679 / 0.989 (s-implied 0.953)  rms z 0.92  64 clips TAILS
+  suite_whisper                    B2   all       s 0.965 [0.913, 1.028]  cover 0.700 / 0.981 (s-implied 0.962)  rms z 0.92  64 clips TAILS
+  suite_whisper                    B2   unvoiced  s 0.965 [0.915, 1.025]  cover 0.700 / 0.981 (s-implied 0.962)  rms z 0.92  64 clips TAILS
+  suite_whisper                    B3   all       s 1.040 [0.998, 1.085]  cover 0.660 / 0.967 (s-implied 0.945)  rms z 0.99  64 clips TAILS
+  suite_whisper                    B3   unvoiced  s 1.040 [0.995, 1.084]  cover 0.660 / 0.967 (s-implied 0.945)  rms z 0.99  64 clips TAILS
+  suite_whisper                    B4   all       s 1.034 [0.977, 1.095]  cover 0.666 / 0.970 (s-implied 0.947)  rms z 0.97  64 clips TAILS
+  suite_whisper                    B4   unvoiced  s 1.034 [0.979, 1.095]  cover 0.666 / 0.970 (s-implied 0.947)  rms z 0.97  64 clips TAILS
+  suite_whisper                    voicing   ECE 0.000
+  suite_whisper                    sonorant  ECE 0.002
+  suite_wide_vibrato               F1   all       s 0.768 [0.720, 0.822]  cover 0.791 / 0.965 (s-implied 0.991)  rms z 0.90  64 clips FLAG TAILS
+  suite_wide_vibrato               F1   150-300   s 0.732 [0.630, 0.853]  cover 0.808 / 0.982 (s-implied 0.994)  rms z 0.80  28 clips FLAG TAILS
+  suite_wide_vibrato               F1   300-500   s 0.729 [0.656, 0.814]  cover 0.815 / 0.979 (s-implied 0.994)  rms z 0.80  36 clips FLAG TAILS
+  suite_wide_vibrato               F1   >500      s 0.796 [0.687, 0.905]  cover 0.777 / 0.961 (s-implied 0.988)  rms z 0.92  38 clips FLAG TAILS
+  suite_wide_vibrato               F2   all       s 0.641 [0.601, 0.681]  cover 0.847 / 0.979 (s-implied 0.998)  rms z 0.90  64 clips FLAG TAILS
+  suite_wide_vibrato               F2   150-300   s 0.641 [0.569, 0.716]  cover 0.840 / 0.977 (s-implied 0.998)  rms z 1.16  28 clips FLAG TAILS
+  suite_wide_vibrato               F2   300-500   s 0.654 [0.591, 0.731]  cover 0.839 / 0.974 (s-implied 0.998)  rms z 0.91  36 clips FLAG TAILS
+  suite_wide_vibrato               F2   >500      s 0.665 [0.595, 0.749]  cover 0.847 / 0.986 (s-implied 0.997)  rms z 0.72  38 clips FLAG TAILS
+  suite_wide_vibrato               F3   all       s 0.643 [0.608, 0.677]  cover 0.847 / 0.979 (s-implied 0.998)  rms z 1.08  64 clips FLAG TAILS
+  suite_wide_vibrato               F3   150-300   s 0.671 [0.608, 0.763]  cover 0.831 / 0.974 (s-implied 0.997)  rms z 0.82  28 clips FLAG TAILS
+  suite_wide_vibrato               F3   300-500   s 0.638 [0.568, 0.700]  cover 0.846 / 0.974 (s-implied 0.998)  rms z 1.61  36 clips FLAG TAILS
+  suite_wide_vibrato               F3   >500      s 0.700 [0.640, 0.760]  cover 0.826 / 0.983 (s-implied 0.996)  rms z 0.77  38 clips FLAG TAILS
+  suite_wide_vibrato               F4   all       s 0.698 [0.644, 0.744]  cover 0.821 / 0.972 (s-implied 0.996)  rms z 0.86  64 clips FLAG TAILS
+  suite_wide_vibrato               F4   150-300   s 0.698 [0.616, 0.805]  cover 0.820 / 0.982 (s-implied 0.996)  rms z 0.77  28 clips FLAG TAILS
+  suite_wide_vibrato               F4   300-500   s 0.703 [0.604, 0.788]  cover 0.816 / 0.964 (s-implied 0.996)  rms z 0.97  36 clips FLAG TAILS
+  suite_wide_vibrato               F4   >500      s 0.739 [0.667, 0.838]  cover 0.799 / 0.967 (s-implied 0.993)  rms z 0.85  38 clips FLAG TAILS
+  suite_wide_vibrato               B1   all       s 1.149 [1.098, 1.203]  cover 0.593 / 0.964 (s-implied 0.918)  rms z 1.06  64 clips TAILS
+  suite_wide_vibrato               B1   150-300   s 1.230 [1.069, 1.334]  cover 0.584 / 0.969 (s-implied 0.896)  rms z 1.07  28 clips FLAG TAILS
+  suite_wide_vibrato               B1   300-500   s 1.180 [1.076, 1.279]  cover 0.573 / 0.960 (s-implied 0.910)  rms z 1.08  36 clips FLAG TAILS
+  suite_wide_vibrato               B1   >500      s 1.108 [1.021, 1.180]  cover 0.617 / 0.974 (s-implied 0.929)  rms z 1.02  38 clips TAILS
+  suite_wide_vibrato               B2   all       s 1.082 [1.039, 1.139]  cover 0.636 / 0.964 (s-implied 0.936)  rms z 1.02  64 clips TAILS
+  suite_wide_vibrato               B2   150-300   s 1.099 [1.028, 1.191]  cover 0.612 / 0.945 (s-implied 0.931)  rms z 1.09  28 clips
+  suite_wide_vibrato               B2   300-500   s 1.094 [0.992, 1.175]  cover 0.634 / 0.966 (s-implied 0.932)  rms z 1.01  36 clips TAILS
+  suite_wide_vibrato               B2   >500      s 1.038 [0.952, 1.131]  cover 0.662 / 0.967 (s-implied 0.946)  rms z 1.00  38 clips
+  suite_wide_vibrato               B3   all       s 1.019 [0.948, 1.077]  cover 0.672 / 0.949 (s-implied 0.950)  rms z 1.01  64 clips
+  suite_wide_vibrato               B3   150-300   s 1.065 [0.858, 1.231]  cover 0.649 / 0.972 (s-implied 0.939)  rms z 0.99  28 clips
+  suite_wide_vibrato               B3   300-500   s 1.032 [0.916, 1.150]  cover 0.666 / 0.945 (s-implied 0.947)  rms z 1.03  36 clips
+  suite_wide_vibrato               B3   >500      s 0.919 [0.830, 1.013]  cover 0.721 / 0.959 (s-implied 0.970)  rms z 0.95  38 clips
+  suite_wide_vibrato               B4   all       s 1.062 [0.993, 1.133]  cover 0.652 / 0.962 (s-implied 0.940)  rms z 1.02  64 clips TAILS
+  suite_wide_vibrato               B4   150-300   s 1.143 [0.999, 1.277]  cover 0.613 / 0.960 (s-implied 0.920)  rms z 1.05  28 clips TAILS
+  suite_wide_vibrato               B4   300-500   s 1.119 [0.992, 1.307]  cover 0.632 / 0.939 (s-implied 0.926)  rms z 1.10  36 clips
+  suite_wide_vibrato               B4   >500      s 0.986 [0.892, 1.076]  cover 0.690 / 0.980 (s-implied 0.958)  rms z 0.94  38 clips TAILS
+  suite_wide_vibrato               voicing   ECE 0.001
+  suite_wide_vibrato               sonorant  ECE 0.019
+  train_v2_val                     F1   all       s 0.847 [0.826, 0.870]  cover 0.753 / 0.961 (s-implied 0.982)  rms z 0.94  512 clips FLAG TAILS
+  train_v2_val                     F1   150-300   s 0.799 [0.755, 0.842]  cover 0.781 / 0.972 (s-implied 0.988)  rms z 0.86  221 clips FLAG TAILS
+  train_v2_val                     F1   300-500   s 0.852 [0.807, 0.907]  cover 0.750 / 0.964 (s-implied 0.981)  rms z 0.94  189 clips FLAG TAILS
+  train_v2_val                     F1   <150      s 0.834 [0.797, 0.876]  cover 0.760 / 0.956 (s-implied 0.983)  rms z 0.97  174 clips FLAG TAILS
+  train_v2_val                     F1   >500      s 0.888 [0.845, 0.942]  cover 0.734 / 0.957 (s-implied 0.976)  rms z 0.97  184 clips TAILS
+  train_v2_val                     F1   unvoiced  s 0.881 [0.828, 0.950]  cover 0.736 / 0.954 (s-implied 0.977)  rms z 0.97  340 clips TAILS
+  train_v2_val                     F2   all       s 0.745 [0.722, 0.765]  cover 0.796 / 0.965 (s-implied 0.993)  rms z 1.01  512 clips FLAG TAILS
+  train_v2_val                     F2   150-300   s 0.755 [0.713, 0.794]  cover 0.789 / 0.963 (s-implied 0.992)  rms z 1.16  220 clips FLAG TAILS
+  train_v2_val                     F2   300-500   s 0.794 [0.748, 0.834]  cover 0.779 / 0.960 (s-implied 0.988)  rms z 1.11  189 clips FLAG TAILS
+  train_v2_val                     F2   <150      s 0.674 [0.637, 0.706]  cover 0.821 / 0.973 (s-implied 0.997)  rms z 0.88  174 clips FLAG TAILS
+  train_v2_val                     F2   >500      s 0.779 [0.747, 0.811]  cover 0.782 / 0.962 (s-implied 0.990)  rms z 0.94  184 clips FLAG TAILS
+  train_v2_val                     F2   unvoiced  s 0.719 [0.653, 0.778]  cover 0.804 / 0.964 (s-implied 0.995)  rms z 0.99  340 clips FLAG TAILS
+  train_v2_val                     F3   all       s 0.696 [0.675, 0.715]  cover 0.817 / 0.964 (s-implied 0.996)  rms z 7.20  512 clips FLAG TAILS
+  train_v2_val                     F3   150-300   s 0.704 [0.662, 0.745]  cover 0.812 / 0.960 (s-implied 0.996)  rms z 16.05  221 clips FLAG TAILS
+  train_v2_val                     F3   300-500   s 0.744 [0.698, 0.788]  cover 0.798 / 0.962 (s-implied 0.993)  rms z 0.98  189 clips FLAG TAILS
+  train_v2_val                     F3   <150      s 0.634 [0.600, 0.670]  cover 0.839 / 0.971 (s-implied 0.998)  rms z 0.90  174 clips FLAG TAILS
+  train_v2_val                     F3   >500      s 0.744 [0.707, 0.783]  cover 0.800 / 0.960 (s-implied 0.993)  rms z 1.10  184 clips FLAG TAILS
+  train_v2_val                     F3   unvoiced  s 0.631 [0.576, 0.690]  cover 0.843 / 0.966 (s-implied 0.998)  rms z 1.18  338 clips FLAG TAILS
+  train_v2_val                     F4   all       s 0.713 [0.691, 0.736]  cover 0.806 / 0.960 (s-implied 0.995)  rms z 1.03  512 clips FLAG TAILS
+  train_v2_val                     F4   150-300   s 0.683 [0.643, 0.722]  cover 0.822 / 0.964 (s-implied 0.997)  rms z 0.98  221 clips FLAG TAILS
+  train_v2_val                     F4   300-500   s 0.755 [0.701, 0.810]  cover 0.786 / 0.948 (s-implied 0.992)  rms z 1.10  189 clips FLAG TAILS
+  train_v2_val                     F4   <150      s 0.652 [0.621, 0.686]  cover 0.831 / 0.969 (s-implied 0.998)  rms z 1.02  174 clips FLAG TAILS
+  train_v2_val                     F4   >500      s 0.794 [0.744, 0.843]  cover 0.777 / 0.955 (s-implied 0.988)  rms z 1.09  184 clips FLAG TAILS
+  train_v2_val                     F4   unvoiced  s 0.669 [0.619, 0.728]  cover 0.825 / 0.966 (s-implied 0.997)  rms z 0.91  339 clips FLAG TAILS
+  train_v2_val                     B1   all       s 0.982 [0.940, 1.020]  cover 0.692 / 0.966 (s-implied 0.958)  rms z 0.97  512 clips
+  train_v2_val                     B1   150-300   s 0.953 [0.898, 1.020]  cover 0.708 / 0.971 (s-implied 0.964)  rms z 0.94  221 clips
+  train_v2_val                     B1   300-500   s 0.962 [0.885, 1.047]  cover 0.702 / 0.968 (s-implied 0.962)  rms z 0.94  189 clips
+  train_v2_val                     B1   <150      s 0.994 [0.913, 1.072]  cover 0.685 / 0.966 (s-implied 0.956)  rms z 0.97  174 clips
+  train_v2_val                     B1   >500      s 0.971 [0.890, 1.047]  cover 0.697 / 0.970 (s-implied 0.961)  rms z 0.95  184 clips
+  train_v2_val                     B1   unvoiced  s 1.067 [0.964, 1.181]  cover 0.647 / 0.938 (s-implied 0.939)  rms z 1.10  340 clips
+  train_v2_val                     B2   all       s 0.991 [0.960, 1.021]  cover 0.687 / 0.956 (s-implied 0.956)  rms z 1.00  512 clips
+  train_v2_val                     B2   150-300   s 0.979 [0.923, 1.036]  cover 0.694 / 0.972 (s-implied 0.959)  rms z 0.95  221 clips TAILS
+  train_v2_val                     B2   300-500   s 0.944 [0.886, 1.013]  cover 0.709 / 0.957 (s-implied 0.966)  rms z 0.98  189 clips
+  train_v2_val                     B2   <150      s 1.023 [0.952, 1.082]  cover 0.671 / 0.955 (s-implied 0.949)  rms z 1.01  174 clips
+  train_v2_val                     B2   >500      s 0.979 [0.924, 1.040]  cover 0.693 / 0.958 (s-implied 0.959)  rms z 0.98  184 clips
+  train_v2_val                     B2   unvoiced  s 1.039 [0.962, 1.140]  cover 0.665 / 0.922 (s-implied 0.946)  rms z 1.11  340 clips TAILS
+  train_v2_val                     B3   all       s 0.974 [0.945, 1.008]  cover 0.695 / 0.955 (s-implied 0.960)  rms z 1.00  512 clips
+  train_v2_val                     B3   150-300   s 0.979 [0.921, 1.041]  cover 0.692 / 0.959 (s-implied 0.959)  rms z 0.99  221 clips
+  train_v2_val                     B3   300-500   s 0.983 [0.919, 1.053]  cover 0.692 / 0.954 (s-implied 0.958)  rms z 1.00  189 clips
+  train_v2_val                     B3   <150      s 1.003 [0.946, 1.062]  cover 0.681 / 0.956 (s-implied 0.954)  rms z 1.01  174 clips
+  train_v2_val                     B3   >500      s 0.939 [0.880, 1.001]  cover 0.712 / 0.958 (s-implied 0.967)  rms z 0.98  184 clips
+  train_v2_val                     B3   unvoiced  s 0.961 [0.881, 1.068]  cover 0.702 / 0.938 (s-implied 0.963)  rms z 1.08  340 clips TAILS
+  train_v2_val                     B4   all       s 0.995 [0.963, 1.032]  cover 0.685 / 0.956 (s-implied 0.956)  rms z 1.00  512 clips
+  train_v2_val                     B4   150-300   s 0.962 [0.897, 1.037]  cover 0.699 / 0.963 (s-implied 0.962)  rms z 0.96  221 clips
+  train_v2_val                     B4   300-500   s 1.007 [0.933, 1.078]  cover 0.678 / 0.965 (s-implied 0.953)  rms z 0.98  189 clips
+  train_v2_val                     B4   <150      s 1.019 [0.960, 1.083]  cover 0.673 / 0.955 (s-implied 0.950)  rms z 1.01  174 clips
+  train_v2_val                     B4   >500      s 0.975 [0.900, 1.049]  cover 0.694 / 0.954 (s-implied 0.960)  rms z 0.99  184 clips
+  train_v2_val                     B4   unvoiced  s 1.010 [0.929, 1.108]  cover 0.677 / 0.938 (s-implied 0.952)  rms z 1.12  340 clips
+  train_v2_val                     VTL  all       s 0.790 [0.702, 0.886]  cover 0.787 / 0.985 (s-implied 0.989)  rms z 0.80  146 clips FLAG
+  train_v2_val                     VTL  150-300   s 0.876 [0.685, 1.019]  cover 0.758 / 0.985 (s-implied 0.978)  rms z 0.83  67 clips
+  train_v2_val                     VTL  300-500   s 0.743 [0.609, 0.951]  cover 0.798 / 0.960 (s-implied 0.993)  rms z 0.85  52 clips FLAG
+  train_v2_val                     VTL  <150      s 0.970 [0.750, 1.163]  cover 0.698 / 0.987 (s-implied 0.961)  rms z 0.90  49 clips
+  train_v2_val                     VTL  >500      s 0.665 [0.558, 0.823]  cover 0.853 / 0.997 (s-implied 0.997)  rms z 0.68  53 clips FLAG
+  train_v2_val                     VTL  unvoiced  s 0.645 [0.499, 0.782]  cover 0.874 / 0.996 (s-implied 0.998)  rms z 0.66  97 clips FLAG
+  train_v2_val                     voicing   ECE 0.001
+  train_v2_val                     sonorant  ECE 0.002
+
+== d040_5b_s1_b20k
+  resynth_vocalset_val_d16k        F1   all       s 0.866 [0.824, 0.911]  cover 0.738 / 0.938 (s-implied 0.979)  rms z 1.11  465 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F1   150-300   s 0.867 [0.816, 0.918]  cover 0.741 / 0.942 (s-implied 0.979)  rms z 1.12  363 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F1   300-500   s 0.884 [0.810, 0.980]  cover 0.728 / 0.925 (s-implied 0.976)  rms z 1.14  249 clips TAILS
+  resynth_vocalset_val_d16k        F1   <150      s 0.819 [0.737, 0.913]  cover 0.757 / 0.958 (s-implied 0.985)  rms z 0.95  195 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F1   >500      s 0.915 [0.755, 1.110]  cover 0.712 / 0.921 (s-implied 0.971)  rms z 1.25  121 clips TAILS
+  resynth_vocalset_val_d16k        F1   unvoiced  s 0.817 [0.627, 1.068]  cover 0.747 / 0.940 (s-implied 0.986)  rms z 1.08  118 clips TAILS
+  resynth_vocalset_val_d16k        F2   all       s 0.693 [0.652, 0.736]  cover 0.795 / 0.938 (s-implied 0.996)  rms z 2.32  465 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   150-300   s 0.702 [0.659, 0.748]  cover 0.808 / 0.955 (s-implied 0.996)  rms z 2.59  363 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   300-500   s 0.746 [0.638, 0.906]  cover 0.753 / 0.894 (s-implied 0.993)  rms z 2.25  249 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   <150      s 0.610 [0.540, 0.695]  cover 0.825 / 0.953 (s-implied 0.999)  rms z 1.83  195 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   >500      s 0.687 [0.586, 0.822]  cover 0.793 / 0.937 (s-implied 0.996)  rms z 2.06  121 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F2   unvoiced  s 0.728 [0.572, 0.982]  cover 0.760 / 0.947 (s-implied 0.994)  rms z 0.95  118 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F3   all       s 0.916 [0.863, 0.976]  cover 0.713 / 0.908 (s-implied 0.971)  rms z 1.68  465 clips TAILS
+  resynth_vocalset_val_d16k        F3   150-300   s 0.864 [0.812, 0.924]  cover 0.737 / 0.941 (s-implied 0.979)  rms z 1.36  363 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F3   300-500   s 1.014 [0.887, 1.171]  cover 0.678 / 0.863 (s-implied 0.951)  rms z 2.02  249 clips TAILS
+  resynth_vocalset_val_d16k        F3   <150      s 0.895 [0.789, 1.015]  cover 0.721 / 0.913 (s-implied 0.975)  rms z 1.55  195 clips TAILS
+  resynth_vocalset_val_d16k        F3   >500      s 0.987 [0.754, 1.349]  cover 0.686 / 0.862 (s-implied 0.957)  rms z 2.09  121 clips TAILS
+  resynth_vocalset_val_d16k        F3   unvoiced  s 1.006 [0.757, 1.383]  cover 0.680 / 0.858 (s-implied 0.953)  rms z 2.47  118 clips TAILS
+  resynth_vocalset_val_d16k        F4   all       s 0.858 [0.803, 0.920]  cover 0.733 / 0.915 (s-implied 0.980)  rms z 1.55  456 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F4   150-300   s 0.807 [0.757, 0.866]  cover 0.759 / 0.938 (s-implied 0.987)  rms z 1.36  356 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F4   300-500   s 0.960 [0.814, 1.162]  cover 0.695 / 0.891 (s-implied 0.963)  rms z 1.76  240 clips TAILS
+  resynth_vocalset_val_d16k        F4   <150      s 0.851 [0.741, 0.979]  cover 0.737 / 0.912 (s-implied 0.981)  rms z 1.42  194 clips FLAG TAILS
+  resynth_vocalset_val_d16k        F4   >500      s 0.942 [0.756, 1.225]  cover 0.700 / 0.875 (s-implied 0.966)  rms z 1.98  117 clips TAILS
+  resynth_vocalset_val_d16k        F4   unvoiced  s 0.992 [0.695, 1.225]  cover 0.688 / 0.888 (s-implied 0.956)  rms z 1.39  114 clips TAILS
+  resynth_vocalset_val_d16k        B1   all       s 1.115 [1.042, 1.193]  cover 0.628 / 0.955 (s-implied 0.927)  rms z 1.06  465 clips TAILS
+  resynth_vocalset_val_d16k        B1   150-300   s 1.043 [0.950, 1.146]  cover 0.661 / 0.959 (s-implied 0.945)  rms z 1.02  363 clips
+  resynth_vocalset_val_d16k        B1   300-500   s 1.215 [1.091, 1.325]  cover 0.568 / 0.955 (s-implied 0.900)  rms z 1.11  249 clips FLAG TAILS
+  resynth_vocalset_val_d16k        B1   <150      s 1.072 [0.915, 1.212]  cover 0.649 / 0.946 (s-implied 0.938)  rms z 1.05  195 clips
+  resynth_vocalset_val_d16k        B1   >500      s 1.186 [0.963, 1.353]  cover 0.599 / 0.957 (s-implied 0.908)  rms z 1.08  121 clips
+  resynth_vocalset_val_d16k        B1   unvoiced  s 1.366 [1.139, 1.603]  cover 0.534 / 0.897 (s-implied 0.857)  rms z 1.25  118 clips FLAG
+  resynth_vocalset_val_d16k        B2   all       s 1.077 [1.012, 1.149]  cover 0.642 / 0.940 (s-implied 0.937)  rms z 1.14  465 clips
+  resynth_vocalset_val_d16k        B2   150-300   s 1.043 [0.966, 1.136]  cover 0.659 / 0.950 (s-implied 0.945)  rms z 1.08  363 clips
+  resynth_vocalset_val_d16k        B2   300-500   s 1.134 [1.010, 1.265]  cover 0.619 / 0.912 (s-implied 0.922)  rms z 1.30  249 clips
+  resynth_vocalset_val_d16k        B2   <150      s 1.119 [1.002, 1.259]  cover 0.620 / 0.950 (s-implied 0.926)  rms z 1.06  195 clips
+  resynth_vocalset_val_d16k        B2   >500      s 1.057 [0.894, 1.256]  cover 0.650 / 0.945 (s-implied 0.942)  rms z 1.17  121 clips
+  resynth_vocalset_val_d16k        B2   unvoiced  s 0.975 [0.787, 1.177]  cover 0.697 / 0.945 (s-implied 0.960)  rms z 1.00  118 clips
+  resynth_vocalset_val_d16k        B3   all       s 1.099 [1.035, 1.167]  cover 0.633 / 0.941 (s-implied 0.931)  rms z 1.09  465 clips
+  resynth_vocalset_val_d16k        B3   150-300   s 1.086 [0.996, 1.171]  cover 0.639 / 0.955 (s-implied 0.934)  rms z 1.04  363 clips TAILS
+  resynth_vocalset_val_d16k        B3   300-500   s 1.106 [0.994, 1.226]  cover 0.628 / 0.937 (s-implied 0.930)  rms z 1.10  249 clips
+  resynth_vocalset_val_d16k        B3   <150      s 1.131 [1.013, 1.252]  cover 0.614 / 0.954 (s-implied 0.923)  rms z 1.08  195 clips TAILS
+  resynth_vocalset_val_d16k        B3   >500      s 1.078 [0.845, 1.428]  cover 0.651 / 0.879 (s-implied 0.936)  rms z 1.20  121 clips
+  resynth_vocalset_val_d16k        B3   unvoiced  s 1.195 [0.974, 1.369]  cover 0.598 / 0.898 (s-implied 0.906)  rms z 1.37  118 clips
+  resynth_vocalset_val_d16k        B4   all       s 1.115 [1.047, 1.187]  cover 0.625 / 0.933 (s-implied 0.927)  rms z 1.12  456 clips
+  resynth_vocalset_val_d16k        B4   150-300   s 1.061 [0.983, 1.146]  cover 0.649 / 0.957 (s-implied 0.941)  rms z 1.03  356 clips
+  resynth_vocalset_val_d16k        B4   300-500   s 1.139 [1.019, 1.267]  cover 0.612 / 0.910 (s-implied 0.921)  rms z 1.18  240 clips
+  resynth_vocalset_val_d16k        B4   <150      s 1.231 [1.077, 1.374]  cover 0.578 / 0.908 (s-implied 0.896)  rms z 1.20  194 clips FLAG
+  resynth_vocalset_val_d16k        B4   >500      s 1.141 [0.931, 1.314]  cover 0.621 / 0.925 (s-implied 0.920)  rms z 1.19  117 clips
+  resynth_vocalset_val_d16k        B4   unvoiced  s 1.059 [0.890, 1.298]  cover 0.652 / 0.912 (s-implied 0.941)  rms z 1.15  114 clips
+  resynth_zeroth_korean_val_d16k   F1   all       s 0.909 [0.891, 0.923]  cover 0.726 / 0.956 (s-implied 0.972)  rms z 0.98  512 clips TAILS
+  resynth_zeroth_korean_val_d16k   F1   150-300   s 0.914 [0.894, 0.933]  cover 0.724 / 0.959 (s-implied 0.971)  rms z 0.98  405 clips TAILS
+  resynth_zeroth_korean_val_d16k   F1   300-500   s 0.972 [0.887, 1.052]  cover 0.698 / 0.926 (s-implied 0.960)  rms z 1.11  128 clips TAILS
+  resynth_zeroth_korean_val_d16k   F1   <150      s 0.910 [0.880, 0.937]  cover 0.727 / 0.956 (s-implied 0.972)  rms z 0.97  286 clips TAILS
+  resynth_zeroth_korean_val_d16k   F1   unvoiced  s 0.832 [0.779, 0.881]  cover 0.755 / 0.954 (s-implied 0.984)  rms z 0.94  478 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   all       s 0.792 [0.775, 0.810]  cover 0.776 / 0.959 (s-implied 0.988)  rms z 0.98  512 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   150-300   s 0.804 [0.784, 0.823]  cover 0.770 / 0.958 (s-implied 0.987)  rms z 0.99  405 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   300-500   s 0.774 [0.709, 0.844]  cover 0.790 / 0.959 (s-implied 0.990)  rms z 0.93  128 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   <150      s 0.783 [0.755, 0.817]  cover 0.782 / 0.963 (s-implied 0.989)  rms z 0.93  286 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F2   unvoiced  s 0.748 [0.694, 0.798]  cover 0.786 / 0.953 (s-implied 0.992)  rms z 1.11  478 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   all       s 0.840 [0.821, 0.858]  cover 0.754 / 0.948 (s-implied 0.983)  rms z 1.11  512 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   150-300   s 0.848 [0.824, 0.873]  cover 0.751 / 0.949 (s-implied 0.982)  rms z 1.07  405 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   300-500   s 0.878 [0.793, 0.979]  cover 0.734 / 0.951 (s-implied 0.977)  rms z 1.00  128 clips TAILS
+  resynth_zeroth_korean_val_d16k   F3   <150      s 0.803 [0.773, 0.831]  cover 0.772 / 0.951 (s-implied 0.987)  rms z 1.16  286 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F3   unvoiced  s 0.928 [0.856, 0.993]  cover 0.711 / 0.925 (s-implied 0.969)  rms z 1.17  478 clips TAILS
+  resynth_zeroth_korean_val_d16k   F4   all       s 0.894 [0.871, 0.916]  cover 0.729 / 0.942 (s-implied 0.975)  rms z 1.08  512 clips TAILS
+  resynth_zeroth_korean_val_d16k   F4   150-300   s 0.901 [0.873, 0.929]  cover 0.726 / 0.943 (s-implied 0.973)  rms z 1.08  405 clips TAILS
+  resynth_zeroth_korean_val_d16k   F4   300-500   s 0.859 [0.781, 0.959]  cover 0.745 / 0.940 (s-implied 0.980)  rms z 1.03  128 clips FLAG TAILS
+  resynth_zeroth_korean_val_d16k   F4   <150      s 0.877 [0.839, 0.920]  cover 0.735 / 0.943 (s-implied 0.977)  rms z 1.08  286 clips TAILS
+  resynth_zeroth_korean_val_d16k   F4   unvoiced  s 0.922 [0.863, 0.974]  cover 0.722 / 0.935 (s-implied 0.970)  rms z 1.13  478 clips TAILS
+  resynth_zeroth_korean_val_d16k   B1   all       s 0.995 [0.933, 1.063]  cover 0.685 / 0.971 (s-implied 0.956)  rms z 0.96  512 clips TAILS
+  resynth_zeroth_korean_val_d16k   B1   150-300   s 1.041 [0.962, 1.117]  cover 0.663 / 0.964 (s-implied 0.945)  rms z 1.00  405 clips TAILS
+  resynth_zeroth_korean_val_d16k   B1   300-500   s 1.101 [0.933, 1.269]  cover 0.632 / 0.949 (s-implied 0.931)  rms z 1.08  128 clips
+  resynth_zeroth_korean_val_d16k   B1   <150      s 0.912 [0.824, 1.009]  cover 0.727 / 0.983 (s-implied 0.972)  rms z 0.89  286 clips
+  resynth_zeroth_korean_val_d16k   B1   unvoiced  s 0.992 [0.914, 1.074]  cover 0.687 / 0.978 (s-implied 0.956)  rms z 0.94  478 clips TAILS
+  resynth_zeroth_korean_val_d16k   B2   all       s 0.890 [0.846, 0.936]  cover 0.742 / 0.980 (s-implied 0.975)  rms z 0.88  512 clips
+  resynth_zeroth_korean_val_d16k   B2   150-300   s 0.875 [0.823, 0.930]  cover 0.752 / 0.985 (s-implied 0.978)  rms z 0.85  405 clips
+  resynth_zeroth_korean_val_d16k   B2   300-500   s 0.922 [0.788, 1.080]  cover 0.718 / 0.984 (s-implied 0.970)  rms z 0.90  128 clips
+  resynth_zeroth_korean_val_d16k   B2   <150      s 0.929 [0.846, 1.018]  cover 0.719 / 0.971 (s-implied 0.969)  rms z 0.93  286 clips
+  resynth_zeroth_korean_val_d16k   B2   unvoiced  s 0.826 [0.767, 0.894]  cover 0.773 / 0.987 (s-implied 0.985)  rms z 0.82  478 clips FLAG
+  resynth_zeroth_korean_val_d16k   B3   all       s 0.947 [0.899, 0.996]  cover 0.710 / 0.977 (s-implied 0.965)  rms z 0.92  512 clips TAILS
+  resynth_zeroth_korean_val_d16k   B3   150-300   s 0.914 [0.855, 0.971]  cover 0.728 / 0.977 (s-implied 0.971)  rms z 0.90  405 clips
+  resynth_zeroth_korean_val_d16k   B3   300-500   s 0.912 [0.775, 1.062]  cover 0.728 / 0.972 (s-implied 0.972)  rms z 0.92  128 clips
+  resynth_zeroth_korean_val_d16k   B3   <150      s 1.007 [0.911, 1.109]  cover 0.679 / 0.979 (s-implied 0.953)  rms z 0.94  286 clips TAILS
+  resynth_zeroth_korean_val_d16k   B3   unvoiced  s 0.948 [0.886, 1.033]  cover 0.707 / 0.968 (s-implied 0.965)  rms z 0.95  478 clips
+  resynth_zeroth_korean_val_d16k   B4   all       s 0.994 [0.943, 1.043]  cover 0.686 / 0.958 (s-implied 0.956)  rms z 0.99  512 clips
+  resynth_zeroth_korean_val_d16k   B4   150-300   s 0.984 [0.919, 1.055]  cover 0.691 / 0.955 (s-implied 0.958)  rms z 0.99  405 clips
+  resynth_zeroth_korean_val_d16k   B4   300-500   s 1.126 [0.927, 1.352]  cover 0.624 / 0.941 (s-implied 0.924)  rms z 1.09  128 clips
+  resynth_zeroth_korean_val_d16k   B4   <150      s 1.016 [0.937, 1.108]  cover 0.674 / 0.963 (s-implied 0.951)  rms z 0.99  286 clips
+  resynth_zeroth_korean_val_d16k   B4   unvoiced  s 0.926 [0.863, 0.979]  cover 0.729 / 0.968 (s-implied 0.969)  rms z 0.93  478 clips
+  suite_adult_high_f0              F1   all       s 0.785 [0.735, 0.829]  cover 0.793 / 0.971 (s-implied 0.989)  rms z 0.88  64 clips FLAG TAILS
+  suite_adult_high_f0              F1   150-300   s 0.768 [0.720, 0.821]  cover 0.801 / 0.974 (s-implied 0.991)  rms z 0.87  64 clips FLAG TAILS
+  suite_adult_high_f0              F1   300-500   s 0.880 [0.735, 1.078]  cover 0.740 / 0.972 (s-implied 0.977)  rms z 0.92  28 clips
+  suite_adult_high_f0              F1   <150      s 0.846 [0.693, 1.036]  cover 0.755 / 0.938 (s-implied 0.982)  rms z 0.98  25 clips TAILS
+  suite_adult_high_f0              F2   all       s 0.716 [0.667, 0.766]  cover 0.809 / 0.954 (s-implied 0.995)  rms z 1.46  64 clips FLAG TAILS
+  suite_adult_high_f0              F2   150-300   s 0.723 [0.667, 0.781]  cover 0.806 / 0.954 (s-implied 0.994)  rms z 1.52  64 clips FLAG TAILS
+  suite_adult_high_f0              F2   300-500   s 0.693 [0.590, 0.808]  cover 0.817 / 0.944 (s-implied 0.996)  rms z 0.99  28 clips FLAG TAILS
+  suite_adult_high_f0              F2   <150      s 0.686 [0.579, 0.779]  cover 0.836 / 0.977 (s-implied 0.996)  rms z 0.94  25 clips FLAG TAILS
+  suite_adult_high_f0              F3   all       s 0.740 [0.683, 0.799]  cover 0.790 / 0.949 (s-implied 0.993)  rms z 1.21  64 clips FLAG TAILS
+  suite_adult_high_f0              F3   150-300   s 0.747 [0.683, 0.817]  cover 0.785 / 0.948 (s-implied 0.993)  rms z 1.23  64 clips FLAG TAILS
+  suite_adult_high_f0              F3   300-500   s 0.740 [0.560, 0.973]  cover 0.787 / 0.934 (s-implied 0.993)  rms z 1.21  27 clips FLAG TAILS
+  suite_adult_high_f0              F3   <150      s 0.668 [0.556, 0.774]  cover 0.867 / 0.983 (s-implied 0.997)  rms z 0.85  25 clips FLAG TAILS
+  suite_adult_high_f0              F4   all       s 0.741 [0.695, 0.785]  cover 0.801 / 0.964 (s-implied 0.993)  rms z 1.33  64 clips FLAG TAILS
+  suite_adult_high_f0              F4   150-300   s 0.751 [0.702, 0.803]  cover 0.793 / 0.962 (s-implied 0.992)  rms z 1.40  64 clips FLAG TAILS
+  suite_adult_high_f0              F4   300-500   s 0.740 [0.578, 0.839]  cover 0.819 / 0.976 (s-implied 0.993)  rms z 0.85  28 clips FLAG TAILS
+  suite_adult_high_f0              F4   <150      s 0.624 [0.554, 0.715]  cover 0.871 / 0.979 (s-implied 0.999)  rms z 0.90  25 clips FLAG TAILS
+  suite_adult_high_f0              B1   all       s 1.151 [1.098, 1.214]  cover 0.593 / 0.953 (s-implied 0.918)  rms z 1.08  64 clips FLAG TAILS
+  suite_adult_high_f0              B1   150-300   s 1.158 [1.102, 1.217]  cover 0.588 / 0.953 (s-implied 0.916)  rms z 1.08  64 clips FLAG TAILS
+  suite_adult_high_f0              B1   300-500   s 1.023 [0.788, 1.250]  cover 0.665 / 0.972 (s-implied 0.949)  rms z 1.00  28 clips
+  suite_adult_high_f0              B1   <150      s 1.176 [1.004, 1.484]  cover 0.563 / 0.935 (s-implied 0.911)  rms z 1.11  25 clips FLAG
+  suite_adult_high_f0              B2   all       s 1.073 [0.986, 1.167]  cover 0.651 / 0.954 (s-implied 0.938)  rms z 1.04  64 clips
+  suite_adult_high_f0              B2   150-300   s 1.062 [0.978, 1.150]  cover 0.656 / 0.957 (s-implied 0.940)  rms z 1.03  64 clips
+  suite_adult_high_f0              B2   300-500   s 1.148 [0.816, 1.401]  cover 0.633 / 0.956 (s-implied 0.919)  rms z 1.07  28 clips
+  suite_adult_high_f0              B2   <150      s 1.100 [0.912, 1.289]  cover 0.618 / 0.919 (s-implied 0.931)  rms z 1.13  25 clips
+  suite_adult_high_f0              B3   all       s 1.065 [1.004, 1.132]  cover 0.650 / 0.945 (s-implied 0.940)  rms z 1.06  64 clips
+  suite_adult_high_f0              B3   150-300   s 1.066 [0.998, 1.141]  cover 0.649 / 0.943 (s-implied 0.939)  rms z 1.07  64 clips
+  suite_adult_high_f0              B3   300-500   s 1.122 [0.879, 1.270]  cover 0.617 / 0.934 (s-implied 0.925)  rms z 1.07  28 clips
+  suite_adult_high_f0              B3   <150      s 0.990 [0.709, 1.199]  cover 0.690 / 0.986 (s-implied 0.957)  rms z 0.91  25 clips
+  suite_adult_high_f0              B4   all       s 0.971 [0.911, 1.026]  cover 0.699 / 0.965 (s-implied 0.961)  rms z 0.96  64 clips
+  suite_adult_high_f0              B4   150-300   s 0.977 [0.914, 1.029]  cover 0.696 / 0.963 (s-implied 0.959)  rms z 0.97  64 clips
+  suite_adult_high_f0              B4   300-500   s 0.867 [0.718, 0.986]  cover 0.761 / 0.985 (s-implied 0.979)  rms z 0.87  28 clips FLAG
+  suite_adult_high_f0              B4   <150      s 1.069 [0.750, 1.326]  cover 0.664 / 0.959 (s-implied 0.939)  rms z 1.03  25 clips
+  suite_adult_high_f0              voicing   ECE 0.001
+  suite_adult_high_f0              sonorant  ECE 0.019
+  suite_breathy                    F1   all       s 0.808 [0.758, 0.855]  cover 0.782 / 0.964 (s-implied 0.987)  rms z 0.99  64 clips FLAG TAILS
+  suite_breathy                    F1   150-300   s 0.793 [0.707, 0.883]  cover 0.793 / 0.985 (s-implied 0.988)  rms z 0.85  23 clips FLAG
+  suite_breathy                    F1   300-500   s 0.790 [0.668, 0.926]  cover 0.786 / 0.966 (s-implied 0.989)  rms z 0.88  25 clips FLAG
+  suite_breathy                    F1   <150      s 0.763 [0.678, 0.864]  cover 0.798 / 0.960 (s-implied 0.991)  rms z 1.16  24 clips FLAG TAILS
+  suite_breathy                    F1   >500      s 0.853 [0.800, 0.924]  cover 0.760 / 0.956 (s-implied 0.981)  rms z 0.95  29 clips FLAG TAILS
+  suite_breathy                    F2   all       s 0.633 [0.570, 0.686]  cover 0.837 / 0.972 (s-implied 0.998)  rms z 0.91  64 clips FLAG TAILS
+  suite_breathy                    F2   150-300   s 0.716 [0.585, 0.845]  cover 0.800 / 0.967 (s-implied 0.995)  rms z 0.98  23 clips FLAG TAILS
+  suite_breathy                    F2   300-500   s 0.634 [0.506, 0.742]  cover 0.841 / 0.969 (s-implied 0.998)  rms z 1.14  25 clips FLAG TAILS
+  suite_breathy                    F2   <150      s 0.491 [0.407, 0.587]  cover 0.882 / 0.983 (s-implied 1.000)  rms z 0.77  24 clips FLAG TAILS
+  suite_breathy                    F2   >500      s 0.723 [0.656, 0.782]  cover 0.811 / 0.967 (s-implied 0.994)  rms z 0.86  29 clips FLAG TAILS
+  suite_breathy                    F3   all       s 0.652 [0.600, 0.712]  cover 0.842 / 0.971 (s-implied 0.998)  rms z 1.09  64 clips FLAG TAILS
+  suite_breathy                    F3   150-300   s 0.714 [0.616, 0.857]  cover 0.810 / 0.949 (s-implied 0.995)  rms z 1.88  23 clips FLAG TAILS
+  suite_breathy                    F3   300-500   s 0.671 [0.589, 0.800]  cover 0.824 / 0.958 (s-implied 0.997)  rms z 1.05  25 clips FLAG TAILS
+  suite_breathy                    F3   <150      s 0.527 [0.469, 0.591]  cover 0.877 / 0.983 (s-implied 1.000)  rms z 0.73  24 clips FLAG TAILS
+  suite_breathy                    F3   >500      s 0.704 [0.609, 0.798]  cover 0.835 / 0.980 (s-implied 0.996)  rms z 0.79  29 clips FLAG TAILS
+  suite_breathy                    F4   all       s 0.746 [0.697, 0.800]  cover 0.805 / 0.966 (s-implied 0.993)  rms z 1.00  64 clips FLAG TAILS
+  suite_breathy                    F4   150-300   s 0.813 [0.698, 0.975]  cover 0.765 / 0.953 (s-implied 0.986)  rms z 1.19  23 clips FLAG TAILS
+  suite_breathy                    F4   300-500   s 0.761 [0.683, 0.877]  cover 0.808 / 0.966 (s-implied 0.991)  rms z 1.02  25 clips FLAG TAILS
+  suite_breathy                    F4   <150      s 0.630 [0.554, 0.696]  cover 0.858 / 0.976 (s-implied 0.999)  rms z 0.82  24 clips FLAG TAILS
+  suite_breathy                    F4   >500      s 0.808 [0.718, 0.912]  cover 0.777 / 0.962 (s-implied 0.987)  rms z 1.02  29 clips FLAG TAILS
+  suite_breathy                    B1   all       s 1.163 [1.113, 1.216]  cover 0.596 / 0.969 (s-implied 0.914)  rms z 1.05  64 clips FLAG TAILS
+  suite_breathy                    B1   150-300   s 1.200 [1.105, 1.306]  cover 0.568 / 0.951 (s-implied 0.905)  rms z 1.11  23 clips FLAG TAILS
+  suite_breathy                    B1   300-500   s 1.073 [0.908, 1.274]  cover 0.652 / 0.966 (s-implied 0.938)  rms z 1.00  25 clips
+  suite_breathy                    B1   <150      s 1.161 [1.083, 1.245]  cover 0.580 / 0.983 (s-implied 0.915)  rms z 1.03  24 clips FLAG TAILS
+  suite_breathy                    B1   >500      s 1.175 [1.074, 1.254]  cover 0.594 / 0.966 (s-implied 0.911)  rms z 1.06  29 clips FLAG TAILS
+  suite_breathy                    B2   all       s 1.122 [1.069, 1.178]  cover 0.622 / 0.947 (s-implied 0.925)  rms z 1.06  64 clips TAILS
+  suite_breathy                    B2   150-300   s 1.028 [0.902, 1.135]  cover 0.664 / 0.932 (s-implied 0.948)  rms z 1.05  23 clips
+  suite_breathy                    B2   300-500   s 1.067 [0.911, 1.187]  cover 0.649 / 0.966 (s-implied 0.939)  rms z 0.99  25 clips
+  suite_breathy                    B2   <150      s 1.111 [1.012, 1.199]  cover 0.637 / 0.963 (s-implied 0.928)  rms z 1.01  24 clips TAILS
+  suite_breathy                    B2   >500      s 1.216 [1.133, 1.302]  cover 0.571 / 0.929 (s-implied 0.900)  rms z 1.15  29 clips FLAG TAILS
+  suite_breathy                    B3   all       s 1.101 [1.036, 1.163]  cover 0.635 / 0.939 (s-implied 0.931)  rms z 1.09  64 clips
+  suite_breathy                    B3   150-300   s 1.059 [0.933, 1.273]  cover 0.651 / 0.937 (s-implied 0.941)  rms z 1.09  23 clips
+  suite_breathy                    B3   300-500   s 1.049 [0.943, 1.202]  cover 0.662 / 0.958 (s-implied 0.943)  rms z 1.03  25 clips
+  suite_breathy                    B3   <150      s 1.029 [0.907, 1.147]  cover 0.673 / 0.948 (s-implied 0.948)  rms z 1.04  24 clips
+  suite_breathy                    B3   >500      s 1.192 [1.093, 1.308]  cover 0.577 / 0.921 (s-implied 0.907)  rms z 1.17  29 clips FLAG
+  suite_breathy                    B4   all       s 1.058 [1.000, 1.115]  cover 0.653 / 0.952 (s-implied 0.941)  rms z 1.03  64 clips
+  suite_breathy                    B4   150-300   s 0.931 [0.790, 1.134]  cover 0.716 / 0.956 (s-implied 0.968)  rms z 0.98  23 clips
+  suite_breathy                    B4   300-500   s 1.029 [0.920, 1.120]  cover 0.668 / 0.946 (s-implied 0.948)  rms z 1.01  25 clips
+  suite_breathy                    B4   <150      s 1.048 [0.982, 1.114]  cover 0.654 / 0.973 (s-implied 0.944)  rms z 0.99  24 clips TAILS
+  suite_breathy                    B4   >500      s 1.131 [1.042, 1.210]  cover 0.609 / 0.934 (s-implied 0.923)  rms z 1.09  29 clips
+  suite_breathy                    voicing   ECE 0.001
+  suite_breathy                    sonorant  ECE 0.021
+  suite_codec                      F1   all       s 0.804 [0.737, 0.878]  cover 0.768 / 0.972 (s-implied 0.987)  rms z 0.89  64 clips FLAG TAILS
+  suite_codec                      F1   150-300   s 0.776 [0.684, 0.884]  cover 0.786 / 0.985 (s-implied 0.990)  rms z 0.88  28 clips FLAG
+  suite_codec                      F1   300-500   s 0.807 [0.705, 0.943]  cover 0.781 / 0.981 (s-implied 0.987)  rms z 0.86  27 clips FLAG
+  suite_codec                      F1   <150      s 0.755 [0.657, 0.869]  cover 0.783 / 0.979 (s-implied 0.992)  rms z 0.82  29 clips FLAG TAILS
+  suite_codec                      F1   >500      s 0.887 [0.714, 1.138]  cover 0.728 / 0.946 (s-implied 0.976)  rms z 1.00  29 clips
+  suite_codec                      F2   all       s 0.605 [0.560, 0.646]  cover 0.850 / 0.974 (s-implied 0.999)  rms z 0.85  64 clips FLAG TAILS
+  suite_codec                      F2   150-300   s 0.617 [0.543, 0.722]  cover 0.831 / 0.957 (s-implied 0.999)  rms z 0.97  28 clips FLAG TAILS
+  suite_codec                      F2   300-500   s 0.557 [0.476, 0.630]  cover 0.867 / 0.969 (s-implied 1.000)  rms z 0.86  27 clips FLAG TAILS
+  suite_codec                      F2   <150      s 0.633 [0.556, 0.705]  cover 0.846 / 0.977 (s-implied 0.998)  rms z 0.86  29 clips FLAG TAILS
+  suite_codec                      F2   >500      s 0.603 [0.517, 0.690]  cover 0.857 / 0.985 (s-implied 0.999)  rms z 0.72  29 clips FLAG TAILS
+  suite_codec                      F3   all       s 0.757 [0.704, 0.810]  cover 0.792 / 0.963 (s-implied 0.992)  rms z 0.95  64 clips FLAG TAILS
+  suite_codec                      F3   150-300   s 0.789 [0.678, 0.902]  cover 0.789 / 0.958 (s-implied 0.989)  rms z 0.94  28 clips FLAG TAILS
+  suite_codec                      F3   300-500   s 0.756 [0.649, 0.952]  cover 0.773 / 0.961 (s-implied 0.992)  rms z 1.16  27 clips FLAG TAILS
+  suite_codec                      F3   <150      s 0.739 [0.671, 0.807]  cover 0.806 / 0.962 (s-implied 0.993)  rms z 0.88  29 clips FLAG TAILS
+  suite_codec                      F3   >500      s 0.757 [0.650, 0.863]  cover 0.790 / 0.971 (s-implied 0.992)  rms z 0.86  29 clips FLAG TAILS
+  suite_codec                      F4   all       s 0.766 [0.699, 0.862]  cover 0.788 / 0.959 (s-implied 0.991)  rms z 0.95  64 clips FLAG TAILS
+  suite_codec                      F4   150-300   s 0.755 [0.659, 0.877]  cover 0.801 / 0.983 (s-implied 0.992)  rms z 0.82  28 clips FLAG
+  suite_codec                      F4   300-500   s 0.797 [0.657, 0.970]  cover 0.776 / 0.970 (s-implied 0.988)  rms z 0.90  27 clips FLAG
+  suite_codec                      F4   <150      s 0.707 [0.620, 0.831]  cover 0.814 / 0.958 (s-implied 0.995)  rms z 0.99  29 clips FLAG TAILS
+  suite_codec                      F4   >500      s 0.822 [0.672, 1.049]  cover 0.755 / 0.935 (s-implied 0.985)  rms z 1.04  29 clips TAILS
+  suite_codec                      B1   all       s 1.130 [1.061, 1.203]  cover 0.620 / 0.964 (s-implied 0.923)  rms z 1.04  64 clips TAILS
+  suite_codec                      B1   150-300   s 1.132 [1.023, 1.232]  cover 0.602 / 0.951 (s-implied 0.923)  rms z 1.08  28 clips
+  suite_codec                      B1   300-500   s 1.182 [0.966, 1.299]  cover 0.621 / 0.971 (s-implied 0.909)  rms z 1.04  27 clips TAILS
+  suite_codec                      B1   <150      s 1.119 [1.017, 1.248]  cover 0.620 / 0.964 (s-implied 0.926)  rms z 1.05  29 clips TAILS
+  suite_codec                      B1   >500      s 1.112 [0.964, 1.263]  cover 0.631 / 0.968 (s-implied 0.928)  rms z 1.01  29 clips TAILS
+  suite_codec                      B2   all       s 1.103 [1.033, 1.171]  cover 0.629 / 0.942 (s-implied 0.930)  rms z 1.07  64 clips
+  suite_codec                      B2   150-300   s 1.033 [0.863, 1.195]  cover 0.663 / 0.950 (s-implied 0.947)  rms z 1.02  28 clips
+  suite_codec                      B2   300-500   s 0.981 [0.892, 1.078]  cover 0.695 / 0.981 (s-implied 0.958)  rms z 0.92  27 clips TAILS
+  suite_codec                      B2   <150      s 1.195 [1.029, 1.372]  cover 0.605 / 0.908 (s-implied 0.906)  rms z 1.16  29 clips FLAG
+  suite_codec                      B2   >500      s 1.161 [1.069, 1.283]  cover 0.584 / 0.950 (s-implied 0.915)  rms z 1.09  29 clips FLAG
+  suite_codec                      B3   all       s 1.077 [0.989, 1.152]  cover 0.647 / 0.957 (s-implied 0.937)  rms z 1.02  64 clips TAILS
+  suite_codec                      B3   150-300   s 0.965 [0.766, 1.194]  cover 0.694 / 0.970 (s-implied 0.962)  rms z 0.93  28 clips
+  suite_codec                      B3   300-500   s 0.963 [0.839, 1.094]  cover 0.704 / 0.982 (s-implied 0.962)  rms z 0.92  27 clips TAILS
+  suite_codec                      B3   <150      s 1.129 [0.972, 1.332]  cover 0.620 / 0.949 (s-implied 0.923)  rms z 1.08  29 clips
+  suite_codec                      B3   >500      s 1.155 [1.047, 1.267]  cover 0.604 / 0.939 (s-implied 0.917)  rms z 1.09  29 clips FLAG
+  suite_codec                      B4   all       s 1.058 [0.988, 1.132]  cover 0.647 / 0.965 (s-implied 0.941)  rms z 1.01  64 clips TAILS
+  suite_codec                      B4   150-300   s 1.078 [0.943, 1.178]  cover 0.634 / 0.988 (s-implied 0.936)  rms z 0.98  28 clips TAILS
+  suite_codec                      B4   300-500   s 0.993 [0.912, 1.079]  cover 0.685 / 0.983 (s-implied 0.956)  rms z 0.92  27 clips
+  suite_codec                      B4   <150      s 1.067 [0.958, 1.235]  cover 0.642 / 0.955 (s-implied 0.939)  rms z 1.05  29 clips
+  suite_codec                      B4   >500      s 1.089 [0.914, 1.320]  cover 0.635 / 0.946 (s-implied 0.934)  rms z 1.06  29 clips
+  suite_codec                      voicing   ECE 0.003
+  suite_codec                      sonorant  ECE 0.015
+  suite_f1_near_h1                 F1   all       s 2.442 [1.795, 3.166]  cover 0.429 / 0.623 (s-implied 0.587)  rms z 11.17  64 clips FLAG
+  suite_f1_near_h1                 F1   150-300   s 2.922 [1.871, 6.072]  cover 0.309 / 0.526 (s-implied 0.506)  rms z 4.88  28 clips FLAG
+  suite_f1_near_h1                 F1   300-500   s 1.038 [0.791, 1.433]  cover 0.672 / 0.916 (s-implied 0.946)  rms z 1.15  25 clips
+  suite_f1_near_h1                 F1   >500      s 1.558 [0.969, 2.387]  cover 0.564 / 0.749 (s-implied 0.801)  rms z 2.00  33 clips
+  suite_f1_near_h1                 F2   all       s 0.693 [0.625, 0.750]  cover 0.808 / 0.953 (s-implied 0.996)  rms z 1.07  64 clips FLAG TAILS
+  suite_f1_near_h1                 F2   150-300   s 0.593 [0.504, 0.697]  cover 0.837 / 0.968 (s-implied 0.999)  rms z 1.05  28 clips FLAG TAILS
+  suite_f1_near_h1                 F2   300-500   s 0.727 [0.618, 0.841]  cover 0.800 / 0.957 (s-implied 0.994)  rms z 0.98  25 clips FLAG TAILS
+  suite_f1_near_h1                 F2   >500      s 0.751 [0.651, 0.874]  cover 0.787 / 0.950 (s-implied 0.992)  rms z 0.94  33 clips FLAG TAILS
+  suite_f1_near_h1                 F3   all       s 0.721 [0.660, 0.782]  cover 0.815 / 0.966 (s-implied 0.994)  rms z 1.01  64 clips FLAG TAILS
+  suite_f1_near_h1                 F3   150-300   s 0.832 [0.661, 0.994]  cover 0.758 / 0.943 (s-implied 0.984)  rms z 1.22  28 clips FLAG TAILS
+  suite_f1_near_h1                 F3   300-500   s 0.684 [0.570, 0.783]  cover 0.835 / 0.969 (s-implied 0.997)  rms z 0.86  25 clips FLAG TAILS
+  suite_f1_near_h1                 F3   >500      s 0.707 [0.643, 0.769]  cover 0.838 / 0.985 (s-implied 0.995)  rms z 0.78  33 clips FLAG TAILS
+  suite_f1_near_h1                 F4   all       s 0.766 [0.699, 0.844]  cover 0.787 / 0.951 (s-implied 0.991)  rms z 1.12  64 clips FLAG TAILS
+  suite_f1_near_h1                 F4   150-300   s 0.831 [0.701, 0.955]  cover 0.751 / 0.944 (s-implied 0.984)  rms z 1.33  28 clips FLAG TAILS
+  suite_f1_near_h1                 F4   300-500   s 0.712 [0.596, 0.826]  cover 0.826 / 0.965 (s-implied 0.995)  rms z 0.92  25 clips FLAG TAILS
+  suite_f1_near_h1                 F4   >500      s 0.806 [0.729, 0.908]  cover 0.777 / 0.952 (s-implied 0.987)  rms z 1.03  33 clips FLAG TAILS
+  suite_f1_near_h1                 B1   all       s 1.493 [1.320, 1.726]  cover 0.494 / 0.812 (s-implied 0.820)  rms z 1.62  64 clips FLAG
+  suite_f1_near_h1                 B1   150-300   s 1.567 [1.291, 1.780]  cover 0.479 / 0.827 (s-implied 0.798)  rms z 1.48  28 clips FLAG
+  suite_f1_near_h1                 B1   300-500   s 1.116 [0.991, 1.247]  cover 0.614 / 0.970 (s-implied 0.927)  rms z 1.05  25 clips TAILS
+  suite_f1_near_h1                 B1   >500      s 1.153 [1.026, 1.284]  cover 0.608 / 0.969 (s-implied 0.917)  rms z 1.05  33 clips FLAG TAILS
+  suite_f1_near_h1                 B2   all       s 1.027 [0.967, 1.092]  cover 0.670 / 0.959 (s-implied 0.948)  rms z 1.00  64 clips
+  suite_f1_near_h1                 B2   150-300   s 1.007 [0.874, 1.189]  cover 0.680 / 0.947 (s-implied 0.953)  rms z 1.03  28 clips
+  suite_f1_near_h1                 B2   300-500   s 1.024 [0.879, 1.181]  cover 0.673 / 0.964 (s-implied 0.949)  rms z 0.98  25 clips
+  suite_f1_near_h1                 B2   >500      s 1.042 [0.944, 1.146]  cover 0.662 / 0.961 (s-implied 0.945)  rms z 1.01  33 clips
+  suite_f1_near_h1                 B3   all       s 1.065 [1.014, 1.115]  cover 0.647 / 0.962 (s-implied 0.940)  rms z 1.01  64 clips TAILS
+  suite_f1_near_h1                 B3   150-300   s 0.997 [0.904, 1.087]  cover 0.684 / 0.967 (s-implied 0.955)  rms z 0.98  28 clips
+  suite_f1_near_h1                 B3   300-500   s 1.178 [1.067, 1.276]  cover 0.593 / 0.944 (s-implied 0.910)  rms z 1.10  25 clips FLAG
+  suite_f1_near_h1                 B3   >500      s 1.063 [0.980, 1.142]  cover 0.645 / 0.964 (s-implied 0.940)  rms z 1.01  33 clips TAILS
+  suite_f1_near_h1                 B4   all       s 1.096 [1.024, 1.178]  cover 0.639 / 0.946 (s-implied 0.932)  rms z 1.06  64 clips
+  suite_f1_near_h1                 B4   150-300   s 1.080 [0.961, 1.209]  cover 0.643 / 0.944 (s-implied 0.936)  rms z 1.05  28 clips
+  suite_f1_near_h1                 B4   300-500   s 1.105 [0.957, 1.315]  cover 0.633 / 0.950 (s-implied 0.930)  rms z 1.05  25 clips
+  suite_f1_near_h1                 B4   >500      s 1.044 [0.939, 1.178]  cover 0.660 / 0.967 (s-implied 0.945)  rms z 0.99  33 clips TAILS
+  suite_f1_near_h1                 voicing   ECE 0.001
+  suite_f1_near_h1                 sonorant  ECE 0.016
+  suite_f1_near_h2                 F1   all       s 1.623 [1.087, 2.579]  cover 0.580 / 0.724 (s-implied 0.782)  rms z 9.91  64 clips FLAG
+  suite_f1_near_h2                 F1   150-300   s 0.753 [0.590, 0.941]  cover 0.789 / 0.981 (s-implied 0.992)  rms z 0.79  25 clips FLAG
+  suite_f1_near_h2                 F1   300-500   s 0.739 [0.606, 0.922]  cover 0.804 / 0.977 (s-implied 0.993)  rms z 0.84  26 clips FLAG
+  suite_f1_near_h2                 F1   <150      s 1.957 [1.084, 3.130]  cover 0.528 / 0.689 (s-implied 0.693)  rms z 16.42  25 clips FLAG
+  suite_f1_near_h2                 F1   >500      s 4.487 [2.315, 6.369]  cover 0.398 / 0.480 (s-implied 0.344)  rms z 5.63  30 clips FLAG TAILS
+  suite_f1_near_h2                 F2   all       s 1.087 [0.848, 1.437]  cover 0.661 / 0.835 (s-implied 0.934)  rms z 9.46  64 clips TAILS
+  suite_f1_near_h2                 F2   150-300   s 0.703 [0.606, 0.820]  cover 0.805 / 0.957 (s-implied 0.996)  rms z 1.06  25 clips FLAG TAILS
+  suite_f1_near_h2                 F2   300-500   s 0.632 [0.511, 0.804]  cover 0.819 / 0.936 (s-implied 0.998)  rms z 2.57  26 clips FLAG TAILS
+  suite_f1_near_h2                 F2   <150      s 0.663 [0.553, 0.861]  cover 0.787 / 0.914 (s-implied 0.997)  rms z 15.61  25 clips FLAG TAILS
+  suite_f1_near_h2                 F2   >500      s 2.224 [1.654, 3.001]  cover 0.388 / 0.645 (s-implied 0.631)  rms z 5.70  30 clips FLAG
+  suite_f1_near_h2                 F3   all       s 1.055 [0.824, 1.659]  cover 0.669 / 0.803 (s-implied 0.942)  rms z 3.84  64 clips TAILS
+  suite_f1_near_h2                 F3   150-300   s 0.831 [0.706, 0.992]  cover 0.758 / 0.947 (s-implied 0.984)  rms z 1.07  25 clips FLAG TAILS
+  suite_f1_near_h2                 F3   300-500   s 0.646 [0.524, 0.786]  cover 0.836 / 0.958 (s-implied 0.998)  rms z 3.64  26 clips FLAG TAILS
+  suite_f1_near_h2                 F3   <150      s 0.766 [0.621, 1.009]  cover 0.766 / 0.904 (s-implied 0.991)  rms z 3.03  25 clips TAILS
+  suite_f1_near_h2                 F3   >500      s 3.200 [1.206, 4.961]  cover 0.455 / 0.563 (s-implied 0.468)  rms z 5.26  30 clips FLAG
+  suite_f1_near_h2                 F4   all       s 0.979 [0.745, 1.474]  cover 0.687 / 0.823 (s-implied 0.959)  rms z 2.29  64 clips TAILS
+  suite_f1_near_h2                 F4   150-300   s 0.739 [0.637, 0.858]  cover 0.795 / 0.965 (s-implied 0.993)  rms z 1.52  25 clips FLAG TAILS
+  suite_f1_near_h2                 F4   300-500   s 0.640 [0.515, 0.748]  cover 0.845 / 0.956 (s-implied 0.998)  rms z 0.90  26 clips FLAG TAILS
+  suite_f1_near_h2                 F4   <150      s 0.705 [0.579, 0.894]  cover 0.795 / 0.922 (s-implied 0.995)  rms z 2.39  25 clips FLAG TAILS
+  suite_f1_near_h2                 F4   >500      s 2.786 [1.215, 3.493]  cover 0.457 / 0.594 (s-implied 0.527)  rms z 2.93  30 clips FLAG
+  suite_f1_near_h2                 B1   all       s 1.409 [1.241, 1.621]  cover 0.507 / 0.834 (s-implied 0.844)  rms z 1.64  64 clips FLAG
+  suite_f1_near_h2                 B1   150-300   s 1.010 [0.848, 1.159]  cover 0.677 / 0.977 (s-implied 0.952)  rms z 0.96  25 clips
+  suite_f1_near_h2                 B1   300-500   s 1.181 [1.034, 1.343]  cover 0.576 / 0.975 (s-implied 0.910)  rms z 1.05  26 clips FLAG TAILS
+  suite_f1_near_h2                 B1   <150      s 1.483 [1.210, 1.865]  cover 0.489 / 0.818 (s-implied 0.823)  rms z 1.56  25 clips FLAG
+  suite_f1_near_h2                 B1   >500      s 1.909 [1.385, 2.928]  cover 0.389 / 0.696 (s-implied 0.705)  rms z 2.19  30 clips FLAG
+  suite_f1_near_h2                 B2   all       s 1.165 [1.082, 1.283]  cover 0.602 / 0.922 (s-implied 0.914)  rms z 1.19  64 clips FLAG
+  suite_f1_near_h2                 B2   150-300   s 0.972 [0.798, 1.170]  cover 0.694 / 0.976 (s-implied 0.960)  rms z 0.95  25 clips
+  suite_f1_near_h2                 B2   300-500   s 1.040 [0.914, 1.176]  cover 0.652 / 0.976 (s-implied 0.946)  rms z 1.01  26 clips
+  suite_f1_near_h2                 B2   <150      s 1.125 [1.029, 1.242]  cover 0.629 / 0.949 (s-implied 0.925)  rms z 1.07  25 clips
+  suite_f1_near_h2                 B2   >500      s 1.401 [1.175, 1.753]  cover 0.497 / 0.837 (s-implied 0.846)  rms z 1.47  30 clips FLAG
+  suite_f1_near_h2                 B3   all       s 1.245 [1.080, 1.453]  cover 0.587 / 0.855 (s-implied 0.892)  rms z 1.44  64 clips FLAG TAILS
+  suite_f1_near_h2                 B3   150-300   s 1.059 [0.875, 1.240]  cover 0.656 / 0.947 (s-implied 0.941)  rms z 1.02  25 clips
+  suite_f1_near_h2                 B3   300-500   s 0.913 [0.811, 1.112]  cover 0.733 / 0.936 (s-implied 0.971)  rms z 1.05  26 clips
+  suite_f1_near_h2                 B3   <150      s 1.048 [0.919, 1.210]  cover 0.659 / 0.932 (s-implied 0.944)  rms z 1.16  25 clips
+  suite_f1_near_h2                 B3   >500      s 1.986 [1.417, 2.385]  cover 0.401 / 0.685 (s-implied 0.686)  rms z 1.98  30 clips FLAG
+  suite_f1_near_h2                 B4   all       s 1.263 [1.126, 1.429]  cover 0.579 / 0.876 (s-implied 0.887)  rms z 1.33  64 clips FLAG
+  suite_f1_near_h2                 B4   150-300   s 0.827 [0.699, 1.000]  cover 0.751 / 0.947 (s-implied 0.984)  rms z 0.94  25 clips FLAG TAILS
+  suite_f1_near_h2                 B4   300-500   s 1.158 [0.922, 1.396]  cover 0.613 / 0.939 (s-implied 0.916)  rms z 1.13  26 clips
+  suite_f1_near_h2                 B4   <150      s 1.099 [0.965, 1.230]  cover 0.635 / 0.933 (s-implied 0.931)  rms z 1.21  25 clips
+  suite_f1_near_h2                 B4   >500      s 1.738 [1.388, 2.142]  cover 0.405 / 0.747 (s-implied 0.750)  rms z 1.68  30 clips FLAG
+  suite_f1_near_h2                 voicing   ECE 0.001
+  suite_f1_near_h2                 sonorant  ECE 0.023
+  suite_f2_f3_close                F1   all       s 0.742 [0.691, 0.802]  cover 0.797 / 0.971 (s-implied 0.993)  rms z 0.93  64 clips FLAG TAILS
+  suite_f2_f3_close                F1   150-300   s 0.689 [0.623, 0.788]  cover 0.837 / 0.983 (s-implied 0.996)  rms z 0.76  30 clips FLAG TAILS
+  suite_f2_f3_close                F1   300-500   s 0.817 [0.719, 0.906]  cover 0.771 / 0.954 (s-implied 0.986)  rms z 0.98  26 clips FLAG TAILS
+  suite_f2_f3_close                F1   >500      s 0.828 [0.730, 0.945]  cover 0.754 / 0.964 (s-implied 0.984)  rms z 0.95  31 clips FLAG TAILS
+  suite_f2_f3_close                F2   all       s 1.009 [0.896, 1.127]  cover 0.680 / 0.894 (s-implied 0.953)  rms z 1.39  64 clips TAILS
+  suite_f2_f3_close                F2   150-300   s 1.211 [1.053, 1.383]  cover 0.599 / 0.852 (s-implied 0.901)  rms z 1.60  30 clips FLAG TAILS
+  suite_f2_f3_close                F2   300-500   s 1.184 [0.940, 1.381]  cover 0.624 / 0.859 (s-implied 0.909)  rms z 1.55  26 clips TAILS
+  suite_f2_f3_close                F2   >500      s 0.994 [0.833, 1.162]  cover 0.685 / 0.907 (s-implied 0.956)  rms z 1.36  31 clips TAILS
+  suite_f2_f3_close                F3   all       s 0.674 [0.557, 0.835]  cover 0.763 / 0.852 (s-implied 0.997)  rms z 5.30  64 clips FLAG TAILS
+  suite_f2_f3_close                F3   150-300   s 0.548 [0.425, 0.723]  cover 0.790 / 0.859 (s-implied 1.000)  rms z 5.16  30 clips FLAG TAILS
+  suite_f2_f3_close                F3   300-500   s 0.793 [0.525, 1.080]  cover 0.749 / 0.856 (s-implied 0.988)  rms z 8.58  26 clips TAILS
+  suite_f2_f3_close                F3   >500      s 0.755 [0.546, 1.026]  cover 0.754 / 0.868 (s-implied 0.992)  rms z 1.63  31 clips TAILS
+  suite_f2_f3_close                F4   all       s 0.679 [0.575, 0.786]  cover 0.800 / 0.943 (s-implied 0.997)  rms z 0.95  64 clips FLAG TAILS
+  suite_f2_f3_close                F4   150-300   s 0.619 [0.452, 0.839]  cover 0.825 / 0.943 (s-implied 0.999)  rms z 0.94  30 clips FLAG TAILS
+  suite_f2_f3_close                F4   300-500   s 0.869 [0.693, 1.129]  cover 0.736 / 0.930 (s-implied 0.979)  rms z 1.01  26 clips TAILS
+  suite_f2_f3_close                F4   >500      s 0.817 [0.709, 1.003]  cover 0.747 / 0.926 (s-implied 0.986)  rms z 1.05  31 clips TAILS
+  suite_f2_f3_close                B1   all       s 1.140 [1.081, 1.206]  cover 0.607 / 0.961 (s-implied 0.921)  rms z 1.05  64 clips TAILS
+  suite_f2_f3_close                B1   150-300   s 1.142 [1.026, 1.285]  cover 0.600 / 0.967 (s-implied 0.920)  rms z 1.05  30 clips TAILS
+  suite_f2_f3_close                B1   300-500   s 1.146 [0.961, 1.266]  cover 0.625 / 0.968 (s-implied 0.919)  rms z 1.03  26 clips TAILS
+  suite_f2_f3_close                B1   >500      s 1.102 [1.003, 1.209]  cover 0.626 / 0.949 (s-implied 0.931)  rms z 1.06  31 clips
+  suite_f2_f3_close                B2   all       s 1.188 [1.107, 1.281]  cover 0.587 / 0.923 (s-implied 0.908)  rms z 1.15  64 clips FLAG
+  suite_f2_f3_close                B2   150-300   s 1.234 [1.105, 1.376]  cover 0.538 / 0.952 (s-implied 0.895)  rms z 1.15  30 clips FLAG TAILS
+  suite_f2_f3_close                B2   300-500   s 1.279 [1.129, 1.484]  cover 0.547 / 0.903 (s-implied 0.882)  rms z 1.22  26 clips FLAG
+  suite_f2_f3_close                B2   >500      s 1.202 [1.034, 1.389]  cover 0.595 / 0.894 (s-implied 0.904)  rms z 1.20  31 clips FLAG
+  suite_f2_f3_close                B3   all       s 1.502 [1.370, 1.634]  cover 0.506 / 0.811 (s-implied 0.817)  rms z 1.57  64 clips FLAG
+  suite_f2_f3_close                B3   150-300   s 1.589 [1.314, 1.906]  cover 0.472 / 0.773 (s-implied 0.792)  rms z 1.66  30 clips FLAG
+  suite_f2_f3_close                B3   300-500   s 1.405 [1.089, 1.975]  cover 0.533 / 0.797 (s-implied 0.846)  rms z 1.77  26 clips FLAG
+  suite_f2_f3_close                B3   >500      s 1.368 [1.224, 1.542]  cover 0.533 / 0.868 (s-implied 0.856)  rms z 1.34  31 clips FLAG
+  suite_f2_f3_close                B4   all       s 1.094 [1.003, 1.194]  cover 0.642 / 0.916 (s-implied 0.933)  rms z 1.16  64 clips
+  suite_f2_f3_close                B4   150-300   s 0.940 [0.823, 1.075]  cover 0.715 / 0.952 (s-implied 0.967)  rms z 1.04  30 clips
+  suite_f2_f3_close                B4   300-500   s 1.137 [0.925, 1.414]  cover 0.628 / 0.928 (s-implied 0.921)  rms z 1.23  26 clips
+  suite_f2_f3_close                B4   >500      s 1.202 [1.041, 1.404]  cover 0.594 / 0.886 (s-implied 0.904)  rms z 1.22  31 clips FLAG
+  suite_f2_f3_close                voicing   ECE 0.001
+  suite_f2_f3_close                sonorant  ECE 0.023
+  suite_high_f0                    F1   all       s 0.782 [0.729, 0.840]  cover 0.793 / 0.977 (s-implied 0.989)  rms z 0.84  64 clips FLAG TAILS
+  suite_high_f0                    F1   300-500   s 0.715 [0.656, 0.794]  cover 0.834 / 0.980 (s-implied 0.995)  rms z 0.77  33 clips FLAG TAILS
+  suite_high_f0                    F1   >500      s 0.805 [0.741, 0.870]  cover 0.782 / 0.976 (s-implied 0.987)  rms z 0.86  64 clips FLAG TAILS
+  suite_high_f0                    F2   all       s 0.686 [0.635, 0.745]  cover 0.821 / 0.970 (s-implied 0.996)  rms z 0.87  64 clips FLAG TAILS
+  suite_high_f0                    F2   300-500   s 0.614 [0.545, 0.687]  cover 0.845 / 0.978 (s-implied 0.999)  rms z 0.89  33 clips FLAG TAILS
+  suite_high_f0                    F2   >500      s 0.707 [0.645, 0.772]  cover 0.813 / 0.968 (s-implied 0.995)  rms z 0.86  64 clips FLAG TAILS
+  suite_high_f0                    F3   all       s 0.714 [0.661, 0.779]  cover 0.821 / 0.970 (s-implied 0.995)  rms z 0.88  64 clips FLAG TAILS
+  suite_high_f0                    F3   300-500   s 0.655 [0.565, 0.734]  cover 0.855 / 0.970 (s-implied 0.998)  rms z 0.86  33 clips FLAG TAILS
+  suite_high_f0                    F3   >500      s 0.735 [0.679, 0.800]  cover 0.810 / 0.970 (s-implied 0.994)  rms z 0.89  64 clips FLAG TAILS
+  suite_high_f0                    F4   all       s 0.804 [0.744, 0.870]  cover 0.771 / 0.962 (s-implied 0.987)  rms z 0.94  64 clips FLAG TAILS
+  suite_high_f0                    F4   300-500   s 0.747 [0.665, 0.806]  cover 0.829 / 0.977 (s-implied 0.993)  rms z 0.85  33 clips FLAG TAILS
+  suite_high_f0                    F4   >500      s 0.834 [0.752, 0.922]  cover 0.754 / 0.957 (s-implied 0.983)  rms z 0.96  64 clips FLAG TAILS
+  suite_high_f0                    B1   all       s 1.179 [1.104, 1.249]  cover 0.589 / 0.956 (s-implied 0.910)  rms z 1.08  64 clips FLAG TAILS
+  suite_high_f0                    B1   300-500   s 1.110 [0.995, 1.223]  cover 0.617 / 0.964 (s-implied 0.928)  rms z 1.04  33 clips TAILS
+  suite_high_f0                    B1   >500      s 1.197 [1.120, 1.276]  cover 0.582 / 0.954 (s-implied 0.905)  rms z 1.09  64 clips FLAG TAILS
+  suite_high_f0                    B2   all       s 1.151 [1.090, 1.223]  cover 0.608 / 0.951 (s-implied 0.918)  rms z 1.07  64 clips FLAG TAILS
+  suite_high_f0                    B2   300-500   s 1.185 [1.087, 1.311]  cover 0.601 / 0.934 (s-implied 0.909)  rms z 1.12  33 clips FLAG
+  suite_high_f0                    B2   >500      s 1.141 [1.066, 1.216]  cover 0.611 / 0.955 (s-implied 0.920)  rms z 1.06  64 clips TAILS
+  suite_high_f0                    B3   all       s 1.038 [0.972, 1.107]  cover 0.663 / 0.957 (s-implied 0.946)  rms z 1.02  64 clips
+  suite_high_f0                    B3   300-500   s 0.986 [0.846, 1.107]  cover 0.689 / 0.976 (s-implied 0.957)  rms z 0.94  33 clips
+  suite_high_f0                    B3   >500      s 1.055 [0.980, 1.144]  cover 0.656 / 0.951 (s-implied 0.942)  rms z 1.04  64 clips
+  suite_high_f0                    B4   all       s 1.096 [1.031, 1.160]  cover 0.633 / 0.954 (s-implied 0.932)  rms z 1.05  64 clips TAILS
+  suite_high_f0                    B4   300-500   s 1.021 [0.932, 1.127]  cover 0.669 / 0.970 (s-implied 0.950)  rms z 0.97  33 clips TAILS
+  suite_high_f0                    B4   >500      s 1.118 [1.040, 1.199]  cover 0.623 / 0.950 (s-implied 0.926)  rms z 1.07  64 clips TAILS
+  suite_high_f0                    voicing   ECE 0.001
+  suite_high_f0                    sonorant  ECE 0.015
+  suite_low_snr                    F1   all       s 0.767 [0.713, 0.825]  cover 0.792 / 0.971 (s-implied 0.991)  rms z 0.86  64 clips FLAG TAILS
+  suite_low_snr                    F1   150-300   s 0.769 [0.662, 0.873]  cover 0.797 / 0.991 (s-implied 0.991)  rms z 0.78  31 clips FLAG
+  suite_low_snr                    F1   300-500   s 0.730 [0.670, 0.788]  cover 0.829 / 0.970 (s-implied 0.994)  rms z 0.84  26 clips FLAG TAILS
+  suite_low_snr                    F1   >500      s 0.826 [0.715, 1.016]  cover 0.748 / 0.959 (s-implied 0.985)  rms z 0.92  32 clips
+  suite_low_snr                    F2   all       s 0.715 [0.651, 0.777]  cover 0.797 / 0.973 (s-implied 0.995)  rms z 0.85  64 clips FLAG TAILS
+  suite_low_snr                    F2   150-300   s 0.692 [0.594, 0.790]  cover 0.826 / 0.979 (s-implied 0.996)  rms z 0.85  31 clips FLAG TAILS
+  suite_low_snr                    F2   300-500   s 0.657 [0.558, 0.781]  cover 0.823 / 0.980 (s-implied 0.998)  rms z 0.83  26 clips FLAG TAILS
+  suite_low_snr                    F2   >500      s 0.784 [0.647, 0.963]  cover 0.753 / 0.959 (s-implied 0.989)  rms z 0.90  32 clips FLAG TAILS
+  suite_low_snr                    F3   all       s 0.889 [0.809, 0.969]  cover 0.734 / 0.944 (s-implied 0.975)  rms z 1.02  64 clips TAILS
+  suite_low_snr                    F3   150-300   s 0.910 [0.777, 1.037]  cover 0.731 / 0.953 (s-implied 0.972)  rms z 1.02  31 clips
+  suite_low_snr                    F3   300-500   s 0.875 [0.720, 1.074]  cover 0.738 / 0.968 (s-implied 0.978)  rms z 0.94  26 clips
+  suite_low_snr                    F3   >500      s 0.946 [0.828, 1.099]  cover 0.704 / 0.924 (s-implied 0.966)  rms z 1.06  32 clips TAILS
+  suite_low_snr                    F4   all       s 0.880 [0.779, 1.020]  cover 0.727 / 0.916 (s-implied 0.977)  rms z 1.19  64 clips TAILS
+  suite_low_snr                    F4   150-300   s 0.906 [0.686, 1.180]  cover 0.717 / 0.936 (s-implied 0.973)  rms z 1.07  31 clips
+  suite_low_snr                    F4   300-500   s 0.822 [0.720, 0.982]  cover 0.755 / 0.944 (s-implied 0.985)  rms z 1.09  26 clips FLAG TAILS
+  suite_low_snr                    F4   >500      s 0.955 [0.750, 1.188]  cover 0.699 / 0.893 (s-implied 0.964)  rms z 1.27  32 clips TAILS
+  suite_low_snr                    B1   all       s 1.084 [1.014, 1.160]  cover 0.634 / 0.978 (s-implied 0.935)  rms z 1.00  64 clips TAILS
+  suite_low_snr                    B1   150-300   s 1.197 [1.080, 1.289]  cover 0.566 / 0.971 (s-implied 0.905)  rms z 1.07  31 clips FLAG TAILS
+  suite_low_snr                    B1   300-500   s 1.115 [0.991, 1.232]  cover 0.621 / 0.990 (s-implied 0.927)  rms z 0.98  26 clips TAILS
+  suite_low_snr                    B1   >500      s 1.013 [0.876, 1.158]  cover 0.676 / 0.976 (s-implied 0.952)  rms z 0.97  32 clips
+  suite_low_snr                    B2   all       s 1.104 [1.016, 1.186]  cover 0.635 / 0.953 (s-implied 0.930)  rms z 1.05  64 clips TAILS
+  suite_low_snr                    B2   150-300   s 1.061 [0.930, 1.301]  cover 0.660 / 0.943 (s-implied 0.941)  rms z 1.07  31 clips
+  suite_low_snr                    B2   300-500   s 1.051 [0.823, 1.214]  cover 0.661 / 0.971 (s-implied 0.943)  rms z 0.98  26 clips
+  suite_low_snr                    B2   >500      s 1.028 [0.918, 1.196]  cover 0.663 / 0.946 (s-implied 0.948)  rms z 1.05  32 clips
+  suite_low_snr                    B3   all       s 1.025 [0.956, 1.115]  cover 0.670 / 0.954 (s-implied 0.949)  rms z 1.00  64 clips
+  suite_low_snr                    B3   150-300   s 1.049 [0.929, 1.166]  cover 0.658 / 0.960 (s-implied 0.943)  rms z 0.99  31 clips
+  suite_low_snr                    B3   300-500   s 0.956 [0.790, 1.102]  cover 0.704 / 0.963 (s-implied 0.964)  rms z 0.94  26 clips
+  suite_low_snr                    B3   >500      s 0.988 [0.876, 1.141]  cover 0.693 / 0.949 (s-implied 0.957)  rms z 1.00  32 clips
+  suite_low_snr                    B4   all       s 1.103 [0.992, 1.227]  cover 0.629 / 0.964 (s-implied 0.930)  rms z 1.02  64 clips TAILS
+  suite_low_snr                    B4   150-300   s 1.099 [0.944, 1.296]  cover 0.638 / 0.963 (s-implied 0.931)  rms z 1.02  31 clips
+  suite_low_snr                    B4   300-500   s 0.958 [0.756, 1.150]  cover 0.699 / 0.982 (s-implied 0.963)  rms z 0.91  26 clips
+  suite_low_snr                    B4   >500      s 1.122 [0.921, 1.337]  cover 0.618 / 0.970 (s-implied 0.925)  rms z 1.02  32 clips TAILS
+  suite_low_snr                    voicing   ECE 0.019
+  suite_low_snr                    sonorant  ECE 0.016
+  suite_nasal                      F1   all       s 0.893 [0.814, 0.977]  cover 0.730 / 0.927 (s-implied 0.975)  rms z 1.10  64 clips TAILS
+  suite_nasal                      F1   150-300   s 0.837 [0.696, 0.957]  cover 0.761 / 0.941 (s-implied 0.983)  rms z 0.98  24 clips FLAG TAILS
+  suite_nasal                      F1   300-500   s 0.873 [0.729, 1.098]  cover 0.738 / 0.897 (s-implied 0.978)  rms z 1.12  23 clips TAILS
+  suite_nasal                      F1   >500      s 1.021 [0.869, 1.210]  cover 0.675 / 0.909 (s-implied 0.950)  rms z 1.25  34 clips TAILS
+  suite_nasal                      F2   all       s 0.643 [0.586, 0.705]  cover 0.843 / 0.967 (s-implied 0.998)  rms z 0.92  64 clips FLAG TAILS
+  suite_nasal                      F2   150-300   s 0.625 [0.525, 0.725]  cover 0.851 / 0.979 (s-implied 0.999)  rms z 0.78  24 clips FLAG TAILS
+  suite_nasal                      F2   300-500   s 0.604 [0.534, 0.678]  cover 0.870 / 0.972 (s-implied 0.999)  rms z 1.06  23 clips FLAG TAILS
+  suite_nasal                      F2   >500      s 0.721 [0.606, 0.813]  cover 0.813 / 0.956 (s-implied 0.994)  rms z 0.96  34 clips FLAG TAILS
+  suite_nasal                      F3   all       s 0.725 [0.668, 0.800]  cover 0.792 / 0.959 (s-implied 0.994)  rms z 2.47  64 clips FLAG TAILS
+  suite_nasal                      F3   150-300   s 0.710 [0.637, 0.810]  cover 0.802 / 0.948 (s-implied 0.995)  rms z 5.16  24 clips FLAG TAILS
+  suite_nasal                      F3   300-500   s 0.748 [0.619, 0.909]  cover 0.793 / 0.967 (s-implied 0.992)  rms z 1.26  23 clips FLAG TAILS
+  suite_nasal                      F3   >500      s 0.767 [0.661, 0.903]  cover 0.770 / 0.961 (s-implied 0.991)  rms z 0.94  34 clips FLAG TAILS
+  suite_nasal                      F4   all       s 0.715 [0.658, 0.781]  cover 0.814 / 0.961 (s-implied 0.995)  rms z 0.95  64 clips FLAG TAILS
+  suite_nasal                      F4   150-300   s 0.616 [0.557, 0.684]  cover 0.849 / 0.972 (s-implied 0.999)  rms z 0.89  24 clips FLAG TAILS
+  suite_nasal                      F4   300-500   s 0.643 [0.534, 0.801]  cover 0.851 / 0.970 (s-implied 0.998)  rms z 1.06  23 clips FLAG TAILS
+  suite_nasal                      F4   >500      s 0.853 [0.742, 0.949]  cover 0.759 / 0.949 (s-implied 0.981)  rms z 0.95  34 clips FLAG TAILS
+  suite_nasal                      B1   all       s 1.166 [1.108, 1.233]  cover 0.582 / 0.958 (s-implied 0.914)  rms z 1.08  64 clips FLAG TAILS
+  suite_nasal                      B1   150-300   s 1.119 [1.018, 1.214]  cover 0.615 / 0.967 (s-implied 0.926)  rms z 1.06  24 clips TAILS
+  suite_nasal                      B1   300-500   s 1.190 [1.075, 1.343]  cover 0.552 / 0.966 (s-implied 0.907)  rms z 1.06  23 clips FLAG TAILS
+  suite_nasal                      B1   >500      s 1.156 [1.078, 1.264]  cover 0.585 / 0.953 (s-implied 0.916)  rms z 1.08  34 clips FLAG TAILS
+  suite_nasal                      B2   all       s 1.071 [1.022, 1.120]  cover 0.647 / 0.961 (s-implied 0.938)  rms z 1.01  64 clips TAILS
+  suite_nasal                      B2   150-300   s 1.093 [0.974, 1.221]  cover 0.623 / 0.952 (s-implied 0.933)  rms z 1.03  24 clips
+  suite_nasal                      B2   300-500   s 1.125 [1.014, 1.215]  cover 0.608 / 0.977 (s-implied 0.925)  rms z 1.02  23 clips TAILS
+  suite_nasal                      B2   >500      s 1.008 [0.926, 1.085]  cover 0.679 / 0.959 (s-implied 0.953)  rms z 0.99  34 clips
+  suite_nasal                      B3   all       s 1.041 [0.969, 1.127]  cover 0.660 / 0.956 (s-implied 0.945)  rms z 1.02  64 clips
+  suite_nasal                      B3   150-300   s 0.994 [0.872, 1.144]  cover 0.687 / 0.958 (s-implied 0.956)  rms z 0.99  24 clips
+  suite_nasal                      B3   300-500   s 0.955 [0.816, 1.121]  cover 0.705 / 0.971 (s-implied 0.964)  rms z 0.92  23 clips
+  suite_nasal                      B3   >500      s 1.145 [1.012, 1.275]  cover 0.619 / 0.950 (s-implied 0.919)  rms z 1.08  34 clips TAILS
+  suite_nasal                      B4   all       s 1.070 [1.000, 1.130]  cover 0.648 / 0.964 (s-implied 0.938)  rms z 1.00  64 clips TAILS
+  suite_nasal                      B4   150-300   s 1.069 [0.882, 1.276]  cover 0.653 / 0.956 (s-implied 0.939)  rms z 1.03  24 clips
+  suite_nasal                      B4   300-500   s 1.081 [0.927, 1.228]  cover 0.640 / 0.972 (s-implied 0.936)  rms z 1.01  23 clips
+  suite_nasal                      B4   >500      s 1.094 [1.000, 1.191]  cover 0.631 / 0.957 (s-implied 0.932)  rms z 1.02  34 clips TAILS
+  suite_nasal                      voicing   ECE 0.001
+  suite_nasal                      sonorant  ECE 0.019
+  suite_phone                      F1   all       s 0.809 [0.749, 0.877]  cover 0.765 / 0.958 (s-implied 0.987)  rms z 0.92  64 clips FLAG TAILS
+  suite_phone                      F1   150-300   s 0.787 [0.654, 1.014]  cover 0.763 / 0.958 (s-implied 0.989)  rms z 0.94  31 clips TAILS
+  suite_phone                      F1   300-500   s 0.728 [0.636, 0.798]  cover 0.821 / 0.974 (s-implied 0.994)  rms z 0.78  31 clips FLAG TAILS
+  suite_phone                      F1   <150      s 0.807 [0.723, 0.900]  cover 0.767 / 0.965 (s-implied 0.987)  rms z 0.89  21 clips FLAG TAILS
+  suite_phone                      F1   >500      s 0.887 [0.775, 1.024]  cover 0.729 / 0.942 (s-implied 0.976)  rms z 1.00  29 clips TAILS
+  suite_phone                      F2   all       s 0.661 [0.614, 0.718]  cover 0.822 / 0.964 (s-implied 0.998)  rms z 0.99  64 clips FLAG TAILS
+  suite_phone                      F2   150-300   s 0.628 [0.579, 0.711]  cover 0.842 / 0.967 (s-implied 0.999)  rms z 1.28  31 clips FLAG TAILS
+  suite_phone                      F2   300-500   s 0.680 [0.577, 0.787]  cover 0.829 / 0.973 (s-implied 0.997)  rms z 0.84  31 clips FLAG TAILS
+  suite_phone                      F2   <150      s 0.631 [0.551, 0.740]  cover 0.829 / 0.965 (s-implied 0.998)  rms z 0.82  21 clips FLAG TAILS
+  suite_phone                      F2   >500      s 0.715 [0.629, 0.824]  cover 0.800 / 0.956 (s-implied 0.995)  rms z 0.96  29 clips FLAG TAILS
+  suite_phone                      F3   all       s 0.890 [0.794, 0.988]  cover 0.724 / 0.919 (s-implied 0.975)  rms z 1.15  64 clips TAILS
+  suite_phone                      F3   150-300   s 0.833 [0.714, 1.025]  cover 0.739 / 0.926 (s-implied 0.984)  rms z 1.05  31 clips TAILS
+  suite_phone                      F3   300-500   s 0.855 [0.727, 1.001]  cover 0.757 / 0.912 (s-implied 0.981)  rms z 1.08  31 clips TAILS
+  suite_phone                      F3   <150      s 0.726 [0.615, 0.868]  cover 0.789 / 0.949 (s-implied 0.994)  rms z 1.15  21 clips FLAG TAILS
+  suite_phone                      F3   >500      s 1.114 [0.954, 1.267]  cover 0.640 / 0.894 (s-implied 0.927)  rms z 1.24  29 clips TAILS
+  suite_phone                      F4   all       s 0.922 [0.834, 1.007]  cover 0.719 / 0.957 (s-implied 0.970)  rms z 1.03  64 clips
+  suite_phone                      F4   150-300   s 0.938 [0.828, 1.014]  cover 0.723 / 0.961 (s-implied 0.967)  rms z 0.98  31 clips
+  suite_phone                      F4   300-500   s 0.900 [0.742, 1.103]  cover 0.728 / 0.957 (s-implied 0.974)  rms z 1.05  31 clips
+  suite_phone                      F4   <150      s 0.815 [0.664, 1.019]  cover 0.755 / 0.955 (s-implied 0.986)  rms z 1.03  21 clips TAILS
+  suite_phone                      F4   >500      s 1.004 [0.829, 1.176]  cover 0.681 / 0.956 (s-implied 0.954)  rms z 1.06  29 clips
+  suite_phone                      B1   all       s 1.077 [1.012, 1.135]  cover 0.643 / 0.964 (s-implied 0.937)  rms z 1.02  64 clips TAILS
+  suite_phone                      B1   150-300   s 1.106 [0.969, 1.204]  cover 0.622 / 0.958 (s-implied 0.929)  rms z 1.02  31 clips
+  suite_phone                      B1   300-500   s 1.076 [0.965, 1.162]  cover 0.641 / 0.967 (s-implied 0.937)  rms z 1.03  31 clips TAILS
+  suite_phone                      B1   <150      s 1.043 [0.933, 1.169]  cover 0.659 / 0.966 (s-implied 0.945)  rms z 1.01  21 clips
+  suite_phone                      B1   >500      s 1.085 [0.940, 1.208]  cover 0.646 / 0.964 (s-implied 0.935)  rms z 1.01  29 clips
+  suite_phone                      B2   all       s 1.121 [1.053, 1.200]  cover 0.621 / 0.946 (s-implied 0.926)  rms z 1.09  64 clips TAILS
+  suite_phone                      B2   150-300   s 1.096 [0.978, 1.271]  cover 0.627 / 0.961 (s-implied 0.932)  rms z 1.07  31 clips
+  suite_phone                      B2   300-500   s 1.141 [0.994, 1.298]  cover 0.618 / 0.940 (s-implied 0.920)  rms z 1.08  31 clips
+  suite_phone                      B2   <150      s 1.094 [0.999, 1.226]  cover 0.625 / 0.948 (s-implied 0.932)  rms z 1.05  21 clips
+  suite_phone                      B2   >500      s 1.156 [0.994, 1.346]  cover 0.616 / 0.937 (s-implied 0.916)  rms z 1.14  29 clips
+  suite_phone                      B3   all       s 1.114 [1.038, 1.190]  cover 0.623 / 0.946 (s-implied 0.928)  rms z 1.06  64 clips TAILS
+  suite_phone                      B3   150-300   s 1.172 [1.012, 1.332]  cover 0.594 / 0.971 (s-implied 0.912)  rms z 1.05  31 clips FLAG TAILS
+  suite_phone                      B3   300-500   s 1.060 [0.958, 1.168]  cover 0.645 / 0.983 (s-implied 0.941)  rms z 0.97  31 clips TAILS
+  suite_phone                      B3   <150      s 1.046 [0.961, 1.152]  cover 0.660 / 0.939 (s-implied 0.944)  rms z 1.03  21 clips
+  suite_phone                      B3   >500      s 1.173 [1.016, 1.354]  cover 0.599 / 0.911 (s-implied 0.912)  rms z 1.15  29 clips FLAG
+  suite_phone                      B4   all       s 1.054 [0.980, 1.140]  cover 0.651 / 0.973 (s-implied 0.942)  rms z 0.99  64 clips TAILS
+  suite_phone                      B4   150-300   s 1.039 [0.919, 1.198]  cover 0.657 / 0.983 (s-implied 0.946)  rms z 0.97  31 clips TAILS
+  suite_phone                      B4   300-500   s 0.904 [0.806, 1.033]  cover 0.743 / 0.994 (s-implied 0.973)  rms z 0.85  31 clips TAILS
+  suite_phone                      B4   <150      s 1.025 [0.948, 1.129]  cover 0.664 / 0.979 (s-implied 0.949)  rms z 0.98  21 clips TAILS
+  suite_phone                      B4   >500      s 1.171 [1.009, 1.335]  cover 0.581 / 0.949 (s-implied 0.912)  rms z 1.10  29 clips FLAG TAILS
+  suite_phone                      voicing   ECE 0.003
+  suite_phone                      sonorant  ECE 0.016
+  suite_reference                  F1   all       s 0.742 [0.699, 0.789]  cover 0.814 / 0.975 (s-implied 0.993)  rms z 0.99  64 clips FLAG TAILS
+  suite_reference                  F1   150-300   s 0.761 [0.684, 0.827]  cover 0.813 / 0.974 (s-implied 0.991)  rms z 0.82  30 clips FLAG TAILS
+  suite_reference                  F1   300-500   s 0.753 [0.681, 0.863]  cover 0.813 / 0.987 (s-implied 0.992)  rms z 0.78  23 clips FLAG
+  suite_reference                  F1   <150      s 0.690 [0.635, 0.757]  cover 0.824 / 0.970 (s-implied 0.996)  rms z 1.25  25 clips FLAG TAILS
+  suite_reference                  F1   >500      s 0.768 [0.656, 0.875]  cover 0.806 / 0.973 (s-implied 0.991)  rms z 0.90  24 clips FLAG TAILS
+  suite_reference                  F2   all       s 0.601 [0.556, 0.649]  cover 0.854 / 0.968 (s-implied 0.999)  rms z 1.11  64 clips FLAG TAILS
+  suite_reference                  F2   150-300   s 0.602 [0.524, 0.695]  cover 0.850 / 0.959 (s-implied 0.999)  rms z 1.15  30 clips FLAG TAILS
+  suite_reference                  F2   300-500   s 0.702 [0.603, 0.765]  cover 0.823 / 0.959 (s-implied 0.996)  rms z 0.99  23 clips FLAG TAILS
+  suite_reference                  F2   <150      s 0.472 [0.411, 0.537]  cover 0.912 / 0.983 (s-implied 1.000)  rms z 1.34  25 clips FLAG TAILS
+  suite_reference                  F2   >500      s 0.675 [0.615, 0.751]  cover 0.816 / 0.964 (s-implied 0.997)  rms z 0.84  24 clips FLAG TAILS
+  suite_reference                  F3   all       s 0.639 [0.590, 0.691]  cover 0.844 / 0.974 (s-implied 0.998)  rms z 1.29  64 clips FLAG TAILS
+  suite_reference                  F3   150-300   s 0.634 [0.534, 0.733]  cover 0.851 / 0.966 (s-implied 0.998)  rms z 0.95  30 clips FLAG TAILS
+  suite_reference                  F3   300-500   s 0.731 [0.626, 0.868]  cover 0.789 / 0.949 (s-implied 0.994)  rms z 1.11  23 clips FLAG TAILS
+  suite_reference                  F3   <150      s 0.534 [0.463, 0.608]  cover 0.887 / 0.980 (s-implied 1.000)  rms z 1.87  25 clips FLAG TAILS
+  suite_reference                  F3   >500      s 0.693 [0.596, 0.793]  cover 0.828 / 0.986 (s-implied 0.996)  rms z 0.75  24 clips FLAG
+  suite_reference                  F4   all       s 0.714 [0.662, 0.776]  cover 0.813 / 0.968 (s-implied 0.995)  rms z 0.92  64 clips FLAG TAILS
+  suite_reference                  F4   150-300   s 0.709 [0.622, 0.791]  cover 0.828 / 0.965 (s-implied 0.995)  rms z 0.93  30 clips FLAG TAILS
+  suite_reference                  F4   300-500   s 0.743 [0.606, 0.867]  cover 0.797 / 0.960 (s-implied 0.993)  rms z 0.97  23 clips FLAG TAILS
+  suite_reference                  F4   <150      s 0.557 [0.502, 0.623]  cover 0.877 / 0.977 (s-implied 1.000)  rms z 0.84  25 clips FLAG TAILS
+  suite_reference                  F4   >500      s 0.871 [0.755, 1.019]  cover 0.747 / 0.963 (s-implied 0.978)  rms z 0.98  24 clips
+  suite_reference                  B1   all       s 1.088 [1.032, 1.157]  cover 0.625 / 0.970 (s-implied 0.934)  rms z 1.01  64 clips TAILS
+  suite_reference                  B1   150-300   s 1.022 [0.898, 1.134]  cover 0.672 / 0.974 (s-implied 0.950)  rms z 0.94  30 clips
+  suite_reference                  B1   300-500   s 0.998 [0.876, 1.150]  cover 0.683 / 0.966 (s-implied 0.955)  rms z 0.96  23 clips
+  suite_reference                  B1   <150      s 1.056 [0.954, 1.168]  cover 0.648 / 0.970 (s-implied 0.942)  rms z 0.98  25 clips TAILS
+  suite_reference                  B1   >500      s 1.212 [1.120, 1.307]  cover 0.532 / 0.968 (s-implied 0.901)  rms z 1.10  24 clips FLAG TAILS
+  suite_reference                  B2   all       s 1.093 [1.030, 1.166]  cover 0.629 / 0.957 (s-implied 0.933)  rms z 1.04  64 clips TAILS
+  suite_reference                  B2   150-300   s 1.088 [0.952, 1.218]  cover 0.635 / 0.972 (s-implied 0.934)  rms z 1.01  30 clips TAILS
+  suite_reference                  B2   300-500   s 1.014 [0.904, 1.230]  cover 0.673 / 0.952 (s-implied 0.951)  rms z 1.02  23 clips
+  suite_reference                  B2   <150      s 1.189 [1.092, 1.258]  cover 0.576 / 0.951 (s-implied 0.907)  rms z 1.08  25 clips FLAG TAILS
+  suite_reference                  B2   >500      s 1.056 [0.950, 1.165]  cover 0.654 / 0.956 (s-implied 0.942)  rms z 1.02  24 clips
+  suite_reference                  B3   all       s 1.025 [0.956, 1.090]  cover 0.672 / 0.965 (s-implied 0.949)  rms z 0.98  64 clips
+  suite_reference                  B3   150-300   s 0.997 [0.909, 1.130]  cover 0.684 / 0.977 (s-implied 0.955)  rms z 0.96  30 clips
+  suite_reference                  B3   300-500   s 0.989 [0.822, 1.186]  cover 0.688 / 0.970 (s-implied 0.957)  rms z 0.97  23 clips
+  suite_reference                  B3   <150      s 1.060 [0.894, 1.192]  cover 0.657 / 0.962 (s-implied 0.941)  rms z 0.99  25 clips
+  suite_reference                  B3   >500      s 1.031 [0.945, 1.123]  cover 0.668 / 0.956 (s-implied 0.948)  rms z 1.00  24 clips
+  suite_reference                  B4   all       s 1.020 [0.945, 1.095]  cover 0.672 / 0.966 (s-implied 0.950)  rms z 0.98  64 clips
+  suite_reference                  B4   150-300   s 1.039 [0.908, 1.164]  cover 0.663 / 0.962 (s-implied 0.946)  rms z 0.99  30 clips
+  suite_reference                  B4   300-500   s 0.872 [0.795, 1.060]  cover 0.744 / 0.984 (s-implied 0.978)  rms z 0.90  23 clips
+  suite_reference                  B4   <150      s 0.986 [0.868, 1.170]  cover 0.688 / 0.953 (s-implied 0.957)  rms z 0.99  25 clips
+  suite_reference                  B4   >500      s 1.111 [0.999, 1.229]  cover 0.619 / 0.972 (s-implied 0.928)  rms z 1.02  24 clips TAILS
+  suite_reference                  voicing   ECE 0.001
+  suite_reference                  sonorant  ECE 0.020
+  suite_tube                       F1   all       s 0.773 [0.722, 0.827]  cover 0.799 / 0.973 (s-implied 0.990)  rms z 0.88  64 clips FLAG TAILS
+  suite_tube                       F1   150-300   s 0.774 [0.698, 0.901]  cover 0.807 / 0.984 (s-implied 0.990)  rms z 0.80  26 clips FLAG
+  suite_tube                       F1   300-500   s 0.721 [0.633, 0.786]  cover 0.833 / 0.981 (s-implied 0.994)  rms z 0.79  31 clips FLAG TAILS
+  suite_tube                       F1   <150      s 0.692 [0.633, 0.784]  cover 0.848 / 0.991 (s-implied 0.996)  rms z 0.75  20 clips FLAG
+  suite_tube                       F1   >500      s 0.875 [0.761, 1.032]  cover 0.738 / 0.951 (s-implied 0.978)  rms z 1.04  32 clips TAILS
+  suite_tube                       F2   all       s 0.609 [0.572, 0.642]  cover 0.860 / 0.978 (s-implied 0.999)  rms z 0.86  64 clips FLAG TAILS
+  suite_tube                       F2   150-300   s 0.686 [0.631, 0.768]  cover 0.825 / 0.970 (s-implied 0.996)  rms z 0.85  26 clips FLAG TAILS
+  suite_tube                       F2   300-500   s 0.574 [0.509, 0.636]  cover 0.888 / 0.976 (s-implied 1.000)  rms z 1.01  31 clips FLAG TAILS
+  suite_tube                       F2   <150      s 0.578 [0.496, 0.646]  cover 0.872 / 0.983 (s-implied 0.999)  rms z 0.71  20 clips FLAG TAILS
+  suite_tube                       F2   >500      s 0.616 [0.550, 0.686]  cover 0.850 / 0.979 (s-implied 0.999)  rms z 0.85  32 clips FLAG TAILS
+  suite_tube                       F3   all       s 0.551 [0.495, 0.620]  cover 0.859 / 0.971 (s-implied 1.000)  rms z 0.92  64 clips FLAG TAILS
+  suite_tube                       F3   150-300   s 0.591 [0.430, 0.777]  cover 0.843 / 0.974 (s-implied 0.999)  rms z 0.92  26 clips FLAG TAILS
+  suite_tube                       F3   300-500   s 0.474 [0.404, 0.559]  cover 0.890 / 0.979 (s-implied 1.000)  rms z 0.85  31 clips FLAG TAILS
+  suite_tube                       F3   <150      s 0.512 [0.419, 0.679]  cover 0.864 / 0.969 (s-implied 1.000)  rms z 0.83  20 clips FLAG TAILS
+  suite_tube                       F3   >500      s 0.613 [0.518, 0.712]  cover 0.843 / 0.966 (s-implied 0.999)  rms z 1.01  32 clips FLAG TAILS
+  suite_tube                       F4   all       s 0.615 [0.549, 0.678]  cover 0.839 / 0.960 (s-implied 0.999)  rms z 1.52  62 clips FLAG TAILS
+  suite_tube                       F4   150-300   s 0.604 [0.512, 0.712]  cover 0.851 / 0.956 (s-implied 0.999)  rms z 1.71  26 clips FLAG TAILS
+  suite_tube                       F4   300-500   s 0.627 [0.502, 0.790]  cover 0.833 / 0.950 (s-implied 0.999)  rms z 1.33  30 clips FLAG TAILS
+  suite_tube                       F4   <150      s 0.467 [0.394, 0.554]  cover 0.900 / 0.977 (s-implied 1.000)  rms z 1.91  20 clips FLAG TAILS
+  suite_tube                       F4   >500      s 0.733 [0.662, 0.821]  cover 0.787 / 0.955 (s-implied 0.994)  rms z 1.11  31 clips FLAG TAILS
+  suite_tube                       B1   all       s 0.846 [0.755, 0.953]  cover 0.769 / 0.978 (s-implied 0.982)  rms z 0.85  64 clips FLAG
+  suite_tube                       B1   150-300   s 0.797 [0.585, 1.136]  cover 0.776 / 0.982 (s-implied 0.988)  rms z 0.82  26 clips
+  suite_tube                       B1   300-500   s 0.981 [0.777, 1.170]  cover 0.693 / 0.979 (s-implied 0.959)  rms z 0.94  31 clips
+  suite_tube                       B1   <150      s 0.725 [0.637, 0.813]  cover 0.865 / 0.989 (s-implied 0.994)  rms z 0.72  20 clips FLAG
+  suite_tube                       B1   >500      s 0.888 [0.743, 1.067]  cover 0.748 / 0.969 (s-implied 0.976)  rms z 0.89  32 clips
+  suite_tube                       B2   all       s 0.905 [0.841, 0.978]  cover 0.729 / 0.968 (s-implied 0.973)  rms z 0.93  64 clips
+  suite_tube                       B2   150-300   s 0.999 [0.807, 1.174]  cover 0.683 / 0.965 (s-implied 0.955)  rms z 0.97  26 clips
+  suite_tube                       B2   300-500   s 0.900 [0.807, 0.998]  cover 0.737 / 0.968 (s-implied 0.974)  rms z 0.91  31 clips
+  suite_tube                       B2   <150      s 0.843 [0.711, 0.961]  cover 0.769 / 0.989 (s-implied 0.982)  rms z 0.84  20 clips FLAG
+  suite_tube                       B2   >500      s 0.926 [0.786, 1.071]  cover 0.719 / 0.955 (s-implied 0.969)  rms z 0.98  32 clips
+  suite_tube                       B3   all       s 0.952 [0.872, 1.042]  cover 0.706 / 0.945 (s-implied 0.964)  rms z 1.05  64 clips TAILS
+  suite_tube                       B3   150-300   s 0.906 [0.768, 1.126]  cover 0.725 / 0.960 (s-implied 0.973)  rms z 0.95  26 clips
+  suite_tube                       B3   300-500   s 0.932 [0.749, 1.129]  cover 0.716 / 0.954 (s-implied 0.968)  rms z 1.02  31 clips
+  suite_tube                       B3   <150      s 0.950 [0.806, 1.219]  cover 0.707 / 0.936 (s-implied 0.965)  rms z 1.07  20 clips
+  suite_tube                       B3   >500      s 0.987 [0.880, 1.084]  cover 0.689 / 0.938 (s-implied 0.957)  rms z 1.11  32 clips
+  suite_tube                       B4   all       s 0.951 [0.873, 1.040]  cover 0.704 / 0.953 (s-implied 0.965)  rms z 1.02  62 clips
+  suite_tube                       B4   150-300   s 0.937 [0.810, 1.135]  cover 0.711 / 0.967 (s-implied 0.967)  rms z 1.01  26 clips
+  suite_tube                       B4   300-500   s 0.938 [0.772, 1.141]  cover 0.703 / 0.951 (s-implied 0.967)  rms z 1.00  30 clips
+  suite_tube                       B4   <150      s 0.984 [0.857, 1.109]  cover 0.690 / 0.942 (s-implied 0.958)  rms z 1.06  20 clips
+  suite_tube                       B4   >500      s 0.936 [0.804, 1.055]  cover 0.712 / 0.955 (s-implied 0.967)  rms z 1.01  31 clips
+  suite_tube                       voicing   ECE 0.001
+  suite_tube                       sonorant  ECE 0.016
+  suite_whisper                    F1   all       s 0.722 [0.683, 0.765]  cover 0.818 / 0.976 (s-implied 0.994)  rms z 0.89  64 clips FLAG TAILS
+  suite_whisper                    F1   unvoiced  s 0.722 [0.682, 0.764]  cover 0.818 / 0.976 (s-implied 0.994)  rms z 0.89  64 clips FLAG TAILS
+  suite_whisper                    F2   all       s 0.593 [0.552, 0.636]  cover 0.861 / 0.977 (s-implied 0.999)  rms z 0.83  64 clips FLAG TAILS
+  suite_whisper                    F2   unvoiced  s 0.593 [0.554, 0.639]  cover 0.861 / 0.977 (s-implied 0.999)  rms z 0.83  64 clips FLAG TAILS
+  suite_whisper                    F3   all       s 0.685 [0.637, 0.738]  cover 0.825 / 0.964 (s-implied 0.996)  rms z 0.95  64 clips FLAG TAILS
+  suite_whisper                    F3   unvoiced  s 0.685 [0.635, 0.740]  cover 0.825 / 0.964 (s-implied 0.996)  rms z 0.95  64 clips FLAG TAILS
+  suite_whisper                    F4   all       s 0.716 [0.670, 0.770]  cover 0.814 / 0.959 (s-implied 0.995)  rms z 1.22  64 clips FLAG TAILS
+  suite_whisper                    F4   unvoiced  s 0.716 [0.667, 0.766]  cover 0.814 / 0.959 (s-implied 0.995)  rms z 1.22  64 clips FLAG TAILS
+  suite_whisper                    B1   all       s 1.087 [1.019, 1.145]  cover 0.636 / 0.975 (s-implied 0.934)  rms z 0.99  64 clips TAILS
+  suite_whisper                    B1   unvoiced  s 1.087 [1.021, 1.149]  cover 0.636 / 0.975 (s-implied 0.934)  rms z 0.99  64 clips TAILS
+  suite_whisper                    B2   all       s 1.017 [0.951, 1.087]  cover 0.674 / 0.971 (s-implied 0.951)  rms z 0.97  64 clips TAILS
+  suite_whisper                    B2   unvoiced  s 1.017 [0.946, 1.092]  cover 0.674 / 0.971 (s-implied 0.951)  rms z 0.97  64 clips TAILS
+  suite_whisper                    B3   all       s 1.020 [0.965, 1.078]  cover 0.671 / 0.967 (s-implied 0.950)  rms z 0.98  64 clips TAILS
+  suite_whisper                    B3   unvoiced  s 1.020 [0.964, 1.082]  cover 0.671 / 0.967 (s-implied 0.950)  rms z 0.98  64 clips TAILS
+  suite_whisper                    B4   all       s 0.942 [0.885, 1.008]  cover 0.711 / 0.957 (s-implied 0.966)  rms z 0.98  64 clips
+  suite_whisper                    B4   unvoiced  s 0.942 [0.889, 1.008]  cover 0.711 / 0.957 (s-implied 0.966)  rms z 0.98  64 clips
+  suite_whisper                    voicing   ECE 0.000
+  suite_whisper                    sonorant  ECE 0.002
+  suite_wide_vibrato               F1   all       s 0.758 [0.714, 0.806]  cover 0.807 / 0.967 (s-implied 0.992)  rms z 0.91  64 clips FLAG TAILS
+  suite_wide_vibrato               F1   150-300   s 0.703 [0.618, 0.798]  cover 0.842 / 0.975 (s-implied 0.996)  rms z 0.78  28 clips FLAG TAILS
+  suite_wide_vibrato               F1   300-500   s 0.722 [0.667, 0.776]  cover 0.835 / 0.989 (s-implied 0.994)  rms z 0.77  36 clips FLAG
+  suite_wide_vibrato               F1   >500      s 0.794 [0.681, 0.915]  cover 0.786 / 0.948 (s-implied 0.988)  rms z 1.00  38 clips FLAG TAILS
+  suite_wide_vibrato               F2   all       s 0.622 [0.590, 0.662]  cover 0.847 / 0.978 (s-implied 0.999)  rms z 0.86  64 clips FLAG TAILS
+  suite_wide_vibrato               F2   150-300   s 0.578 [0.504, 0.663]  cover 0.844 / 0.972 (s-implied 0.999)  rms z 0.97  28 clips FLAG TAILS
+  suite_wide_vibrato               F2   300-500   s 0.621 [0.556, 0.695]  cover 0.847 / 0.969 (s-implied 0.999)  rms z 0.91  36 clips FLAG TAILS
+  suite_wide_vibrato               F2   >500      s 0.678 [0.617, 0.754]  cover 0.831 / 0.985 (s-implied 0.997)  rms z 0.78  38 clips FLAG TAILS
+  suite_wide_vibrato               F3   all       s 0.665 [0.626, 0.709]  cover 0.847 / 0.974 (s-implied 0.997)  rms z 0.88  64 clips FLAG TAILS
+  suite_wide_vibrato               F3   150-300   s 0.667 [0.617, 0.753]  cover 0.848 / 0.971 (s-implied 0.997)  rms z 0.88  28 clips FLAG TAILS
+  suite_wide_vibrato               F3   300-500   s 0.609 [0.544, 0.691]  cover 0.860 / 0.979 (s-implied 0.999)  rms z 0.96  36 clips FLAG TAILS
+  suite_wide_vibrato               F3   >500      s 0.743 [0.682, 0.806]  cover 0.821 / 0.973 (s-implied 0.993)  rms z 0.81  38 clips FLAG TAILS
+  suite_wide_vibrato               F4   all       s 0.682 [0.635, 0.725]  cover 0.830 / 0.972 (s-implied 0.997)  rms z 0.84  64 clips FLAG TAILS
+  suite_wide_vibrato               F4   150-300   s 0.690 [0.604, 0.790]  cover 0.815 / 0.980 (s-implied 0.996)  rms z 0.85  28 clips FLAG TAILS
+  suite_wide_vibrato               F4   300-500   s 0.675 [0.611, 0.755]  cover 0.832 / 0.963 (s-implied 0.997)  rms z 0.89  36 clips FLAG TAILS
+  suite_wide_vibrato               F4   >500      s 0.764 [0.698, 0.851]  cover 0.802 / 0.967 (s-implied 0.991)  rms z 0.86  38 clips FLAG TAILS
+  suite_wide_vibrato               B1   all       s 1.141 [1.085, 1.203]  cover 0.601 / 0.956 (s-implied 0.920)  rms z 1.07  64 clips TAILS
+  suite_wide_vibrato               B1   150-300   s 1.185 [1.062, 1.294]  cover 0.592 / 0.940 (s-implied 0.908)  rms z 1.10  28 clips FLAG
+  suite_wide_vibrato               B1   300-500   s 1.149 [1.074, 1.247]  cover 0.584 / 0.958 (s-implied 0.918)  rms z 1.07  36 clips TAILS
+  suite_wide_vibrato               B1   >500      s 1.101 [1.003, 1.205]  cover 0.623 / 0.968 (s-implied 0.931)  rms z 1.03  38 clips TAILS
+  suite_wide_vibrato               B2   all       s 1.095 [1.034, 1.156]  cover 0.639 / 0.959 (s-implied 0.932)  rms z 1.03  64 clips TAILS
+  suite_wide_vibrato               B2   150-300   s 1.084 [0.957, 1.194]  cover 0.646 / 0.941 (s-implied 0.935)  rms z 1.05  28 clips
+  suite_wide_vibrato               B2   300-500   s 1.082 [0.985, 1.198]  cover 0.644 / 0.962 (s-implied 0.936)  rms z 1.02  36 clips
+  suite_wide_vibrato               B2   >500      s 1.085 [0.959, 1.209]  cover 0.647 / 0.960 (s-implied 0.935)  rms z 1.03  38 clips TAILS
+  suite_wide_vibrato               B3   all       s 1.031 [0.969, 1.092]  cover 0.666 / 0.947 (s-implied 0.948)  rms z 1.04  64 clips
+  suite_wide_vibrato               B3   150-300   s 0.981 [0.875, 1.096]  cover 0.689 / 0.966 (s-implied 0.959)  rms z 0.94  28 clips
+  suite_wide_vibrato               B3   300-500   s 1.019 [0.892, 1.155]  cover 0.673 / 0.949 (s-implied 0.950)  rms z 1.03  36 clips
+  suite_wide_vibrato               B3   >500      s 0.998 [0.895, 1.085]  cover 0.684 / 0.944 (s-implied 0.955)  rms z 1.04  38 clips
+  suite_wide_vibrato               B4   all       s 1.078 [1.006, 1.151]  cover 0.643 / 0.955 (s-implied 0.936)  rms z 1.04  64 clips TAILS
+  suite_wide_vibrato               B4   150-300   s 1.138 [0.996, 1.328]  cover 0.595 / 0.958 (s-implied 0.921)  rms z 1.08  28 clips
+  suite_wide_vibrato               B4   300-500   s 1.027 [0.882, 1.173]  cover 0.671 / 0.935 (s-implied 0.948)  rms z 1.04  36 clips
+  suite_wide_vibrato               B4   >500      s 1.091 [1.006, 1.185]  cover 0.630 / 0.963 (s-implied 0.933)  rms z 1.04  38 clips TAILS
+  suite_wide_vibrato               voicing   ECE 0.001
+  suite_wide_vibrato               sonorant  ECE 0.018
+  train_v2_val                     F1   all       s 0.853 [0.829, 0.878]  cover 0.750 / 0.959 (s-implied 0.981)  rms z 0.94  512 clips FLAG TAILS
+  train_v2_val                     F1   150-300   s 0.816 [0.775, 0.863]  cover 0.767 / 0.962 (s-implied 0.986)  rms z 0.92  221 clips FLAG TAILS
+  train_v2_val                     F1   300-500   s 0.871 [0.823, 0.927]  cover 0.747 / 0.961 (s-implied 0.978)  rms z 0.94  189 clips TAILS
+  train_v2_val                     F1   <150      s 0.828 [0.786, 0.875]  cover 0.762 / 0.959 (s-implied 0.984)  rms z 0.95  174 clips FLAG TAILS
+  train_v2_val                     F1   >500      s 0.875 [0.831, 0.924]  cover 0.739 / 0.957 (s-implied 0.978)  rms z 0.95  184 clips TAILS
+  train_v2_val                     F1   unvoiced  s 0.906 [0.833, 0.982]  cover 0.724 / 0.956 (s-implied 0.973)  rms z 0.99  340 clips TAILS
+  train_v2_val                     F2   all       s 0.724 [0.705, 0.744]  cover 0.805 / 0.964 (s-implied 0.994)  rms z 1.01  512 clips FLAG TAILS
+  train_v2_val                     F2   150-300   s 0.750 [0.709, 0.792]  cover 0.791 / 0.960 (s-implied 0.992)  rms z 1.06  220 clips FLAG TAILS
+  train_v2_val                     F2   300-500   s 0.736 [0.699, 0.775]  cover 0.804 / 0.965 (s-implied 0.993)  rms z 0.99  189 clips FLAG TAILS
+  train_v2_val                     F2   <150      s 0.642 [0.605, 0.686]  cover 0.831 / 0.969 (s-implied 0.998)  rms z 0.87  174 clips FLAG TAILS
+  train_v2_val                     F2   >500      s 0.779 [0.742, 0.810]  cover 0.784 / 0.960 (s-implied 0.990)  rms z 1.13  184 clips FLAG TAILS
+  train_v2_val                     F2   unvoiced  s 0.706 [0.654, 0.770]  cover 0.814 / 0.967 (s-implied 0.995)  rms z 0.95  340 clips FLAG TAILS
+  train_v2_val                     F3   all       s 0.688 [0.664, 0.712]  cover 0.815 / 0.961 (s-implied 0.996)  rms z 1.34  512 clips FLAG TAILS
+  train_v2_val                     F3   150-300   s 0.655 [0.615, 0.701]  cover 0.830 / 0.962 (s-implied 0.998)  rms z 1.96  221 clips FLAG TAILS
+  train_v2_val                     F3   300-500   s 0.759 [0.693, 0.824]  cover 0.782 / 0.949 (s-implied 0.992)  rms z 1.11  189 clips FLAG TAILS
+  train_v2_val                     F3   <150      s 0.627 [0.589, 0.665]  cover 0.838 / 0.968 (s-implied 0.999)  rms z 0.93  174 clips FLAG TAILS
+  train_v2_val                     F3   >500      s 0.759 [0.710, 0.809]  cover 0.786 / 0.955 (s-implied 0.992)  rms z 1.42  184 clips FLAG TAILS
+  train_v2_val                     F3   unvoiced  s 0.618 [0.576, 0.675]  cover 0.854 / 0.974 (s-implied 0.999)  rms z 0.90  339 clips FLAG TAILS
+  train_v2_val                     F4   all       s 0.727 [0.704, 0.751]  cover 0.802 / 0.959 (s-implied 0.994)  rms z 1.16  512 clips FLAG TAILS
+  train_v2_val                     F4   150-300   s 0.711 [0.666, 0.753]  cover 0.814 / 0.961 (s-implied 0.995)  rms z 1.29  221 clips FLAG TAILS
+  train_v2_val                     F4   300-500   s 0.788 [0.740, 0.847]  cover 0.770 / 0.949 (s-implied 0.989)  rms z 1.23  189 clips FLAG TAILS
+  train_v2_val                     F4   <150      s 0.648 [0.608, 0.688]  cover 0.839 / 0.968 (s-implied 0.998)  rms z 1.01  174 clips FLAG TAILS
+  train_v2_val                     F4   >500      s 0.801 [0.751, 0.849]  cover 0.771 / 0.953 (s-implied 0.988)  rms z 1.16  184 clips FLAG TAILS
+  train_v2_val                     F4   unvoiced  s 0.686 [0.636, 0.757]  cover 0.813 / 0.960 (s-implied 0.996)  rms z 1.10  339 clips FLAG TAILS
+  train_v2_val                     B1   all       s 0.975 [0.934, 1.015]  cover 0.695 / 0.969 (s-implied 0.960)  rms z 0.96  512 clips
+  train_v2_val                     B1   150-300   s 1.000 [0.943, 1.059]  cover 0.682 / 0.971 (s-implied 0.954)  rms z 0.96  221 clips TAILS
+  train_v2_val                     B1   300-500   s 0.907 [0.833, 0.986]  cover 0.730 / 0.971 (s-implied 0.972)  rms z 0.91  189 clips
+  train_v2_val                     B1   <150      s 1.031 [0.949, 1.101]  cover 0.668 / 0.971 (s-implied 0.948)  rms z 0.98  174 clips TAILS
+  train_v2_val                     B1   >500      s 0.933 [0.864, 0.997]  cover 0.717 / 0.975 (s-implied 0.968)  rms z 0.92  184 clips
+  train_v2_val                     B1   unvoiced  s 1.024 [0.908, 1.158]  cover 0.672 / 0.939 (s-implied 0.949)  rms z 1.10  340 clips
+  train_v2_val                     B2   all       s 0.988 [0.957, 1.020]  cover 0.689 / 0.957 (s-implied 0.957)  rms z 1.00  512 clips
+  train_v2_val                     B2   150-300   s 0.971 [0.921, 1.025]  cover 0.697 / 0.967 (s-implied 0.961)  rms z 0.96  221 clips
+  train_v2_val                     B2   300-500   s 0.943 [0.891, 0.998]  cover 0.714 / 0.963 (s-implied 0.966)  rms z 0.95  189 clips
+  train_v2_val                     B2   <150      s 1.019 [0.965, 1.080]  cover 0.673 / 0.951 (s-implied 0.950)  rms z 1.03  174 clips
+  train_v2_val                     B2   >500      s 0.990 [0.934, 1.053]  cover 0.687 / 0.963 (s-implied 0.957)  rms z 0.98  184 clips
+  train_v2_val                     B2   unvoiced  s 1.032 [0.926, 1.135]  cover 0.670 / 0.928 (s-implied 0.947)  rms z 1.17  340 clips
+  train_v2_val                     B3   all       s 0.979 [0.946, 1.010]  cover 0.694 / 0.956 (s-implied 0.959)  rms z 1.00  512 clips
+  train_v2_val                     B3   150-300   s 0.961 [0.907, 1.019]  cover 0.701 / 0.958 (s-implied 0.963)  rms z 0.99  221 clips
+  train_v2_val                     B3   300-500   s 0.956 [0.881, 1.034]  cover 0.704 / 0.959 (s-implied 0.964)  rms z 0.96  189 clips
+  train_v2_val                     B3   <150      s 1.016 [0.962, 1.076]  cover 0.675 / 0.957 (s-implied 0.951)  rms z 1.01  174 clips
+  train_v2_val                     B3   >500      s 0.966 [0.905, 1.024]  cover 0.702 / 0.958 (s-implied 0.962)  rms z 0.98  184 clips
+  train_v2_val                     B3   unvoiced  s 0.992 [0.904, 1.089]  cover 0.687 / 0.942 (s-implied 0.956)  rms z 1.14  340 clips
+  train_v2_val                     B4   all       s 1.008 [0.973, 1.044]  cover 0.679 / 0.954 (s-implied 0.953)  rms z 1.03  512 clips
+  train_v2_val                     B4   150-300   s 0.988 [0.925, 1.070]  cover 0.688 / 0.951 (s-implied 0.957)  rms z 1.01  221 clips
+  train_v2_val                     B4   300-500   s 0.995 [0.926, 1.064]  cover 0.685 / 0.966 (s-implied 0.955)  rms z 0.97  189 clips
+  train_v2_val                     B4   <150      s 1.045 [0.983, 1.112]  cover 0.662 / 0.953 (s-implied 0.944)  rms z 1.03  174 clips
+  train_v2_val                     B4   >500      s 0.982 [0.891, 1.068]  cover 0.691 / 0.954 (s-implied 0.958)  rms z 1.00  184 clips
+  train_v2_val                     B4   unvoiced  s 1.030 [0.946, 1.118]  cover 0.665 / 0.939 (s-implied 0.948)  rms z 1.19  340 clips
+  train_v2_val                     VTL  all       s 0.751 [0.661, 0.853]  cover 0.805 / 0.982 (s-implied 0.992)  rms z 0.79  146 clips FLAG
+  train_v2_val                     VTL  150-300   s 0.764 [0.541, 1.000]  cover 0.791 / 0.989 (s-implied 0.991)  rms z 0.79  67 clips
+  train_v2_val                     VTL  300-500   s 0.778 [0.625, 0.986]  cover 0.795 / 0.974 (s-implied 0.990)  rms z 0.83  52 clips FLAG
+  train_v2_val                     VTL  <150      s 0.869 [0.680, 1.105]  cover 0.743 / 0.966 (s-implied 0.979)  rms z 0.89  49 clips
+  train_v2_val                     VTL  >500      s 0.685 [0.581, 0.838]  cover 0.850 / 0.992 (s-implied 0.996)  rms z 0.71  53 clips FLAG
+  train_v2_val                     VTL  unvoiced  s 0.654 [0.523, 0.807]  cover 0.891 / 0.997 (s-implied 0.998)  rms z 0.63  97 clips FLAG
+  train_v2_val                     voicing   ECE 0.001
+  train_v2_val                     sonorant  ECE 0.001
+
+FLAGS (d040_5b_s2_b20k, deciding): 
+  resynth_vocalset_val_d16k F1 all: TAILS  (this seed only)
+  resynth_vocalset_val_d16k F1 150-300: FLAG TAILS
+  resynth_vocalset_val_d16k F1 300-500: TAILS
+  resynth_vocalset_val_d16k F1 <150: TAILS  (this seed only)
+  resynth_vocalset_val_d16k F1 >500: TAILS
+  resynth_vocalset_val_d16k F1 unvoiced: FLAG TAILS  (this seed only)
+  resynth_vocalset_val_d16k F2 all: FLAG TAILS
+  resynth_vocalset_val_d16k F2 150-300: FLAG TAILS
+  resynth_vocalset_val_d16k F2 300-500: FLAG TAILS
+  resynth_vocalset_val_d16k F2 <150: FLAG TAILS
+  resynth_vocalset_val_d16k F2 >500: FLAG TAILS
+  resynth_vocalset_val_d16k F2 unvoiced: FLAG TAILS
+  resynth_vocalset_val_d16k F3 all: TAILS
+  resynth_vocalset_val_d16k F3 150-300: TAILS  (this seed only)
+  resynth_vocalset_val_d16k F3 300-500: TAILS
+  resynth_vocalset_val_d16k F3 <150: FLAG TAILS  (this seed only)
+  resynth_vocalset_val_d16k F3 >500: TAILS
+  resynth_vocalset_val_d16k F3 unvoiced: TAILS
+  resynth_vocalset_val_d16k F4 all: TAILS  (this seed only)
+  resynth_vocalset_val_d16k F4 150-300: TAILS  (this seed only)
+  resynth_vocalset_val_d16k F4 300-500: TAILS
+  resynth_vocalset_val_d16k F4 <150: FLAG TAILS
+  resynth_vocalset_val_d16k F4 >500: TAILS
+  resynth_vocalset_val_d16k F4 unvoiced: TAILS
+  resynth_vocalset_val_d16k B1 all: TAILS
+  resynth_vocalset_val_d16k B1 300-500: FLAG TAILS
+  resynth_vocalset_val_d16k B1 >500: TAILS  (this seed only)
+  resynth_vocalset_val_d16k B2 300-500: FLAG  (this seed only)
+  resynth_vocalset_val_d16k B3 300-500: FLAG  (this seed only)
+  resynth_vocalset_val_d16k B3 <150: FLAG TAILS  (this seed only)
+  resynth_vocalset_val_d16k B3 >500: TAILS  (this seed only)
+  resynth_vocalset_val_d16k B3 unvoiced: FLAG  (this seed only)
+  resynth_vocalset_val_d16k B4 150-300: TAILS  (this seed only)
+  resynth_vocalset_val_d16k B4 <150: FLAG
+  resynth_zeroth_korean_val_d16k F1 all: TAILS
+  resynth_zeroth_korean_val_d16k F1 150-300: TAILS
+  resynth_zeroth_korean_val_d16k F1 300-500: TAILS
+  resynth_zeroth_korean_val_d16k F1 <150: TAILS
+  resynth_zeroth_korean_val_d16k F1 unvoiced: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F2 all: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F2 150-300: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F2 300-500: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F2 <150: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F2 unvoiced: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F3 all: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F3 150-300: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F3 300-500: FLAG TAILS  (this seed only)
+  resynth_zeroth_korean_val_d16k F3 <150: FLAG TAILS
+  resynth_zeroth_korean_val_d16k F3 unvoiced: TAILS
+  resynth_zeroth_korean_val_d16k F4 all: TAILS
+  resynth_zeroth_korean_val_d16k F4 150-300: TAILS
+  resynth_zeroth_korean_val_d16k F4 300-500: TAILS  (this seed only)
+  resynth_zeroth_korean_val_d16k F4 <150: FLAG TAILS  (this seed only)
+  resynth_zeroth_korean_val_d16k F4 unvoiced: TAILS
+  resynth_zeroth_korean_val_d16k B1 <150: FLAG  (this seed only)
+  resynth_zeroth_korean_val_d16k B2 150-300: FLAG  (this seed only)
+  resynth_zeroth_korean_val_d16k B3 <150: TAILS
+  resynth_zeroth_korean_val_d16k B4 <150: TAILS  (this seed only)
+  suite_adult_high_f0 F1 all: FLAG TAILS
+  suite_adult_high_f0 F1 150-300: FLAG TAILS
+  suite_adult_high_f0 F1 300-500: FLAG  (this seed only)
+  suite_adult_high_f0 F2 all: FLAG TAILS
+  suite_adult_high_f0 F2 150-300: FLAG TAILS
+  suite_adult_high_f0 F2 300-500: FLAG TAILS
+  suite_adult_high_f0 F2 <150: FLAG TAILS
+  suite_adult_high_f0 F3 all: FLAG TAILS
+  suite_adult_high_f0 F3 150-300: FLAG TAILS
+  suite_adult_high_f0 F3 300-500: TAILS  (this seed only)
+  suite_adult_high_f0 F3 <150: FLAG TAILS
+  suite_adult_high_f0 F4 all: FLAG TAILS
+  suite_adult_high_f0 F4 150-300: FLAG TAILS
+  suite_adult_high_f0 F4 300-500: FLAG  (this seed only)
+  suite_adult_high_f0 F4 <150: FLAG TAILS
+  suite_adult_high_f0 B1 all: TAILS  (this seed only)
+  suite_adult_high_f0 B1 150-300: TAILS  (this seed only)
+  suite_adult_high_f0 B1 <150: FLAG TAILS  (this seed only)
+  suite_adult_high_f0 B2 all: TAILS  (this seed only)
+  suite_adult_high_f0 B2 150-300: TAILS  (this seed only)
+  suite_breathy F1 all: FLAG TAILS
+  suite_breathy F1 150-300: FLAG
+  suite_breathy F1 300-500: FLAG TAILS  (this seed only)
+  suite_breathy F1 <150: FLAG TAILS
+  suite_breathy F2 all: FLAG TAILS
+  suite_breathy F2 150-300: FLAG TAILS
+  suite_breathy F2 300-500: FLAG TAILS
+  suite_breathy F2 <150: FLAG TAILS
+  suite_breathy F2 >500: FLAG TAILS
+  suite_breathy F3 all: FLAG TAILS
+  suite_breathy F3 150-300: FLAG TAILS
+  suite_breathy F3 300-500: FLAG TAILS
+  suite_breathy F3 <150: FLAG TAILS
+  suite_breathy F3 >500: FLAG TAILS
+  suite_breathy F4 all: FLAG TAILS
+  suite_breathy F4 150-300: FLAG TAILS
+  suite_breathy F4 300-500: FLAG  (this seed only)
+  suite_breathy F4 <150: FLAG TAILS
+  suite_breathy F4 >500: FLAG TAILS
+  suite_breathy B1 all: TAILS  (this seed only)
+  suite_breathy B1 <150: FLAG TAILS
+  suite_breathy B1 >500: TAILS  (this seed only)
+  suite_breathy B2 all: TAILS
+  suite_breathy B2 >500: FLAG TAILS
+  suite_breathy B3 all: TAILS  (this seed only)
+  suite_breathy B3 <150: TAILS  (this seed only)
+  suite_breathy B3 >500: FLAG TAILS  (this seed only)
+  suite_breathy B4 all: TAILS  (this seed only)
+  suite_breathy B4 >500: FLAG TAILS  (this seed only)
+  suite_codec F1 all: FLAG TAILS
+  suite_codec F1 150-300: FLAG TAILS  (this seed only)
+  suite_codec F1 300-500: FLAG TAILS  (this seed only)
+  suite_codec F1 <150: FLAG TAILS
+  suite_codec F1 >500: FLAG TAILS  (this seed only)
+  suite_codec F2 all: FLAG TAILS
+  suite_codec F2 150-300: FLAG TAILS
+  suite_codec F2 300-500: FLAG TAILS
+  suite_codec F2 <150: FLAG TAILS
+  suite_codec F2 >500: FLAG TAILS
+  suite_codec F3 all: FLAG TAILS
+  suite_codec F3 150-300: FLAG TAILS
+  suite_codec F3 300-500: FLAG TAILS
+  suite_codec F3 <150: FLAG TAILS
+  suite_codec F3 >500: FLAG TAILS
+  suite_codec F4 all: FLAG TAILS
+  suite_codec F4 150-300: FLAG
+  suite_codec F4 300-500: FLAG
+  suite_codec F4 <150: FLAG TAILS
+  suite_codec F4 >500: FLAG TAILS  (this seed only)
+  suite_codec B1 all: TAILS
+  suite_codec B1 150-300: FLAG TAILS  (this seed only)
+  suite_codec B1 <150: TAILS
+  suite_codec B1 >500: TAILS
+  suite_codec B2 <150: FLAG TAILS  (this seed only)
+  suite_codec B3 all: TAILS
+  suite_codec B3 300-500: TAILS
+  suite_codec B3 <150: FLAG TAILS  (this seed only)
+  suite_codec B4 all: TAILS
+  suite_codec B4 >500: TAILS  (this seed only)
+  suite_f1_near_h1 F1 all: FLAG
+  suite_f1_near_h1 F1 150-300: FLAG
+  suite_f1_near_h1 F1 300-500: TAILS  (this seed only)
+  suite_f1_near_h1 F1 >500: TAILS  (this seed only)
+  suite_f1_near_h1 F2 all: FLAG TAILS
+  suite_f1_near_h1 F2 150-300: FLAG TAILS
+  suite_f1_near_h1 F2 300-500: FLAG TAILS
+  suite_f1_near_h1 F2 >500: FLAG TAILS
+  suite_f1_near_h1 F3 all: FLAG TAILS
+  suite_f1_near_h1 F3 150-300: FLAG TAILS
+  suite_f1_near_h1 F3 300-500: FLAG TAILS
+  suite_f1_near_h1 F3 >500: FLAG TAILS
+  suite_f1_near_h1 F4 all: FLAG TAILS
+  suite_f1_near_h1 F4 150-300: FLAG TAILS
+  suite_f1_near_h1 F4 300-500: FLAG TAILS
+  suite_f1_near_h1 F4 >500: FLAG TAILS
+  suite_f1_near_h1 B1 all: FLAG
+  suite_f1_near_h1 B1 150-300: FLAG
+  suite_f1_near_h1 B1 300-500: FLAG TAILS  (this seed only)
+  suite_f1_near_h1 B1 >500: TAILS  (this seed only)
+  suite_f1_near_h1 B2 all: TAILS  (this seed only)
+  suite_f1_near_h1 B2 150-300: TAILS  (this seed only)
+  suite_f1_near_h1 B2 300-500: TAILS  (this seed only)
+  suite_f1_near_h1 B4 all: TAILS  (this seed only)
+  suite_f1_near_h1 B4 150-300: TAILS  (this seed only)
+  suite_f1_near_h1 B4 >500: TAILS
+  suite_f1_near_h2 F1 all: FLAG
+  suite_f1_near_h2 F1 150-300: FLAG TAILS  (this seed only)
+  suite_f1_near_h2 F1 300-500: FLAG TAILS  (this seed only)
+  suite_f1_near_h2 F1 <150: FLAG
+  suite_f1_near_h2 F1 >500: FLAG  (this seed only)
+  suite_f1_near_h2 F2 all: TAILS
+  suite_f1_near_h2 F2 150-300: FLAG TAILS
+  suite_f1_near_h2 F2 300-500: FLAG TAILS
+  suite_f1_near_h2 F2 <150: FLAG TAILS
+  suite_f1_near_h2 F2 >500: FLAG
+  suite_f1_near_h2 F3 all: TAILS
+  suite_f1_near_h2 F3 150-300: FLAG TAILS
+  suite_f1_near_h2 F3 300-500: FLAG TAILS
+  suite_f1_near_h2 F3 <150: FLAG TAILS  (this seed only)
+  suite_f1_near_h2 F3 >500: FLAG
+  suite_f1_near_h2 F4 all: TAILS
+  suite_f1_near_h2 F4 150-300: FLAG TAILS
+  suite_f1_near_h2 F4 300-500: FLAG TAILS
+  suite_f1_near_h2 F4 <150: FLAG TAILS
+  suite_f1_near_h2 F4 >500: FLAG
+  suite_f1_near_h2 B1 all: FLAG
+  suite_f1_near_h2 B1 150-300: TAILS  (this seed only)
+  suite_f1_near_h2 B1 300-500: FLAG TAILS
+  suite_f1_near_h2 B1 <150: FLAG
+  suite_f1_near_h2 B1 >500: FLAG
+  suite_f1_near_h2 B2 >500: FLAG
+  suite_f1_near_h2 B3 all: FLAG TAILS
+  suite_f1_near_h2 B3 >500: FLAG
+  suite_f1_near_h2 B4 all: FLAG
+  suite_f1_near_h2 B4 >500: FLAG
+  suite_f2_f3_close F1 all: FLAG TAILS
+  suite_f2_f3_close F1 150-300: FLAG TAILS
+  suite_f2_f3_close F1 300-500: FLAG TAILS
+  suite_f2_f3_close F1 >500: FLAG TAILS
+  suite_f2_f3_close F2 all: TAILS
+  suite_f2_f3_close F2 150-300: FLAG TAILS
+  suite_f2_f3_close F2 300-500: FLAG TAILS  (this seed only)
+  suite_f2_f3_close F2 >500: TAILS
+  suite_f2_f3_close F3 all: FLAG TAILS
+  suite_f2_f3_close F3 150-300: FLAG TAILS
+  suite_f2_f3_close F3 300-500: TAILS
+  suite_f2_f3_close F3 >500: TAILS
+  suite_f2_f3_close F4 all: FLAG TAILS
+  suite_f2_f3_close F4 150-300: FLAG TAILS
+  suite_f2_f3_close F4 300-500: FLAG TAILS  (this seed only)
+  suite_f2_f3_close F4 >500: FLAG TAILS  (this seed only)
+  suite_f2_f3_close B1 all: TAILS
+  suite_f2_f3_close B1 >500: TAILS  (this seed only)
+  suite_f2_f3_close B2 all: FLAG
+  suite_f2_f3_close B2 150-300: FLAG  (this seed only)
+  suite_f2_f3_close B2 300-500: FLAG
+  suite_f2_f3_close B3 all: FLAG
+  suite_f2_f3_close B3 150-300: FLAG
+  suite_f2_f3_close B3 300-500: FLAG
+  suite_f2_f3_close B3 >500: FLAG
+  suite_high_f0 F1 all: FLAG TAILS
+  suite_high_f0 F1 300-500: FLAG TAILS
+  suite_high_f0 F1 >500: FLAG TAILS
+  suite_high_f0 F2 all: FLAG TAILS
+  suite_high_f0 F2 300-500: FLAG TAILS
+  suite_high_f0 F2 >500: FLAG TAILS
+  suite_high_f0 F3 all: FLAG TAILS
+  suite_high_f0 F3 300-500: FLAG TAILS
+  suite_high_f0 F3 >500: FLAG TAILS
+  suite_high_f0 F4 all: FLAG TAILS
+  suite_high_f0 F4 300-500: FLAG TAILS
+  suite_high_f0 F4 >500: FLAG TAILS
+  suite_high_f0 B1 all: TAILS  (this seed only)
+  suite_high_f0 B1 >500: TAILS  (this seed only)
+  suite_high_f0 B2 all: TAILS  (this seed only)
+  suite_high_f0 B2 >500: TAILS
+  suite_high_f0 B3 all: TAILS  (this seed only)
+  suite_high_f0 B3 >500: TAILS  (this seed only)
+  suite_high_f0 B4 all: TAILS
+  suite_high_f0 B4 >500: TAILS
+  suite_low_snr F1 all: FLAG TAILS
+  suite_low_snr F1 150-300: FLAG TAILS  (this seed only)
+  suite_low_snr F1 300-500: FLAG  (this seed only)
+  suite_low_snr F1 >500: FLAG TAILS  (this seed only)
+  suite_low_snr F2 all: FLAG TAILS
+  suite_low_snr F2 150-300: FLAG TAILS
+  suite_low_snr F2 300-500: FLAG TAILS
+  suite_low_snr F2 >500: FLAG TAILS
+  suite_low_snr F3 all: TAILS
+  suite_low_snr F3 >500: TAILS
+  suite_low_snr F4 all: TAILS
+  suite_low_snr F4 300-500: FLAG TAILS
+  suite_low_snr B1 all: TAILS
+  suite_low_snr B1 150-300: FLAG TAILS
+  suite_low_snr B1 300-500: FLAG TAILS  (this seed only)
+  suite_low_snr B2 all: FLAG TAILS  (this seed only)
+  suite_low_snr B2 >500: FLAG  (this seed only)
+  suite_low_snr B3 all: TAILS  (this seed only)
+  suite_low_snr B3 300-500: TAILS  (this seed only)
+  suite_low_snr B4 all: TAILS
+  suite_low_snr B4 150-300: TAILS  (this seed only)
+  suite_low_snr B4 >500: TAILS
+  suite_nasal F1 all: FLAG TAILS  (this seed only)
+  suite_nasal F1 150-300: FLAG TAILS
+  suite_nasal F1 300-500: FLAG TAILS  (this seed only)
+  suite_nasal F1 >500: TAILS
+  suite_nasal F2 all: FLAG TAILS
+  suite_nasal F2 150-300: FLAG TAILS
+  suite_nasal F2 300-500: FLAG TAILS
+  suite_nasal F2 >500: FLAG TAILS
+  suite_nasal F3 all: FLAG TAILS
+  suite_nasal F3 150-300: FLAG TAILS
+  suite_nasal F3 300-500: FLAG TAILS
+  suite_nasal F3 >500: FLAG TAILS
+  suite_nasal F4 all: FLAG TAILS
+  suite_nasal F4 150-300: FLAG TAILS
+  suite_nasal F4 300-500: FLAG TAILS
+  suite_nasal F4 >500: TAILS  (this seed only)
+  suite_nasal B1 all: TAILS  (this seed only)
+  suite_nasal B1 300-500: FLAG TAILS
+  suite_nasal B1 >500: FLAG TAILS
+  suite_nasal B2 all: TAILS
+  suite_nasal B2 150-300: TAILS  (this seed only)
+  suite_nasal B2 300-500: TAILS
+  suite_nasal B2 >500: TAILS  (this seed only)
+  suite_nasal B3 all: TAILS  (this seed only)
+  suite_nasal B3 >500: FLAG TAILS  (this seed only)
+  suite_nasal B4 all: TAILS
+  suite_nasal B4 >500: TAILS
+  suite_phone F1 all: FLAG TAILS
+  suite_phone F1 150-300: FLAG TAILS  (this seed only)
+  suite_phone F1 300-500: FLAG TAILS
+  suite_phone F1 <150: FLAG TAILS
+  suite_phone F2 all: FLAG TAILS
+  suite_phone F2 150-300: FLAG TAILS
+  suite_phone F2 300-500: FLAG TAILS
+  suite_phone F2 <150: FLAG TAILS
+  suite_phone F2 >500: FLAG TAILS
+  suite_phone F3 all: TAILS
+  suite_phone F3 150-300: TAILS
+  suite_phone F3 300-500: TAILS
+  suite_phone F3 <150: FLAG TAILS
+  suite_phone F3 >500: TAILS
+  suite_phone F4 all: TAILS  (this seed only)
+  suite_phone F4 <150: FLAG  (this seed only)
+  suite_phone B2 150-300: FLAG  (this seed only)
+  suite_phone B2 <150: TAILS  (this seed only)
+  suite_phone B3 all: TAILS
+  suite_phone B3 300-500: TAILS
+  suite_phone B3 >500: TAILS  (this seed only)
+  suite_phone B4 all: TAILS
+  suite_phone B4 300-500: TAILS
+  suite_phone B4 >500: TAILS  (this seed only)
+  suite_reference F1 all: FLAG TAILS
+  suite_reference F1 150-300: FLAG TAILS
+  suite_reference F1 300-500: FLAG
+  suite_reference F1 <150: FLAG TAILS
+  suite_reference F1 >500: FLAG TAILS
+  suite_reference F2 all: FLAG TAILS
+  suite_reference F2 150-300: FLAG TAILS
+  suite_reference F2 300-500: FLAG TAILS
+  suite_reference F2 <150: FLAG TAILS
+  suite_reference F2 >500: FLAG TAILS
+  suite_reference F3 all: FLAG TAILS
+  suite_reference F3 150-300: FLAG TAILS
+  suite_reference F3 300-500: FLAG TAILS
+  suite_reference F3 <150: FLAG TAILS
+  suite_reference F3 >500: FLAG TAILS  (this seed only)
+  suite_reference F4 all: FLAG TAILS
+  suite_reference F4 150-300: FLAG TAILS
+  suite_reference F4 300-500: FLAG TAILS
+  suite_reference F4 <150: FLAG TAILS
+  suite_reference F4 >500: FLAG  (this seed only)
+  suite_reference B1 all: TAILS
+  suite_reference B1 <150: TAILS
+  suite_reference B1 >500: FLAG TAILS
+  suite_reference B2 all: TAILS
+  suite_reference B2 150-300: TAILS
+  suite_reference B2 300-500: TAILS  (this seed only)
+  suite_reference B2 <150: TAILS  (this seed only)
+  suite_reference B3 all: TAILS  (this seed only)
+  suite_reference B3 >500: TAILS  (this seed only)
+  suite_reference B4 >500: FLAG TAILS  (this seed only)
+  suite_tube F1 all: FLAG TAILS
+  suite_tube F1 150-300: FLAG
+  suite_tube F1 300-500: FLAG TAILS
+  suite_tube F1 <150: FLAG
+  suite_tube F1 >500: TAILS
+  suite_tube F2 all: FLAG TAILS
+  suite_tube F2 150-300: FLAG TAILS
+  suite_tube F2 300-500: FLAG TAILS
+  suite_tube F2 <150: FLAG TAILS
+  suite_tube F2 >500: FLAG TAILS
+  suite_tube F3 all: FLAG TAILS
+  suite_tube F3 150-300: FLAG TAILS
+  suite_tube F3 300-500: FLAG TAILS
+  suite_tube F3 <150: FLAG TAILS
+  suite_tube F3 >500: FLAG TAILS
+  suite_tube F4 all: FLAG TAILS
+  suite_tube F4 150-300: FLAG TAILS
+  suite_tube F4 300-500: FLAG TAILS
+  suite_tube F4 <150: FLAG TAILS
+  suite_tube F4 >500: FLAG TAILS
+  suite_tube B1 <150: FLAG
+  suite_tube B3 all: TAILS
+  suite_tube B3 <150: TAILS  (this seed only)
+  suite_tube B3 >500: TAILS  (this seed only)
+  suite_whisper F1 all: FLAG TAILS
+  suite_whisper F1 unvoiced: FLAG TAILS
+  suite_whisper F2 all: FLAG TAILS
+  suite_whisper F2 unvoiced: FLAG TAILS
+  suite_whisper F3 all: FLAG TAILS
+  suite_whisper F3 unvoiced: FLAG TAILS
+  suite_whisper F4 all: FLAG TAILS
+  suite_whisper F4 unvoiced: FLAG TAILS
+  suite_whisper B1 all: TAILS
+  suite_whisper B1 unvoiced: TAILS
+  suite_whisper B2 all: TAILS
+  suite_whisper B2 unvoiced: TAILS
+  suite_whisper B3 all: TAILS
+  suite_whisper B3 unvoiced: TAILS
+  suite_whisper B4 all: TAILS  (this seed only)
+  suite_whisper B4 unvoiced: TAILS  (this seed only)
+  suite_wide_vibrato F1 all: FLAG TAILS
+  suite_wide_vibrato F1 150-300: FLAG TAILS
+  suite_wide_vibrato F1 300-500: FLAG TAILS  (this seed only)
+  suite_wide_vibrato F1 >500: FLAG TAILS
+  suite_wide_vibrato F2 all: FLAG TAILS
+  suite_wide_vibrato F2 150-300: FLAG TAILS
+  suite_wide_vibrato F2 300-500: FLAG TAILS
+  suite_wide_vibrato F2 >500: FLAG TAILS
+  suite_wide_vibrato F3 all: FLAG TAILS
+  suite_wide_vibrato F3 150-300: FLAG TAILS
+  suite_wide_vibrato F3 300-500: FLAG TAILS
+  suite_wide_vibrato F3 >500: FLAG TAILS
+  suite_wide_vibrato F4 all: FLAG TAILS
+  suite_wide_vibrato F4 150-300: FLAG TAILS
+  suite_wide_vibrato F4 300-500: FLAG TAILS
+  suite_wide_vibrato F4 >500: FLAG TAILS
+  suite_wide_vibrato B1 all: TAILS
+  suite_wide_vibrato B1 150-300: FLAG TAILS  (this seed only)
+  suite_wide_vibrato B1 300-500: FLAG TAILS  (this seed only)
+  suite_wide_vibrato B1 >500: TAILS
+  suite_wide_vibrato B2 all: TAILS
+  suite_wide_vibrato B2 300-500: TAILS  (this seed only)
+  suite_wide_vibrato B4 all: TAILS
+  suite_wide_vibrato B4 150-300: TAILS  (this seed only)
+  suite_wide_vibrato B4 >500: TAILS
+  train_v2_val F1 all: FLAG TAILS
+  train_v2_val F1 150-300: FLAG TAILS
+  train_v2_val F1 300-500: FLAG TAILS  (this seed only)
+  train_v2_val F1 <150: FLAG TAILS
+  train_v2_val F1 >500: TAILS
+  train_v2_val F1 unvoiced: TAILS
+  train_v2_val F2 all: FLAG TAILS
+  train_v2_val F2 150-300: FLAG TAILS
+  train_v2_val F2 300-500: FLAG TAILS
+  train_v2_val F2 <150: FLAG TAILS
+  train_v2_val F2 >500: FLAG TAILS
+  train_v2_val F2 unvoiced: FLAG TAILS
+  train_v2_val F3 all: FLAG TAILS
+  train_v2_val F3 150-300: FLAG TAILS
+  train_v2_val F3 300-500: FLAG TAILS
+  train_v2_val F3 <150: FLAG TAILS
+  train_v2_val F3 >500: FLAG TAILS
+  train_v2_val F3 unvoiced: FLAG TAILS
+  train_v2_val F4 all: FLAG TAILS
+  train_v2_val F4 150-300: FLAG TAILS
+  train_v2_val F4 300-500: FLAG TAILS
+  train_v2_val F4 <150: FLAG TAILS
+  train_v2_val F4 >500: FLAG TAILS
+  train_v2_val F4 unvoiced: FLAG TAILS
+  train_v2_val B2 150-300: TAILS  (this seed only)
+  train_v2_val B2 unvoiced: TAILS  (this seed only)
+  train_v2_val B3 unvoiced: TAILS  (this seed only)
+  train_v2_val VTL all: FLAG
+  train_v2_val VTL 300-500: FLAG
+  train_v2_val VTL >500: FLAG
+  train_v2_val VTL unvoiced: FLAG
