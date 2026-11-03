@@ -19,6 +19,7 @@ from .bins import F0_AXIS, FORMANT_AXIS
 
 N_FORMANTS = 4
 LOG2_VQT = torch.log2(torch.tensor(vqt.bin_frequencies(), dtype=torch.float32))
+QUERY_READOUTS = ("queries", "queries_abs")  # D-073: learned formant queries (content-only keys, or with absolute positions)
 
 
 @dataclass
@@ -60,7 +61,8 @@ class TeacherConfig:
     # (every model to D-051); "mlp": the same with one hidden layer of readout_hidden (a capacity control); "film":
     # frequency-resolved (`FreqReadout`): the encoder's conv maps, modulated by h, upsampled back to the VQT's bins, one
     # logit per bin per formant, and each bandwidth read at its formant's position; "film_residual" (D-056): the flat
-    # heads plus a FreqReadout whose logits and bandwidths are added to theirs, its output layers initialised at zero
+    # heads plus a FreqReadout whose logits and bandwidths are added to theirs, its output layers initialised at zero;
+    # "queries" / "queries_abs" (D-073): FreqReadout's maps read by learned formant queries (`QueryReadout`)
     readout: str = "flat"
     readout_channels: int = 32
     readout_hidden: int = 512
@@ -324,7 +326,7 @@ class FreqReadout(nn.Module):
             x = self.blocks[i](x + self.lat[i](kept[i]))
         return x
 
-    def logits(self, x: torch.Tensor) -> torch.Tensor:
+    def logits(self, x: torch.Tensor, h: torch.Tensor | None = None) -> torch.Tensor:
         """(B, N, T, formant bins) before the cascade's mask."""
         return torch.einsum("bnft,kf->bntk", self.out(x).float(), self.to_formant)
 
@@ -342,6 +344,32 @@ class FreqReadout(nn.Module):
         v = torch.stack([self.bw[n](torch.cat([local[:, :, n], h.to(local.dtype)], -1)) for n in range(N_FORMANTS)], 2).float()
         return torch.cat([v[..., 0], v[..., 1]], -1)
 
+
+class QueryReadout(FreqReadout):
+    """D-073: FreqReadout's maps and bandwidths, with formant n's logits read by a learned query instead of a 1x1 conv:
+    query n (a learned vector plus a projection of h, then one self-attention layer among the four) scores every bin by
+    its dot product with the bin's key (a 1x1 projection of the maps; plus a learned absolute position per bin if
+    `absolute`, else content only, so the read-out is shift-equivariant along frequency)."""
+
+    def __init__(self, d: int, chans: tuple[int, ...], c: int, absolute: bool, dq: int = 32):
+        super().__init__(d, chans, c)
+        del self.out
+        self.q0 = nn.Parameter(torch.randn(N_FORMANTS, dq) / dq ** 0.5)
+        self.q_h = nn.Linear(d, N_FORMANTS * dq)
+        self.q_att = nn.MultiheadAttention(dq, 4, batch_first=True)
+        self.q_norm = nn.LayerNorm(dq)
+        self.key = nn.Conv2d(c, dq, 1)
+        self.pos = nn.Parameter(torch.randn(vqt.N_BINS, dq) / dq ** 0.5) if absolute else None
+
+    def logits(self, x: torch.Tensor, h: torch.Tensor | None = None) -> torch.Tensor:
+        b, _, f, t = x.shape
+        q = (self.q0 + self.q_h(h).unflatten(-1, (N_FORMANTS, -1))).reshape(b * t, N_FORMANTS, -1)  # (B*T, N, dq)
+        q = self.q_norm(q + self.q_att(q, q, q, need_weights=False)[0]).reshape(b, t, N_FORMANTS, -1)
+        k = self.key(x).permute(0, 3, 2, 1)  # (B, T, F, dq)
+        if self.pos is not None:
+            k = k + self.pos.to(k.dtype)
+        s = torch.einsum("btnd,btfd->bnft", q.to(k.dtype), k).float() / k.shape[-1] ** 0.5
+        return torch.einsum("bnft,kf->bntk", s, self.to_formant)
 
 class Teacher(nn.Module):
     def __init__(self, cfg: TeacherConfig | None = None):
@@ -364,10 +392,12 @@ class Teacher(nn.Module):
             self.formant_heads = nn.ModuleList([nn.Sequential(nn.Linear(d + n, hid), nn.GELU(), nn.Linear(hid, FORMANT_AXIS.n_bins))
                                                 for n in range(N_FORMANTS)])
             self.bw_head = nn.Sequential(nn.Linear(d, hid), nn.GELU(), nn.Linear(hid, 2 * N_FORMANTS))
-        elif cfg.readout != "film":
+        elif cfg.readout not in ("film", *QUERY_READOUTS):
             raise ValueError(f"unknown readout {cfg.readout!r}")
         if cfg.readout in ("film", "film_residual"):
             self.readout = FreqReadout(d, cfg.channels, cfg.readout_channels)
+        elif cfg.readout in QUERY_READOUTS:  # D-073
+            self.readout = QueryReadout(d, cfg.channels, cfg.readout_channels, absolute=cfg.readout == "queries_abs")
         if cfg.readout == "film_residual":  # starts exactly at the flat heads' outputs
             for m in (self.readout.out, *(b[-1] for b in self.readout.bw)):
                 nn.init.zeros_(m.weight)
@@ -405,12 +435,12 @@ class Teacher(nn.Module):
                 f0 = comb_f0 if comb_f0 is not None else self.expected_f0(out["f0_logits"].float())
                 vp = comb_voiced if comb_voiced is not None else torch.sigmoid(out["voicing_logit"].float())
             x = torch.cat([x, self.comb(f0, vp).to(x.dtype)], 1)
-        film = self.cfg.readout in ("film", "film_residual")
-        flat = self.cfg.readout != "film"
+        film = self.cfg.readout in ("film", "film_residual", *QUERY_READOUTS)
+        flat = self.cfg.readout not in ("film", *QUERY_READOUTS)
         h, kept = self.enc(x, maps=True) if film else (self.enc(x), None)
         if film:
             fx = self.readout.maps(kept, h)
-            raw = self.readout.logits(fx)
+            raw = self.readout.logits(fx, h)
         logits, means = [], []
         for n in range(N_FORMANTS):
             lg = 0.0

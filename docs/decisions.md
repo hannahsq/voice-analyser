@@ -2567,7 +2567,7 @@ structure"). Question: **do the conv maps hold information h is missing, that a 
   (the Conformer's width of 128 after `t_in` is the other narrow point). Either way it does not gate D-073, which
   tests the read-out's behaviour rather than missing information.
 
-## D-073 (2026-11-03, draft for Hannah, not registered; nothing built): learned formant queries as the read-out, on teacher v3.1's frozen trunk
+## D-073 (registered 2026-11-03; seen beforehand: a 40-step smoke run of each arm, for function only): learned formant queries as the read-out, on teacher v3.1's frozen trunk
 
 *Why*: D-054's free per-bin read-out ("film") read women's closed-phase F1 lower (+0.1 / +2.8 Hz bias against mlp's
 +4.2) with F1 scale slopes near 1 (1.005 / 1.014), but misread scale clip by clip (synthetic F1-F4 about 1.9 x mlp's),
@@ -2585,9 +2585,12 @@ Independent of D-072 (the read-out's behaviour, not missing information); the tw
   the position encoding), interpolated onto the formant axis as film's. The cascade's soft mask is kept (dropping it
   would be a second change; self-attention among the queries is part of the read-out). Bandwidths as film's (read at
   each formant's position).
-- *Arms*: **Q-rel** (rotary log-frequency encoding only: relative, so the read-out stays shift-equivariant and
-  identity must come from the queries and context) and **Q-abs** (rotary plus a learned absolute embedding per bin in
-  the keys). Head seeds 1 and 2 each; four runs.
+- *Arms* (corrected at registration: the queries have no position, so a rotary encoding on the keys alone would be
+  an absolute one, not relative): **queries** (content-only keys: the read-out is shift-equivariant along frequency,
+  and identity must come from the queries and h's context) and **queries_abs** (keys plus a learned absolute position
+  per bin). Head seeds 1 and 2 each; four runs. `TeacherConfig.readout`, `QueryReadout`;
+  `scripts/analysis/d073_queries.py`; chain `chains/d073.sh`; read-out parameters about 0.1 M (film's 91 k plus the
+  queries, less its 1x1 output: 112,616 and 124,232 against film's 90,764).
 - *Training*: D-054's exactly (5b's data mix and channel, AdamW 1e-3, weight decay 0.01, 300 warm-up steps, cosine
   over 8,000 steps; comb from the frozen f0 network). About 1.5 h a run.
 - *Measures*: D-054's (synthetic F1-F4 and resynthesised F1-F3 MAE; bandwidth error and probe 12; probe 11's slopes;
@@ -2600,6 +2603,6 @@ Independent of D-072 (the read-out's behaviour, not missing information); the tw
   with its paired speaker interval (power-limited, not a criterion). Futility stop as D-054 amendment 1: if an arm's
   seed 1 synthetic F1-F4 MAE exceeds 1.5 x mlp seed 1's, its seed 2 is not trained.
 - *Reading*: supported makes a query read-out a full-size candidate (end to end, and combined with D-072's retrieve
-  if that gains: retrieve, Conformer, query read-out, as in Perceiver IO). Q-rel against Q-abs says how much absolute
-  frequency the identity needs. Not supported, with Q-abs near mlp and no equivariance, says the anchor costs the
-  equivariance in this form too.
+  if that gains: retrieve, Conformer, query read-out, as in Perceiver IO). queries against queries_abs says how much absolute
+  frequency the identity needs. Not supported, with queries_abs near mlp and no equivariance, says the anchor costs
+  the equivariance in this form too.
