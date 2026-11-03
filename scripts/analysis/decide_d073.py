@@ -84,17 +84,19 @@ def main():
         return c1 and c2 and guard, {"mae ratio": af / mf, "scale": sa, "scale mlp": sm, "c1": c1, "c2": c2, "dev": dv,
                                      "resynth worst": rs, "guard": guard}
 
+    out = {}
     for arm in ARMS:
         print(f"arm {arm}")
         if (O / f"futility_stop_{arm}").exists():
             f1, m1 = D.syn_f(run(arm, 1)), D.syn_f(run("mlp", 1))
             print(f"  futility stop: seed 1's synthetic F1-F4 MAE {f1.mean():.1f} Hz against mlp seed 1's {m1.mean():.1f} "
                   f"({f1.mean() / m1.mean():.2f} x, stop above 1.5 x); seed 2 not trained")
-            print(f"  DECISION ({arm}): not supported (futility stop)\n")
+            out[arm] = "not supported (futility stop)"
+            print(f"  {arm}: {out[arm]}\n")
             continue
         seeds = [s for s in SEEDS if trained(run(arm, s))]
         ok, v = rule(arm, seeds)
-        per = {s: rule(arm, [s])[0] for s in seeds}
+        per = {s: bool(rule(arm, [s])[0]) for s in seeds}
         print(f"  (1) synthetic F1-F4 MAE / mlp's: {v['mae ratio']:.2f} (<= 1.15) -> {v['c1']}")
         print(f"  (2) probe 11 F1 slope, Hillenbrand / PTDB-TUG: {v['scale']['hillenbrand']:.3f} / {v['scale']['ptdb_tug']:.3f} "
               f"against mlp's {v['scale mlp']['hillenbrand']:.3f} / {v['scale mlp']['ptdb_tug']:.3f} (error at most half) -> {v['c2']}")
@@ -106,9 +108,9 @@ def main():
                 print(f"  reported, seed {s}: women's closed-phase F1 bias, arm - mlp {p:+.1f} Hz [{lo:+.1f}, {hi:+.1f}]")
         print(f"  the rule on each seed alone: {per}")
         robust = len(set(per.values())) == 1
-        print(f"  DECISION ({arm}): " + ("supported" if ok else "not supported")
-              + ("" if robust else " (NOT ROBUST TO THE SEED)") + "\n")
-    print("DECISION: see each arm above")
+        out[arm] = ("supported" if ok else "not supported") + ("" if robust else " (NOT ROBUST TO THE SEED)")
+        print(f"  {arm}: {out[arm]}\n")
+    print("DECISION: " + "; ".join(f"{a} {v}" for a, v in out.items()))
 
 
 if __name__ == "__main__":

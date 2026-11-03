@@ -12,8 +12,8 @@ arm queries
   guards: Hillenbrand F1/F2/F3 +0.4, +4.5, +16.4 Hz; resynthesised F1-F3 worst +47.3 % -> FAIL
   reported, seed 1: women's closed-phase F1 bias, arm - mlp -1.3 Hz [-6.5, +0.9]
   reported, seed 2: women's closed-phase F1 bias, arm - mlp -4.1 Hz [-8.7, -2.1]
-  the rule on each seed alone: {1: np.False_, 2: np.False_}
-  DECISION (queries): not supported
+  the rule on each seed alone: {1: False, 2: False}
+  queries: not supported
 
 arm queries_abs
   (1) synthetic F1-F4 MAE / mlp's: 1.92 (<= 1.15) -> False
@@ -21,7 +21,7 @@ arm queries_abs
   guards: Hillenbrand F1/F2/F3 +0.4, +4.5, +16.4 Hz; resynthesised F1-F3 worst +47.3 % -> FAIL
   reported, seed 1: women's closed-phase F1 bias, arm - mlp -1.3 Hz [-6.5, +1.1]
   reported, seed 2: women's closed-phase F1 bias, arm - mlp -4.1 Hz [-8.8, -1.9]
-  the rule on each seed alone: {1: np.False_, 2: np.False_}
-  DECISION (queries_abs): not supported
+  the rule on each seed alone: {1: False, 2: False}
+  queries_abs: not supported
 
-DECISION: see each arm above
+DECISION: queries not supported; queries_abs not supported
