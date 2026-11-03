@@ -2387,3 +2387,14 @@ sex (no per-speaker lengths were looked at for choosing anything). Set now, befo
   - *Uncertainty is higher on the scanner audio, mostly in women*: median length sigma ratio 1.67 (women; over the 1.5 bar) and 1.09 (men). Women's formant sigma F1-F4 172 / 83 / 64 / 118 cents against 111 / 50 / 35 / 35 in the studio; men's 131 / 76 / 75 / 65 against 83 / 44 / 39 / 47. So the model sees less evidence in the upper formants (the denoiser and AAC most likely), says so, and its lengths still don't wander more than on studio speech.
   - The sonorant voiced fraction is higher on USC (0.50-0.54 against 0.21), because the passages are continuous read speech while PTDB-TUG's files carry long silences.
   - *Reading*: for speaker-level length checks, the MRI audio is about as repeatable as studio speech; its cost is wider intervals, so any criterion on it should use the model's sigma (coverage) or speaker medians over many files, not single frames. Whether its lengths are *right* is untested here by design (D-067 decides that against MRI).
+
+## D-069 (2026-11-03, Hannah; nothing of ArtSpeech measured here): ArtSpeech's 10 speakers are all lockbox
+
+ArtSpeech (Isaieva et al. 2021, figshare collection 5270387, CC0: 10 French speakers, 5 men and 5 women, real-time
+MRI with denoised audio and alignments) is the second lab and language in the paper outline's length claim ("an
+independent check"). Too small to split into dev and semi, so all 10 go to the lockbox (`tiers.LOCKBOX`): no voice
+model is run on their audio, and no length is compared with their MRI, before a milestone acceptance with its rule
+set beforehand. vtl-mri may train its contour model on the *images* of two of them (its V-023: P1 and P7, drawn
+with a seed, one per sex), as it does with the USC lockbox speakers' images (D-035). Before ArtSpeech audio is used
+here it goes into `ATTRIBUTION.md`.
+

@@ -27,7 +27,7 @@ TIER_FILE = Path(__file__).with_name("tiers.json")
 DEV_FRAC = 0.6
 SEED = 20261011
 DEV_ONLY = ("cmu_arctic", "openglot", "birkholz2019")  # too few speakers to split, or analysis tools
-LOCKBOX = ("mocha_timit",)  # not yet looked at, too small to split
+LOCKBOX = ("mocha_timit", "artspeech")  # not yet looked at, too small to split (artspeech: D-069)
 # Single speakers kept in the lockbox whatever their corpus's split (D-035): the USC 75-speaker MRI set's 16 speakers
 # with hand-drawn contours in 75-Speaker Annot-16, its best anatomical (MRI midline) VTL references
 LOCKBOX_SPEAKERS = frozenset(f"usc75:sub{n:03d}" for n in (9, 13, 22, 23, 28, 30, 34, 43, 47, 61, 64, 68, 70, 71, 72, 74))

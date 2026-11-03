@@ -78,3 +78,10 @@ def test_usc75_tiers_nest_with_vtl_mri_split():
     assert sum(a[s] == "dev" for s in ids) == 34
     t = tiers.load()
     assert {s: t[s] for s in ids} == a
+
+
+def test_artspeech_all_lockbox():
+    """D-069: ArtSpeech's 10 speakers are all lockbox, whatever their sex."""
+    ids = [f"artspeech:P{n}" for n in range(1, 11)]
+    assert set(tiers.assign(ids).values()) == {"lockbox"}
+    assert all(tiers.tier_of(s, {}) == "lockbox" for s in ids)
