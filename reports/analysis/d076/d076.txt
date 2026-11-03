@@ -1,0 +1,15 @@
+D-076: v3.1's F1 error against the closed-phase reference, on the EGG closed quotient within speakers (PTDB-TUG dev; slope in Hz per 0.1 CQ, controlling closed-phase F1 and log f0)
+
+primary, 12 dev speakers, v3.1 seed mean: mean slope +0.31 Hz per 0.1 CQ, permutation p (one-sided) 0.6327, null SD 0.91 (the predicted -2 is 2.2 null SDs)
+  per speaker: F01(f) +2.1, F02(f) -3.7, F04(f) +5.6, F08(f) -4.2, F09(f) -10.1, F10(f) +1.4, M01(m) +0.8, M02(m) +6.7, M03(m) -0.3, M04(m) +2.7, M07(m) +6.1, M09(m) -3.3
+
+reported:
+  women: mean -1.48, median -1.17, p 0.2009, null SD 1.71
+  men: mean +2.11, median +1.75, p 0.9955, null SD 0.78
+  d040_5b_s1_b20k alone: mean +0.75, p 0.7881
+  d040_5b_s2_b20k alone: mean -0.12, p 0.4408
+  conformer_v2r2_s1_d16k alone: mean +0.34, p 0.6392
+  closed-phase F1 < 500 Hz: mean -1.21, p 0.0470
+  closed-phase F1 >= 500 Hz: mean +0.72, p 0.6912
+
+DECISION: not detected
