@@ -542,10 +542,11 @@ def clip_tract(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> tup
 
 
 def _acoustic_formants(traj: Trajectories, cycles: np.ndarray, coupled: dict, formants: np.ndarray,
-                       fi: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+                       fi: np.ndarray, bws: np.ndarray | None = None) -> tuple:
     """D-078's acoustic label: each coupled pole at its cycle mean, F (1 + df <a>), <a> the opening (as
     `voice._voiced_coupled` renders it) averaged over the frame's 10 ms; poles above the coupled ones as labelled.
-    Also returns <a> per frame (D-079)."""
+    Also returns <a> per frame (D-079); with `bws`, also the cycle-mean bandwidths B (1 + (bm - 1) <a>) and the
+    frame's open quotient (D-081)."""
     from .voice import _open_phase_te, glottal_opening
 
     te_s = _open_phase_te(traj)
@@ -557,7 +558,11 @@ def _acoustic_formants(traj: Trajectories, cycles: np.ndarray, coupled: dict, fo
     out = formants.copy()
     m = min(coupling.N_COUPLED, out.shape[1])
     out[:, :m] *= 1.0 + coupled["df"][fi, :m] * a_mean[:, None]
-    return out, a_mean
+    if bws is None:
+        return out, a_mean
+    bout = bws.copy()
+    bout[:, :m] *= 1.0 + (coupled["bm"][fi, :m] - 1.0) * a_mean[:, None]
+    return out, a_mean, bout, te_s[np.minimum(fi * CTRL, len(te_s) - 1)]
 
 
 def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_components: bool = False) -> SynthClip:
@@ -694,8 +699,13 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
     }
     if cfg.acoustic_labels:
         if coupled is not None:
-            labels["formants_acoustic"], labels["glottal_opening"] = _acoustic_formants(traj, comps["cycles"], coupled,
-                                                                                        labels["formants"], fi)
+            (labels["formants_acoustic"], labels["glottal_opening"], labels["bandwidths_acoustic"],
+             labels["open_quotient"]) = _acoustic_formants(traj, comps["cycles"], coupled, labels["formants"], fi,
+                                                           labels["bandwidths"])
+            m = min(coupling.N_COUPLED, N_LABEL_FORMANTS)  # D-081: the clip's coupling, for oracle checks
+            labels["coupling_df"], labels["coupling_bm"] = np.full((len(fi), N_LABEL_FORMANTS), np.nan), np.full((len(fi), N_LABEL_FORMANTS), np.nan)
+            labels["coupling_df"][:, :m], labels["coupling_bm"][:, :m] = coupled["df"][fi, :m], coupled["bm"][fi, :m]
+            labels["gap_offset"] = np.full(len(fi), coupled["gap_offset"])
         else:
             labels["formants_acoustic"] = labels["formants"].copy()
             labels["glottal_opening"] = np.full(len(fi), np.nan)

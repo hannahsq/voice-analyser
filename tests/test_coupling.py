@@ -93,3 +93,10 @@ def test_acoustic_labels_are_the_cycle_mean_and_change_nothing_else():
     k = rel[ok, 0] / op[ok]
     assert ok.mean() > 0.9 and np.all((k >= df1.min() - 1e-9) & (k <= df1.max() + 1e-9))
     assert np.all(np.isnan(u.labels["glottal_opening"]))
+    # D-081: the cycle-mean bandwidths use the same <a>, with bm in place of df; the clip's coupling as drawn
+    bw, ba, bm = b.labels["bandwidths"], b.labels["bandwidths_acoustic"], b.labels["coupling_bm"]
+    np.testing.assert_allclose(ba[:, 0], bw[:, 0] * (1 + (bm[:, 0] - 1) * op), rtol=1e-9)
+    np.testing.assert_allclose(fa[:, 0], f[:, 0] * (1 + b.labels["coupling_df"][:, 0] * op), rtol=1e-9)
+    assert np.all(b.labels["gap_offset"] == b.labels["gap_offset"][0]) and -0.3 <= b.labels["gap_offset"][0] <= 0.1
+    oq = b.labels["open_quotient"]
+    assert oq.shape == (len(f),) and np.all((oq > 0) & (oq < 1))
