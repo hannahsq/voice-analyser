@@ -131,11 +131,14 @@ def one(job):
 
 
 if __name__ == "__main__":
-    n_clips = int(sys.argv[1]) if len(sys.argv) > 1 else 60
+    n_clips = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1] != "summary" else 60
     workers = int(sys.argv[2]) if len(sys.argv) > 2 else 8
     O.mkdir(parents=True, exist_ok=True)
     res = {True: [], False: []}
     i0 = 0
+    if sys.argv[1:2] == ["summary"]:  # re-summarise identify.json (no rendering)
+        res = {k == "True": v for k, v in json.loads((O / "identify.json").read_text()).items()}
+        n_clips = 0
     with ProcessPoolExecutor(workers) as ex:
         while min(len(v) for v in res.values()) < n_clips:
             jobs = [(i, a) for i in range(i0, i0 + 2 * workers) for a in (True, False)]
@@ -143,7 +146,11 @@ if __name__ == "__main__":
             for i, asp, out in ex.map(one, jobs):
                 if out is not None and len(res[asp]) < n_clips:
                     res[asp].append({"index": i, **out})
-    (O / "identify.json").write_text(json.dumps({str(k): v for k, v in res.items()}, indent=1))
+    if n_clips:
+        (O / "identify.json").write_text(json.dumps({str(k): v for k, v in res.items()}, indent=1))
+    # clips with no voiced frames have nothing to compare (NaN throughout): left out, and counted
+    n_all = {k: len(v) for k, v in res.items()}
+    res = {k: [r for r in v if np.isfinite(r["f0"])] for k, v in res.items()}
     L = ["D-081 I: VQT log-power difference against R (offset -0.3), RMS dB on voiced frames, median over clips "
          "(all bins / below 1.5 kHz)", f"variants: U = offset +0.1; MF / MFB = +0.1 with the cycle-mean F (and B) matched", ""]
     verdict = None
@@ -151,7 +158,7 @@ if __name__ == "__main__":
         rows = res[asp]
         med = {m: np.median([r[m][0] for r in rows]) for m in (*VARIANTS, *REPORTED)}
         lo = {m: np.median([r[m][1] for r in rows]) for m in (*VARIANTS, *REPORTED)}
-        L.append(f"{'with' if asp else 'without'} aspiration ({len(rows)} clips):")
+        L.append(f"{'with' if asp else 'without'} aspiration ({len(rows)} clips; {n_all[asp] - len(rows)} without voiced frames left out):")
         L += [f"  {m:8s} {med[m]:.3f} / {lo[m]:.3f}" for m in (*VARIANTS, *REPORTED)]
         L.append(f"  MFB* (best-fit F1 / B1 on top of MFB, reported): median F1 x {np.median([r['MFB*_s'] for r in rows]):.3f}, "
                  f"B1 x {np.median([r['MFB*_b'] for r in rows]):.2f}; MFB* / F1x1.01 per clip "

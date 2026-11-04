@@ -1,0 +1,24 @@
+D-081 I: VQT log-power difference against R (offset -0.3), RMS dB on voiced frames, median over clips (all bins / below 1.5 kHz)
+variants: U = offset +0.1; MF / MFB = +0.1 with the cycle-mean F (and B) matched
+
+without aspiration (55 clips; 5 without voiced frames left out):
+  U        2.435 / 1.591
+  MF       1.705 / 1.219
+  MFB      1.467 / 0.841
+  F1x1.01  0.359 / 0.347
+  F1x1.03  1.022 / 0.952
+  MFB*     1.466 / 0.819
+  MFB* (best-fit F1 / B1 on top of MFB, reported): median F1 x 0.999, B1 x 0.94; MFB* / F1x1.01 per clip 4.01, ratio of medians 4.09
+  per clip, MFB / F1x1.01: 4.24 / 2.53; MF / F1x1.01: 4.98 / 3.47; MFB / U: 0.64
+
+with aspiration (55 clips; 5 without voiced frames left out):
+  U        2.154 / 1.625
+  MF       2.081 / 1.297
+  MFB      1.980 / 0.987
+  F1x1.01  0.303 / 0.355
+  F1x1.03  0.882 / 0.963
+  MFB*     1.969 / 0.942
+  MFB* (best-fit F1 / B1 on top of MFB, reported): median F1 x 0.999, B1 x 0.94; MFB* / F1x1.01 per clip 5.90, ratio of medians 6.49
+  per clip, MFB / F1x1.01: 6.00 / 2.84; MF / F1x1.01: 6.65 / 3.68; MFB / U: 0.98
+
+I (without aspiration, MFB against F1 x 1.01, all bins): audible

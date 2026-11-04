@@ -1,0 +1,16 @@
+D-081 A: label-only fits (train_v2ko 3000 clips -> val_v2ko sonorant frames)
+
+A1, the glottal slope on known predictions (expected 1 / 0 / 0): closed label +0.972, acoustic label +0.000, acoustic - vowel part -0.028 -> valid
+
+A2, the closed F1 from perfect acoustic-domain labels (glottal slope); the clip's gap offset (R², frame / clip mean); <a> beyond Rd (R²)
+  full           slope +0.335; offset R² -0.090 / 0.038; <a> beyond Rd 0.073 (58973 frames)
+  no bandwidths  slope +0.266; offset R² -0.150 / -0.027; <a> beyond Rd -0.095 (58973 frames)
+  -> partly
+
+A3, the anatomical length from the iVTL track (window = centred, seconds) plus acoustic F1-F4: MAE cm, R²
+  0.00 s  MAE 0.194 cm, R² 0.855
+  0.25 s  MAE 0.147 cm, R² 0.916
+  0.50 s  MAE 0.127 cm, R² 0.940
+  1.00 s  MAE 0.108 cm, R² 0.958
+  2.00 s  MAE 0.091 cm, R² 0.971
+  -> context helps (2 s against frame only: -53 %)

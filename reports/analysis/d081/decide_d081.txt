@@ -1,0 +1,18 @@
+D-081: the oracle battery
+
+I  (is the offset audible, without aspiration): audible
+A1 (the glottal slope's check): valid
+A2 (closed F1 from perfect acoustic-domain labels): partly (slope +0.335; without bandwidths +0.266)
+A3 (aVTL from iVTL context): context helps
+
+B1 glottal slope, closed F1 head (h / h+<a> / h+<a>+df1), by trunk: v31_s1 +0.472 / +0.524 / +1.073; v31_s2 +0.469 / +0.503 / +1.052 -> not usable
+B2 glottal slope with the true acoustic B1, change against h: v31_s1 +0.077, v31_s2 +0.069 -> no help
+B3 MAE (Hz, F1-F4 mean), h -> h+aperiodicity: v31_s1 56.061 -> 55.874 (-0.3 %, 3x seed spread 1.393); v31_s2 54.736 -> 54.472 (-0.5 %, 3x seed spread 1.019) -> no help
+B4 MAE (Hz, B1-B4 mean), h -> h+source: v31_s1 14.760 -> 14.422 (-2.3 %, 3x seed spread 0.123); v31_s2 14.604 -> 14.392 (-1.4 %, 3x seed spread 0.143) -> no help
+B5 MAE (cm), h -> h+iVTL: v31_s1 0.157 -> 0.126 (-19.8 %, 3x seed spread 0.003); v31_s2 0.155 -> 0.125 (-19.4 %, 3x seed spread 0.003) -> helps
+
+What follows for the screening run:
+  closed-F1 question OUT (needs I audible, A1 valid, B1 usable)
+  aperiodicity heads no help; source-shape heads (for bandwidths) no help; iVTL (for aVTL) helps; long crops for the aVTL split: context helps
+
+DECISION: I audible; A2 partly; B1 not usable; B2 no help; B3 no help; B4 no help; B5 helps
