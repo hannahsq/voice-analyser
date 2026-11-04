@@ -1,0 +1,27 @@
+D-080: a glottal-opening head on v3.1's final stage, coupled audio in the mix (val_v2ko, 400-frame crops)
+
+(1) A1 opening R² by seed 1: 0.658, 2: 0.662; mean 0.660 -> learned
+    reported, by crop length (frames 400 / 100 / 50), seed means: 0.660 / 0.658 / 0.646
+    reported, by the crop's F1 spread terciles (cut at 867 / 1088 cents), seed means: 0.630 / 0.690 / 0.672
+    reported (amendment 2026-11-04), by seed, 400-frame crops: s1 within 0.189, between 0.721, beyond Rd -0.330, Rd-only 0.716; s2 within 0.226, between 0.724, beyond Rd -0.316, Rd-only 0.716
+
+(2) F1 glottal slope (1 = full recovery of the closed-glottis F1's glottal part):
+    A0    s1 +0.557, s2 +0.542
+    A1    s1 +0.534, s2 +0.517
+    v3.1  s1 +0.346, s2 +0.354
+    seed 1: A1 - A0 -0.023 [-0.044, -0.004] -> not used
+    seed 2: A1 - A0 -0.025 [-0.044, -0.008] -> not used
+
+guards (A1 against A0): train_v2 validation F1-F4 MAE (log's last eval), signed F1 on uncoupled train_v2 val
+    seed 1: MAE change +6.7 %, +3.2 %, +3.5 %, +5.9 %; signed F1 A1 -2.9, A0 -3.0, v3.1 -0.3 Hz  FAIL: F1 +6.7 %; F2 +3.2 %; F3 +3.5 %; F4 +5.9 %
+    seed 2: MAE change +8.8 %, +8.3 %, +5.8 %, +8.4 %; signed F1 A1 -2.5, A0 -2.6, v3.1 +0.1 Hz  FAIL: F1 +8.8 %; F2 +8.3 %; F3 +5.8 %; F4 +8.4 %
+reported: resynthesised validation sets, F1 MAE / signed median, seed means (A0 / A1 / v3.1)
+    vocalset_val_d16k        29.4 (-0.7) / 30.2 (-0.4) / 28.6 (+0.2)
+    zeroth_korean_val_d16k   14.0 (-0.7) / 14.6 (-0.2) / 14.1 (-0.2)
+reported: PTDB-TUG dev closed-phase F1 bias, median Hz (women / men), seed means
+    A0    -0.1 / +3.7
+    A1    +0.3 / +3.3
+    v3.1  +4.2 / +5.7
+reported: Hillenbrand dev signed error: see hillenbrand_signed.txt
+
+DECISION: (1) learned; (2) not used; GUARD FAILED: F1 +6.7 %; F2 +3.2 %; F3 +3.5 %; F4 +5.9 %; F1 +8.8 %; F2 +8.3 %; F3 +5.8 %; F4 +8.4 %

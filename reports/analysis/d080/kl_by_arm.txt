@@ -1,0 +1,17 @@
+D-080, reported: KL F1 error by arm (seed means), median over files by gap 0 / 0.1 / 0.2 / 0.3; growth = paired gap 0.3 - 0, median [95 % bootstrap]
+
+against the closed label:
+  Male   A0    +19.1 / +20.1 / +34.6 / +44.1   growth +17.9 [+10.7, +31.9] (80 pairs)
+  Male   A1    +19.4 / +19.3 / +31.8 / +39.1   growth +17.4 [+8.5, +30.2] (80 pairs)
+  Male   v3.1  +22.8 / +22.4 / +35.8 / +50.8   growth +19.0 [+11.3, +35.2] (80 pairs)
+  Female A0    +30.1 / +33.3 / +44.8 / +53.2   growth +16.5 [+9.3, +21.7] (80 pairs)
+  Female A1    +30.9 / +35.1 / +42.5 / +51.0   growth +12.6 [+8.2, +20.4] (80 pairs)
+  Female v3.1  +31.6 / +32.0 / +41.1 / +53.9   growth +15.0 [+9.2, +19.3] (80 pairs)
+
+against the D-077 response (error - dE):
+  Male   A0    +6.9 / +7.3 / +6.6 / -0.5   growth -2.8 [-11.2, +6.0] (74 pairs)
+  Male   A1    +7.1 / +7.5 / +2.2 / -3.8   growth -2.9 [-14.0, +2.0] (74 pairs)
+  Male   v3.1  +9.6 / +10.2 / +5.3 / +2.6   growth -4.0 [-12.1, +6.3] (74 pairs)
+  Female A0    +20.7 / +23.2 / +22.5 / +14.7   growth +3.9 [+0.2, +8.6] (74 pairs)
+  Female A1    +18.9 / +24.2 / +17.9 / +17.2   growth +4.0 [+0.0, +7.6] (74 pairs)
+  Female v3.1  +13.7 / +7.7 / +14.7 / +16.8   growth -1.1 [-6.2, +5.8] (74 pairs)
