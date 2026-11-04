@@ -103,7 +103,8 @@ class SynthConfig:
     coupling_full_poles: int = 0
     # D-078: on coupled clips, also label "formants_acoustic", each coupled pole at its cycle mean over the frame,
     # F (1 + df <a>), <a> the rendered opening's mean over the frame's 10 ms (the cascade's own trajectory). No draw;
-    # False (no such label) reproduces earlier sets
+    # False (no such label) reproduces earlier sets. D-079: with it, "glottal_opening", that <a> per frame (NaN on
+    # uncoupled clips)
     acoustic_labels: bool = False
     # Interactive source (D-026), per tube clip: glottal flow from the glottal area and the tract's load
     # (`interactive`), so the tract shapes the source. Replaces the quasi-static coupling on those clips. Labels are
@@ -541,9 +542,10 @@ def clip_tract(index: int, cfg: SynthConfig | None = None, seed: int = 0) -> tup
 
 
 def _acoustic_formants(traj: Trajectories, cycles: np.ndarray, coupled: dict, formants: np.ndarray,
-                       fi: np.ndarray) -> np.ndarray:
+                       fi: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """D-078's acoustic label: each coupled pole at its cycle mean, F (1 + df <a>), <a> the opening (as
-    `voice._voiced_coupled` renders it) averaged over the frame's 10 ms; poles above the coupled ones as labelled."""
+    `voice._voiced_coupled` renders it) averaged over the frame's 10 ms; poles above the coupled ones as labelled.
+    Also returns <a> per frame (D-079)."""
     from .voice import _open_phase_te, glottal_opening
 
     te_s = _open_phase_te(traj)
@@ -555,7 +557,7 @@ def _acoustic_formants(traj: Trajectories, cycles: np.ndarray, coupled: dict, fo
     out = formants.copy()
     m = min(coupling.N_COUPLED, out.shape[1])
     out[:, :m] *= 1.0 + coupled["df"][fi, :m] * a_mean[:, None]
-    return out
+    return out, a_mean
 
 
 def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_components: bool = False) -> SynthClip:
@@ -691,8 +693,12 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
                            if use_tube else np.full(len(fi), length)),
     }
     if cfg.acoustic_labels:
-        labels["formants_acoustic"] = (_acoustic_formants(traj, comps["cycles"], coupled, labels["formants"], fi)
-                                       if coupled is not None else labels["formants"].copy())
+        if coupled is not None:
+            labels["formants_acoustic"], labels["glottal_opening"] = _acoustic_formants(traj, comps["cycles"], coupled,
+                                                                                        labels["formants"], fi)
+        else:
+            labels["formants_acoustic"] = labels["formants"].copy()
+            labels["glottal_opening"] = np.full(len(fi), np.nan)
     meta = {
         "index": index, "seed": seed, "fs": FS, "duration_s": len(audio) / FS, "length_cm": length, "length_group": length_group,
         "length_from_f0": v.length_from_f0,

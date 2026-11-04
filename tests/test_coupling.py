@@ -86,3 +86,10 @@ def test_acoustic_labels_are_the_cycle_mean_and_change_nothing_else():
     # an uncoupled clip's acoustic label is its closed-glottis label
     u = generate(3, SynthConfig(p_tube=1.0, duration_s=(1.0, 1.0), acoustic_labels=True), 7)
     assert np.array_equal(u.labels["formants_acoustic"], u.labels["formants"], equal_nan=True)
+    # D-079: the opening label is the <a> the acoustic label used, in [0, 1]; NaN on an uncoupled clip
+    op = b.labels["glottal_opening"]
+    assert op.shape == (len(f),) and np.all((op >= 0) & (op <= 1)) and op.std() > 0
+    ok = op > 1e-3  # F1's shift over the opening is df, interpolated between the targets'
+    k = rel[ok, 0] / op[ok]
+    assert ok.mean() > 0.9 and np.all((k >= df1.min() - 1e-9) & (k <= df1.max() + 1e-9))
+    assert np.all(np.isnan(u.labels["glottal_opening"]))

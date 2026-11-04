@@ -24,7 +24,7 @@ from ..synth.shards import INT16_SCALE, ShardReader
 
 LABEL_KEYS = ("f0", "voiced", "sonorant", "whisper", "formants", "bandwidths", "rd", "source_h_db")
 # labels only some sets carry, consolidated when the shards have them (D-078: the cycle-mean acoustic formants)
-OPTIONAL_LABEL_KEYS = ("formants_acoustic",)
+OPTIONAL_LABEL_KEYS = ("formants_acoustic", "glottal_opening")
 N_TRAIN_FORMANTS = 4
 TRACT_LEFT_WEIGHT = (0.15, 0.5)
 OBS_MARGIN = 20  # frames each side of a crop for observability's temporal pooling (4 x 50 ms reaches 0.02 weight)  # formant loss weight 1 up to this |tract_left|, falling linearly to 0 at that
