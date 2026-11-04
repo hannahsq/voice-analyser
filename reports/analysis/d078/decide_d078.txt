@@ -1,0 +1,32 @@
+D-078: can the closed-glottis F1 be recovered from coupled phonation? (frozen v3.1 trunk, heads on train_v2k)
+
+label gap on val_v2k, |acoustic - closed| F1: median 28.9 Hz, mean 33.6
+
+F1 MAE on val_v2k, Hz (signed median in brackets): head -> against closed label | against acoustic label
+  d078_closed_s1       20.5 ( +1.5) |   32.3 (-24.0)
+  d078_closed_s2       20.5 ( +1.4) |   32.3 (-24.0)
+  d078_acoustic_s1     34.7 (+25.8) |   19.6 ( -0.2)
+  d078_acoustic_s2     34.8 (+26.0) |   19.5 ( -0.1)
+
+C = 20.5 Hz, A = 34.7 Hz, C / A = 0.591 (seed means); per seed 1: 0.592, 2: 0.590
+
+reported: F2-F4 MAE against the closed label on val_v2k (closed head / acoustic head), seed means
+  F2: 25.6 / 52.1
+  F3: 22.4 / 91.5
+  F4: 35.5 / 207.1
+reported: other sets (labels: closed-glottis = acoustic there), F1 MAE and signed median, seed means, closed / acoustic head
+  v2:formants                    26.3 ( -7.5) /   28.5 (+11.8)
+  vocalset_val_d16k:formants     34.9 ( -3.1) /   40.4 (+12.2)
+  zeroth_korean_val_d16k:formants   21.4 ( -1.6) /   30.4 (+16.7)
+reported: PTDB-TUG dev closed-phase F1 bias, median Hz (women / men), seed means; v3.1 for scale
+  closed   -7.0 / +1.7
+  acoustic +13.9 / +15.5
+  v3.1     +4.2 / +5.7
+reported: KL (D-060's files), F1 error against the closed label, median by gap 0 / 0.1 / 0.2 / 0.3 (men; women)
+  closed   +10.4 / +12.0 / +28.1 / +37.0; +22.4 / +25.8 / +36.4 / +46.6
+  acoustic +32.3 / +29.5 / +43.4 / +52.5; +42.1 / +47.7 / +54.6 / +63.6
+reported: the same against D-077's measured response (error - dE), median by gap (men; women)
+  closed   +1.3 / -3.3 / -0.1 / -7.2; +6.2 / +8.6 / +6.9 / +6.1
+  acoustic +17.0 / +16.0 / +15.2 / +13.0; +30.1 / +28.9 / +28.8 / +25.9
+
+DECISION: separable
