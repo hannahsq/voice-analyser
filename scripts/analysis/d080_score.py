@@ -1,5 +1,5 @@
 """D-080 scoring (GPU): each run's F1-F4 and opening on fixed clean crops. val_v2ko at 400, 100 and 50 frames (both
-formant labels, the opening label, the crop's clip), train_v2's validation clips (uncoupled) and the resynthesised
+formant labels, the opening label, the Rd label, the crop's clip), train_v2's validation clips (uncoupled) and the resynthesised
 validation sets at 400 frames. Runs without an opening head score the formants only.
 
     python scripts/analysis/d080_score.py <run> ...   (VA_DEVICE=cuda)
@@ -54,7 +54,7 @@ def score(run, ck, data):
     vq = TorchVQT(dev)
     res = {}
     for name, ds in data.items():
-        rows = {"pred": [], "ref": [], "son": [], "op": [], "op_ref": [], "item": []}
+        rows = {"pred": [], "ref": [], "son": [], "op": [], "op_ref": [], "rd": [], "item": []}
         k = 0
         with torch.inference_mode():
             for audio, lab in DataLoader(ds, BATCH, num_workers=4, collate_fn=collate):
@@ -70,6 +70,7 @@ def score(run, ck, data):
                 k += len(audio)
                 if "glottal_opening" in lab:
                     rows["op_ref"].append(lab["glottal_opening"].numpy().reshape(-1))
+                    rows["rd"].append(lab["rd"].numpy().reshape(-1))  # amendment 2026-11-04: the opening beyond Rd
                     rows["op"].append(out["opening"].float().cpu().numpy().reshape(-1) if "opening" in out
                                       else np.full(len(audio) * t, np.nan, np.float32))
         for key, v in rows.items():

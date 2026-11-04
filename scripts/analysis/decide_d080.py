@@ -70,6 +70,25 @@ def opening_r2(z, name):
     return r2(y[m], p[m]) if m.sum() > 1 else float("nan")
 
 
+def opening_parts(z, name):
+    """Amendment (2026-11-04, before any result): the opening R² within crops (each crop's mean removed from both),
+    between crops (crop means), and beyond Rd: an Rd-only boosted-tree fit of <a> on even crops, then on odd crops
+    R² of (label - fit) by (prediction - fit), with the Rd-only fit's own R² there for reference."""
+    from sklearn.ensemble import HistGradientBoostingRegressor
+
+    y, p, rd, it = z[f"{name}|op_ref"], z[f"{name}|op"], z[f"{name}|rd"], z[f"{name}|item"]
+    m = ok(z, name) & np.isfinite(y) & np.isfinite(p) & np.isfinite(rd)
+    y, p, rd, it = y[m], p[m], rd[m], it[m]
+    crops, inv = np.unique(it, return_inverse=True)
+    n = np.bincount(inv)
+    ym, pm = np.bincount(inv, y) / n, np.bincount(inv, p) / n
+    ev = it % 2 == 0
+    f = HistGradientBoostingRegressor(max_iter=300, random_state=0).fit(rd[ev, None], y[ev])
+    fo = f.predict(rd[~ev, None])
+    return {"within": r2(y - ym[inv], p - pm[inv]), "between": r2(ym, pm),
+            "beyond Rd": r2(y[~ev] - fo, p[~ev] - fo), "Rd-only": r2(y[~ev], fo)}
+
+
 def last_eval(run):
     rows = [json.loads(ln) for ln in open(f"runs/{run}/log.jsonl") if '"eval"' in ln or "F1_mae_hz" in ln]
     rows = [r for r in rows if "F1_mae_hz" in r.get("eval", r)]
@@ -107,6 +126,9 @@ if __name__ == "__main__":
             vals.append(r2(zz[f"{name}|op_ref"][m], zz[f"{name}|op"][m]))
         parts.append(f"{np.mean(vals):.3f}")
     L.append(f"    reported, by the crop's F1 spread terciles (cut at {qs[0]:.0f} / {qs[1]:.0f} cents), seed means: {' / '.join(parts)}")
+    # amendment 2026-11-04 (reported only): within- and between-crop parts, and the opening beyond Rd
+    L.append("    reported (amendment 2026-11-04), by seed, 400-frame crops: " + "; ".join(
+        f"s{s} " + ", ".join(f"{k} {v:.3f}" for k, v in opening_parts(Z["A1", s], name).items()) for s in SEEDS))
     # (2) used
     sl = {}
     for arm in RUNS:
