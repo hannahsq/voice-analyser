@@ -1,0 +1,153 @@
+Probe 'valley' (D-050): d072_factorised_s2
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  null/change/F1             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/F2             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/F3             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/F4             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/B1             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/B2             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/B3             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/B4             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/VTL            +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/change/f0             +0.0000 [+0.0000, +0.0000]  ideal 0
+  null/sigma_growth/F1       sigma log2 change: ref:+0.00 valley=['null', 0.5, 0.0]:+0.00
+  null/sigma_growth/F2       sigma log2 change: ref:+0.00 valley=['null', 0.5, 0.0]:+0.00
+  null/sigma_growth/F3       sigma log2 change: ref:+0.00 valley=['null', 0.5, 0.0]:+0.00
+  null/sigma_growth/F4       sigma log2 change: ref:+0.00 valley=['null', 0.5, 0.0]:+0.00
+  null/sigma_growth/VTL      sigma log2 change: ref:+0.00 valley=['null', 0.5, 0.0]:+0.00
+  peak33_+6/change/F1        +0.0078 [+0.0051, +0.0092]  ideal 0
+  peak33_+6/change/F2        +0.0002 [-0.0004, +0.0004]  ideal 0
+  peak33_+6/change/F3        +0.0003 [+0.0001, +0.0006]  ideal 0
+  peak33_+6/change/F4        -0.0002 [-0.0006, +0.0002]  ideal 0
+  peak33_+6/change/B1        +0.1806 [+0.1630, +0.1980]  ideal 0
+  peak33_+6/change/B2        +0.0035 [-0.0023, +0.0063]  ideal 0
+  peak33_+6/change/B3        -0.0044 [-0.0063, +0.0011]  ideal 0
+  peak33_+6/change/B4        +0.0143 [+0.0126, +0.0207]  ideal 0
+  peak33_+6/change/VTL       +0.0004 [-0.0003, +0.0010]  ideal 0
+  peak33_+6/change/f0        -0.0000 [-0.0001, +0.0001]  ideal 0
+  peak33_+6/sigma_growth/F1  sigma log2 change: ref:+0.00 valley=['peak', 0.33, 6.0]:+0.16
+  peak33_+6/sigma_growth/F2  sigma log2 change: ref:+0.00 valley=['peak', 0.33, 6.0]:+0.10
+  peak33_+6/sigma_growth/F3  sigma log2 change: ref:+0.00 valley=['peak', 0.33, 6.0]:+0.05
+  peak33_+6/sigma_growth/F4  sigma log2 change: ref:+0.00 valley=['peak', 0.33, 6.0]:+0.03
+  peak33_+6/sigma_growth/VTL sigma log2 change: ref:+0.00 valley=['peak', 0.33, 6.0]:+0.03
+  peak33_-6/change/F1        -0.0024 [-0.0030, -0.0017]  ideal 0
+  peak33_-6/change/F2        +0.0000 [-0.0001, +0.0003]  ideal 0
+  peak33_-6/change/F3        -0.0002 [-0.0003, +0.0000]  ideal 0
+  peak33_-6/change/F4        +0.0006 [+0.0004, +0.0008]  ideal 0
+  peak33_-6/change/B1        -0.1151 [-0.1230, -0.1048]  ideal 0
+  peak33_-6/change/B2        +0.0035 [-0.0015, +0.0125]  ideal 0
+  peak33_-6/change/B3        +0.0079 [+0.0055, +0.0095]  ideal 0
+  peak33_-6/change/B4        -0.0136 [-0.0187, -0.0072]  ideal 0
+  peak33_-6/change/VTL       -0.0007 [-0.0012, -0.0004]  ideal 0
+  peak33_-6/change/f0        +0.0000 [-0.0000, +0.0000]  ideal 0
+  peak33_-6/sigma_growth/F1  sigma log2 change: ref:+0.00 valley=['peak', 0.33, -6.0]:-0.01
+  peak33_-6/sigma_growth/F2  sigma log2 change: ref:+0.00 valley=['peak', 0.33, -6.0]:-0.02
+  peak33_-6/sigma_growth/F3  sigma log2 change: ref:+0.00 valley=['peak', 0.33, -6.0]:-0.00
+  peak33_-6/sigma_growth/F4  sigma log2 change: ref:+0.00 valley=['peak', 0.33, -6.0]:+0.01
+  peak33_-6/sigma_growth/VTL sigma log2 change: ref:+0.00 valley=['peak', 0.33, -6.0]:-0.03
+  peak50_+6/change/F1        -0.0006 [-0.0012, -0.0000]  ideal 0
+  peak50_+6/change/F2        -0.0004 [-0.0010, +0.0003]  ideal 0
+  peak50_+6/change/F3        +0.0006 [+0.0002, +0.0007]  ideal 0
+  peak50_+6/change/F4        +0.0000 [-0.0001, +0.0003]  ideal 0
+  peak50_+6/change/B1        +0.0517 [+0.0470, +0.0620]  ideal 0
+  peak50_+6/change/B2        +0.0327 [+0.0209, +0.0395]  ideal 0
+  peak50_+6/change/B3        -0.0028 [-0.0075, +0.0041]  ideal 0
+  peak50_+6/change/B4        +0.0012 [-0.0096, +0.0090]  ideal 0
+  peak50_+6/change/VTL       -0.0005 [-0.0009, +0.0006]  ideal 0
+  peak50_+6/change/f0        -0.0000 [-0.0001, +0.0000]  ideal 0
+  peak50_+6/sigma_growth/F1  sigma log2 change: ref:+0.00 valley=['peak', 0.5, 6.0]:+0.09
+  peak50_+6/sigma_growth/F2  sigma log2 change: ref:+0.00 valley=['peak', 0.5, 6.0]:+0.12
+  peak50_+6/sigma_growth/F3  sigma log2 change: ref:+0.00 valley=['peak', 0.5, 6.0]:+0.06
+  peak50_+6/sigma_growth/F4  sigma log2 change: ref:+0.00 valley=['peak', 0.5, 6.0]:+0.04
+  peak50_+6/sigma_growth/VTL sigma log2 change: ref:+0.00 valley=['peak', 0.5, 6.0]:+0.02
+  peak50_-6/change/F1        +0.0003 [-0.0000, +0.0011]  ideal 0
+  peak50_-6/change/F2        -0.0000 [-0.0005, +0.0004]  ideal 0
+  peak50_-6/change/F3        -0.0004 [-0.0004, -0.0002]  ideal 0
+  peak50_-6/change/F4        +0.0001 [-0.0001, +0.0002]  ideal 0
+  peak50_-6/change/B1        -0.0356 [-0.0415, -0.0261]  ideal 0
+  peak50_-6/change/B2        -0.0156 [-0.0235, -0.0069]  ideal 0
+  peak50_-6/change/B3        +0.0161 [+0.0127, +0.0194]  ideal 0
+  peak50_-6/change/B4        +0.0005 [-0.0083, +0.0064]  ideal 0
+  peak50_-6/change/VTL       -0.0006 [-0.0010, +0.0005]  ideal 0
+  peak50_-6/change/f0        +0.0000 [-0.0001, +0.0001]  ideal 0
+  peak50_-6/sigma_growth/F1  sigma log2 change: ref:+0.00 valley=['peak', 0.5, -6.0]:+0.00
+  peak50_-6/sigma_growth/F2  sigma log2 change: ref:+0.00 valley=['peak', 0.5, -6.0]:-0.01
+  peak50_-6/sigma_growth/F3  sigma log2 change: ref:+0.00 valley=['peak', 0.5, -6.0]:-0.00
+  peak50_-6/sigma_growth/F4  sigma log2 change: ref:+0.00 valley=['peak', 0.5, -6.0]:-0.00
+  peak50_-6/sigma_growth/VTL sigma log2 change: ref:+0.00 valley=['peak', 0.5, -6.0]:-0.01
+  peak67_+6/change/F1        -0.0005 [-0.0009, +0.0000]  ideal 0
+  peak67_+6/change/F2        -0.0014 [-0.0024, -0.0008]  ideal 0
+  peak67_+6/change/F3        +0.0004 [+0.0002, +0.0007]  ideal 0
+  peak67_+6/change/F4        +0.0004 [+0.0002, +0.0006]  ideal 0
+  peak67_+6/change/B1        +0.0031 [-0.0010, +0.0072]  ideal 0
+  peak67_+6/change/B2        +0.1107 [+0.1027, +0.1306]  ideal 0
+  peak67_+6/change/B3        -0.0148 [-0.0172, -0.0096]  ideal 0
+  peak67_+6/change/B4        -0.0209 [-0.0262, -0.0180]  ideal 0
+  peak67_+6/change/VTL       +0.0001 [-0.0005, +0.0007]  ideal 0
+  peak67_+6/change/f0        +0.0001 [-0.0000, +0.0001]  ideal 0
+  peak67_+6/sigma_growth/F1  sigma log2 change: ref:+0.00 valley=['peak', 0.67, 6.0]:+0.07
+  peak67_+6/sigma_growth/F2  sigma log2 change: ref:+0.00 valley=['peak', 0.67, 6.0]:+0.13
+  peak67_+6/sigma_growth/F3  sigma log2 change: ref:+0.00 valley=['peak', 0.67, 6.0]:+0.04
+  peak67_+6/sigma_growth/F4  sigma log2 change: ref:+0.00 valley=['peak', 0.67, 6.0]:+0.03
+  peak67_+6/sigma_growth/VTL sigma log2 change: ref:+0.00 valley=['peak', 0.67, 6.0]:-0.00
+  peak67_-6/change/F1        +0.0002 [-0.0001, +0.0005]  ideal 0
+  peak67_-6/change/F2        +0.0006 [+0.0000, +0.0013]  ideal 0
+  peak67_-6/change/F3        -0.0005 [-0.0006, -0.0004]  ideal 0
+  peak67_-6/change/F4        -0.0002 [-0.0003, -0.0000]  ideal 0
+  peak67_-6/change/B1        -0.0043 [-0.0091, -0.0007]  ideal 0
+  peak67_-6/change/B2        -0.0825 [-0.1003, -0.0666]  ideal 0
+  peak67_-6/change/B3        +0.0216 [+0.0174, +0.0269]  ideal 0
+  peak67_-6/change/B4        +0.0248 [+0.0189, +0.0273]  ideal 0
+  peak67_-6/change/VTL       +0.0004 [+0.0001, +0.0008]  ideal 0
+  peak67_-6/change/f0        -0.0000 [-0.0001, +0.0000]  ideal 0
+  peak67_-6/sigma_growth/F1  sigma log2 change: ref:+0.00 valley=['peak', 0.67, -6.0]:+0.00
+  peak67_-6/sigma_growth/F2  sigma log2 change: ref:+0.00 valley=['peak', 0.67, -6.0]:+0.04
+  peak67_-6/sigma_growth/F3  sigma log2 change: ref:+0.00 valley=['peak', 0.67, -6.0]:+0.02
+  peak67_-6/sigma_growth/F4  sigma log2 change: ref:+0.00 valley=['peak', 0.67, -6.0]:+0.03
+  peak67_-6/sigma_growth/VTL sigma log2 change: ref:+0.00 valley=['peak', 0.67, -6.0]:+0.01
+  fill_+3/change/F1          +0.0025 [+0.0018, +0.0040]  ideal 0
+  fill_+3/change/F2          -0.0006 [-0.0009, -0.0003]  ideal 0
+  fill_+3/change/F3          +0.0004 [+0.0004, +0.0006]  ideal 0
+  fill_+3/change/F4          +0.0000 [-0.0002, +0.0002]  ideal 0
+  fill_+3/change/B1          +0.1117 [+0.1047, +0.1254]  ideal 0
+  fill_+3/change/B2          +0.0721 [+0.0569, +0.0810]  ideal 0
+  fill_+3/change/B3          -0.0142 [-0.0191, -0.0124]  ideal 0
+  fill_+3/change/B4          -0.0037 [-0.0129, +0.0010]  ideal 0
+  fill_+3/change/VTL         +0.0004 [+0.0001, +0.0007]  ideal 0
+  fill_+3/change/f0          -0.0000 [-0.0001, +0.0001]  ideal 0
+  fill_+3/sigma_growth/F1    sigma log2 change: ref:+0.00 valley=['fill', 0.5, 3.0]:+0.10
+  fill_+3/sigma_growth/F2    sigma log2 change: ref:+0.00 valley=['fill', 0.5, 3.0]:+0.09
+  fill_+3/sigma_growth/F3    sigma log2 change: ref:+0.00 valley=['fill', 0.5, 3.0]:+0.04
+  fill_+3/sigma_growth/F4    sigma log2 change: ref:+0.00 valley=['fill', 0.5, 3.0]:+0.02
+  fill_+3/sigma_growth/VTL   sigma log2 change: ref:+0.00 valley=['fill', 0.5, 3.0]:+0.02
+  fill_+6/change/F1          +0.0095 [+0.0061, +0.0115]  ideal 0
+  fill_+6/change/F2          -0.0012 [-0.0021, -0.0005]  ideal 0
+  fill_+6/change/F3          +0.0010 [+0.0008, +0.0013]  ideal 0
+  fill_+6/change/F4          -0.0001 [-0.0007, +0.0002]  ideal 0
+  fill_+6/change/B1          +0.2330 [+0.2212, +0.2627]  ideal 0
+  fill_+6/change/B2          +0.1510 [+0.1302, +0.1704]  ideal 0
+  fill_+6/change/B3          -0.0298 [-0.0411, -0.0255]  ideal 0
+  fill_+6/change/B4          -0.0138 [-0.0239, -0.0042]  ideal 0
+  fill_+6/change/VTL         +0.0012 [+0.0005, +0.0026]  ideal 0
+  fill_+6/change/f0          +0.0001 [-0.0001, +0.0002]  ideal 0
+  fill_+6/sigma_growth/F1    sigma log2 change: ref:+0.00 valley=['fill', 0.5, 6.0]:+0.28
+  fill_+6/sigma_growth/F2    sigma log2 change: ref:+0.00 valley=['fill', 0.5, 6.0]:+0.25
+  fill_+6/sigma_growth/F3    sigma log2 change: ref:+0.00 valley=['fill', 0.5, 6.0]:+0.12
+  fill_+6/sigma_growth/F4    sigma log2 change: ref:+0.00 valley=['fill', 0.5, 6.0]:+0.09
+  fill_+6/sigma_growth/VTL   sigma log2 change: ref:+0.00 valley=['fill', 0.5, 6.0]:+0.04
+  fill_-6/change/F1          -0.0024 [-0.0038, -0.0009]  ideal 0
+  fill_-6/change/F2          +0.0007 [+0.0001, +0.0019]  ideal 0
+  fill_-6/change/F3          -0.0007 [-0.0010, -0.0007]  ideal 0
+  fill_-6/change/F4          -0.0001 [-0.0002, +0.0003]  ideal 0
+  fill_-6/change/B1          -0.1578 [-0.1703, -0.1494]  ideal 0
+  fill_-6/change/B2          -0.1042 [-0.1327, -0.0748]  ideal 0
+  fill_-6/change/B3          +0.0309 [+0.0251, +0.0373]  ideal 0
+  fill_-6/change/B4          +0.0065 [-0.0018, +0.0247]  ideal 0
+  fill_-6/change/VTL         +0.0007 [-0.0003, +0.0011]  ideal 0
+  fill_-6/change/f0          -0.0001 [-0.0003, +0.0000]  ideal 0
+  fill_-6/sigma_growth/F1    sigma log2 change: ref:+0.00 valley=['fill', 0.5, -6.0]:-0.04
+  fill_-6/sigma_growth/F2    sigma log2 change: ref:+0.00 valley=['fill', 0.5, -6.0]:-0.02
+  fill_-6/sigma_growth/F3    sigma log2 change: ref:+0.00 valley=['fill', 0.5, -6.0]:+0.00
+  fill_-6/sigma_growth/F4    sigma log2 change: ref:+0.00 valley=['fill', 0.5, -6.0]:+0.05
+  fill_-6/sigma_growth/VTL   sigma log2 change: ref:+0.00 valley=['fill', 0.5, -6.0]:-0.01

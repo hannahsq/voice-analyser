@@ -1,0 +1,34 @@
+Uniform scale probe (D-050, probe 11): d072_factorised_s1
+slopes against log2 r: point [95 % speaker bootstrap]; shuffle null 2.5-97.5 %; ideal
+clean: Hillenbrand |error| F1-F4 39 / 44 / 53 / 99 Hz; PTDB-TUG RPA 87.7 %
+  hillenbrand/slope/F1         +0.976 [+0.971, +0.982]  null [-0.349, +0.336]  ideal +1
+  hillenbrand/slope/F2         +1.001 [+0.998, +1.003]  null [-0.449, +0.419]  ideal +1
+  hillenbrand/slope/F3         +1.003 [+1.000, +1.004]  null [-0.461, +0.430]  ideal +1
+  hillenbrand/slope/F4         +1.006 [+1.000, +1.010]  null [-0.420, +0.396]  ideal +1
+  hillenbrand/slope/B1         +0.688 [+0.633, +0.747]  null [-0.053, +0.054]  ideal +1
+  hillenbrand/slope/B2         +1.399 [+1.348, +1.455]  null [-0.144, +0.132]  ideal +1
+  hillenbrand/slope/B3         +1.414 [+1.376, +1.480]  null [-0.145, +0.140]  ideal +1
+  hillenbrand/slope/B4         +1.752 [+1.646, +1.870]  null [-0.179, +0.188]  ideal +1
+  hillenbrand/slope/VTL        -0.979 [-0.996, -0.958]  null [-0.281, +0.300]  ideal -1
+  ptdb_tug/slope/F1            +1.044 [+1.005, +1.093]  null [-0.092, +0.102]  ideal +1
+  ptdb_tug/slope/F2            +0.999 [+0.985, +1.009]  null [-0.090, +0.092]  ideal +1
+  ptdb_tug/slope/F3            +0.998 [+0.988, +1.007]  null [-0.090, +0.094]  ideal +1
+  ptdb_tug/slope/F4            +0.983 [+0.971, +0.991]  null [-0.090, +0.094]  ideal +1
+  ptdb_tug/slope/B1            +0.284 [+0.154, +0.435]  null [-0.031, +0.032]  ideal +1
+  ptdb_tug/slope/B2            +1.312 [+1.255, +1.465]  null [-0.119, +0.122]  ideal +1
+  ptdb_tug/slope/B3            +1.619 [+1.529, +1.716]  null [-0.133, +0.156]  ideal +1
+  ptdb_tug/slope/B4            +1.570 [+1.364, +1.673]  null [-0.122, +0.127]  ideal +1
+  ptdb_tug/slope/VTL           -0.903 [-0.986, -0.733]  null [-0.083, +0.079]  ideal -1
+  ptdb_tug/slope/f0            +1.003 [+1.002, +1.006]  null [-0.091, +0.092]  ideal +1
+  hillenbrand/r1.090/F1/abs_error_change_hz +2.6 [+1.9, +3.4] Hz
+  hillenbrand/r1.090/F2/abs_error_change_hz +4.3 [+3.3, +5.3] Hz
+  hillenbrand/r1.090/F3/abs_error_change_hz +3.1 [-3.6, +9.1] Hz
+  hillenbrand/r1.090/F4/abs_error_change_hz +8.8 [-1.3, +18.3] Hz
+  hillenbrand/r1.180/F1/abs_error_change_hz +4.7 [+3.4, +6.1] Hz
+  hillenbrand/r1.180/F2/abs_error_change_hz +9.2 [+6.8, +12.8] Hz
+  hillenbrand/r1.180/F3/abs_error_change_hz +8.6 [+1.9, +14.3] Hz
+  hillenbrand/r1.180/F4/abs_error_change_hz +29.9 [+18.9, +42.1] Hz
+  ptdb_tug/r0.850/f0/rpa_change_points     -0.9 points
+  ptdb_tug/r0.920/f0/rpa_change_points     -0.9 points
+  ptdb_tug/r1.090/f0/rpa_change_points     -0.7 points
+  ptdb_tug/r1.180/f0/rpa_change_points     -1.0 points

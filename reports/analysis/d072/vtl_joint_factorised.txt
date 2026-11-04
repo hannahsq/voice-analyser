@@ -1,0 +1,128 @@
+
+[d040_5b_s1_b20k] synthetic per-clip median |error| (c): tube, not from f0 10  cascade, not from f0 50  length from f0 21; coverage frames 0.80 / 0.98
+[d040_5b_s1_b20k] probe: median |slope| f0 <= 250 Hz 9.5 c/oct; shuffle null median 9.0 (95 % 12.6); excess +0.5; P(null >= obs) 0.404; vowel spread 21 c; bias by length 13: +10  15.5: +9  18: -11
+
+[d040_5b_s2_b20k] synthetic per-clip median |error| (c): tube, not from f0 12  cascade, not from f0 47  length from f0 24; coverage frames 0.79 / 0.99
+[d040_5b_s2_b20k] probe: median |slope| f0 <= 250 Hz 9.1 c/oct; shuffle null median 8.4 (95 % 11.4); excess +0.7; P(null >= obs) 0.356; vowel spread 18 c; bias by length 13: +15  15.5: +17  18: -10
+
+[d072_factorised_s1] synthetic per-clip median |error| (c): tube, not from f0 10  cascade, not from f0 50  length from f0 21; coverage frames 0.80 / 0.98
+[d072_factorised_s1] probe: median |slope| f0 <= 250 Hz 9.3 c/oct; shuffle null median 9.1 (95 % 12.7); excess +0.2; P(null >= obs) 0.475; vowel spread 21 c; bias by length 13: +10  15.5: +9  18: -12
+
+[d072_factorised_s2] synthetic per-clip median |error| (c): tube, not from f0 12  cascade, not from f0 47  length from f0 24; coverage frames 0.79 / 0.99
+[d072_factorised_s2] probe: median |slope| f0 <= 250 Hz 9.1 c/oct; shuffle null median 8.0 (95 % 11.6); excess +1.0; P(null >= obs) 0.310; vowel spread 18 c; bias by length 13: +14  15.5: +18  18: -11
+
+Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
+  reliability
+    d040_5b_s1_b20k                 0.228 [   0.168,    0.274]
+    d040_5b_s2_b20k                 0.261 [   0.205,    0.303]
+    d072_factorised_s1              0.227 [   0.168,    0.273]
+    d072_factorised_s2              0.261 [   0.205,    0.303]
+    A                               0.153 [   0.104,    0.198]
+  rel men
+    d040_5b_s1_b20k                 0.254 [   0.164,    0.332]
+    d040_5b_s2_b20k                 0.328 [   0.235,    0.402]
+    d072_factorised_s1              0.254 [   0.163,    0.333]
+    d072_factorised_s2              0.329 [   0.235,    0.402]
+    A                               0.170 [   0.089,    0.255]
+  rel women
+    d040_5b_s1_b20k                 0.201 [   0.130,    0.259]
+    d040_5b_s2_b20k                 0.194 [   0.136,    0.244]
+    d072_factorised_s1              0.201 [   0.130,    0.258]
+    d072_factorised_s2              0.194 [   0.136,    0.243]
+    A                               0.135 [   0.089,    0.174]
+  w/m
+    d040_5b_s1_b20k                 0.869 [   0.844,    0.900]
+    d040_5b_s2_b20k                 0.860 [   0.843,    0.893]
+    d072_factorised_s1              0.869 [   0.844,    0.900]
+    d072_factorised_s2              0.861 [   0.843,    0.893]
+    A                               0.863 [   0.849,    0.891]
+  within SD c
+    d040_5b_s1_b20k               119.030 [ 113.492,  124.966]
+    d040_5b_s2_b20k               110.776 [ 105.592,  116.099]
+    d072_factorised_s1            118.747 [ 113.222,  124.621]
+    d072_factorised_s2            110.954 [ 105.774,  116.289]
+    A                             155.816 [ 149.963,  161.710]
+  men cm
+    d040_5b_s1_b20k                17.015 [  16.514,   17.347]
+    d040_5b_s2_b20k                17.316 [  16.824,   17.524]
+    d072_factorised_s1             17.005 [  16.507,   17.345]
+    d072_factorised_s2             17.310 [  16.817,   17.516]
+    A                              17.837 [  17.431,   18.062]
+  women cm
+    d040_5b_s1_b20k                14.782 [  14.542,   15.078]
+    d040_5b_s2_b20k                14.900 [  14.638,   15.138]
+    d072_factorised_s1             14.780 [  14.542,   15.080]
+    d072_factorised_s2             14.898 [  14.635,   15.131]
+    A                              15.390 [  15.248,   15.657]
+  children cm
+    d040_5b_s1_b20k                13.869 [  13.721,   14.218]
+    d040_5b_s2_b20k                13.986 [  13.642,   14.232]
+    d072_factorised_s1             13.874 [  13.734,   14.230]
+    d072_factorised_s2             13.978 [  13.638,   14.229]
+    A                              14.679 [  14.421,   15.008]
+  r(len, f0) in sex
+    d040_5b_s1_b20k                -0.399 [  -0.641,   -0.127]
+    d040_5b_s2_b20k                -0.417 [  -0.674,   -0.128]
+    d072_factorised_s1             -0.398 [  -0.640,   -0.125]
+    d072_factorised_s2             -0.417 [  -0.674,   -0.127]
+    A                              -0.347 [  -0.582,   -0.093]
+
+Paired differences (speaker bootstrap)
+  d040_5b_s1_b20k - A                          reliability    +0.075 [  +0.037,   +0.113]
+  d040_5b_s1_b20k - A                          w/m            +0.006 [  -0.025,   +0.023]
+  d040_5b_s1_b20k - A                          within SD c   -36.786 [ -41.579,  -31.902]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            reliability    -0.034 [  -0.060,   -0.005]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            w/m            +0.008 [  -0.011,   +0.019]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            within SD c    +8.253 [  +5.542,  +11.353]
+  d040_5b_s1_b20k - d072_factorised_s1         reliability    +0.000 [  -0.000,   +0.001]
+  d040_5b_s1_b20k - d072_factorised_s1         w/m            -0.000 [  -0.001,   +0.000]
+  d040_5b_s1_b20k - d072_factorised_s1         within SD c    +0.282 [  +0.155,   +0.414]
+  d040_5b_s1_b20k - d072_factorised_s2         reliability    -0.034 [  -0.060,   -0.005]
+  d040_5b_s1_b20k - d072_factorised_s2         w/m            +0.008 [  -0.011,   +0.019]
+  d040_5b_s1_b20k - d072_factorised_s2         within SD c    +8.076 [  +5.370,  +11.235]
+  d040_5b_s2_b20k - A                          reliability    +0.109 [  +0.064,   +0.150]
+  d040_5b_s2_b20k - A                          w/m            -0.002 [  -0.028,   +0.017]
+  d040_5b_s2_b20k - A                          within SD c   -45.040 [ -48.915,  -41.423]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            reliability    +0.034 [  +0.005,   +0.060]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            w/m            -0.008 [  -0.019,   +0.011]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            within SD c    -8.253 [ -11.353,   -5.542]
+  d040_5b_s2_b20k - d072_factorised_s1         reliability    +0.034 [  +0.005,   +0.060]
+  d040_5b_s2_b20k - d072_factorised_s1         w/m            -0.009 [  -0.019,   +0.011]
+  d040_5b_s2_b20k - d072_factorised_s1         within SD c    -7.971 [ -11.001,   -5.285]
+  d040_5b_s2_b20k - d072_factorised_s2         reliability    -0.000 [  -0.001,   +0.000]
+  d040_5b_s2_b20k - d072_factorised_s2         w/m            -0.000 [  -0.001,   +0.001]
+  d040_5b_s2_b20k - d072_factorised_s2         within SD c    -0.177 [  -0.230,   -0.122]
+  d072_factorised_s1 - A                       reliability    +0.075 [  +0.037,   +0.113]
+  d072_factorised_s1 - A                       w/m            +0.006 [  -0.024,   +0.023]
+  d072_factorised_s1 - A                       within SD c   -37.069 [ -41.903,  -32.302]
+  d072_factorised_s1 - d040_5b_s1_b20k         reliability    -0.000 [  -0.001,   +0.000]
+  d072_factorised_s1 - d040_5b_s1_b20k         w/m            +0.000 [  -0.000,   +0.001]
+  d072_factorised_s1 - d040_5b_s1_b20k         within SD c    -0.282 [  -0.414,   -0.155]
+  d072_factorised_s1 - d040_5b_s2_b20k         reliability    -0.034 [  -0.060,   -0.005]
+  d072_factorised_s1 - d040_5b_s2_b20k         w/m            +0.009 [  -0.011,   +0.019]
+  d072_factorised_s1 - d040_5b_s2_b20k         within SD c    +7.971 [  +5.285,  +11.001]
+  d072_factorised_s1 - d072_factorised_s2      reliability    -0.034 [  -0.060,   -0.006]
+  d072_factorised_s1 - d072_factorised_s2      w/m            +0.009 [  -0.011,   +0.019]
+  d072_factorised_s1 - d072_factorised_s2      within SD c    +7.794 [  +5.101,  +10.832]
+  d072_factorised_s2 - A                       reliability    +0.109 [  +0.064,   +0.150]
+  d072_factorised_s2 - A                       w/m            -0.002 [  -0.028,   +0.017]
+  d072_factorised_s2 - A                       within SD c   -44.862 [ -48.728,  -41.270]
+  d072_factorised_s2 - d040_5b_s1_b20k         reliability    +0.034 [  +0.005,   +0.060]
+  d072_factorised_s2 - d040_5b_s1_b20k         w/m            -0.008 [  -0.019,   +0.011]
+  d072_factorised_s2 - d040_5b_s1_b20k         within SD c    -8.076 [ -11.235,   -5.370]
+  d072_factorised_s2 - d040_5b_s2_b20k         reliability    +0.000 [  -0.000,   +0.001]
+  d072_factorised_s2 - d040_5b_s2_b20k         w/m            +0.000 [  -0.001,   +0.001]
+  d072_factorised_s2 - d040_5b_s2_b20k         within SD c    +0.177 [  +0.122,   +0.230]
+  d072_factorised_s2 - d072_factorised_s1      reliability    +0.034 [  +0.006,   +0.060]
+  d072_factorised_s2 - d072_factorised_s1      w/m            -0.009 [  -0.019,   +0.011]
+  d072_factorised_s2 - d072_factorised_s1      within SD c    -7.794 [ -10.832,   -5.101]
+
+Seed mean factorised (d072_factorised_s1 + d072_factorised_s2): reliability - A +0.092 [+0.052, +0.129]; w/m 0.865; probe excess +0.6 c/oct
+
+Seed mean 5b (d040_5b_s1_b20k + d040_5b_s2_b20k): reliability - A +0.092 [+0.052, +0.129]; w/m 0.865; probe excess +0.6 c/oct
+
+Paired seed means factorised-5b: reliability -0.000 [-0.001, +0.000]; w/m 0.865; probe excess +0.6 c/oct
+
+Paired seed means s1: reliability -0.000 [-0.001, +0.000]; w/m 0.869; probe excess +0.2 c/oct
+
+Paired seed means s2: reliability +0.000 [-0.000, +0.001]; w/m 0.861; probe excess +1.0 c/oct
