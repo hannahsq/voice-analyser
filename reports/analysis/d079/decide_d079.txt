@@ -1,0 +1,24 @@
+D-079: R² of the frame's mean glottal opening <a> from frozen trunk features (val_v2ko voiced frames)
+
+trunk      frame R² (head seeds 1 / 2)   clip R²   ridge
+  mix_s0    0.191 (0.189 / 0.194)        0.450    0.149
+  mix_s1    0.194 (0.189 / 0.198)        0.447    0.126
+  mix_s2    0.150 (0.145 / 0.156)        0.432    0.123
+  mix mean: 0.179
+  v2c2_s0   0.203 (0.202 / 0.203)        0.467    0.120
+  v2c2_s1   0.186 (0.186 / 0.186)        0.442    0.115
+  v2c2_s2   0.156 (0.156 / 0.156)        0.435    0.092
+  v2c2 mean: 0.182
+  v2c_s0    0.195 (0.195 / 0.196)        0.459    0.128
+  v2c_s1    0.193 (0.201 / 0.185)        0.442    0.125
+  v2c_s2    0.140 (0.140 / 0.140)        0.420    0.101
+  v2c mean: 0.176
+  v31_s1    0.172 (0.172 / 0.172)        0.470    0.124
+  v31_s2    0.206 (0.207 / 0.204)        0.498    0.135
+  v3.1 mean: 0.189
+ceiling: <a> from the frame's Rd label alone, R² 0.748 (d079_opening_share.py ceiling)
+
+D = R²(v2c2) - R²(mix) by seed: +0.011, -0.008, +0.006; mean +0.003
+mix seed mean R² 0.179: not carried without coupling
+
+DECISION: not kept; not carried without coupling
