@@ -100,6 +100,21 @@ Gathered 2026-10-29 (Hannah, after D-045 to D-047): D-045 found real and synthet
 - **VTL-normalised formants as an output** (2026-10-27; Hannah, from earlier work where VTL-normalised formants classified vowels better). The formants scaled to a reference length (F × L / L_ref, a shift in log frequency) keep mostly the vowel's shape. Unlike Lobanov or Nearey normalisation, which need a speaker's whole vowel inventory, a VTL estimate works from one recording, which is how outcome recordings arrive. Use the speaker's length from the recording as a whole (or a leave-one-out over its tokens), never the same frame's estimate, which can absorb the vowel itself (D-035's vowel-spread measure).
 - **Splitting a formant change into size and shape** (2026-10-27; for the long-term surgical-outcomes aim). A before / after change in formants mixes a change in vocal-tract length (e.g. a raised or smaller larynx) with a change in articulation and resonance strategy. The VTL change and the change in VTL-normalised formants separate them. Worth doing once a VTL estimate passes on real voices, with its uncertainty carried through, since a small length change is easily within noise.
 
+- **Reallocating Saarbrücken: some voice-disorder speakers for training** (2026-11-04; Hannah). Saarbrücken (CC BY 4.0, EGG for every recording) is evaluation-only today (D-024), and none of its audio has been opened, so the allocation is still free. Pathological voices as resynthesis material would serve the surgical-outcomes aim directly, and no training pool has them. Counts from the five zips' `overview.csv` only (metadata: recording and speaker ids, dates, diagnosis, sex; birth dates are in there too, so never copy rows into the repo), extracted alone to `C:\github\datasets\saarbruecken_overview`:
+
+  | Group | Recordings | Speakers | Women / men | Speakers with more than one recording |
+  |---|---|---|---|---|
+  | Healthy | 869 | 854 | 430 / 424 | 14 |
+  | Recurrent laryngeal nerve paresis | 213 | 156 | 104 / 52 | 36 |
+  | Functional dysphonia | 112 | 108 | 73 / 35 | 3 |
+  | Hypofunctional dysphonia | 16 | 15 | 5 / 10 | 1 |
+  | Phonasthenia | 10 | 10 | 8 / 2 | 0 |
+
+  - *Checks before a split*: 9 speakers appear in two groups (5 functional dysphonia and healthy; 1 each in four other pairs), so a split is by speaker id across all groups, never by recording. The healthy zip has 687 numbered folders against 869 recordings in its overview, unexplained (recordings missing from the zip, or folders holding several); reconcile from the file listing before drawing anything.
+  - *Sketch*: draw by speaker id, stratified by group and sex, seeded, from metadata alone, before any audio is opened. Paresis and functional dysphonia split (for example one third to training); hypofunctional dysphonia and phonasthenia stay whole for evaluation; the healthy speakers keep D-024's semi-private / lockbox plan, perhaps with a dev share. The training share goes only to resynthesis (and never fits synthesis priors that the evaluation share then tests). Recorded as a decision with the rule and seed, like any tier change.
+  - *Paresis's repeat recordings*: 36 speakers recorded more than once, presumably over the course of treatment. Before / after pairs of the same voice are the closest thing in the open data to the outcomes use case, an argument for keeping those speakers on the evaluation side.
+  - *Weights*: CC BY 4.0 allows training; attribution is already in `ATTRIBUTION.md` (its row's use column would change).
+
 ## Evaluation: invariance and equivariance probes
 
 Hannah (2026-10-28): which perturbations should leave an output unchanged, and which should move it by a known amount, is one of the main tests separating a research-grade model from a hobbyist one. Today only the f0 probe exists (synthetic, invariance only). Each probe reports a slope against the imposed change with a shuffle null (equivariance: slope 1; invariance: slope 0), per output (F1–F4, bandwidths, VTL), and whether σ grows instead of the estimate drifting. Where possible each runs twice: on the synthetic probe (exact truth) and on real voices.
