@@ -1,0 +1,4 @@
+seed 1: formant pattern predicts R2 0.34 of the gap (held-out crops); disagreement slope on the predicted part 0.61, on the rest 0.09 (r 0.12)
+seed 1: frames 243686, gap mean 29.6 SD 28.6 Hz; disagreement mean 25.6 SD 18.3; slope 0.35 [0.33, 0.36], r 0.54; per clip: gap SD 18.3, slope 0.41, r 0.71
+seed 2: formant pattern predicts R2 0.34 of the gap (held-out crops); disagreement slope on the predicted part 0.62, on the rest 0.09 (r 0.11)
+seed 2: frames 243686, gap mean 29.6 SD 28.6 Hz; disagreement mean 25.8 SD 18.5; slope 0.35 [0.33, 0.36], r 0.54; per clip: gap SD 18.3, slope 0.41, r 0.71
