@@ -1,0 +1,8 @@
+v31_s1: HNR terciles cut at 15.9 / 28.4 dB; slope all / low HNR / mid / high
+  closed label  +0.877 / +0.874 / +0.908 / +0.846
+  h            +0.466 / +0.578 / +0.476 / +0.320
+  h+<a>        +0.526 / +0.622 / +0.527 / +0.412
+v31_s2: HNR terciles cut at 15.9 / 28.4 dB; slope all / low HNR / mid / high
+  closed label  +0.877 / +0.874 / +0.908 / +0.846
+  h            +0.465 / +0.582 / +0.472 / +0.312
+  h+<a>        +0.499 / +0.622 / +0.515 / +0.330
