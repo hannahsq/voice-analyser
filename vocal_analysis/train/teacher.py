@@ -128,6 +128,14 @@ class TrainConfig:
     # output at zero), in its own AdamW at side_lr x the model's schedule (weight decay 0.01), as D-056's read-out
     proj_side: str | None = None
     side_lr: float | None = None
+    # D-080: a glottal-opening head (TeacherConfig.opening_head) added at a branch, fresh, in its own AdamW at opening_lr
+    # x the model's schedule (weight decay 0.01); gradient into the trunk gated: 0 for opening_detach steps from the
+    # branch, then a linear ramp to 1 over opening_gate_ramp. Labels train.data's "glottal_opening" where a set has
+    # them; loss weight loss_weights["opening"]
+    opening: bool = False
+    opening_lr: float | None = None
+    opening_detach: int = 300
+    opening_gate_ramp: int = 700
 
 
 def _git() -> dict:
@@ -208,7 +216,7 @@ def _optimizer(model, cfg: "TrainConfig"):
         return torch.optim.AdamW(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
 
     own = (VTL_PREFIXES + (READOUT_PREFIX if cfg.readout_lr is not None else ())
-           + (SIDE_PREFIX if cfg.side_lr is not None else ()))  # their own groups, added by the trainer
+           + (SIDE_PREFIX if cfg.side_lr is not None else ()) + (OPENING_PREFIX if cfg.opening else ()))  # their own groups, added by the trainer
     if cfg.optimizer in ("adamw", "adan"):  # the VTL head (D-036) gets its own group, added by the trainer
         return rest([p for n, p in model.named_parameters() if not n.startswith(own)])
     if cfg.optimizer in ("muon", "muon_adan"):
@@ -293,6 +301,12 @@ def _vtl_gate(step: int, cfg: TrainConfig) -> float:
 VTL_PREFIXES = ("vtl_head.", "vtl_inst_head.")  # D-036 / D-051: the heads in the VTL parameter group
 READOUT_PREFIX = ("readout.",)  # D-056: a frequency-resolved read-out's modules
 SIDE_PREFIX = ("enc.side.",)  # D-072: the path beside the flatten
+OPENING_PREFIX = ("opening_head.",)  # D-080
+
+
+def _opening_gate(step: int, cfg: TrainConfig) -> float:
+    rel = step - (cfg.decay_start or 0) - cfg.opening_detach
+    return 0.0 if rel < 0 else min(1.0, rel / max(1, cfg.opening_gate_ramp))
 
 
 def _add_readout_group(opt, params: list, cfg: TrainConfig, lr: float | None = None) -> None:
@@ -395,7 +409,8 @@ def evaluate(model, batches, device) -> dict:
 
     model.eval()
     rows = {"fm_err": [], "fm_ref": [], "f0_c": [], "voiced_ok": [], "f0_ref": [], "son": [], "obs_p": [], "obs": [],
-            "vtl_mu": [], "vtl_lv": [], "vtl": [], "vtl_inst_mu": [], "vtl_inst_lv": [], "vtl_inst": []}
+            "vtl_mu": [], "vtl_lv": [], "vtl": [], "vtl_inst_mu": [], "vtl_inst_lv": [], "vtl_inst": [], "opening_p": [],
+            "opening": []}
     with torch.inference_mode():
         for lp, lab in batches:
             with torch.autocast(device.type, dtype=torch.bfloat16):
@@ -424,6 +439,9 @@ def evaluate(model, batches, device) -> dict:
                 rows["vtl_inst_mu"].append(out["vtl_inst_mu"].float().cpu().numpy())
                 rows["vtl_inst_lv"].append(out["vtl_inst_logvar"].float().clamp(-12, 4).cpu().numpy())
                 rows["vtl_inst"].append(lab["vtl_inst"].cpu().numpy())
+            if "opening" in out and "glottal_opening" in lab:
+                rows["opening_p"].append(out["opening"].float().cpu().numpy())
+                rows["opening"].append(lab["glottal_opening"].cpu().numpy())
     model.train()
     rows = {k: v for k, v in rows.items() if v}
     cat = {k: np.concatenate([r.reshape(-1, *r.shape[2:]) for r in v]) for k, v in rows.items()}
@@ -467,6 +485,13 @@ def evaluate(model, batches, device) -> dict:
             res[f"{key}_nll"] = float(np.mean(0.5 * (lv + (y - mu) ** 2 / np.exp(lv))))  # the training loss's form
             res[f"{key}_cover1"] = float(np.mean(np.abs(mu - y) <= np.exp(lv / 2)))  # ideal 0.683
             res[f"{key}_frames"] = int(ok.sum())
+    if "opening" in cat:  # D-080: the opening head against <a> (sonorant frames with a label)
+        ok = son & np.isfinite(cat["opening"])
+        if ok.sum() > 1:
+            y, p = cat["opening"][ok], cat["opening_p"][ok]
+            res["opening_mae"] = float(np.mean(np.abs(p - y)))
+            res["opening_r2"] = float(1 - np.var(y - p) / np.var(y))
+            res["opening_frames"] = int(ok.sum())
     return res
 
 
@@ -526,6 +551,11 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         if cfg.side_lr is None:
             raise ValueError("proj_side needs side_lr (its own AdamW group)")
         model_cfg = replace(model_cfg, proj_side=cfg.proj_side)
+    new_opening = cfg.opening and not model_cfg.opening_head  # D-080: added at this branch
+    if cfg.opening:
+        if cfg.opening_lr is None:
+            raise ValueError("opening needs opening_lr (its own AdamW group)")
+        model_cfg = replace(model_cfg, opening_head=True)
     new_vtl = bool(cfg.vtl) and not model_cfg.vtl_head  # D-036: the head is added at this branch
     if cfg.vtl:
         if cfg.optimizer not in ("adamw", "adan", "muon", "muon_adan"):  # D-040: Muon runs keep it out of Muon
@@ -573,10 +603,13 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     side_params = [p for n, p in model.named_parameters() if n.startswith(SIDE_PREFIX)] if cfg.side_lr is not None else []
     if side_params and not new_side:
         _add_readout_group(opt, side_params, cfg, lr=cfg.side_lr)  # resuming
+    op_params = [p for n, p in model.named_parameters() if n.startswith(OPENING_PREFIX)] if cfg.opening else []
+    if op_params and not new_opening:
+        _add_readout_group(opt, op_params, cfg, lr=cfg.opening_lr)  # resuming
     if ck is not None:
-        if new_vtl or new_readout or new_side:
+        if new_vtl or new_readout or new_side or new_opening:
             missing, unexpected = model.load_state_dict(ck["model"], strict=False)
-            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX) for k in missing), (missing, unexpected)
+            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX + OPENING_PREFIX) for k in missing), (missing, unexpected)
         else:
             model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
@@ -598,6 +631,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     if new_side:
         _add_readout_group(opt, side_params, cfg, lr=cfg.side_lr)
         log(f"side path {cfg.proj_side}: {sum(p.numel() for p in side_params):,} parameters, output at zero")
+    if new_opening:
+        _add_readout_group(opt, op_params, cfg, lr=cfg.opening_lr)
+        log(f"opening head: {sum(p.numel() for p in op_params):,} parameters")
     if cfg.ema_decay > 0:  # from the checkpoint's average if it has one, else from the current weights
         import copy
 
@@ -626,7 +662,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         raise FileNotFoundError(f"obs_head needs {flat}'s observability store (obs_store.write_store)")
     vtl, vti = bool(cfg.vtl), bool(cfg.vtl_inst)
     ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs, vtl=vtl,
-                    vtl_inst=vti, formant_label=cfg.formant_label)
+                    vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label)
     if cfg.resynth:
         parts, sizes = [], []
         for d in cfg.resynth:
@@ -634,7 +670,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             n = json.loads((rflat / "done").read_text())["n_clips"]
             parts.append(SynthCrops(rflat, np.arange(n), cfg.n_frames, channel, seed=cfg.seed + 1 + len(parts),
                                     epoch_size=epoch, tract_left_weight=cfg.tract_left_weight, observability=obs, vtl=vtl,
-                                    vtl_inst=vti))
+                                    vtl_inst=vti, opening=cfg.opening))
             sizes.append(n)
         weights = [1.0 - cfg.resynth_frac] + [cfg.resynth_frac * n / sum(sizes) for n in sizes]
         if not cfg.synth_extra:
@@ -650,10 +686,10 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             xtr, xva = split_ids(n)
             xseed = cfg.seed if cfg.synth_extra_replace else cfg.seed + 101 + len(xparts)  # replace: the main set's seed
             xparts.append(SynthCrops(xflat, xtr, cfg.n_frames, channel, seed=xseed, epoch_size=epoch,
-                                     observability=obs, vtl=vtl, vtl_inst=vti))
+                                     observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening))
             xsizes.append(len(xtr))
             extra_val[f"eval_extra:{Path(d).name}"] = SynthCrops(xflat, xva[: cfg.val_clips], cfg.n_frames, val_channel, seed=12345,
-                                                                  fixed=True, observability=obs, vtl=vtl, vtl_inst=vti)
+                                                                  fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening)
         f = cfg.synth_extra_frac
         if cfg.synth_extra_replace:  # in the main set's place, position and seed: the mix is the usual one with the set swapped
             if len(xparts) != 1:
@@ -671,17 +707,17 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     # vtl only adds the label (no random draws), so the crops stay those of runs before it was passed
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti,
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening,
                         formant_label=cfg.formant_label)
     short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl,
-                          vtl_inst=vti, formant_label=cfg.formant_label)
+                          vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label)
     resynth_val = {}
     for d in cfg.resynth_val:
         rflat = consolidate(d, log=log)
         n = json.loads((rflat / "done").read_text())["n_clips"]
         ids = np.random.default_rng(0).permutation(n)[: cfg.val_clips]  # spread over recordings, fixed
         resynth_val[f"eval_resynth:{Path(d).name}"] = SynthCrops(rflat, np.sort(ids), cfg.n_frames, val_channel, seed=12345, fixed=True,
-                                                                  tract_left_weight=cfg.tract_left_weight)
+                                                                  tract_left_weight=cfg.tract_left_weight, opening=cfg.opening)
     vq = TorchVQT(device)
     val_sets = {"eval": cache_batches(DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate), vq, device),
                 "eval_short": cache_batches(DataLoader(short_ds, cfg.batch * cfg.n_frames // cfg.val_short_frames,
@@ -716,6 +752,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                     g["lr"] = (_vtl_lr if g.get("vtl") else _lr)(step, cfg) * g.get("lr_scale", 1.0)
             if cfg.vtl:
                 model.vtl_gate = _vtl_gate(step, cfg)
+            if cfg.opening:
+                model.opening_gate = _opening_gate(step, cfg)
             audio, lab = audio.to(device, non_blocking=True), _to(lab, device)
             p_truth = _p_comb_truth(step, cfg)
             truth = rng.random() < p_truth

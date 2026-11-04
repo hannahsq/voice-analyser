@@ -419,3 +419,46 @@ def test_vtl_clock_survives_a_decay_branch(tmp_path):
     assert _vtl_lr(18000, b) == _lr(18000, b) < 0.002
     d036 = TrainConfig(steps=20000, decay_start=16000, vtl="new", vtl_detach=300, vtl_warmup=300)
     assert _vtl_gate(16299, d036) == 0.0 and _vtl_lr(16000, d036) == d036.lr / 300
+
+
+def test_opening_head_gate_loss_and_label(tmp_path):
+    """D-080: the opening head's output lies in (0, 1); gate 0 sends no gradient into the trunk; the loss covers only
+    sonorant frames with a label; SynthCrops serves the label where a set has it and NaN where it doesn't."""
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.data import SynthCrops, consolidate
+    from vocal_analysis.train.losses import teacher_loss
+
+    torch.manual_seed(0)
+    m = Teacher(TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16,
+                              opening_head=True))
+    lp = torch.randn(2, vqt.N_BINS, 30)
+    with torch.no_grad():
+        out = m(lp)
+    assert out["opening"].shape == (2, 30) and float(out["opening"].min()) > 0 and float(out["opening"].max()) < 1
+    m.opening_gate = 0.0
+    m.zero_grad()
+    m(lp)["opening"].sum().backward()
+    assert all(p.grad is None or float(p.grad.abs().max()) == 0 for n, p in m.named_parameters() if n.startswith("enc."))
+    assert any(p.grad is not None and float(p.grad.abs().max()) > 0 for n, p in m.named_parameters() if n.startswith("opening_head."))
+    # the loss: NaN labels and non-sonorant frames carry none
+    out = m(lp)
+    lab = {"voiced": torch.ones(2, 30, dtype=torch.bool), "sonorant": torch.zeros(2, 30, dtype=torch.bool),
+           "f0": torch.full((2, 30), 200.0), "formants": torch.full((2, 30, 4), float("nan")),
+           "bandwidths": torch.full((2, 30, 4), float("nan")), "glottal_opening": torch.full((2, 30), float("nan"))}
+    lab["sonorant"][0, :10] = True
+    lab["glottal_opening"][0, :5] = 0.5
+    _, parts = teacher_loss(out, lab)
+    assert torch.isclose(parts["opening"], 10 * (out["opening"][0, :5] - 0.5).abs().mean())
+    # the label in crops: present on a coupled set, NaN on a set without it
+    cfg = SynthConfig(duration_s=(1.0, 1.0), p_tube=1.0, p_coupling=1.0, coupling_scale=(1.0, 1.0), acoustic_labels=True)
+    flat = consolidate(write_set(tmp_path / "k", 2, cfg, seed=3, shard_size=2, workers=1, log=lambda m: None), log=lambda m: None)
+    plain = consolidate(write_set(tmp_path / "p", 2, SynthConfig(duration_s=(1.0, 1.0)), seed=3, shard_size=2, workers=1,
+                                  log=lambda m: None), log=lambda m: None)
+    _, lab = SynthCrops(flat, np.arange(2), n_frames=50, channel=None, opening=True)[0]
+    assert np.all(np.isfinite(lab["glottal_opening"])) and np.all((lab["glottal_opening"] >= 0) & (lab["glottal_opening"] <= 1))
+    _, lab = SynthCrops(plain, np.arange(2), n_frames=50, channel=None, opening=True)[0]
+    assert np.all(np.isnan(lab["glottal_opening"]))
+    _, lab = SynthCrops(flat, np.arange(2), n_frames=50, channel=None)[0]
+    assert "glottal_opening" not in lab

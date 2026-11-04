@@ -31,7 +31,7 @@ def heatmap_ce(logits: torch.Tensor, values_hz: torch.Tensor, mask: torch.Tensor
     return _masked_mean(ce, mask & valid, weight)
 
 
-WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5, "obs": 0.2, "vtl": 0.0125, "vtl_inst": 0.0125}  # vtl: D-036's registered weight
+WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5, "obs": 0.2, "vtl": 0.0125, "vtl_inst": 0.0125, "opening": 1.0}  # vtl: D-036's registered weight
 
 
 def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[torch.Tensor, dict]:
@@ -67,5 +67,9 @@ def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[tor
         vmask = son & torch.isfinite(y)
         lv = out["vtl_inst_logvar"].clamp(-12, 4)
         parts["vtl_inst"] = _masked_mean(0.5 * (lv + (torch.nan_to_num(y) - out["vtl_inst_mu"]) ** 2 / lv.exp()), vmask)
+    if "opening" in out and "glottal_opening" in lab:  # D-080: L1 on <a> x 10 on sonorant frames with a label
+        y = lab["glottal_opening"]
+        omask = son & torch.isfinite(y)
+        parts["opening"] = _masked_mean(10.0 * (out["opening"] - torch.nan_to_num(y)).abs(), omask)
     total = sum(w[k] * v for k, v in parts.items())
     return total, {k: v.detach() for k, v in parts.items()}

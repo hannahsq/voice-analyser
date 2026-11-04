@@ -57,6 +57,9 @@ class TeacherConfig:
     # D-051: instantaneous tract length head (larynx height and lip protrusion included), built as vtl_head and fed
     # through the same gate; needs vtl_head
     vtl_inst_head: bool = False
+    # D-080: glottal-opening head: the frame's mean opening <a> in (0, 1) (sigmoid), the VTL head's form on the formant
+    # trunk, behind its own gradient gate (Teacher.opening_gate, set by the trainer)
+    opening_head: bool = False
     # D-054: how the formant and bandwidth heads read the trunk. "flat": linear heads on the pooled per-frame vector h
     # (every model to D-051); "mlp": the same with one hidden layer of readout_hidden (a capacity control); "film":
     # frequency-resolved (`FreqReadout`): the encoder's conv maps, modulated by h, upsampled back to the VQT's bins, one
@@ -410,6 +413,10 @@ class Teacher(nn.Module):
             self.vtl_gate = 1.0  # set by the trainer each step
         if cfg.vtl_inst_head:
             self.vtl_inst_head = vtl_head_module(d)
+        if cfg.opening_head:
+            self.opening_head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 256), nn.GELU(), nn.Linear(256, 256), nn.GELU(),
+                                              nn.Linear(256, 1))
+            self.opening_gate = 1.0
         self.register_buffer("log2_vqt", LOG2_VQT.clone(), persistent=False)
         self.register_buffer("f0_log2", torch.log2(torch.tensor(F0_AXIS.centres_hz, dtype=torch.float32)), persistent=False)
         self.register_buffer("fm_bins", torch.arange(FORMANT_AXIS.n_bins, dtype=torch.float32), persistent=False)
@@ -472,6 +479,10 @@ class Teacher(nn.Module):
             if self.cfg.vtl_inst_head:
                 vi = self.vtl_inst_head(hv).float()
                 out["vtl_inst_mu"], out["vtl_inst_logvar"] = vi[..., 0], vi[..., 1]
+        if self.cfg.opening_head:
+            g = self.opening_gate
+            ho = h.detach() if g == 0 else h if g == 1 else _GradGate.apply(h, float(g))
+            out["opening"] = torch.sigmoid(self.opening_head(ho).float()[..., 0])
         return out
 
 

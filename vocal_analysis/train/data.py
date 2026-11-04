@@ -90,7 +90,7 @@ def _pad_labels(key: str, v: np.ndarray, n: int) -> np.ndarray:
     keep finite on every frame (f0 carries its contour through unvoiced frames; the comb reads it), repeat the last."""
     if v.dtype == bool:
         return np.zeros((n,) + v.shape[1:], bool)
-    if key in ("formants", "bandwidths", "vtl", "vtl_inst"):
+    if key in ("formants", "bandwidths", "vtl", "vtl_inst", "glottal_opening"):
         return np.full((n,) + v.shape[1:], np.nan, v.dtype)
     return np.repeat(v[-1:], n, axis=0)
 
@@ -107,7 +107,7 @@ class SynthCrops:
                  fixed: bool = False, tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT,
                  observability: bool = False, obs_config=None, obs_floor: str = "recording",
                  obs_rec_snr_db: float | None = None, vtl: bool = False, vtl_inst: bool = False,
-                 formant_label: str = "formants"):
+                 formant_label: str = "formants", opening: bool = False):
         self.dir = Path(flat_dir)
         self.clip_ids = np.asarray(clip_ids)
         self.n_frames = n_frames
@@ -129,6 +129,8 @@ class SynthCrops:
         self.vtl_inst = vtl_inst
         # D-078: the label served as "formants" (an OPTIONAL_LABEL_KEYS file beside flat/); "formants" = the closed-glottis poles
         self.formant_label = formant_label
+        # D-080: also the per-frame glottal opening ("glottal_opening", <a>) where the set has it; NaN elsewhere
+        self.opening = opening
         self._arrays = None
 
     def _open(self):
@@ -139,6 +141,8 @@ class SynthCrops:
                             **{k: load(f"label_{k}.npy") for k in LABEL_KEYS}}
             if self.formant_label != "formants":
                 self._arrays["formants"] = load(f"label_{self.formant_label}.npy")
+            if self.opening and (self.dir / "label_glottal_opening.npy").exists():
+                self._arrays["glottal_opening"] = load("label_glottal_opening.npy")
             if self.observability and (self.dir / "obs_sig.npy").exists():
                 self._arrays.update(obs_sig=load("obs_sig.npy"), obs_noise=load("obs_noise.npy"), obs_peak=load("obs_peak.npy"))
             if self.vtl and (self.dir / "label_length_cm.npy").exists():
@@ -169,6 +173,9 @@ class SynthCrops:
         x = arr["audio"][a0:a1].astype(np.float32) / INT16_SCALE
         n_clip_frames = int(f1_ - f0_)
         lab = {k: np.asarray(arr[k][f0_:f1_]) for k in LABEL_KEYS}
+        if self.opening:
+            lab["glottal_opening"] = (np.asarray(arr["glottal_opening"][f0_:f1_], np.float32) if "glottal_opening" in arr
+                                      else np.full(n_clip_frames, np.nan, np.float32))
         if self.vtl:
             ok = "vtl_ok" in arr and bool(arr["vtl_ok"][cid])
             lab["vtl"] = np.log2(np.asarray(arr["vtl_frames"][f0_:f1_], np.float32)) if ok else np.full(n_clip_frames, np.nan, np.float32)
