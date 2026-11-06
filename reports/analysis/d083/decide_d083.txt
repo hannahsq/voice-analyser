@@ -1,0 +1,16 @@
+D-083: the aVTL head with a predicted iVTL track (v3.1 frozen features; MAE cm on val_v2ko sonorant frames)
+
+v31_s1: iVTL head MAE 0.193 cm; P1 h 0.1567 -> +true 0.1253 / +pred 0.1569 (+0.1 %, 3x seed spread 0.0035; -1 % of the true gain kept)
+  P2 0.00 s: (i) aVTL pred 0.1552, (ii) + iVTL pred 0.1542, (iii) + iVTL true 0.1195
+  P2 0.25 s: (i) aVTL pred 0.1447, (ii) + iVTL pred 0.1445, (iii) + iVTL true 0.0987
+  P2 0.50 s: (i) aVTL pred 0.1425, (ii) + iVTL pred 0.1427, (iii) + iVTL true 0.0905
+  P2 1.00 s: (i) aVTL pred 0.1414, (ii) + iVTL pred 0.1412, (iii) + iVTL true 0.0823
+  P2 2.00 s: (i) aVTL pred 0.1422, (ii) + iVTL pred 0.1405, (iii) + iVTL true 0.0777
+v31_s2: iVTL head MAE 0.191 cm; P1 h 0.1545 -> +true 0.1244 / +pred 0.1553 (+0.5 %, 3x seed spread 0.0028; -3 % of the true gain kept)
+  P2 0.00 s: (i) aVTL pred 0.1536, (ii) + iVTL pred 0.1534, (iii) + iVTL true 0.1181
+  P2 0.25 s: (i) aVTL pred 0.1436, (ii) + iVTL pred 0.1438, (iii) + iVTL true 0.0980
+  P2 0.50 s: (i) aVTL pred 0.1416, (ii) + iVTL pred 0.1421, (iii) + iVTL true 0.0892
+  P2 1.00 s: (i) aVTL pred 0.1399, (ii) + iVTL pred 0.1400, (iii) + iVTL true 0.0824
+  P2 2.00 s: (i) aVTL pred 0.1420, (ii) + iVTL pred 0.1408, (iii) + iVTL true 0.0769
+
+DECISION: P1 not usable; P2 iVTL context no clear help
