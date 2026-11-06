@@ -1,0 +1,10 @@
+D-082: the closed-F1 shift on aspiration-free cascade audio (v3.1 frozen features)
+
+v31_s1 (243083 val frames): closed label slope +0.887; label ceiling +0.288; h +0.370, h+<a> +0.426, h+<a>+df1 +1.115
+  shift: R² beyond the vowel part -0.231 (seeds -0.221, -0.241); label reference +0.371; vowel part alone R² 0.427; slope via the shift head +0.183
+  df1: R² beyond the vowel part -0.351 (seeds -0.347, -0.355); label reference +0.264; vowel part alone R² 0.490
+v31_s2 (243083 val frames): closed label slope +0.887; label ceiling +0.288; h +0.356, h+<a> +0.399, h+<a>+df1 +1.079
+  shift: R² beyond the vowel part -0.210 (seeds -0.204, -0.215); label reference +0.371; vowel part alone R² 0.427; slope via the shift head +0.189
+  df1: R² beyond the vowel part -0.351 (seeds -0.335, -0.368); label reference +0.264; vowel part alone R² 0.490
+
+DECISION: C1 artefact explanation unclear (h - ceiling: +0.082, +0.068); C2 shift not learnable; df1 not learnable
