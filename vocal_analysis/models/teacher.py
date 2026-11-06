@@ -18,6 +18,8 @@ from ..features import vqt
 from .bins import F0_AXIS, FORMANT_AXIS
 
 N_FORMANTS = 4
+FED_CENTRES = (139.0, 234.0, 279.0, 308.0)  # D-086: bins of about 500 / 1500 / 2500 / 3500 Hz
+FED_SCALE = 30.0  # bins (0.5 octave)
 LOG2_VQT = torch.log2(torch.tensor(vqt.bin_frequencies(), dtype=torch.float32))
 QUERY_READOUTS = ("queries", "queries_abs")  # D-073: learned formant queries (content-only keys, or with absolute positions)
 
@@ -60,6 +62,9 @@ class TeacherConfig:
     # D-080: glottal-opening head: the frame's mean opening <a> in (0, 1) (sigmoid), the VTL head's form on the formant
     # trunk, behind its own gradient gate (Teacher.opening_gate, set by the trainer)
     opening_head: bool = False
+    # D-086: the formant chain's fed means, also as standardised inputs ((bin - FED_CENTRES[m]) / FED_SCALE) through
+    # a fresh linear path per head (modules "fed_heads.*", zero at the start, so a branch starts at its parent)
+    fed_standardised: bool = False
     # D-054: how the formant and bandwidth heads read the trunk. "flat": linear heads on the pooled per-frame vector h
     # (every model to D-051); "mlp": the same with one hidden layer of readout_hidden (a capacity control); "film":
     # frequency-resolved (`FreqReadout`): the encoder's conv maps, modulated by h, upsampled back to the VQT's bins, one
@@ -417,6 +422,13 @@ class Teacher(nn.Module):
             self.opening_head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 256), nn.GELU(), nn.Linear(256, 256), nn.GELU(),
                                               nn.Linear(256, 1))
             self.opening_gate = 1.0
+        if cfg.fed_standardised:
+            if cfg.readout != "flat":
+                raise ValueError("fed_standardised needs the flat read-out")
+            self.fed_heads = nn.ModuleList([nn.Linear(max(n, 1), FORMANT_AXIS.n_bins) for n in range(N_FORMANTS)])
+            for m in self.fed_heads:
+                nn.init.zeros_(m.weight)
+                nn.init.zeros_(m.bias)
         self.register_buffer("log2_vqt", LOG2_VQT.clone(), persistent=False)
         self.register_buffer("f0_log2", torch.log2(torch.tensor(F0_AXIS.centres_hz, dtype=torch.float32)), persistent=False)
         self.register_buffer("fm_bins", torch.arange(FORMANT_AXIS.n_bins, dtype=torch.float32), persistent=False)
@@ -432,8 +444,11 @@ class Teacher(nn.Module):
     def expected_f0(self, f0_logits: torch.Tensor) -> torch.Tensor:
         return torch.exp2((f0_logits.softmax(-1) * self.f0_log2).sum(-1))
 
-    def forward(self, logpow: torch.Tensor, comb_f0: torch.Tensor | None = None, comb_voiced: torch.Tensor | None = None) -> dict:
-        """logpow: (B, F, T) VQT log power. comb_f0/comb_voiced override the comb source (teacher forcing)."""
+    def forward(self, logpow: torch.Tensor, comb_f0: torch.Tensor | None = None, comb_voiced: torch.Tensor | None = None,
+                formant_fed: torch.Tensor | None = None) -> dict:
+        """logpow: (B, F, T) VQT log power. comb_f0/comb_voiced override the comb source (teacher forcing).
+        formant_fed: (B, T, N) bin indices fed to later formant heads and the mask in place of the chain's own means,
+        NaN where not given (D-086, teacher forcing of the chain)."""
         x = normalise(logpow)
         h0 = self.f0_net(x)
         out = {"f0_logits": self.f0_head(h0), "voicing_logit": self.voicing_head(h0)[..., 0]}
@@ -448,19 +463,27 @@ class Teacher(nn.Module):
         if film:
             fx = self.readout.maps(kept, h)
             raw = self.readout.logits(fx, h)
-        logits, means = [], []
+        logits, means, fed = [], [], []
         for n in range(N_FORMANTS):
             lg = 0.0
             if flat:
-                inp = torch.cat([h] + [(m / FORMANT_AXIS.n_bins)[..., None].to(h.dtype) for m in means], -1) if means else h
+                inp = torch.cat([h] + [(m / FORMANT_AXIS.n_bins)[..., None].to(h.dtype) for m in fed], -1) if fed else h
                 lg = self.formant_heads[n](inp).float()
+                if self.cfg.fed_standardised and fed:
+                    z = torch.stack([(m - FED_CENTRES[k]) / FED_SCALE for k, m in enumerate(fed)], -1)
+                    lg = lg + self.fed_heads[n](z.to(h.dtype)).float()
             if film:
                 lg = lg + raw[:, n]
-            if means:  # soft mask below the previous formant
-                below = (means[-1][..., None] - self.cfg.mask_margin_bins - self.fm_bins).clamp_min(0.0)
+            if fed:  # soft mask below the previous formant
+                below = (fed[-1][..., None] - self.cfg.mask_margin_bins - self.fm_bins).clamp_min(0.0)
                 lg = lg - self.cfg.mask_strength * torch.tanh(below / self.cfg.mask_margin_bins)
             logits.append(lg)
             means.append((lg.softmax(-1) * self.fm_bins).sum(-1))  # expected bin index
+            mu = means[-1]
+            if formant_fed is not None:
+                t = formant_fed[..., n].to(mu.dtype)
+                mu = torch.where(torch.isfinite(t), t, mu)
+            fed.append(mu)
         bw = self.bw_head(h).float() if flat else 0.0
         if film:
             pos = FORMANT_AXIS.f_min * torch.exp2(torch.stack(means, -1).detach() * FORMANT_AXIS.cents_per_bin / 1200.0)

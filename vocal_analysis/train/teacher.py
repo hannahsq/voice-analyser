@@ -134,6 +134,12 @@ class TrainConfig:
     # them; loss weight loss_weights["opening"]
     opening: bool = False
     opening_lr: float | None = None
+    # D-086: a decay branch may add the standardised fed-means path (TeacherConfig.fed_standardised; "fed_heads.*",
+    # fresh, at zero) in its own AdamW at fed_lr x the model's schedule; fed_truth_steps: the chain's fed means come
+    # from the formant labels with a probability decaying 1 -> 0 over this many steps from the branch point
+    fed_standardised: bool = False
+    fed_lr: float | None = None
+    fed_truth_steps: int | None = None
     opening_detach: int = 300
     opening_gate_ramp: int = 700
 
@@ -216,7 +222,8 @@ def _optimizer(model, cfg: "TrainConfig"):
         return torch.optim.AdamW(params, lr=cfg.lr, weight_decay=cfg.weight_decay)
 
     own = (VTL_PREFIXES + (READOUT_PREFIX if cfg.readout_lr is not None else ())
-           + (SIDE_PREFIX if cfg.side_lr is not None else ()) + (OPENING_PREFIX if cfg.opening else ()))  # their own groups, added by the trainer
+           + (SIDE_PREFIX if cfg.side_lr is not None else ()) + (OPENING_PREFIX if cfg.opening else ())
+           + (FED_PREFIX if cfg.fed_standardised else ()))  # their own groups, added by the trainer
     if cfg.optimizer in ("adamw", "adan"):  # the VTL head (D-036) gets its own group, added by the trainer
         return rest([p for n, p in model.named_parameters() if not n.startswith(own)])
     if cfg.optimizer in ("muon", "muon_adan"):
@@ -302,6 +309,7 @@ VTL_PREFIXES = ("vtl_head.", "vtl_inst_head.")  # D-036 / D-051: the heads in th
 READOUT_PREFIX = ("readout.",)  # D-056: a frequency-resolved read-out's modules
 SIDE_PREFIX = ("enc.side.",)  # D-072: the path beside the flatten
 OPENING_PREFIX = ("opening_head.",)  # D-080
+FED_PREFIX = ("fed_heads.",)  # D-086
 
 
 def _opening_gate(step: int, cfg: TrainConfig) -> float:
@@ -362,6 +370,22 @@ def _add_vtl_head(model, cfg: TrainConfig, log) -> None:
 def _p_comb_truth(step: int, cfg: TrainConfig) -> float:
     span = cfg.comb_truth_steps if cfg.comb_truth_steps is not None else cfg.comb_truth_until * cfg.steps
     return max(0.0, 1.0 - step / max(1.0, span))
+
+
+def _p_fed_truth(step: int, cfg: TrainConfig) -> float:
+    """D-086: P(the chain's fed means from the labels), 1 -> 0 over fed_truth_steps from the branch point."""
+    if not cfg.fed_truth_steps:
+        return 0.0
+    return max(0.0, 1.0 - (step - cfg.decay_start) / cfg.fed_truth_steps)
+
+
+def _fed_bins(formants_hz):
+    """(B, T, N) Hz labels (NaN where missing) -> fractional bins on the formant axis, NaN where missing."""
+    import torch
+
+    f = formants_hz.float()
+    b = 1200.0 * torch.log2(f.clamp_min(1e-3) / FORMANT_AXIS.f_min) / FORMANT_AXIS.cents_per_bin
+    return torch.where(torch.isfinite(f) & (f > 0), b, torch.full_like(b, float("nan")))
 
 
 def branch_config(parent_run: Path, ckpt_step: int, out: str, decay_steps: int | None = None) -> TrainConfig:
@@ -556,6 +580,13 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         if cfg.opening_lr is None:
             raise ValueError("opening needs opening_lr (its own AdamW group)")
         model_cfg = replace(model_cfg, opening_head=True)
+    new_fed = cfg.fed_standardised and not model_cfg.fed_standardised  # D-086: added at this branch
+    if cfg.fed_standardised:
+        if cfg.fed_lr is None:
+            raise ValueError("fed_standardised needs fed_lr (its own AdamW group)")
+        model_cfg = replace(model_cfg, fed_standardised=True)
+    if cfg.fed_truth_steps is not None and cfg.decay_start is None:
+        raise ValueError("fed_truth_steps is counted from a branch point (decay_start)")
     new_vtl = bool(cfg.vtl) and not model_cfg.vtl_head  # D-036: the head is added at this branch
     if cfg.vtl:
         if cfg.optimizer not in ("adamw", "adan", "muon", "muon_adan"):  # D-040: Muon runs keep it out of Muon
@@ -606,10 +637,13 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     op_params = [p for n, p in model.named_parameters() if n.startswith(OPENING_PREFIX)] if cfg.opening else []
     if op_params and not new_opening:
         _add_readout_group(opt, op_params, cfg, lr=cfg.opening_lr)  # resuming
+    fed_params = [p for n, p in model.named_parameters() if n.startswith(FED_PREFIX)] if cfg.fed_standardised else []
+    if fed_params and not new_fed:
+        _add_readout_group(opt, fed_params, cfg, lr=cfg.fed_lr)  # resuming
     if ck is not None:
-        if new_vtl or new_readout or new_side or new_opening:
+        if new_vtl or new_readout or new_side or new_opening or new_fed:
             missing, unexpected = model.load_state_dict(ck["model"], strict=False)
-            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX + OPENING_PREFIX) for k in missing), (missing, unexpected)
+            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX + OPENING_PREFIX + FED_PREFIX) for k in missing), (missing, unexpected)
         else:
             model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
@@ -633,6 +667,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         log(f"side path {cfg.proj_side}: {sum(p.numel() for p in side_params):,} parameters, output at zero")
     if new_opening:
         _add_readout_group(opt, op_params, cfg, lr=cfg.opening_lr)
+    if new_fed:
+        _add_readout_group(opt, fed_params, cfg, lr=cfg.fed_lr)
+        log(f"fed-means path: {sum(p.numel() for p in fed_params):,} parameters, output at zero")
         log(f"opening head: {sum(p.numel() for p in op_params):,} parameters")
     if cfg.ema_decay > 0:  # from the checkpoint's average if it has one, else from the current weights
         import copy
@@ -760,7 +797,10 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             with torch.autocast(device.type, dtype=torch.bfloat16):
                 lp = vq.log_power_with_context(audio, lab["f0"].shape[1])
                 comb_f0 = torch.nan_to_num(lab["f0"], nan=100.0)  # resynthesised f0 labels can be NaN; unvoiced there, so no comb
-                out_ = model(lp, comb_f0=comb_f0 if truth else None, comb_voiced=lab["voiced"].float() if truth else None)
+                p_fed = _p_fed_truth(step, cfg)
+                fed = _fed_bins(lab["formants"]) if p_fed > 0 and rng.random() < p_fed else None
+                out_ = model(lp, comb_f0=comb_f0 if truth else None, comb_voiced=lab["voiced"].float() if truth else None,
+                             formant_fed=fed)
             loss, parts = teacher_loss(out_, lab, cfg.loss_weights)
             opt.zero_grad(set_to_none=True)
             loss.backward()

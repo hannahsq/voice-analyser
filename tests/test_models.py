@@ -462,3 +462,68 @@ def test_opening_head_gate_loss_and_label(tmp_path):
     assert np.all(np.isnan(lab["glottal_opening"]))
     _, lab = SynthCrops(flat, np.arange(2), n_frames=50, channel=None)[0]
     assert "glottal_opening" not in lab
+
+
+def test_fed_standardised_starts_at_the_model_without_it_and_forcing_feeds_the_chain():
+    """D-086: the standardised fed-means path leaves every output unchanged until it trains; formant_fed replaces the
+    means fed to later heads (NaN = the chain's own), and F1's own output does not depend on it."""
+    from dataclasses import replace
+
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+
+    cfg = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, temporal="conformer", conformer_dim=16, f0_conv_dim=16)
+    base = Teacher(cfg).eval()
+    m = Teacher(replace(cfg, fed_standardised=True)).eval()
+    missing, unexpected = m.load_state_dict(base.state_dict(), strict=False)
+    assert not unexpected and missing and all(k.startswith("fed_heads.") for k in missing)
+    lp = torch.randn(2, vqt.N_BINS, 30)
+    with torch.no_grad():
+        a, b = base(lp), m(lp)
+        assert all(torch.equal(a[k], b[k]) for k in a)
+        nan = base(lp, formant_fed=torch.full((2, 30, 4), float("nan")))
+        assert torch.equal(nan["formant_logits"], a["formant_logits"])
+        for mm in m.fed_heads:  # give the new path a say
+            torch.nn.init.normal_(mm.weight, std=0.1)
+        fed = torch.full((2, 30, 4), float("nan"))
+        fed[..., 0] = 200.0
+        f = m(lp, formant_fed=fed)
+        assert torch.equal(f["formant_logits"][:, :, 0], m(lp)["formant_logits"][:, :, 0])
+        assert not torch.equal(f["formant_logits"][:, :, 1], m(lp)["formant_logits"][:, :, 1])
+
+
+def test_fed_truth_ramp_and_bins():
+    from vocal_analysis.models.bins import FORMANT_AXIS
+    from vocal_analysis.train.teacher import TrainConfig, _fed_bins, _p_fed_truth
+
+    cfg = TrainConfig(decay_start=16000, fed_truth_steps=2000)
+    assert _p_fed_truth(16000, cfg) == 1.0 and _p_fed_truth(17000, cfg) == 0.5 and _p_fed_truth(18000, cfg) == 0.0
+    assert _p_fed_truth(17000, TrainConfig()) == 0.0
+    b = _fed_bins(torch.tensor([[[500.0, float("nan"), 0.0, 3500.0]]]))
+    assert b[0, 0, 0].item() == pytest.approx(float(FORMANT_AXIS.to_bin(500.0)), abs=1e-3)
+    assert torch.isnan(b[0, 0, 1]) and torch.isnan(b[0, 0, 2]) and torch.isfinite(b[0, 0, 3])
+
+
+def test_fed_standardised_branch_trains(tmp_path):
+    """D-086: a decay branch adds the fed-means path in its own group and forces the chain from the labels."""
+    import json
+
+    from vocal_analysis.models.teacher import TeacherConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.teacher import TrainConfig, branch_config, train
+
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16,
+                          temporal="conformer", conformer_dim=32)
+    data = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    cfg = TrainConfig(data=str(data), out=str(tmp_path / "run"), steps=4, batch=4, n_frames=50, workers=1, log_every=2,
+                      eval_every=4, ckpt_every=2, val_clips=4, warmup=2, optimizer="muon_adan")
+    out = train(cfg, small, log=lambda *a: None)
+    b = branch_config(out, 4, str(tmp_path / "branch"), decay_steps=4)
+    b.branch_from = str(out / "ckpt_000004.pt")
+    b.fed_standardised, b.fed_lr, b.fed_truth_steps = True, 1e-3, 2
+    out2 = train(b, None, log=lambda *a: None)
+    recs = [json.loads(line) for line in (out2 / "log.jsonl").read_text().splitlines()]
+    assert recs and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
+    sd = torch.load(out2 / "ckpt_last.pt", map_location="cpu", weights_only=False)
+    assert sd["teacher_config"]["fed_standardised"] and any(k.startswith("fed_heads.") for k in sd["model"])
+    assert float(sd["model"]["fed_heads.1.weight"].abs().sum()) > 0  # it trained
