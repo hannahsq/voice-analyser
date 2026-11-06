@@ -2956,8 +2956,7 @@ Independent of D-072 (the read-out's behaviour, not missing information); the tw
 |---|---|---|
 | Base | - | - |
 | Heads | yes | - |
-| Neutral | - | yes |
-| Both | yes | yes |
+| (Neutral and Both: dropped, open item 1) | | |
 
 If the neutral list has fewer than 3 qualifying items, it is dropped and the run is two arms: base and heads. The interaction cell is reported, not decided (one seed).
 
@@ -2974,7 +2973,7 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 
 *Reading*:
 - A positive is attributed to the bundle in its arm; a negative is weak (one harmful component could mask a useful one). To make negatives readable, every head's learning curve and the main tasks' validation are logged every 1000 steps.
-- Thresholds from known seed spreads: about 0.015 on the glottal slope; the real-voice F1 measures from D-040's seed pairs (to be filled in before registration).
+- Thresholds from known seed spreads (one seed per arm, so a signal must clear about twice the seed-to-seed difference to be broken down later). 5b's two seeds (`d040_5b_s{1,2}_b20k`) differ by 1.1 / 0.9 / 1.7 / 2.5 Hz on synthetic F1-F4 MAE (3-5 %), 0.2 Hz on women's closed-phase F1 bias, 0.003-0.004 in probe 11's F1 slope and 0.034 in Hillenbrand length reliability; D-065's paired arms moved women's bias by up to 1.9 Hz between seeds. Proposed: the glottal slope >= +0.03 (twice its 0.015); synthetic MAE >= 8 % per formant or the mean >= 5 %; women's closed-phase |error| >= 4 Hz (twice D-065's spread; D-056's 2 Hz is within one seed); aVTL MAE >= 10 % (D-083's -9 % from clip averaging is reported apart); length reliability >= 0.07. Below these, a change is reported, not called.
 - D-080's costs of coupled data (a -3 Hz offset on uncoupled audio, a worse F4) belong to the base, not the heads.
 
 *Smoke test before the GPU budget is committed*: memory and step time at 1600 frames on the iGPU (chunked if needed), every head's loss moving, the main tasks holding over the first few hundred steps.
@@ -2982,10 +2981,10 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 *Cost*: about 12-16 h per run at the wider size; about 1-1.5 days for four arms, two at a time.
 
 *Open items before registration*:
-1. Compile the neutral list by the rule above (decides whether that arm exists).
+1. (Done, 2026-11-06.) The neutral list, by the rule, from a keyword search of the log's results ("no difference", "within noise", "not a candidate", "no gain", "neither", "not adopted", "not robust") and a reading of each hit: **D-056** (anchored read-out: non-inferior, synthetic -0.5 to -0.8 SE, no gain), **D-073 queries_abs** (query read-out: non-inferior, women's closed-phase bias -1.0 / -1.5 Hz on both seeds, under the 2 Hz gain), **D-065 bw** (bandwidths decoupled from the formants: guards held, primary half met). Excluded: D-072 (a tight null, both arms at 5b to the decimal, no useful effect left in the interval), D-065 gain and D-051 5c (failed guards), v3a / v3b (worse), D-031's weight decay and D-040's rB / rC (recipe values the base already fixes). D-056 and D-073 are both formant read-outs and can't be combined, and either would move every formant measure, as D-086 did for the chain. So at most two compatible items qualify, under the 3 needed: **the neutral arm is dropped; the run is two arms, base and heads.** The keyword search could miss an entry phrased otherwise; a full read would settle it.
 2. (Closed, 2026-11-06: long crops from synthetic clips only.)
-3. Implement and test the coupled-aspiration flag; the golden renders stay identical.
-4. Fill the thresholds from D-040's seed spreads.
+3. (Done, 2026-11-06, `fb7a06a`.) `SynthConfig.coupled_aspiration` / `voice.synthesize(coupled_aspiration=...)`; off by default, golden renders unchanged; tested (no pole movement: equals the closed tract; with movement: only the aspiration changes; no effect without coupling).
+4. (Done, 2026-11-06: see the thresholds above, proposed.)
 5. (Closed, 2026-11-06: the formant chain goes to D-086; level and slope heads out.)
 6. The smoke test.
 
