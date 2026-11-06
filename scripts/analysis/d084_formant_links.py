@@ -114,8 +114,8 @@ def swap(name, ck):
                 s = np.asarray(son[f_off[c]:f_off[c] + t]).astype(bool) & np.all(np.isfinite(y) & (y > 0), 1)
                 if not s.any():
                     continue
-                tb = torch.from_numpy(np.nan_to_num(FORMANT_AXIS.to_bin(np.where(y > 0, y, 1.0)))).float().to(dev)
-                tb = torch.nn.functional.pad(tb, (0, 0, 0, h.shape[1] - t), mode="replicate")[None]  # (1, T, 4)
+                tb = np.nan_to_num(FORMANT_AXIS.to_bin(np.where(y > 0, y, 1.0)))
+                tb = torch.from_numpy(np.pad(tb, ((0, h.shape[1] - t), (0, 0)), mode="edge")).float().to(dev)[None]  # (1, T, 4)
                 own = chain(model, h, [None] * 4)
                 if c == 0:  # the re-run chain must reproduce the model's own read-out
                     ref = (model(vq.log_power_with_context(xx, (len(x) + pad) // HOP))["formant_logits"].float().softmax(-1)
