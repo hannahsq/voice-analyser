@@ -106,6 +106,9 @@ class SynthConfig:
     # False (no such label) reproduces earlier sets. D-079: with it, "glottal_opening", that <a> per frame (NaN on
     # uncoupled clips)
     acoustic_labels: bool = False
+    # D-085: on coupled cascade clips, aspiration through the coupled tract (`voice.synthesize`'s coupled_aspiration),
+    # not the closed-glottis one, which leaks the closed F1 (D-081). No draw; False reproduces earlier sets
+    coupled_aspiration: bool = False
     # Interactive source (D-026), per tube clip: glottal flow from the glottal area and the tract's load
     # (`interactive`), so the tract shapes the source. Replaces the quasi-static coupling on those clips. Labels are
     # the tube's closed-glottis poles, with the area function interpolated through transitions (keyframes at quarter
@@ -669,7 +672,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
     else:
         comps = synthesize(traj, rng, jitter=jitter, shimmer_db=shimmer, hnr_db=hnr, coupling=coupled,
                            asp_tilt_db_oct=cfg.asp_tilt_db_oct, whisper_tilt_db_oct=cfg.whisper_tilt_db_oct,
-                           whisper_level=cfg.whisper_level)
+                           whisper_level=cfg.whisper_level, coupled_aspiration=cfg.coupled_aspiration)
     audio = comps["total"]
     peak = np.max(np.abs(audio)) + 1e-12
     gain = 0.5 / peak

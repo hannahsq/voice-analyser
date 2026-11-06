@@ -156,6 +156,12 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
     amp = source_coefficients(traj.rd, k_max) * taper
     kmax = np.minimum(np.ceil(NYQ_TAPER_HZ[1] / traj.f0).astype(np.int64), k_max)
     src = _additive(cycles, np.abs(amp) * traj.voice_amp[:, None], np.unwrap(np.angle(amp), axis=0), kmax, CTRL)
+    f, b, z = _coupled_tract(traj, cycles, coupling)
+    return filters.filter_tv(src, f, b, fs, z)
+
+
+def _coupled_tract(traj: Trajectories, cycles: np.ndarray, coupling: dict) -> tuple:
+    """The coupled tract per sample (`_voiced_coupled`): (freqs, bandwidths, is_zero) for `filters.filter_tv`."""
     te_s = _open_phase_te(traj)
     if "gap_offset" in coupling:
         from .coupling import gap_from_open_quotient
@@ -172,7 +178,7 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
     pb[:n_c] = pb[:n_c] * (1.0 + (bm - 1.0) * a)
     zf, zb = _sections_per_sample(traj.zeros_f, traj.zeros_b)
     is_zero = np.r_[np.zeros(len(pf), bool), np.ones(len(zf), bool)]
-    return filters.filter_tv(src, np.concatenate([pf, zf]), np.concatenate([pb, zb]), fs, is_zero)
+    return np.concatenate([pf, zf]), np.concatenate([pb, zb]), is_zero
 
 
 # whisper and /h/ noise is not rescaled to a level by the caller (aspiration is, by HNR): with a 50 Hz floor, -12 dB/oct
@@ -184,7 +190,7 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
 def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0, shimmer_db: float = 0.0,
                hnr_db: float | None = None, fs: float = FS, coupling: dict | None = None,
                asp_tilt_db_oct: float | None = None, whisper_tilt_db_oct: float | None = None,
-               whisper_level: str = "as-is") -> dict[str, np.ndarray]:
+               whisper_level: str = "as-is", coupled_aspiration: bool = False) -> dict[str, np.ndarray]:
     """Render the components. Returns dict of float64 arrays (same length) and 'cycles' (glottal phase).
 
     jitter: SD of the per-period relative period perturbation; shimmer_db: SD of per-period amplitude (dB).
@@ -193,6 +199,9 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
     asp_tilt_db_oct: the aspiration noise's spectral tilt before the tract (dB per octave, 0 = white, re 1 kHz, flat
     below 50 Hz); None = the first difference of white noise (about +6 dB/octave, every set before D-048). The same
     random draws either way, so a clip differs only in its aspiration.
+    coupled_aspiration: with coupling, aspiration goes through the coupled tract (poles moving with the opening, as the
+    voiced source) instead of the closed-glottis one, which leaks the closed F1 into the audio (D-081). Off by default
+    (every set before D-085); the same random draws either way.
     """
     n = traj.n_samples
     f0_s = _per_sample(traj.f0)
@@ -221,9 +230,13 @@ def synthesize(traj: Trajectories, rng: np.random.Generator, jitter: float = 0.0
         te_s = _per_sample(te)
         mod = np.where(frac < te_s, 0.25 + 0.75 * np.sin(np.pi * frac / te_s) ** 2, 0.25)
         white = rng.standard_normal(n + 1)
+        if coupled_aspiration and coupling is not None:
+            ct = _coupled_tract(traj, cycles, coupling)
+            asp_tract = lambda x: filters.filter_tv(x, ct[0], ct[1], fs, ct[2])  # noqa: E731
+        else:
+            asp_tract = lambda x: tract_filter(x, traj, fs)  # noqa: E731
         out["aspiration"] = aspiration_component(
-            white, mod, va, voiced, tilt_db_oct=asp_tilt_db_oct, tract=lambda x: tract_filter(x, traj, fs),
-            hnr_db=hnr_db, fs=fs)
+            white, mod, va, voiced, tilt_db_oct=asp_tilt_db_oct, tract=asp_tract, hnr_db=hnr_db, fs=fs)
     wa = _per_sample(traj.whisper_amp)
     if wa.any():
         white = rng.standard_normal(n + 1)

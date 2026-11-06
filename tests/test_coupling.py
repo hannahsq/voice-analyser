@@ -100,3 +100,30 @@ def test_acoustic_labels_are_the_cycle_mean_and_change_nothing_else():
     assert np.all(b.labels["gap_offset"] == b.labels["gap_offset"][0]) and -0.3 <= b.labels["gap_offset"][0] <= 0.1
     oq = b.labels["open_quotient"]
     assert oq.shape == (len(f),) and np.all((oq > 0) & (oq < 1))
+
+
+def test_coupled_aspiration_follows_the_coupled_tract_and_changes_nothing_else():
+    """D-085: coupled_aspiration sends aspiration through the coupled tract. With no pole movement (df 0, bm 1) that is
+    the closed tract (same aspiration); with movement, only the aspiration changes; without coupling the flag does
+    nothing. The same draws throughout."""
+    c = 301
+    pf, pb = np.full((c, 8), np.nan), np.full((c, 8), np.nan)
+    pf[:, :4], pb[:, :4] = [600, 1300, 2500, 3500], [60, 80, 120, 150]
+    tr = Trajectories(f0=np.full(c, 150.0), rd=np.full(c, 1.2), voice_amp=np.ones(c), whisper_amp=np.zeros(c), fric_amp=np.zeros(c),
+                      poles_f=pf, poles_b=pb, zeros_f=np.zeros((c, 0)), zeros_b=np.zeros((c, 0)))
+    still = {"df": np.zeros((c, 4)), "bm": np.ones((c, 4))}
+    moving = {"df": np.full((c, 4), 0.1), "bm": np.full((c, 4), 2.0), "gap": 0.2}
+    run = lambda cp, flag: synthesize(tr, np.random.default_rng(0), hnr_db=15.0, coupling=cp, coupled_aspiration=flag)  # noqa: E731
+    seg = slice(2000, (c - 1) * CTRL)
+    a, b = run(still, False), run(still, True)
+    assert np.allclose(a["aspiration"][seg], b["aspiration"][seg], atol=1e-3 * np.abs(a["aspiration"][seg]).max())
+    a, b = run(moving, False), run(moving, True)
+    assert np.array_equal(a["voiced"], b["voiced"])
+    assert not np.allclose(a["aspiration"][seg], b["aspiration"][seg], atol=1e-2 * np.abs(a["aspiration"][seg]).max())
+    for k in a:
+        assert a[k].shape == b[k].shape
+    u0 = synthesize(tr, np.random.default_rng(0), hnr_db=15.0)
+    u1 = synthesize(tr, np.random.default_rng(0), hnr_db=15.0, coupled_aspiration=True)
+    assert all(np.array_equal(u0[k], u1[k]) for k in u0)
+    cfg = SynthConfig(p_tube=1.0, p_coupling=1.0, coupling_scale=(1.0, 1.0))
+    assert np.array_equal(generate(3, cfg, 5).audio, generate(3, cfg, 5).audio)
