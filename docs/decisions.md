@@ -2933,3 +2933,58 @@ Independent of D-072 (the read-out's behaviour, not missing information); the tw
   - M (MAE Hz, trunks 1 / 2): all three true others cut each formant's MAE by 10-16 % (F1 31.6 -> 27.1 / 31.0 -> 27.2; F2 -11 / -10 %; F3 -14 / -13 %; F4 -16 / -14 %). The strongest single cells: F4 <- F1 (-11 / -10 %), F3 <- F2 (-10 / -9 %), F1 <- F4 (-8 / -7 %), F2 <- F1 (-5 / -5 %). F1 <- F2 just misses on trunk 2 (-4.3 %). The label-only reference (the true others without h) is far worse (F1 85 Hz, F2 358 Hz), so the gain is the others combined with h, not the vowel space alone.
   - S: feeding the true F1 changes F2-F4 by at most 0.1 Hz; with the true F1..Fn-1, F3 and F4 move by up to 0.7 Hz (through the mask). Scaling F1's fed mean by 0.97 or 1.03 moves F2-F4 by a median of 0.000 of F1's shift. The chain re-run reproduces the model's own read-out (checked on the first clip).
   - *Reading (results seen)*: the heads receive the earlier means but have learned to ignore them. The input is the bin index / 368, so a 3 % F1 change moves it by about 0.007, next to h's 128 standardised channels. Only the mask acts, and only when a formant would fall below the one before it. So the chain is not passing F1's errors on, and a truth ramp on the chain as built would do nothing: the heads don't read the input it would correct. The true other formants are worth 10-16 % per formant at the frozen ceiling. D-083's lesson says a sibling's prediction from the same frozen h adds nothing, so that ceiling is reachable only if training makes the formants' estimates better together (shared gradients, a joint loss, or a rescaled, ramped input), which is a trained-arm question. Consistent with D-073: a joint read-out on the frozen trunk gained nothing.
+
+## D-085 (DRAFT, 2026-11-06; not registered, nothing runs from it): a screening run that relaxes several constraints at once
+
+*Status*: draft for Hannah's review. Her proposal (2026-11-05): a run "not worried about maintaining lineage", which gives the model what might help (a wider trunk, more heads, longer context) and asks several questions at once. The design was discussed on 2026-11-05 (loss weighting, what might hurt, a neutral arm; an advisor review), and D-081-D-084's oracle and learnability checks set which heads it carries. Open items (end of entry) must be closed before registration.
+
+*Questions, each with its primary measure fixed in advance; everything else reported at the same detail*:
+- **Q1, is the closed-phase F1 learnable?** The glottal slope of F1 (D-078's addendum) on aspiration-free coupled validation; the uncoupled offset between the closed and acoustic heads; KL's gap growth (D-074). Landmarks: label ceiling 0.29 (D-082), frozen v3.1 0.36, full recovery 0.89 on that scale.
+- **Q2, the aVTL-iVTL split.** aVTL MAE on synthetic validation, D-051's measures, probe 10 (whether the anatomical head follows the instantaneous length). Landmarks (D-083): frozen v3.1 0.155 cm; true iVTL as input 0.125; true iVTL with 2 s context 0.078.
+- **Q3, real-voice F1.** PTDB-TUG women's closed-phase bias and Hillenbrand F1 (dev), as always; guards on F2-F4, f0 RPA and resynthesised validation.
+- **Q4, capacity and context.** The base arm against v3.1 on all of the above: does the wider trunk with long context help at all?
+
+*Base (shared by every arm)*:
+- *Trunk*: about 1.5x v3.1's width (conformer_dim 128 -> 192, embed 384 -> 576; the rest as v3.1), the learning rate scaled by the width rule, and at least v3.1's step budget (D-040's recipe), so a negative isn't "undertrained".
+- *Context*: mixed crops: most batches as now (up to 4 s); some at 4-16 s, batched by a frame budget. Long material comes from new synthetic clips of 8-16 s with one anatomy per clip (the cleanest teacher for the split). Resynthesised clips are at most 6 s now (VocalSet and Zeroth train sets: median 3.7 / 4.0 s, max 6.0); longer ones need a new resynthesis (open item). Attention uses rotary positions, so 1600 frames needs no new positional scheme.
+- *Render*: train_v2's mix plus D-080's coupled share. A new opt-in flag sends the cascade's aspiration through the coupled tract (D-081's artefact); the golden renders stay identical.
+- *Evaluation at both lengths*: 4 s crops and long, so a model that needs long context to work is visible.
+
+*Arms (single seed each; a factorial on the shared base)*:
+
+| Arm | Heads bundle | Neutral bundle |
+|---|---|---|
+| Base | - | - |
+| Heads | yes | - |
+| Neutral | - | yes |
+| Both | yes | yes |
+
+If the neutral list has fewer than 3 qualifying items, it is dropped and the run is two arms: base and heads. The interaction cell is reported, not decided (one seed).
+
+*Heads bundle (each with D-081-D-084's evidence)*:
+- *Paired formant sets*: closed and acoustic F1-F4 as two main tasks (never cut against each other), the shift reported as their difference. D-081: the offset is audible and the shift, not the opening, is the missing quantity; D-082: not readable from frozen v3.1, so this is the trained-trunk question.
+- *A trained iVTL head* beside aVTL, with aVTL reading a detached iVTL whose source ramps from true to predicted, as the f0 comb does. D-081 B5 / A3: the true iVTL is worth 20 % (53 % with context); D-083: a frozen sibling's prediction adds nothing, so the link pays only if training learns iVTL well.
+- *The formant chain with standardised fed means and a truth ramp* (to 0). D-084: true other formants are worth 10-16 % per formant at the frozen ceiling, and v3.1's chain ignores its fed means (bin / 368 gives them no leverage). This changes the main formant read-out, so it is flagged in the bundle's reading.
+- *Not carried*: the opening head (D-080: an Rd proxy, costs 3-9 % formant accuracy); aperiodicity heads (D-081 B3: -0.3 %); source heads for bandwidths (B4: -2 %). Clip-level averaging of aVTL (D-083: -9 %) is post-processing, reported for every arm.
+- *Open*: frame level relative to the clip median and spectral slope earn a place only by a renderer role (D-081's rule), which this run doesn't have.
+
+*Neutral bundle*: changes with a "no difference" or "within noise" verdict whose interval still includes a useful effect, and no failed guard. The rule is applied to the decision log before the list is read, and the list is fixed in the registration.
+
+*Loss weighting*: each auxiliary loss normalised by its running mean once past its detached phase; a fixed auxiliary budget (about 25 % of the total) split per concept (length, coupling / shift, the formant chain), not per head; the main tasks' weights unchanged. Every head uses the side-path pattern (detached first, then ramped in). No gradient surgery (advisor: untested code, and fixed weights match adaptive methods in the literature).
+
+*Reading*:
+- A positive is attributed to the bundle in its arm; a negative is weak (one harmful component could mask a useful one). To make negatives readable, every head's learning curve and the main tasks' validation are logged every 1000 steps.
+- Thresholds from known seed spreads: about 0.015 on the glottal slope; the real-voice F1 measures from D-040's seed pairs (to be filled in before registration).
+- D-080's costs of coupled data (a -3 Hz offset on uncoupled audio, a worse F4) belong to the base, not the heads.
+
+*Smoke test before the GPU budget is committed*: memory and step time at 1600 frames on the iGPU (chunked if needed), every head's loss moving, the main tasks holding over the first few hundred steps.
+
+*Cost*: about 12-16 h per run at the wider size; about 1-1.5 days for four arms, two at a time.
+
+*Open items before registration*:
+1. Compile the neutral list by the rule above (decides whether that arm exists).
+2. Long resynthesised material: re-resynthesise longer segments from the source recordings (are the VocalSet and Zeroth sources long enough?), or rely on long synthetic clips alone.
+3. Implement and test the coupled-aspiration flag; the golden renders stay identical.
+4. Fill the thresholds from D-040's seed spreads.
+5. Hannah's call: the formant-chain change inside the heads bundle, or as its own arm; level and slope heads in or out.
+6. The smoke test.
