@@ -1,0 +1,18 @@
+Probe 'bandwidth' (D-050): d086_std_s1
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  bw/all/F1                  +0.002 [-0.001, +0.008]  null -0.000 [-0.001, +0.001]  n 60/10  ideal 0
+  bw/all/F2                  -0.001 [-0.001, +0.001]  null +0.000 [-0.000, +0.000]  n 60/10  ideal 0
+  bw/all/F3                  +0.000 [-0.002, +0.002]  null +0.000 [-0.000, +0.000]  n 60/10  ideal 0
+  bw/all/F4                  -0.001 [-0.002, +0.001]  null +0.000 [-0.000, +0.000]  n 60/10  ideal 0
+  bw/all/B1                  +0.483 [+0.455, +0.515]  null -0.009 [-0.086, +0.076]  n 60/10  ideal 1
+  bw/all/B2                  +0.614 [+0.571, +0.647]  null -0.011 [-0.108, +0.096]  n 60/10  ideal 1
+  bw/all/B3                  +0.601 [+0.549, +0.701]  null -0.009 [-0.107, +0.099]  n 60/10  ideal 1
+  bw/all/B4                  +0.598 [+0.553, +0.634]  null -0.004 [-0.102, +0.094]  n 60/10  ideal 1
+  bw/all/VTL                 +0.021 [+0.016, +0.022]  null +0.000 [-0.003, +0.003]  n 60/10  ideal 0
+  bw/all/f0                  +0.000 [-0.000, +0.000]  null +0.000 [-0.000, +0.000]  n 60/10  ideal 0
+  bw/sigma_growth/F1         sigma log2 change: ref:+0.00 bw=0.7:-0.15 bw=0.85:-0.08 bw=1.2:+0.11 bw=1.45:+0.22 bw=2.0:+0.46
+  bw/sigma_growth/F2         sigma log2 change: ref:+0.00 bw=0.7:-0.05 bw=0.85:-0.04 bw=1.2:+0.08 bw=1.45:+0.19 bw=2.0:+0.43
+  bw/sigma_growth/F3         sigma log2 change: ref:+0.00 bw=0.7:-0.04 bw=0.85:-0.04 bw=1.2:+0.08 bw=1.45:+0.21 bw=2.0:+0.50
+  bw/sigma_growth/F4         sigma log2 change: ref:+0.00 bw=0.7:-0.12 bw=0.85:-0.11 bw=1.2:+0.19 bw=1.45:+0.45 bw=2.0:+0.94
+  bw/sigma_growth/VTL        sigma log2 change: ref:+0.00 bw=0.7:-0.02 bw=0.85:-0.01 bw=1.2:+0.02 bw=1.45:+0.06 bw=2.0:+0.16

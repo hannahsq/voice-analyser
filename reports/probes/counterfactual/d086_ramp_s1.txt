@@ -1,0 +1,43 @@
+Probe 'counterfactual' (D-050): d086_ramp_s1
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  length/all/F1              +0.971 [+0.941, +1.006]  null -0.001 [-0.170, +0.183]  n 60/10  ideal 1
+  length/all/F2              +0.980 [+0.974, +0.993]  null +0.001 [-0.178, +0.190]  n 60/10  ideal 1
+  length/all/F3              +0.989 [+0.986, +0.999]  null +0.002 [-0.169, +0.190]  n 60/10  ideal 1
+  length/all/F4              +0.989 [+0.986, +1.006]  null -0.001 [-0.169, +0.197]  n 60/10  ideal 1
+  length/all/B1              +1.432 [+0.423, +1.659]  null +0.004 [-0.582, +0.485]  n 60/10  ideal 1
+  length/all/B2              +0.945 [+0.869, +1.004]  null -0.015 [-0.234, +0.202]  n 60/10  ideal 1
+  length/all/B3              +0.952 [+0.914, +1.029]  null +0.001 [-0.172, +0.197]  n 60/10  ideal 1
+  length/all/B4              +0.986 [+0.951, +1.015]  null -0.000 [-0.166, +0.171]  n 60/10  ideal 1
+  length/all/VTL             +0.988 [+0.902, +1.019]  null +0.001 [-0.159, +0.167]  n 60/10  ideal 1
+  length/all/f0              +0.001 [-0.001, +0.002]  null -0.000 [-0.001, +0.002]  n 60/10  ideal 0
+  length/sigma_growth/F1     sigma log2 change: ref:+0.00 alpha=0.85:-0.11 alpha=0.92:-0.10 alpha=1.09:+0.15 alpha=1.18:+0.33
+  length/sigma_growth/F2     sigma log2 change: ref:+0.00 alpha=0.85:+0.08 alpha=0.92:+0.07 alpha=1.09:+0.13 alpha=1.18:+0.29
+  length/sigma_growth/F3     sigma log2 change: ref:+0.00 alpha=0.85:+0.20 alpha=0.92:+0.11 alpha=1.09:+0.00 alpha=1.18:+0.11
+  length/sigma_growth/F4     sigma log2 change: ref:+0.00 alpha=0.85:+0.31 alpha=0.92:+0.20 alpha=1.09:-0.05 alpha=1.18:+0.01
+  length/sigma_growth/VTL    sigma log2 change: ref:+0.00 alpha=0.85:+0.13 alpha=0.92:+0.10 alpha=1.09:-0.07 alpha=1.18:-0.12
+  f0/all/F1                  +0.024 [-0.008, +0.041]  null +0.000 [-0.012, +0.013]  n 60/10  ideal 0
+  f0/all/F2                  +0.008 [+0.000, +0.024]  null +0.000 [-0.009, +0.008]  n 60/10  ideal 0
+  f0/all/F3                  +0.002 [-0.002, +0.007]  null +0.000 [-0.007, +0.007]  n 60/10  ideal 0
+  f0/all/F4                  +0.011 [-0.004, +0.020]  null +0.000 [-0.007, +0.008]  n 60/10  ideal 0
+  f0/all/B1                  +0.704 [+0.357, +1.088]  null +0.002 [-0.218, +0.226]  n 60/10  ideal 1
+  f0/all/B2                  +1.221 [+1.057, +1.623]  null -0.000 [-0.328, +0.354]  n 60/10  ideal 1
+  f0/all/B3                  +0.641 [+0.333, +1.070]  null -0.004 [-0.316, +0.322]  n 60/10  ideal 1
+  f0/all/B4                  +1.503 [+1.296, +1.691]  null -0.001 [-0.350, +0.337]  n 60/10  ideal 1
+  f0/all/VTL                 +0.014 [-0.001, +0.028]  null +0.000 [-0.007, +0.006]  n 60/10  ideal 0
+  f0/all/f0                  +1.004 [+1.001, +1.007]  null -0.002 [-0.191, +0.199]  n 60/10  ideal 1
+  f0/sigma_growth/F1         sigma log2 change: ref:+0.00 r=0.84:-0.06 r=0.92:-0.07 r=1.09:+0.13 r=1.19:+0.26
+  f0/sigma_growth/F2         sigma log2 change: ref:+0.00 r=0.84:+0.07 r=0.92:+0.07 r=1.09:+0.11 r=1.19:+0.33
+  f0/sigma_growth/F3         sigma log2 change: ref:+0.00 r=0.84:+0.10 r=0.92:+0.07 r=1.09:+0.15 r=1.19:+0.24
+  f0/sigma_growth/F4         sigma log2 change: ref:+0.00 r=0.84:+0.07 r=0.92:+0.02 r=1.09:+0.12 r=1.19:+0.36
+  f0/sigma_growth/VTL        sigma log2 change: ref:+0.00 r=0.84:+0.06 r=0.92:-0.02 r=1.09:+0.00 r=1.19:+0.07
+  original_vs_resynth/F1     +0.0192 [-0.0029, +0.0412]
+  original_vs_resynth/F2     +0.0277 [+0.0142, +0.0338]
+  original_vs_resynth/F3     +0.0043 [-0.0002, +0.0087]
+  original_vs_resynth/F4     -0.0070 [-0.0117, +0.0008]
+  original_vs_resynth/B1     +0.6719 [+0.5570, +0.8444]
+  original_vs_resynth/B2     +0.8792 [+0.7054, +1.0398]
+  original_vs_resynth/B3     +0.5566 [+0.2711, +0.7232]
+  original_vs_resynth/B4     -0.0811 [-0.1949, +0.0611]
+  original_vs_resynth/VTL    +0.0203 [+0.0024, +0.0401]
+  original_vs_resynth/f0     +0.0004 [-0.0009, +0.0011]

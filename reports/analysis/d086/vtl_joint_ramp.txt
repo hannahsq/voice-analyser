@@ -1,0 +1,128 @@
+
+[d040_5b_s1_b20k] synthetic per-clip median |error| (c): tube, not from f0 10  cascade, not from f0 50  length from f0 21; coverage frames 0.80 / 0.98
+[d040_5b_s1_b20k] probe: median |slope| f0 <= 250 Hz 9.5 c/oct; shuffle null median 9.0 (95 % 12.6); excess +0.5; P(null >= obs) 0.404; vowel spread 21 c; bias by length 13: +10  15.5: +9  18: -11
+
+[d040_5b_s2_b20k] synthetic per-clip median |error| (c): tube, not from f0 12  cascade, not from f0 47  length from f0 24; coverage frames 0.79 / 0.99
+[d040_5b_s2_b20k] probe: median |slope| f0 <= 250 Hz 9.1 c/oct; shuffle null median 8.4 (95 % 11.4); excess +0.7; P(null >= obs) 0.356; vowel spread 18 c; bias by length 13: +15  15.5: +17  18: -10
+
+[d086_ramp_s1] synthetic per-clip median |error| (c): tube, not from f0 10  cascade, not from f0 50  length from f0 21; coverage frames 0.80 / 0.98
+[d086_ramp_s1] probe: median |slope| f0 <= 250 Hz 9.5 c/oct; shuffle null median 9.1 (95 % 12.5); excess +0.4; P(null >= obs) 0.430; vowel spread 21 c; bias by length 13: +10  15.5: +9  18: -11
+
+[d086_ramp_s2] synthetic per-clip median |error| (c): tube, not from f0 12  cascade, not from f0 47  length from f0 23; coverage frames 0.79 / 0.99
+[d086_ramp_s2] probe: median |slope| f0 <= 250 Hz 9.3 c/oct; shuffle null median 7.9 (95 % 11.4); excess +1.5; P(null >= obs) 0.240; vowel spread 18 c; bias by length 13: +14  15.5: +19  18: -9
+
+Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
+  reliability
+    d040_5b_s1_b20k                 0.228 [   0.168,    0.274]
+    d040_5b_s2_b20k                 0.261 [   0.205,    0.303]
+    d086_ramp_s1                    0.229 [   0.169,    0.275]
+    d086_ramp_s2                    0.263 [   0.207,    0.305]
+    A                               0.153 [   0.104,    0.198]
+  rel men
+    d040_5b_s1_b20k                 0.254 [   0.164,    0.332]
+    d040_5b_s2_b20k                 0.328 [   0.235,    0.402]
+    d086_ramp_s1                    0.255 [   0.164,    0.334]
+    d086_ramp_s2                    0.331 [   0.237,    0.404]
+    A                               0.170 [   0.089,    0.255]
+  rel women
+    d040_5b_s1_b20k                 0.201 [   0.130,    0.259]
+    d040_5b_s2_b20k                 0.194 [   0.136,    0.244]
+    d086_ramp_s1                    0.202 [   0.129,    0.260]
+    d086_ramp_s2                    0.195 [   0.137,    0.245]
+    A                               0.135 [   0.089,    0.174]
+  w/m
+    d040_5b_s1_b20k                 0.869 [   0.844,    0.900]
+    d040_5b_s2_b20k                 0.860 [   0.843,    0.893]
+    d086_ramp_s1                    0.869 [   0.844,    0.901]
+    d086_ramp_s2                    0.861 [   0.842,    0.891]
+    A                               0.863 [   0.849,    0.891]
+  within SD c
+    d040_5b_s1_b20k               119.030 [ 113.492,  124.966]
+    d040_5b_s2_b20k               110.776 [ 105.592,  116.099]
+    d086_ramp_s1                  118.650 [ 113.144,  124.510]
+    d086_ramp_s2                  110.428 [ 105.231,  115.764]
+    A                             155.816 [ 149.963,  161.710]
+  men cm
+    d040_5b_s1_b20k                17.015 [  16.514,   17.347]
+    d040_5b_s2_b20k                17.316 [  16.824,   17.524]
+    d086_ramp_s1                   17.017 [  16.513,   17.327]
+    d086_ramp_s2                   17.309 [  16.830,   17.514]
+    A                              17.837 [  17.431,   18.062]
+  women cm
+    d040_5b_s1_b20k                14.782 [  14.542,   15.078]
+    d040_5b_s2_b20k                14.900 [  14.638,   15.138]
+    d086_ramp_s1                   14.785 [  14.531,   15.072]
+    d086_ramp_s2                   14.904 [  14.636,   15.126]
+    A                              15.390 [  15.248,   15.657]
+  children cm
+    d040_5b_s1_b20k                13.869 [  13.721,   14.218]
+    d040_5b_s2_b20k                13.986 [  13.642,   14.232]
+    d086_ramp_s1                   13.868 [  13.727,   14.231]
+    d086_ramp_s2                   13.984 [  13.652,   14.234]
+    A                              14.679 [  14.421,   15.008]
+  r(len, f0) in sex
+    d040_5b_s1_b20k                -0.399 [  -0.641,   -0.127]
+    d040_5b_s2_b20k                -0.417 [  -0.674,   -0.128]
+    d086_ramp_s1                   -0.399 [  -0.639,   -0.128]
+    d086_ramp_s2                   -0.419 [  -0.676,   -0.129]
+    A                              -0.347 [  -0.582,   -0.093]
+
+Paired differences (speaker bootstrap)
+  d040_5b_s1_b20k - A                          reliability    +0.075 [  +0.037,   +0.113]
+  d040_5b_s1_b20k - A                          w/m            +0.006 [  -0.025,   +0.023]
+  d040_5b_s1_b20k - A                          within SD c   -36.786 [ -41.579,  -31.902]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            reliability    -0.034 [  -0.060,   -0.005]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            w/m            +0.008 [  -0.011,   +0.019]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            within SD c    +8.253 [  +5.542,  +11.353]
+  d040_5b_s1_b20k - d086_ramp_s1               reliability    -0.001 [  -0.002,   +0.000]
+  d040_5b_s1_b20k - d086_ramp_s1               w/m            -0.000 [  -0.001,   +0.001]
+  d040_5b_s1_b20k - d086_ramp_s1               within SD c    +0.380 [  +0.202,   +0.555]
+  d040_5b_s1_b20k - d086_ramp_s2               reliability    -0.035 [  -0.062,   -0.006]
+  d040_5b_s1_b20k - d086_ramp_s2               w/m            +0.008 [  -0.011,   +0.019]
+  d040_5b_s1_b20k - d086_ramp_s2               within SD c    +8.601 [  +5.933,  +11.691]
+  d040_5b_s2_b20k - A                          reliability    +0.109 [  +0.064,   +0.150]
+  d040_5b_s2_b20k - A                          w/m            -0.002 [  -0.028,   +0.017]
+  d040_5b_s2_b20k - A                          within SD c   -45.040 [ -48.915,  -41.423]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            reliability    +0.034 [  +0.005,   +0.060]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            w/m            -0.008 [  -0.019,   +0.011]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            within SD c    -8.253 [ -11.353,   -5.542]
+  d040_5b_s2_b20k - d086_ramp_s1               reliability    +0.033 [  +0.004,   +0.059]
+  d040_5b_s2_b20k - d086_ramp_s1               w/m            -0.008 [  -0.019,   +0.011]
+  d040_5b_s2_b20k - d086_ramp_s1               within SD c    -7.874 [ -10.912,   -5.154]
+  d040_5b_s2_b20k - d086_ramp_s2               reliability    -0.002 [  -0.003,   -0.001]
+  d040_5b_s2_b20k - d086_ramp_s2               w/m            -0.001 [  -0.001,   +0.001]
+  d040_5b_s2_b20k - d086_ramp_s2               within SD c    +0.348 [  +0.254,   +0.446]
+  d086_ramp_s1 - A                             reliability    +0.076 [  +0.037,   +0.115]
+  d086_ramp_s1 - A                             w/m            +0.006 [  -0.025,   +0.023]
+  d086_ramp_s1 - A                             within SD c   -37.166 [ -42.031,  -32.358]
+  d086_ramp_s1 - d040_5b_s1_b20k               reliability    +0.001 [  -0.000,   +0.002]
+  d086_ramp_s1 - d040_5b_s1_b20k               w/m            +0.000 [  -0.001,   +0.001]
+  d086_ramp_s1 - d040_5b_s1_b20k               within SD c    -0.380 [  -0.555,   -0.202]
+  d086_ramp_s1 - d040_5b_s2_b20k               reliability    -0.033 [  -0.059,   -0.004]
+  d086_ramp_s1 - d040_5b_s2_b20k               w/m            +0.008 [  -0.011,   +0.019]
+  d086_ramp_s1 - d040_5b_s2_b20k               within SD c    +7.874 [  +5.154,  +10.912]
+  d086_ramp_s1 - d086_ramp_s2                  reliability    -0.034 [  -0.061,   -0.006]
+  d086_ramp_s1 - d086_ramp_s2                  w/m            +0.008 [  -0.011,   +0.019]
+  d086_ramp_s1 - d086_ramp_s2                  within SD c    +8.222 [  +5.523,  +11.246]
+  d086_ramp_s2 - A                             reliability    +0.110 [  +0.066,   +0.152]
+  d086_ramp_s2 - A                             w/m            -0.002 [  -0.028,   +0.017]
+  d086_ramp_s2 - A                             within SD c   -45.388 [ -49.293,  -41.794]
+  d086_ramp_s2 - d040_5b_s1_b20k               reliability    +0.035 [  +0.006,   +0.062]
+  d086_ramp_s2 - d040_5b_s1_b20k               w/m            -0.008 [  -0.019,   +0.011]
+  d086_ramp_s2 - d040_5b_s1_b20k               within SD c    -8.601 [ -11.691,   -5.933]
+  d086_ramp_s2 - d040_5b_s2_b20k               reliability    +0.002 [  +0.001,   +0.003]
+  d086_ramp_s2 - d040_5b_s2_b20k               w/m            +0.001 [  -0.001,   +0.001]
+  d086_ramp_s2 - d040_5b_s2_b20k               within SD c    -0.348 [  -0.446,   -0.254]
+  d086_ramp_s2 - d086_ramp_s1                  reliability    +0.034 [  +0.006,   +0.061]
+  d086_ramp_s2 - d086_ramp_s1                  w/m            -0.008 [  -0.019,   +0.011]
+  d086_ramp_s2 - d086_ramp_s1                  within SD c    -8.222 [ -11.246,   -5.523]
+
+Seed mean ramp (d086_ramp_s1 + d086_ramp_s2): reliability - A +0.093 [+0.053, +0.131]; w/m 0.865; probe excess +1.0 c/oct
+
+Seed mean 5b (d040_5b_s1_b20k + d040_5b_s2_b20k): reliability - A +0.092 [+0.052, +0.129]; w/m 0.865; probe excess +0.6 c/oct
+
+Paired seed means ramp-5b: reliability +0.001 [+0.000, +0.002]; w/m 0.865; probe excess +1.0 c/oct
+
+Paired seed means s1: reliability +0.001 [-0.000, +0.002]; w/m 0.869; probe excess +0.4 c/oct
+
+Paired seed means s2: reliability +0.002 [+0.001, +0.003]; w/m 0.861; probe excess +1.5 c/oct

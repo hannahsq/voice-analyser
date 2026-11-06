@@ -1,0 +1,18 @@
+tiers: dev
+
+Hillenbrand, d086_std_s2 vs d086_ramp_s2 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    44.3    44.3  diff   +0.0 [-0.1, +0.1]  within noise
+  F1 MAE children:    51.2    51.2  diff   +0.0 [-0.0, +0.1]  within noise
+  F1 MAE men     :    20.5    20.6  diff   +0.0 [-0.0, +0.1]  within noise
+  F1 MAE all     :    38.8    38.8  diff   +0.0 [-0.0, +0.1]  within noise
+  F2 MAE all     :    43.6    43.6  diff   +0.0 [-0.0, +0.0]  within noise
+  F2 DR  all     :    98.3    98.3  diff   +0.0 [+0.0, +0.1]  within noise
+  F3 MAE all     :    45.1    45.1  diff   -0.0 [-0.1, +0.0]  within noise
+  F3 DR  all     :    98.3    98.3  diff   +0.0 [+0.0, +0.0]  within noise
+  F4 MAE all     :    97.3    97.4  diff   +0.1 [-0.1, +0.3]  within noise
+  F4 DR  all     :    91.8    91.7  diff   -0.1 [-0.5, +0.0]  within noise
+
+PTDB-TUG f0 RPA, d086_std_s2 vs d086_ramp_s2
+  all frames    :  87.0  87.0  diff  +0.0 [-0.0, +0.0]  within noise  (n 154653)
+  modal         :  93.9  93.9  diff  +0.0 [+0.0, +0.0]  better  (n 126992)
+  modal < 85 Hz :  85.9  86.0  diff  +0.1 [-0.3, +0.1]  within noise  (n 11014)
