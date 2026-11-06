@@ -2946,7 +2946,7 @@ Independent of D-072 (the read-out's behaviour, not missing information); the tw
 
 *Base (shared by every arm)*:
 - *Trunk*: about 1.5x v3.1's width (conformer_dim 128 -> 192, embed 384 -> 576; the rest as v3.1), the learning rate scaled by the width rule, and at least v3.1's step budget (D-040's recipe), so a negative isn't "undertrained".
-- *Context*: mixed crops: most batches as now (up to 4 s); some at 4-16 s, batched by a frame budget. Long material comes from new synthetic clips of 8-16 s with one anatomy per clip (the cleanest teacher for the split). Resynthesised clips are at most 6 s now (VocalSet and Zeroth train sets: median 3.7 / 4.0 s, max 6.0); longer ones need a new resynthesis (open item). Attention uses rotary positions, so 1600 frames needs no new positional scheme.
+- *Context*: mixed crops: most batches as now (up to 4 s); some at 4-16 s, batched by a frame budget. Long material comes from new synthetic clips of 8-16 s with one anatomy per clip (the cleanest teacher for the split). Resynthesised clips are at most 6 s now (VocalSet and Zeroth train sets: median 3.7 / 4.0 s, max 6.0); they stay as they are. Long crops come from synthetic clips only (Hannah, 2026-11-06): only they carry exact aVTL and iVTL labels, and real-voice transfer is measured on held-out real recordings anyway. A longer resynthesis is worth doing only if the base arm shows long context helps. Attention uses rotary positions, so 1600 frames needs no new positional scheme.
 - *Render*: train_v2's mix plus D-080's coupled share. A new opt-in flag sends the cascade's aspiration through the coupled tract (D-081's artefact); the golden renders stay identical.
 - *Evaluation at both lengths*: 4 s crops and long, so a model that needs long context to work is visible.
 
@@ -2964,13 +2964,13 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 *Heads bundle (each with D-081-D-084's evidence)*:
 - *Paired formant sets*: closed and acoustic F1-F4 as two main tasks (never cut against each other), the shift reported as their difference. D-081: the offset is audible and the shift, not the opening, is the missing quantity; D-082: not readable from frozen v3.1, so this is the trained-trunk question.
 - *A trained iVTL head* beside aVTL, with aVTL reading a detached iVTL whose source ramps from true to predicted, as the f0 comb does. D-081 B5 / A3: the true iVTL is worth 20 % (53 % with context); D-083: a frozen sibling's prediction adds nothing, so the link pays only if training learns iVTL well.
-- *The formant chain with standardised fed means and a truth ramp* (to 0). D-084: true other formants are worth 10-16 % per formant at the frozen ceiling, and v3.1's chain ignores its fed means (bin / 368 gives them no leverage). This changes the main formant read-out, so it is flagged in the bundle's reading.
+- *Not in this run: the formant chain with standardised fed means and a truth ramp* (Hannah, 2026-11-06). It changes the main formant read-out and would move every measure here, so it is tested on its own on the S2 proxy (D-086; D-084: the true other formants are worth 10-16 % per formant at the frozen ceiling, and v3.1's chain ignores its fed means). If it helps, it joins the base of the next run.
 - *Not carried*: the opening head (D-080: an Rd proxy, costs 3-9 % formant accuracy); aperiodicity heads (D-081 B3: -0.3 %); source heads for bandwidths (B4: -2 %). Clip-level averaging of aVTL (D-083: -9 %) is post-processing, reported for every arm.
-- *Open*: frame level relative to the clip median and spectral slope earn a place only by a renderer role (D-081's rule), which this run doesn't have.
+- *Not carried (Hannah, 2026-11-06)*: frame level and spectral slope. No oracle evidence, no renderer in this run, and known risks (level against the gain augmentation; slope overlaps source shape, D-080 / D-081 B4). They belong with the differentiable renderer's registration.
 
 *Neutral bundle*: changes with a "no difference" or "within noise" verdict whose interval still includes a useful effect, and no failed guard. The rule is applied to the decision log before the list is read, and the list is fixed in the registration.
 
-*Loss weighting*: each auxiliary loss normalised by its running mean once past its detached phase; a fixed auxiliary budget (about 25 % of the total) split per concept (length, coupling / shift, the formant chain), not per head; the main tasks' weights unchanged. Every head uses the side-path pattern (detached first, then ramped in). No gradient surgery (advisor: untested code, and fixed weights match adaptive methods in the literature).
+*Loss weighting*: each auxiliary loss normalised by its running mean once past its detached phase; a fixed auxiliary budget (about 25 % of the total) split per concept (length, coupling / shift), not per head; the main tasks' weights unchanged. Every head uses the side-path pattern (detached first, then ramped in). No gradient surgery (advisor: untested code, and fixed weights match adaptive methods in the literature).
 
 *Reading*:
 - A positive is attributed to the bundle in its arm; a negative is weak (one harmful component could mask a useful one). To make negatives readable, every head's learning curve and the main tasks' validation are logged every 1000 steps.
@@ -2983,8 +2983,19 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 
 *Open items before registration*:
 1. Compile the neutral list by the rule above (decides whether that arm exists).
-2. Long resynthesised material: re-resynthesise longer segments from the source recordings (are the VocalSet and Zeroth sources long enough?), or rely on long synthetic clips alone.
+2. (Closed, 2026-11-06: long crops from synthetic clips only.)
 3. Implement and test the coupled-aspiration flag; the golden renders stay identical.
 4. Fill the thresholds from D-040's seed spreads.
-5. Hannah's call: the formant-chain change inside the heads bundle, or as its own arm; level and slope heads in or out.
+5. (Closed, 2026-11-06: the formant chain goes to D-086; level and slope heads out.)
 6. The smoke test.
+
+## D-086 (registered 2026-11-06; seen beforehand: D-084, a 2-step branch test of the code, D-086's decision script in check mode on D-065's arm, no arm result): the formant chain with standardised fed means, and a truth ramp, in 5b's decay branch
+
+*Status*: registered (Hannah, 2026-11-06: taken out of D-085's heads bundle and tested alone). D-084: v3.1's formant heads receive the earlier formants' predicted means but ignore them (fed as bin / 368, a 3 % F1 change moves the input by about 0.007; sensitivity 0.000), while the true other formants are worth 10-16 % per formant at the frozen ceiling. Question: **with inputs that have leverage, does the chain use the other formants, and does forcing it from the labels at first help it learn to?**
+- *Arm A, standardised* (`TeacherConfig.fed_standardised`): each later head Fn also reads the fed means of F1..Fn-1 as (bin - centre_m) / 30 (centres at about 500 / 1500 / 2500 / 3500 Hz; 30 bins = half an octave) through a fresh linear path (`fed_heads.*`), initialised at zero, so the branch starts exactly at 5b (tested). The raw path and the mask are unchanged. The new path trains in its own AdamW at `fed_lr` 1e-3 x the model's schedule (weight decay 0.01), as D-072's side path.
+- *Arm B, A plus a truth ramp* (`TrainConfig.fed_truth_steps` 2000): the means fed to later heads and to the mask come from the formant labels (where defined; elsewhere the chain's own) with a probability decaying 1 -> 0 over the branch's first 2000 steps, so the last 2000 steps are on its own means, as the f0 comb's ramp.
+- *Training*: `va train teacher --branch-from runs/d040_5b_s{s}/ckpt_016000.pt --decay-steps 4000 --train-set fed_standardised=true --train-set fed_lr=0.001` (+ `fed_truth_steps=2000` for B); paired control `d040_5b_s{s}_b20k`. Seeds 2 then 1, A then B; about 1.5-2 h each.
+- *Measures and rule* (each arm against `d040_5b_s{s}_b20k`, `decide_d086.py`): D-072's, unchanged (D-056's non-inferiority on D-040's margins and a gain on at least one of: synthetic F1-F4 MAE lower by >= 3 %, women's closed-phase F1 |error| lower by >= 2 Hz, probe 11's F1 scale error halved on Hillenbrand and PTDB-TUG; D-051's length guard (2) and f0 guard (3)). Seed means, both seeds in the same direction; otherwise "not robust to the seed".
+- *Reported, deciding nothing*: B against A (the ramp's own effect); the fed path's weight norms (did it learn); 5b's seed spread beside the length guard.
+- *Reading*: A a candidate -> the chain's input scale was the limit, and standardised fed means go into the next run's base. B a candidate and A not -> the ramp is what lets the chain learn to use the others. Neither -> the 10-16 % frozen ceiling isn't reachable through the chain in a 4k-step branch; a joint loss or a from-scratch arm would be the next question, if any. A null here is weaker than D-072's, since D-084 says the information is there.
+- Scripts: `scripts/analysis/chains/d086.sh`, `scripts/analysis/decide_d086.py`; reports `reports/analysis/d086/`.
