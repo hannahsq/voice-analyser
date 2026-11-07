@@ -68,7 +68,7 @@ def test_write_formats(tmp_path):
 def test_plot_writes_png(tmp_path):
     audio = np.random.default_rng(1).normal(0, 0.1, 8000).astype(np.float32)
     r = _fake(51)
-    for kind in ("wide", "narrow"):
+    for kind in ("wide", "medium", "narrow"):
         p = A.plot(audio, r, tmp_path / f"{kind}.png", spectrogram=kind)
         assert p.exists() and p.stat().st_size > 1000
 

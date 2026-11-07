@@ -376,7 +376,7 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--window", default="crop", help="crop (training crop, 400 frames; default), whole, or a window in frames")
     a.add_argument("--out", default="va_analyse", help="output directory (default: va_analyse)")
     a.add_argument("--format", default="csv", help="comma list of csv, json, npz (a summary .json is always written)")
-    a.add_argument("--plot", action="store_true", help="spectrogram with F1-F4 (+-sigma), f0 and tract length panels (.png)")
+    a.add_argument("--plot", action="store_true", help="spectrogram with F1-F4 and f0 overlaid (+-sigma), and a tract length panel (.png)")
     a.add_argument("--mask", action="store_true", help="blank f0 where unvoiced and formants / lengths where non-sonorant")
     a.add_argument("--threshold", type=float, default=0.5, help="voicing / sonorant probability threshold (default 0.5)")
     a.add_argument("--channel", type=int, default=None, help="channel to analyse (default: the mean of all)")
@@ -386,8 +386,8 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--fmax", type=float, default=5000.0, help="plot's upper frequency, Hz (default 5000)")
     a.add_argument("--no-normalise", action="store_true",
                    help="analyse at the recorded level (default: peak-normalise to -12 dBFS, the middle of training's range)")
-    a.add_argument("--spectrogram", default="wide", choices=("wide", "narrow"),
-                   help="plot's spectrogram: wide (6 ms, formants; default) or narrow (30 ms, harmonics)")
+    a.add_argument("--spectrogram", default="wide", choices=("wide", "medium", "narrow"),
+                   help="plot's spectrogram: wide (6 ms, formants; default), medium (12 ms, e.g. high voices) or narrow (30 ms, harmonics)")
     a.set_defaults(fn=cmd_analyse)
     return p
 

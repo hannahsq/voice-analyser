@@ -170,27 +170,28 @@ def write(cols: dict[str, np.ndarray], summ: dict, meta: dict, stem: Path, forma
     return written
 
 
-SPECTROGRAMS = {"wide": 96, "narrow": 480}  # window, samples: 6 ms shows formants, 30 ms resolves harmonics
+SPECTROGRAMS = {"wide": 96, "medium": 192, "narrow": 480}  # window, samples: 6 ms shows formants, 30 ms resolves harmonics;
+# 12 ms between them (smoother formants, harmonics resolved at high f0, e.g. singing)
 
 
 def plot(audio: np.ndarray, r: dict, path: Path, title: str = "", t0: float = 0.0, fmax: float = 5000.0,
          threshold: float = 0.5, spectrogram: str = "wide") -> Path:
-    """Spectrogram (wideband by default) with F1-F4 (sonorant frames, +-sigma bands), f0 (voiced frames, +-sigma) and
-    the tract lengths."""
+    """Spectrogram (wideband by default) with F1-F4 (sonorant frames, +-sigma bands) and f0 (voiced frames, +-sigma)
+    overlaid, and the tract lengths below."""
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from matplotlib.ticker import ScalarFormatter
     from scipy.signal import stft
 
     t = r["t"] + t0
     voiced, son = r["voiced_p"] > threshold, r["sonorant_p"] > threshold
     has_vtl = "vtl_log2cm" in r
-    rows = 3 if has_vtl else 2
+    rows = 2 if has_vtl else 1
     width = float(np.clip(4 + 2.5 * len(audio) / FS, 8, 40))
-    fig, ax = plt.subplots(rows, 1, figsize=(width, 3.2 * rows), sharex=True,
-                           gridspec_kw={"height_ratios": [3, 1, 1][:rows]}, constrained_layout=True)
+    fig, ax = plt.subplots(rows, 1, figsize=(width, 3.2 * (rows + 1)), sharex=True, squeeze=False,
+                           gridspec_kw={"height_ratios": [4, 1][:rows]}, constrained_layout=True)
+    ax = ax[:, 0]
     n = SPECTROGRAMS[spectrogram]
     shown = np.r_[audio[:1], audio[1:] - 0.97 * audio[:-1]]  # pre-emphasis for display only, as phonetics tools do
     f, ts, z = stft(shown, FS, window="hann", nperseg=n, noverlap=n - 32, nfft=max(512, n))  # 2 ms hop
@@ -203,29 +204,24 @@ def plot(audio: np.ndarray, r: dict, path: Path, title: str = "", t0: float = 0.
         sg = 2.0 ** (np.where(son, r["formant_sigma_cents"][:, k], np.nan) / 1200)
         ax[0].fill_between(t, fk / sg, fk * sg, color=colours[k], alpha=0.25, linewidth=0)
         ax[0].plot(t, fk, color=colours[k], linewidth=1.2, label=f"F{k + 1}")
-    ax[0].set_ylim(0, fmax)
-    ax[0].set_ylabel("Hz")
-    ax[0].legend(loc="upper right", ncols=4, fontsize=8)
-    ax[0].set_title(title)
     f0 = np.where(voiced, r["f0"], np.nan)
     s0 = 2.0 ** (np.where(voiced, r["f0_sigma_cents"], np.nan) / 1200)
-    ax[1].fill_between(t, f0 / s0, f0 * s0, color="tab:purple", alpha=0.25, linewidth=0)
-    ax[1].plot(t, f0, color="tab:purple", linewidth=1.2)
-    ax[1].set_yscale("log")
-    for axis in (ax[1].yaxis,):
-        axis.set_major_formatter(ScalarFormatter())
-        axis.set_minor_formatter(ScalarFormatter())
-    ax[1].set_ylabel("f0 (Hz)")
+    ax[0].fill_between(t, f0 / s0, f0 * s0, color="tab:purple", alpha=0.3, linewidth=0)
+    ax[0].plot(t, f0, color="tab:purple", linewidth=1.4, label="f0")
+    ax[0].set_ylim(0, fmax)
+    ax[0].set_ylabel("Hz")
+    ax[0].legend(loc="upper right", ncols=5, fontsize=8)
+    ax[0].set_title(title)
     if has_vtl:
         for key, colour, label in (("vtl", "tab:brown", "anatomical"), ("vtl_inst", "tab:cyan", "instantaneous")):
             if f"{key}_log2cm" not in r:
                 continue
             mu = np.where(son, r[f"{key}_log2cm"], np.nan)
             sg = np.where(son, r[f"{key}_sigma"], np.nan)
-            ax[2].fill_between(t, 2 ** (mu - sg), 2 ** (mu + sg), color=colour, alpha=0.25, linewidth=0)
-            ax[2].plot(t, 2 ** mu, color=colour, linewidth=1.2, label=label)
-        ax[2].set_ylabel("tract length (cm)")
-        ax[2].legend(loc="upper right", fontsize=8)
+            ax[1].fill_between(t, 2 ** (mu - sg), 2 ** (mu + sg), color=colour, alpha=0.25, linewidth=0)
+            ax[1].plot(t, 2 ** mu, color=colour, linewidth=1.2, label=label)
+        ax[1].set_ylabel("tract length (cm)")
+        ax[1].legend(loc="upper right", fontsize=8)
     ax[-1].set_xlabel("time (s)")
     fig.savefig(path, dpi=120)
     plt.close(fig)
