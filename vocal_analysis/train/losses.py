@@ -14,7 +14,7 @@ from __future__ import annotations
 import torch
 import torch.nn.functional as Fn
 
-from ..models.bins import F0_AXIS, FORMANT_AXIS, gaussian_targets
+from ..models.bins import F0_AXIS, FORMANT_AXIS, UPPER_AXIS, gaussian_targets
 
 
 def _masked_mean(x: torch.Tensor, mask: torch.Tensor, weight: torch.Tensor | None = None) -> torch.Tensor:
@@ -31,7 +31,7 @@ def heatmap_ce(logits: torch.Tensor, values_hz: torch.Tensor, mask: torch.Tensor
     return _masked_mean(ce, mask & valid, weight)
 
 
-WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5, "obs": 0.2, "vtl": 0.0125, "vtl_inst": 0.0125, "opening": 1.0}  # vtl: D-036's registered weight
+WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5, "obs": 0.2, "vtl": 0.0125, "vtl_inst": 0.0125, "opening": 1.0, "upper": 1.0}  # vtl: D-036's registered weight
 
 
 def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[torch.Tensor, dict]:
@@ -71,5 +71,9 @@ def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[tor
         y = lab["glottal_opening"]
         omask = son & torch.isfinite(y)
         parts["opening"] = _masked_mean(10.0 * (out["opening"] - torch.nan_to_num(y)).abs(), omask)
+    if "upper_logits" in out and "upper_formants" in lab:  # D-090: as the formant term, per formant at F1-F4's
+        ul = out["upper_logits"]  # weight (sum / 4); frames with the formant out of band (NaN) carry no loss
+        parts["upper"] = sum(heatmap_ce(ul[:, :, k], lab["upper_formants"][..., k], son, UPPER_AXIS, w_fm)
+                             for k in range(ul.shape[2])) / 4
     total = sum(w[k] * v for k, v in parts.items())
     return total, {k: v.detach() for k, v in parts.items()}

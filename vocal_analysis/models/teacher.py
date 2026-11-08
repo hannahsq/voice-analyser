@@ -10,12 +10,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as Fn
 
 from ..features import vqt
-from .bins import F0_AXIS, FORMANT_AXIS
+from .bins import F0_AXIS, FORMANT_AXIS, UPPER_AXIS
 
 N_FORMANTS = 4
 FED_CENTRES = (139.0, 234.0, 279.0, 308.0)  # D-086: bins of about 500 / 1500 / 2500 / 3500 Hz
@@ -65,6 +67,9 @@ class TeacherConfig:
     # D-086: the formant chain's fed means, also as standardised inputs ((bin - FED_CENTRES[m]) / FED_SCALE) through
     # a fresh linear path per head (modules "fed_heads.*", zero at the start, so a branch starts at its parent)
     fed_standardised: bool = False
+    # D-090 / D-085: n_upper extra formant heads (F5, F6, ...) on UPPER_AXIS, linear on h ("upper_heads.*"), each
+    # soft-masked above the one before (F5 above F4's mean), behind their own gradient gate (Teacher.upper_gate)
+    n_upper: int = 0
     # D-054: how the formant and bandwidth heads read the trunk. "flat": linear heads on the pooled per-frame vector h
     # (every model to D-051); "mlp": the same with one hidden layer of readout_hidden (a capacity control); "film":
     # frequency-resolved (`FreqReadout`): the encoder's conv maps, modulated by h, upsampled back to the VQT's bins, one
@@ -429,6 +434,10 @@ class Teacher(nn.Module):
             for m in self.fed_heads:
                 nn.init.zeros_(m.weight)
                 nn.init.zeros_(m.bias)
+        if cfg.n_upper:
+            self.upper_heads = nn.ModuleList([nn.Linear(d, UPPER_AXIS.n_bins) for _ in range(cfg.n_upper)])
+            self.upper_gate = 1.0  # set by the trainer each step
+            self.register_buffer("up_bins", torch.arange(UPPER_AXIS.n_bins, dtype=torch.float32), persistent=False)
         self.register_buffer("log2_vqt", LOG2_VQT.clone(), persistent=False)
         self.register_buffer("f0_log2", torch.log2(torch.tensor(F0_AXIS.centres_hz, dtype=torch.float32)), persistent=False)
         self.register_buffer("fm_bins", torch.arange(FORMANT_AXIS.n_bins, dtype=torch.float32), persistent=False)
@@ -506,6 +515,19 @@ class Teacher(nn.Module):
             g = self.opening_gate
             ho = h.detach() if g == 0 else h if g == 1 else _GradGate.apply(h, float(g))
             out["opening"] = torch.sigmoid(self.opening_head(ho).float()[..., 0])
+        if self.cfg.n_upper:
+            g = self.upper_gate
+            hu = h.detach() if g == 0 else h if g == 1 else _GradGate.apply(h, float(g))
+            # the previous formant's mean on UPPER_AXIS's bins (F4 from the main chain, detached)
+            prev = (means[-1].detach() * FORMANT_AXIS.cents_per_bin + 1200.0 * math.log2(FORMANT_AXIS.f_min / UPPER_AXIS.f_min)) / UPPER_AXIS.cents_per_bin
+            up = []
+            for k in range(self.cfg.n_upper):
+                lg = self.upper_heads[k](hu).float()
+                below = (prev[..., None] - self.cfg.mask_margin_bins - self.up_bins).clamp_min(0.0)
+                lg = lg - self.cfg.mask_strength * torch.tanh(below / self.cfg.mask_margin_bins)
+                up.append(lg)
+                prev = (lg.softmax(-1) * self.up_bins).sum(-1).detach()
+            out["upper_logits"] = torch.stack(up, 2)  # (B, T, n_upper, UPPER_AXIS bins)
         return out
 
 

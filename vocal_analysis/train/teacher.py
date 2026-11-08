@@ -140,6 +140,11 @@ class TrainConfig:
     fed_standardised: bool = False
     fed_lr: float | None = None
     fed_truth_steps: int | None = None
+    # D-090: n upper formant heads (TeacherConfig.n_upper; "upper_heads.*", fresh) added at a branch, in their own AdamW
+    # at upper_lr x the model's schedule; their gradient into the trunk gated as the opening head's
+    # (0 for opening_detach steps, then a ramp to 1 over opening_gate_ramp)
+    upper: int = 0
+    upper_lr: float | None = None
     opening_detach: int = 300
     opening_gate_ramp: int = 700
 
@@ -223,7 +228,7 @@ def _optimizer(model, cfg: "TrainConfig"):
 
     own = (VTL_PREFIXES + (READOUT_PREFIX if cfg.readout_lr is not None else ())
            + (SIDE_PREFIX if cfg.side_lr is not None else ()) + (OPENING_PREFIX if cfg.opening else ())
-           + (FED_PREFIX if cfg.fed_standardised else ()))  # their own groups, added by the trainer
+           + (FED_PREFIX if cfg.fed_standardised else ()) + (UPPER_PREFIX if cfg.upper else ()))  # own groups, added by the trainer
     if cfg.optimizer in ("adamw", "adan"):  # the VTL head (D-036) gets its own group, added by the trainer
         return rest([p for n, p in model.named_parameters() if not n.startswith(own)])
     if cfg.optimizer in ("muon", "muon_adan"):
@@ -310,6 +315,7 @@ READOUT_PREFIX = ("readout.",)  # D-056: a frequency-resolved read-out's modules
 SIDE_PREFIX = ("enc.side.",)  # D-072: the path beside the flatten
 OPENING_PREFIX = ("opening_head.",)  # D-080
 FED_PREFIX = ("fed_heads.",)  # D-086
+UPPER_PREFIX = ("upper_heads.",)  # D-090
 
 
 def _opening_gate(step: int, cfg: TrainConfig) -> float:
@@ -585,6 +591,13 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         if cfg.fed_lr is None:
             raise ValueError("fed_standardised needs fed_lr (its own AdamW group)")
         model_cfg = replace(model_cfg, fed_standardised=True)
+    new_upper = bool(cfg.upper) and not model_cfg.n_upper  # D-090: added at this branch
+    if cfg.upper:
+        if cfg.upper_lr is None:
+            raise ValueError("upper needs upper_lr (its own AdamW group)")
+        if model_cfg.n_upper not in (0, cfg.upper):
+            raise ValueError(f"the checkpoint has {model_cfg.n_upper} upper heads, not {cfg.upper}")
+        model_cfg = replace(model_cfg, n_upper=cfg.upper)
     if cfg.fed_truth_steps is not None and cfg.decay_start is None:
         raise ValueError("fed_truth_steps is counted from a branch point (decay_start)")
     new_vtl = bool(cfg.vtl) and not model_cfg.vtl_head  # D-036: the head is added at this branch
@@ -640,10 +653,13 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     fed_params = [p for n, p in model.named_parameters() if n.startswith(FED_PREFIX)] if cfg.fed_standardised else []
     if fed_params and not new_fed:
         _add_readout_group(opt, fed_params, cfg, lr=cfg.fed_lr)  # resuming
+    up_params = [p for n, p in model.named_parameters() if n.startswith(UPPER_PREFIX)] if cfg.upper else []
+    if up_params and not new_upper:
+        _add_readout_group(opt, up_params, cfg, lr=cfg.upper_lr)  # resuming
     if ck is not None:
-        if new_vtl or new_readout or new_side or new_opening or new_fed:
+        if new_vtl or new_readout or new_side or new_opening or new_fed or new_upper:
             missing, unexpected = model.load_state_dict(ck["model"], strict=False)
-            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX + OPENING_PREFIX + FED_PREFIX) for k in missing), (missing, unexpected)
+            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX + OPENING_PREFIX + FED_PREFIX + UPPER_PREFIX) for k in missing), (missing, unexpected)
         else:
             model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
@@ -667,6 +683,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         log(f"side path {cfg.proj_side}: {sum(p.numel() for p in side_params):,} parameters, output at zero")
     if new_opening:
         _add_readout_group(opt, op_params, cfg, lr=cfg.opening_lr)
+    if new_upper:
+        _add_readout_group(opt, up_params, cfg, lr=cfg.upper_lr)
+        log(f"upper formant heads: {cfg.upper}, {sum(p.numel() for p in up_params):,} parameters")
     if new_fed:
         _add_readout_group(opt, fed_params, cfg, lr=cfg.fed_lr)
         log(f"fed-means path: {sum(p.numel() for p in fed_params):,} parameters, output at zero")
@@ -791,6 +810,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 model.vtl_gate = _vtl_gate(step, cfg)
             if cfg.opening:
                 model.opening_gate = _opening_gate(step, cfg)
+            if cfg.upper:
+                model.upper_gate = _opening_gate(step, cfg)
             audio, lab = audio.to(device, non_blocking=True), _to(lab, device)
             p_truth = _p_comb_truth(step, cfg)
             truth = rng.random() < p_truth

@@ -33,6 +33,7 @@ class Axis:
 
 F0_AXIS = Axis(40.0, 320)  # 40-1594 Hz
 FORMANT_AXIS = Axis(100.0, 368)  # 100-6938 Hz
+UPPER_AXIS = Axis(2000.0, 118)  # 2000-7740 Hz: F5 and up (D-090), past FORMANT_AXIS's top and the labels' 7.6 kHz
 TARGET_SIGMA_CENTS = 35.0
 DECODE_HALF_WIDTH = 4  # bins either side of the mode (+-80 cents)
 

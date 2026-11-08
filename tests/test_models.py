@@ -527,3 +527,66 @@ def test_fed_standardised_branch_trains(tmp_path):
     sd = torch.load(out2 / "ckpt_last.pt", map_location="cpu", weights_only=False)
     assert sd["teacher_config"]["fed_standardised"] and any(k.startswith("fed_heads.") for k in sd["model"])
     assert float(sd["model"]["fed_heads.1.weight"].abs().sum()) > 0  # it trained
+
+
+def test_upper_heads_leave_the_model_unchanged_and_mask_above_f4():
+    """D-090: upper formant heads add outputs without changing any existing one; each is masked above the one before."""
+    from dataclasses import replace
+
+    from vocal_analysis.models.bins import UPPER_AXIS
+    from vocal_analysis.models.teacher import Teacher, TeacherConfig
+    from vocal_analysis.train.losses import teacher_loss
+
+    cfg = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, temporal="conformer", conformer_dim=16, f0_conv_dim=16)
+    base = Teacher(cfg).eval()
+    m = Teacher(replace(cfg, n_upper=3)).eval()
+    missing, unexpected = m.load_state_dict(base.state_dict(), strict=False)
+    assert not unexpected and missing and all(k.startswith("upper_heads.") for k in missing)
+    lp = torch.randn(2, vqt.N_BINS, 30)
+    with torch.no_grad():
+        a, b = base(lp), m(lp)
+    assert all(torch.equal(a[k], b[k]) for k in a)
+    assert b["upper_logits"].shape == (2, 30, 3, UPPER_AXIS.n_bins)
+    assert UPPER_AXIS.f_max > 7600 and UPPER_AXIS.f_min < 3000
+    # the mask: F5's distribution keeps little mass well below F4's mean
+    f4 = FORMANT_AXIS.to_hz((a["formant_logits"][:, :, 3].softmax(-1) * torch.arange(FORMANT_AXIS.n_bins)).sum(-1).numpy())
+    p5 = b["upper_logits"][:, :, 0].softmax(-1).numpy()
+    below = UPPER_AXIS.centres_hz[None, None, :] < f4[..., None] * 2 ** (-400 / 1200)
+    assert (p5 * below).sum(-1).mean() < 0.2
+    lab = {"f0": torch.full((2, 30), 200.0), "voiced": torch.ones(2, 30, dtype=torch.bool),
+           "sonorant": torch.ones(2, 30, dtype=torch.bool), "formants": torch.tensor([500.0, 1500, 2500, 3500]).expand(2, 30, 4),
+           "bandwidths": torch.full((2, 30, 4), 80.0),
+           "upper_formants": torch.tensor([4500.0, 5500, float("nan")]).expand(2, 30, 3)}
+    _, parts = teacher_loss(b, lab)
+    assert "upper" in parts and torch.isfinite(parts["upper"]) and parts["upper"] > 0
+    _, parts0 = teacher_loss(a, lab)
+    assert "upper" not in parts0
+
+
+def test_upper_heads_branch_trains(tmp_path):
+    """D-090: a decay branch adds upper formant heads in their own group; they get labels and train."""
+    import json
+
+    from vocal_analysis.models.teacher import TeacherConfig
+    from vocal_analysis.synth.sampler import SynthConfig
+    from vocal_analysis.synth.shards import write_set
+    from vocal_analysis.train.teacher import TrainConfig, branch_config, train
+
+    small = TeacherConfig(channels=(8, 8, 8), f0_channels=8, embed=32, gru_hidden=16, gru_layers=1, f0_gru_hidden=16,
+                          temporal="conformer", conformer_dim=32)
+    data = write_set(tmp_path / "s", 8, SynthConfig(duration_s=(2.5, 2.5)), seed=3, shard_size=4, workers=1, log=lambda m: None)
+    cfg = TrainConfig(data=str(data), out=str(tmp_path / "run"), steps=4, batch=4, n_frames=50, workers=1, log_every=2,
+                      eval_every=4, ckpt_every=2, val_clips=4, warmup=2, optimizer="muon_adan")
+    out = train(cfg, small, log=lambda *a: None)
+    b = branch_config(out, 4, str(tmp_path / "branch"), decay_steps=4)
+    b.branch_from = str(out / "ckpt_000004.pt")
+    b.upper, b.upper_lr, b.opening_detach, b.opening_gate_ramp = 3, 1e-3, 1, 2
+    out2 = train(b, None, log=lambda *a: None)
+    recs = [json.loads(line) for line in (out2 / "log.jsonl").read_text().splitlines()]
+    assert recs and all(np.isfinite(r["loss"]) for r in recs if "loss" in r)
+    assert any("upper" in r for r in recs)
+    sd = torch.load(out2 / "ckpt_last.pt", map_location="cpu", weights_only=False)
+    assert sd["teacher_config"]["n_upper"] == 3
+    init = torch.load(out / "ckpt_000004.pt", map_location="cpu", weights_only=False)
+    assert not any(k.startswith("upper_heads.") for k in init["model"])
+    assert sd["model"]["upper_heads.0.weight"].abs().sum() > 0
