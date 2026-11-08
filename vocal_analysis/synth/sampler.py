@@ -710,8 +710,14 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
             labels["coupling_df"][:, :m], labels["coupling_bm"][:, :m] = coupled["df"][fi, :m], coupled["bm"][fi, :m]
             labels["gap_offset"] = np.full(len(fi), coupled["gap_offset"])
         else:
+            # D-085: the same keys as a coupled clip, so mixed sets pack (uncoupled: acoustic = closed; the rest unknown)
             labels["formants_acoustic"] = labels["formants"].copy()
+            labels["bandwidths_acoustic"] = labels["bandwidths"].copy()
             labels["glottal_opening"] = np.full(len(fi), np.nan)
+            labels["open_quotient"] = np.full(len(fi), np.nan)
+            labels["coupling_df"] = np.full((len(fi), N_LABEL_FORMANTS), np.nan)
+            labels["coupling_bm"] = np.full((len(fi), N_LABEL_FORMANTS), np.nan)
+            labels["gap_offset"] = np.full(len(fi), np.nan)
     meta = {
         "index": index, "seed": seed, "fs": FS, "duration_s": len(audio) / FS, "length_cm": length, "length_group": length_group,
         "length_from_f0": v.length_from_f0,
