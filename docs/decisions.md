@@ -3027,3 +3027,10 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 - *Reported, deciding nothing*: the same comparisons on frames where F5 is defined, and on short tracts (`length_cm` < 14).
 - *Reading*: no output helped -> an F5 output has no motive from the existing heads; a wider band would need its own reason (D-087). Some helped -> an F5 head (or joint loss) becomes a candidate trained arm, registered separately. D-083 and D-086 apply: a predicted F5 from the same frozen h is unlikely to add anything, so the ceiling is reachable only through training, if at all. The flag alone helping (h + flag beats h) says the trunk under-uses length information it could infer, which is worth noting for the length heads either way.
 - Cost: 6 groups x 3 variants x 2 seeds x 2 trunks, about 35-45 min (GPU). Scripts: `scripts/analysis/d088_f5_oracle.py`; reports `reports/analysis/d088/`.
+
+*Result* (2026-11-08, `reports/analysis/d088/decide_d088.txt`, `v31_s1.json`, `v31_s2.json`): **F5 helps F1, F4 and iVTL.** Cuts against h / h + flag, trunks 1 / 2, all frames:
+  - F4 24.5 / 24.4 % (69 -> 52 Hz); F1 6.0 / 6.7 % (31.9 -> 30.0 Hz); iVTL 6.6 / 7.4 % (0.19 cm).
+  - Below the bar: B1 and B4 3-4 %, F3 about 2 %, F2 and B2-B3 1-2 %, aVTL about 1 %, glottal opening and the source parameters about 0.
+  - The flag alone does nothing (within 1.6 % everywhere): the trunk already knows when F5 is out of band.
+  - Short tracts (< 14 cm) gain less: F1 3-4 %, F4 16 %, iVTL 4-6 %.
+  - *Reading*: F5 is worth to F1 about what F4 was in D-084 (6-7 % against 7-8 %), and a lot to F4. aVTL barely moves because its clip context already gives it what F5 would. As D-083 and D-086 found, this is a frozen ceiling with the true value: a predicted F5 from the same h would add little. So the motive is a trained arm (an F5 output or loss term, trained jointly), registered separately, not a chain head. Whether that arm overlaps with D-084's F4 gain, and whether the band above 8 kHz adds more, are open; this tells nothing about the wider band directly. Smaller for short tracts, where F5 is often out of band, so not a direct fix for the women's overread.

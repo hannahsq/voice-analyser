@@ -1,0 +1,77 @@
+v31_s1 formants h: F1 31.91, F2 80.52, F3 42.4, F4 69.41
+v31_s1 formants h+flag: F1 31.98, F2 81.81, F3 42.25, F4 69.28
+v31_s1 formants h+F5+flag: F1 29.99, F2 79.69, F3 41.6, F4 52.41
+v31_s1 bandwidths h: B1 11.14, B2 12.71, B3 17.24, B4 17.94
+v31_s1 bandwidths h+flag: B1 11.11, B2 12.73, B3 17.12, B4 17.89
+v31_s1 bandwidths h+F5+flag: B1 10.68, B2 12.59, B3 16.82, B4 17.27
+v31_s1 aVTL h: aVTL 0.1567
+v31_s1 aVTL h+flag: aVTL 0.157
+v31_s1 aVTL h+F5+flag: aVTL 0.155
+v31_s1 iVTL h: iVTL 0.1937
+v31_s1 iVTL h+flag: iVTL 0.1946
+v31_s1 iVTL h+F5+flag: iVTL 0.181
+v31_s1 glottal h: glottal_opening 0.1169
+v31_s1 glottal h+flag: glottal_opening 0.1174
+v31_s1 glottal h+F5+flag: glottal_opening 0.1173
+v31_s1 source h: Rd 0.5086, OQ 0.0746
+v31_s1 source h+flag: Rd 0.5037, OQ 0.07453
+v31_s1 source h+F5+flag: Rd 0.5061, OQ 0.07391
+v31_s2 formants h: F1 31.66, F2 75.65, F3 42.45, F4 69.18
+v31_s2 formants h+flag: F1 31.48, F2 76.84, F3 42.25, F4 69.39
+v31_s2 formants h+F5+flag: F1 29.53, F2 75.26, F3 41.73, F4 52.27
+v31_s2 bandwidths h: B1 10.89, B2 12.59, B3 17.14, B4 17.8
+v31_s2 bandwidths h+flag: B1 10.9, B2 12.58, B3 17.15, B4 17.78
+v31_s2 bandwidths h+F5+flag: B1 10.51, B2 12.45, B3 16.91, B4 17.23
+v31_s2 aVTL h: aVTL 0.1545
+v31_s2 aVTL h+flag: aVTL 0.155
+v31_s2 aVTL h+F5+flag: aVTL 0.1532
+v31_s2 iVTL h: iVTL 0.1906
+v31_s2 iVTL h+flag: iVTL 0.1902
+v31_s2 iVTL h+F5+flag: iVTL 0.1765
+v31_s2 glottal h: glottal_opening 0.1148
+v31_s2 glottal h+flag: glottal_opening 0.1147
+v31_s2 glottal h+F5+flag: glottal_opening 0.1145
+v31_s2 source h: Rd 0.4827, OQ 0.07021
+v31_s2 source h+flag: Rd 0.4826, OQ 0.07047
+v31_s2 source h+F5+flag: Rd 0.4831, OQ 0.07029
+F1 [all]: v31_s1 h 31.91, flag -0.2 %, F5 vs h +6.0 %, vs flag +6.2 % (3x spread 1.1); v31_s2 h 31.66, flag +0.6 %, F5 vs h +6.7 %, vs flag +6.2 % (3x spread 0.696)
+F1 [F5 defined]: v31_s1 h 30.55, flag -0.0 %, F5 vs h +8.0 %, vs flag +8.0 % (3x spread 0.914); v31_s2 h 30.31, flag +0.5 %, F5 vs h +8.4 %, vs flag +7.9 % (3x spread 0.712)
+F1 [short (<14 cm)]: v31_s1 h 39.55, flag -0.5 %, F5 vs h +3.3 %, vs flag +3.8 % (3x spread 1.51); v31_s2 h 39, flag +0.5 %, F5 vs h +4.1 %, vs flag +3.6 % (3x spread 1.18)
+F2 [all]: v31_s1 h 80.52, flag -1.6 %, F5 vs h +1.0 %, vs flag +2.6 % (3x spread 6.17); v31_s2 h 75.65, flag -1.6 %, F5 vs h +0.5 %, vs flag +2.1 % (3x spread 6.19)
+F2 [F5 defined]: v31_s1 h 77.1, flag -1.7 %, F5 vs h +1.3 %, vs flag +3.0 % (3x spread 6.13); v31_s2 h 72.71, flag -1.5 %, F5 vs h +0.7 %, vs flag +2.2 % (3x spread 5.13)
+F2 [short (<14 cm)]: v31_s1 h 98.4, flag -1.3 %, F5 vs h +0.9 %, vs flag +2.2 % (3x spread 6.97); v31_s2 h 92.04, flag -1.8 %, F5 vs h +0.3 %, vs flag +2.1 % (3x spread 9.08)
+F3 [all]: v31_s1 h 42.4, flag +0.4 %, F5 vs h +1.9 %, vs flag +1.5 % (3x spread 1.18); v31_s2 h 42.45, flag +0.5 %, F5 vs h +1.7 %, vs flag +1.2 % (3x spread 1.28)
+F3 [F5 defined]: v31_s1 h 40.14, flag +0.2 %, F5 vs h +2.2 %, vs flag +1.9 % (3x spread 1.02); v31_s2 h 40.56, flag +0.4 %, F5 vs h +2.4 %, vs flag +2.0 % (3x spread 0.962)
+F3 [short (<14 cm)]: v31_s1 h 51.14, flag +0.2 %, F5 vs h +2.2 %, vs flag +2.0 % (3x spread 1.86); v31_s2 h 50.77, flag +0.2 %, F5 vs h +1.5 %, vs flag +1.3 % (3x spread 1.84)
+F4 [all]: v31_s1 h 69.41, flag +0.2 %, F5 vs h +24.5 %, vs flag +24.4 % (3x spread 1.91); v31_s2 h 69.18, flag -0.3 %, F5 vs h +24.4 %, vs flag +24.7 % (3x spread 2.71)
+F4 [F5 defined]: v31_s1 h 65.57, flag -0.0 %, F5 vs h +29.7 %, vs flag +29.7 % (3x spread 2.43); v31_s2 h 65.69, flag -0.2 %, F5 vs h +29.4 %, vs flag +29.5 % (3x spread 3.02)
+F4 [short (<14 cm)]: v31_s1 h 83.49, flag +0.0 %, F5 vs h +16.2 %, vs flag +16.1 % (3x spread 0.717); v31_s2 h 83.08, flag -1.3 %, F5 vs h +16.3 %, vs flag +17.4 % (3x spread 4.93)
+B1 [all]: v31_s1 h 11.14, flag +0.3 %, F5 vs h +4.1 %, vs flag +3.9 % (3x spread 0.277); v31_s2 h 10.89, flag -0.1 %, F5 vs h +3.5 %, vs flag +3.6 % (3x spread 0.115)
+B1 [F5 defined]: v31_s1 h 11.11, flag +0.2 %, F5 vs h +4.5 %, vs flag +4.3 % (3x spread 0.278); v31_s2 h 10.85, flag -0.2 %, F5 vs h +4.0 %, vs flag +4.1 % (3x spread 0.108)
+B1 [short (<14 cm)]: v31_s1 h 11.07, flag -0.2 %, F5 vs h +2.9 %, vs flag +3.1 % (3x spread 0.331); v31_s2 h 10.91, flag -0.0 %, F5 vs h +2.3 %, vs flag +2.3 % (3x spread 0.347)
+B2 [all]: v31_s1 h 12.71, flag -0.2 %, F5 vs h +0.9 %, vs flag +1.1 % (3x spread 0.256); v31_s2 h 12.59, flag +0.0 %, F5 vs h +1.1 %, vs flag +1.1 % (3x spread 0.275)
+B2 [F5 defined]: v31_s1 h 12.01, flag -0.2 %, F5 vs h +1.1 %, vs flag +1.2 % (3x spread 0.262); v31_s2 h 11.94, flag +0.0 %, F5 vs h +1.2 %, vs flag +1.2 % (3x spread 0.33)
+B2 [short (<14 cm)]: v31_s1 h 16.25, flag -0.6 %, F5 vs h +0.2 %, vs flag +0.8 % (3x spread 0.687); v31_s2 h 16.09, flag -0.2 %, F5 vs h +1.0 %, vs flag +1.1 % (3x spread 0.491)
+B3 [all]: v31_s1 h 17.24, flag +0.7 %, F5 vs h +2.5 %, vs flag +1.8 % (3x spread 0.246); v31_s2 h 17.14, flag -0.1 %, F5 vs h +1.3 %, vs flag +1.4 % (3x spread 0.32)
+B3 [F5 defined]: v31_s1 h 16.67, flag +0.4 %, F5 vs h +2.6 %, vs flag +2.2 % (3x spread 0.29); v31_s2 h 16.63, flag -0.2 %, F5 vs h +1.6 %, vs flag +1.8 % (3x spread 0.375)
+B3 [short (<14 cm)]: v31_s1 h 19.96, flag +1.1 %, F5 vs h +2.2 %, vs flag +1.2 % (3x spread 0.922); v31_s2 h 19.82, flag -0.0 %, F5 vs h +0.8 %, vs flag +0.8 % (3x spread 0.42)
+B4 [all]: v31_s1 h 17.94, flag +0.3 %, F5 vs h +3.8 %, vs flag +3.5 % (3x spread 0.289); v31_s2 h 17.8, flag +0.1 %, F5 vs h +3.2 %, vs flag +3.1 % (3x spread 0.391)
+B4 [F5 defined]: v31_s1 h 16.89, flag +0.2 %, F5 vs h +4.7 %, vs flag +4.4 % (3x spread 0.347); v31_s2 h 16.76, flag -0.1 %, F5 vs h +3.8 %, vs flag +3.9 % (3x spread 0.311)
+B4 [short (<14 cm)]: v31_s1 h 23.22, flag +0.1 %, F5 vs h +2.5 %, vs flag +2.4 % (3x spread 0.531); v31_s2 h 22.94, flag -0.0 %, F5 vs h +2.4 %, vs flag +2.4 % (3x spread 0.804)
+aVTL [all]: v31_s1 h 0.1567, flag -0.2 %, F5 vs h +1.0 %, vs flag +1.2 % (3x spread 0.00334); v31_s2 h 0.1545, flag -0.3 %, F5 vs h +0.9 %, vs flag +1.2 % (3x spread 0.00251)
+aVTL [F5 defined]: v31_s1 h 0.1564, flag -0.1 %, F5 vs h +1.2 %, vs flag +1.3 % (3x spread 0.0029); v31_s2 h 0.1547, flag -0.5 %, F5 vs h +0.8 %, vs flag +1.3 % (3x spread 0.00286)
+aVTL [short (<14 cm)]: v31_s1 h 0.1584, flag -0.2 %, F5 vs h +0.7 %, vs flag +0.9 % (3x spread 0.00367); v31_s2 h 0.1571, flag +0.1 %, F5 vs h +1.6 %, vs flag +1.5 % (3x spread 0.00882)
+iVTL [all]: v31_s1 h 0.1937, flag -0.4 %, F5 vs h +6.6 %, vs flag +7.0 % (3x spread 0.0046); v31_s2 h 0.1906, flag +0.2 %, F5 vs h +7.4 %, vs flag +7.2 % (3x spread 0.00265)
+iVTL [F5 defined]: v31_s1 h 0.1947, flag -0.3 %, F5 vs h +7.4 %, vs flag +7.7 % (3x spread 0.00327); v31_s2 h 0.191, flag +0.0 %, F5 vs h +8.0 %, vs flag +8.0 % (3x spread 0.00338)
+iVTL [short (<14 cm)]: v31_s1 h 0.1855, flag -1.1 %, F5 vs h +4.0 %, vs flag +5.0 % (3x spread 0.0048); v31_s2 h 0.187, flag +0.5 %, F5 vs h +6.3 %, vs flag +5.8 % (3x spread 0.00229)
+glottal_opening [all]: v31_s1 h 0.1169, flag -0.4 %, F5 vs h -0.3 %, vs flag +0.1 % (3x spread 0.00118); v31_s2 h 0.1148, flag +0.1 %, F5 vs h +0.3 %, vs flag +0.2 % (3x spread 0.00354)
+glottal_opening [F5 defined]: v31_s1 h 0.1161, flag -0.4 %, F5 vs h -0.2 %, vs flag +0.3 % (3x spread 0.00212); v31_s2 h 0.113, flag -0.0 %, F5 vs h +0.2 %, vs flag +0.2 % (3x spread 0.00347)
+glottal_opening [short (<14 cm)]: v31_s1 h 0.1174, flag -0.3 %, F5 vs h -0.7 %, vs flag -0.4 % (3x spread 0.00374); v31_s2 h 0.117, flag +1.0 %, F5 vs h +0.2 %, vs flag -0.8 % (3x spread 0.00643)
+Rd [all]: v31_s1 h 0.5086, flag +1.0 %, F5 vs h +0.5 %, vs flag -0.5 % (3x spread 0.0112); v31_s2 h 0.4827, flag +0.0 %, F5 vs h -0.1 %, vs flag -0.1 % (3x spread 0.0111)
+Rd [F5 defined]: v31_s1 h 0.5065, flag +0.9 %, F5 vs h +0.5 %, vs flag -0.4 % (3x spread 0.0111); v31_s2 h 0.4792, flag -0.2 %, F5 vs h -0.1 %, vs flag +0.1 % (3x spread 0.00858)
+Rd [short (<14 cm)]: v31_s1 h 0.5079, flag +1.1 %, F5 vs h +0.9 %, vs flag -0.2 % (3x spread 0.033); v31_s2 h 0.4838, flag +0.2 %, F5 vs h -0.6 %, vs flag -0.8 % (3x spread 0.00824)
+OQ [all]: v31_s1 h 0.0746, flag +0.1 %, F5 vs h +0.9 %, vs flag +0.8 % (3x spread 0.000642); v31_s2 h 0.07021, flag -0.4 %, F5 vs h -0.1 %, vs flag +0.2 % (3x spread 0.000628)
+OQ [F5 defined]: v31_s1 h 0.0742, flag -0.1 %, F5 vs h +0.9 %, vs flag +1.0 % (3x spread 0.000394); v31_s2 h 0.06941, flag -0.4 %, F5 vs h -0.0 %, vs flag +0.4 % (3x spread 0.000477)
+OQ [short (<14 cm)]: v31_s1 h 0.07418, flag +0.1 %, F5 vs h +1.2 %, vs flag +1.1 % (3x spread 0.00266); v31_s2 h 0.07113, flag +0.1 %, F5 vs h -0.5 %, vs flag -0.6 % (3x spread 0.00302)
+F5 helps (all frames, both trunks, >= 5 % against h and h + flag, beyond 3x seed spread): ['F1', 'F4', 'iVTL']
+DECISION: F5 helps F1, F4, iVTL
