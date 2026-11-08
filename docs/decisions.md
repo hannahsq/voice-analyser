@@ -3039,9 +3039,9 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
     - F4: 16 % below 14 cm, 29-32 % elsewhere. iVTL: 4-6 % below 14 cm, 7-9 % elsewhere. B1, B4: 2-7 %, no clear pattern.
     - So "smaller for short tracts" holds only below 14 cm (children's range, where F5 is often out of band); in the women-typical band F1 gains as much as in the men's. That revises the result's last sentence: the oracle gain does reach women-typical lengths.
 
-## D-089 (DRAFT, 2026-11-08; not registered, nothing runs from it; seen beforehand: D-088 and its tract-length breakdown, the label cache's F5-F8 coverage by band, no D-089 result): do F6 and F7 help as well? D-088's oracle extended
+## D-089 (registered 2026-11-08; seen beforehand: D-088 and its tract-length breakdown, the label cache's F5-F8 coverage by band, a 20-step smoke run of the script (mechanics only), no D-089 result): do F6 and F7 help as well? D-088's oracle extended
 
-*Status*: draft for Hannah's review. D-088: the true F5 cuts F1's error by about 9 % at women- and men-typical lengths, F4's by about 30 %, iVTL's by 7-9 %. The labels carry F6-F8 too. In val's sonorant frames, F6 is in band (below 7.6 kHz) on 100 % of frames from 14 cm up and 32 % below 14 cm. F7 is in band on 53 % at 14-16.6 cm and 100 % from 16.6 cm. So at 16 kHz the model already sees six to eight resonances for most adults. Question: **do F6 and F7 carry information for the existing outputs beyond F5?**
+*Status*: registered (Hannah, 2026-11-08). D-088: the true F5 cuts F1's error by about 9 % at women- and men-typical lengths, F4's by about 30 %, iVTL's by 7-9 %. The labels carry F6-F8 too. In val's sonorant frames, F6 is in band (below 7.6 kHz) on 100 % of frames from 14 cm up and 32 % below 14 cm. F7 is in band on 53 % at 14-16.6 cm and 100 % from 16.6 cm. So at 16 kHz the model already sees six to eight resonances for most adults. Question: **do F6 and F7 carry information for the existing outputs beyond F5?**
 - *Data, heads and training*: D-088's (frozen v3.1 features, trunks `v31_s1` and `v31_s2`; D-081's labels; head seeds 1 and 2; all sonorant frames scored, short tracts included).
 - *Inputs*: each formant Fk enters as log Fk plus its own out-of-band flag (log Fk filled with the training median where undefined), as F5 did in D-088.
 - *Variants*:
