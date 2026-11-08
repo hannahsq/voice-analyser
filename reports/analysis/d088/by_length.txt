@@ -1,0 +1,63 @@
+v31_s1 formants h done
+v31_s1 formants h+flag done
+v31_s1 formants h+F5+flag done
+v31_s1 bandwidths h done
+v31_s1 bandwidths h+flag done
+v31_s1 bandwidths h+F5+flag done
+v31_s1 iVTL h done
+v31_s1 iVTL h+flag done
+v31_s1 iVTL h+F5+flag done
+v31_s2 formants h done
+v31_s2 formants h+flag done
+v31_s2 formants h+F5+flag done
+v31_s2 bandwidths h done
+v31_s2 bandwidths h+flag done
+v31_s2 bandwidths h+F5+flag done
+v31_s2 iVTL h done
+v31_s2 iVTL h+flag done
+v31_s2 iVTL h+F5+flag done
+F1 [all]: v31_s1 h 31.91, F5 vs h +6.0 %, vs flag +6.2 %; v31_s2 h 31.67, F5 vs h +6.7 %, vs flag +6.2 %
+F1 [<14 cm]: v31_s1 h 39.54, F5 vs h +3.3 %, vs flag +3.8 %; v31_s2 h 39, F5 vs h +4.1 %, vs flag +3.6 %
+F1 [14-16.6 (women-typical)]: v31_s1 h 30.21, F5 vs h +8.8 %, vs flag +8.9 %; v31_s2 h 30.25, F5 vs h +9.3 %, vs flag +8.8 %
+F1 [16.6-18.5 (men-typical)]: v31_s1 h 24.64, F5 vs h +8.6 %, vs flag +8.4 %; v31_s2 h 24.46, F5 vs h +9.8 %, vs flag +9.0 %
+F1 [>18.5 cm]: v31_s1 h 24.67, F5 vs h +7.3 %, vs flag +7.2 %; v31_s2 h 24.55, F5 vs h +7.8 %, vs flag +7.2 %
+F2 [all]: v31_s1 h 80.5, F5 vs h +1.0 %, vs flag +2.6 %; v31_s2 h 75.63, F5 vs h +0.5 %, vs flag +2.0 %
+F2 [<14 cm]: v31_s1 h 98.37, F5 vs h +0.9 %, vs flag +2.2 %; v31_s2 h 92.02, F5 vs h +0.3 %, vs flag +2.0 %
+F2 [14-16.6 (women-typical)]: v31_s1 h 75.01, F5 vs h +1.7 %, vs flag +3.6 %; v31_s2 h 71.2, F5 vs h +0.2 %, vs flag +1.8 %
+F2 [16.6-18.5 (men-typical)]: v31_s1 h 65.08, F5 vs h +0.3 %, vs flag +2.5 %; v31_s2 h 61.32, F5 vs h +1.3 %, vs flag +2.8 %
+F2 [>18.5 cm]: v31_s1 h 64.48, F5 vs h +1.0 %, vs flag +1.9 %; v31_s2 h 59.98, F5 vs h +0.8 %, vs flag +1.7 %
+F3 [all]: v31_s1 h 42.4, F5 vs h +1.9 %, vs flag +1.5 %; v31_s2 h 42.45, F5 vs h +1.7 %, vs flag +1.2 %
+F3 [<14 cm]: v31_s1 h 51.14, F5 vs h +2.2 %, vs flag +2.0 %; v31_s2 h 50.79, F5 vs h +1.5 %, vs flag +1.3 %
+F3 [14-16.6 (women-typical)]: v31_s1 h 39.7, F5 vs h +2.0 %, vs flag +1.6 %; v31_s2 h 40.19, F5 vs h +3.2 %, vs flag +1.6 %
+F3 [16.6-18.5 (men-typical)]: v31_s1 h 33.99, F5 vs h +0.9 %, vs flag +1.1 %; v31_s2 h 33.99, F5 vs h +0.1 %, vs flag +0.4 %
+F3 [>18.5 cm]: v31_s1 h 35.72, F5 vs h +1.7 %, vs flag +0.1 %; v31_s2 h 36, F5 vs h +1.0 %, vs flag +1.2 %
+F4 [all]: v31_s1 h 69.42, F5 vs h +24.5 %, vs flag +24.3 %; v31_s2 h 69.18, F5 vs h +24.4 %, vs flag +24.7 %
+F4 [<14 cm]: v31_s1 h 83.5, F5 vs h +16.2 %, vs flag +16.1 %; v31_s2 h 83.06, F5 vs h +16.3 %, vs flag +17.4 %
+F4 [14-16.6 (women-typical)]: v31_s1 h 67.83, F5 vs h +32.2 %, vs flag +32.1 %; v31_s2 h 67.51, F5 vs h +32.3 %, vs flag +32.2 %
+F4 [16.6-18.5 (men-typical)]: v31_s1 h 54.8, F5 vs h +32.0 %, vs flag +31.2 %; v31_s2 h 55.24, F5 vs h +31.0 %, vs flag +29.9 %
+F4 [>18.5 cm]: v31_s1 h 54.56, F5 vs h +29.5 %, vs flag +29.4 %; v31_s2 h 54.1, F5 vs h +29.3 %, vs flag +29.1 %
+B1 [all]: v31_s1 h 11.14, F5 vs h +4.1 %, vs flag +3.9 %; v31_s2 h 10.89, F5 vs h +3.5 %, vs flag +3.5 %
+B1 [<14 cm]: v31_s1 h 11.07, F5 vs h +2.9 %, vs flag +3.1 %; v31_s2 h 10.91, F5 vs h +2.3 %, vs flag +2.3 %
+B1 [14-16.6 (women-typical)]: v31_s1 h 11.26, F5 vs h +4.9 %, vs flag +4.0 %; v31_s2 h 10.83, F5 vs h +3.7 %, vs flag +4.4 %
+B1 [16.6-18.5 (men-typical)]: v31_s1 h 11.16, F5 vs h +5.7 %, vs flag +6.0 %; v31_s2 h 11.08, F5 vs h +4.7 %, vs flag +4.1 %
+B1 [>18.5 cm]: v31_s1 h 11.06, F5 vs h +3.7 %, vs flag +3.0 %; v31_s2 h 10.72, F5 vs h +4.4 %, vs flag +4.5 %
+B2 [all]: v31_s1 h 12.71, F5 vs h +1.0 %, vs flag +1.1 %; v31_s2 h 12.59, F5 vs h +1.1 %, vs flag +1.1 %
+B2 [<14 cm]: v31_s1 h 16.26, F5 vs h +0.3 %, vs flag +0.8 %; v31_s2 h 16.09, F5 vs h +0.9 %, vs flag +1.2 %
+B2 [14-16.6 (women-typical)]: v31_s1 h 11.89, F5 vs h +2.2 %, vs flag +1.9 %; v31_s2 h 11.63, F5 vs h +1.2 %, vs flag +0.6 %
+B2 [16.6-18.5 (men-typical)]: v31_s1 h 9.9, F5 vs h +1.4 %, vs flag +1.6 %; v31_s2 h 9.955, F5 vs h +2.4 %, vs flag +2.0 %
+B2 [>18.5 cm]: v31_s1 h 8.698, F5 vs h +0.5 %, vs flag -0.2 %; v31_s2 h 8.73, F5 vs h +0.0 %, vs flag +1.1 %
+B3 [all]: v31_s1 h 17.24, F5 vs h +2.5 %, vs flag +1.8 %; v31_s2 h 17.14, F5 vs h +1.4 %, vs flag +1.4 %
+B3 [<14 cm]: v31_s1 h 19.96, F5 vs h +2.3 %, vs flag +1.2 %; v31_s2 h 19.83, F5 vs h +0.8 %, vs flag +0.9 %
+B3 [14-16.6 (women-typical)]: v31_s1 h 16.82, F5 vs h +3.2 %, vs flag +2.3 %; v31_s2 h 16.59, F5 vs h +2.7 %, vs flag +2.9 %
+B3 [16.6-18.5 (men-typical)]: v31_s1 h 14.97, F5 vs h +2.1 %, vs flag +1.4 %; v31_s2 h 15.17, F5 vs h +0.5 %, vs flag +0.9 %
+B3 [>18.5 cm]: v31_s1 h 13.94, F5 vs h +2.0 %, vs flag +3.1 %; v31_s2 h 13.73, F5 vs h +1.2 %, vs flag +0.9 %
+B4 [all]: v31_s1 h 17.94, F5 vs h +3.8 %, vs flag +3.5 %; v31_s2 h 17.8, F5 vs h +3.2 %, vs flag +3.1 %
+B4 [<14 cm]: v31_s1 h 23.23, F5 vs h +2.5 %, vs flag +2.4 %; v31_s2 h 22.93, F5 vs h +2.3 %, vs flag +2.4 %
+B4 [14-16.6 (women-typical)]: v31_s1 h 16.48, F5 vs h +4.5 %, vs flag +4.1 %; v31_s2 h 16.4, F5 vs h +3.5 %, vs flag +2.9 %
+B4 [16.6-18.5 (men-typical)]: v31_s1 h 13.75, F5 vs h +4.7 %, vs flag +4.5 %; v31_s2 h 13.99, F5 vs h +4.7 %, vs flag +5.0 %
+B4 [>18.5 cm]: v31_s1 h 12.43, F5 vs h +6.8 %, vs flag +5.9 %; v31_s2 h 12.06, F5 vs h +4.4 %, vs flag +4.4 %
+iVTL [all]: v31_s1 h 0.1937, F5 vs h +6.6 %, vs flag +7.0 %; v31_s2 h 0.1906, F5 vs h +7.4 %, vs flag +7.2 %
+iVTL [<14 cm]: v31_s1 h 0.1855, F5 vs h +4.0 %, vs flag +5.0 %; v31_s2 h 0.1869, F5 vs h +6.3 %, vs flag +5.8 %
+iVTL [14-16.6 (women-typical)]: v31_s1 h 0.1898, F5 vs h +8.2 %, vs flag +8.3 %; v31_s2 h 0.185, F5 vs h +9.0 %, vs flag +8.5 %
+iVTL [16.6-18.5 (men-typical)]: v31_s1 h 0.1974, F5 vs h +7.1 %, vs flag +7.5 %; v31_s2 h 0.1859, F5 vs h +7.4 %, vs flag +8.1 %
+iVTL [>18.5 cm]: v31_s1 h 0.2183, F5 vs h +8.9 %, vs flag +8.5 %; v31_s2 h 0.2169, F5 vs h +7.4 %, vs flag +7.3 %
