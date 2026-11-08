@@ -3038,3 +3038,24 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
     - F1: < 14 cm 3.3 / 4.1 %; women-typical 8.8 / 9.3 % (30.2 -> 27.5 Hz); men-typical 8.6 / 9.8 %; > 18.5 7.3 / 7.8 %.
     - F4: 16 % below 14 cm, 29-32 % elsewhere. iVTL: 4-6 % below 14 cm, 7-9 % elsewhere. B1, B4: 2-7 %, no clear pattern.
     - So "smaller for short tracts" holds only below 14 cm (children's range, where F5 is often out of band); in the women-typical band F1 gains as much as in the men's. That revises the result's last sentence: the oracle gain does reach women-typical lengths.
+
+## D-089 (DRAFT, 2026-11-08; not registered, nothing runs from it; seen beforehand: D-088 and its tract-length breakdown, the label cache's F5-F8 coverage by band, no D-089 result): do F6 and F7 help as well? D-088's oracle extended
+
+*Status*: draft for Hannah's review. D-088: the true F5 cuts F1's error by about 9 % at women- and men-typical lengths, F4's by about 30 %, iVTL's by 7-9 %. The labels carry F6-F8 too. In val's sonorant frames, F6 is in band (below 7.6 kHz) on 100 % of frames from 14 cm up and 32 % below 14 cm. F7 is in band on 53 % at 14-16.6 cm and 100 % from 16.6 cm. So at 16 kHz the model already sees six to eight resonances for most adults. Question: **do F6 and F7 carry information for the existing outputs beyond F5?**
+- *Data, heads and training*: D-088's (frozen v3.1 features, trunks `v31_s1` and `v31_s2`; D-081's labels; head seeds 1 and 2; all sonorant frames scored, short tracts included).
+- *Inputs*: each formant Fk enters as log Fk plus its own out-of-band flag (log Fk filled with the training median where undefined), as F5 did in D-088.
+- *Variants*:
+  - **h + F5** (D-088's best, the reference);
+  - **h + F6** (F6 alone, against D-088's h);
+  - **h + F5 + F6** (does F6 add to F5);
+  - **h + F5 + F6 + F7** (a ceiling for "everything above F4" that the band shows most adults).
+  - Flag-only controls: h + all three flags.
+- *Targets*: D-088's three that passed (F1, F4, iVTL), plus F2, F3, B1-B4 and aVTL, reported. Source parameters and glottal opening dropped (null in D-088).
+- *Rule*: **F6 adds** if h + F5 + F6 cuts an output's MAE against h + F5 by at least 3 %, beyond 3x the head-seed spread, on both trunks. **F7 adds** if h + F5 + F6 + F7 does so against h + F5 + F6. Both are judged in the tract-length band where the formant is in band on most frames (F6: 14 cm up; F7: 16.6 cm up), as well as on all frames. 3 % rather than D-088's 5 %, since it is a gain on top of F5.
+- *Reported, deciding nothing*: every cell by D-088's tract-length bands (< 14, 14-16.6, 16.6-18.5, > 18.5 cm); F6 alone against F5 alone (is F6 a substitute where F5 is missing).
+- *Caveats*:
+  - The synthesiser's upper formants are tidier than real ones. Above about 5 kHz real tracts aren't plane-wave tubes: side branches (piriform sinuses) add zeros, losses grow, and higher-order transverse modes appear once the wavelength nears the tract's width. For a circular duct the first cross mode starts near 1.84 c / (pi d), about 6.8 kHz at 3 cm diameter and about 5 kHz at 4 cm. Our tube labels assume plane waves. So a synthetic oracle shows whether these labels carry information, and overstates how usable they are in real speech.
+  - A real-speech check (do F6 and F7 resolve, and where) would come before any trained F6 or F7 head.
+  - Hannah's own spectrograms (2026-11-08) show 7-8 resonances below 8 kHz, some possibly broad or unresolved pairs.
+- *Reading*: F6 and F7 add -> a jointly trained upper-formant output (F5 and up) is a candidate, registered separately after the real-speech check. F6 adds nothing beyond F5 -> F5 is the one upper output worth trying.
+- Cost: about 40-50 min (GPU). Scripts: `scripts/analysis/d089_upper_oracle.py`; reports `reports/analysis/d089/`.
