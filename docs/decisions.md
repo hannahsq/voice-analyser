@@ -3059,3 +3059,9 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
   - Hannah's own spectrograms (2026-11-08) show 7-8 resonances below 8 kHz, some possibly broad or unresolved pairs.
 - *Reading*: F6 and F7 add -> a jointly trained upper-formant output (F5 and up) is a candidate, registered separately after the real-speech check. F6 adds nothing beyond F5 -> F5 is the one upper output worth trying.
 - Cost: about 40-50 min (GPU). Scripts: `scripts/analysis/d089_upper_oracle.py`; reports `reports/analysis/d089/`.
+
+*Result* (2026-11-08, `reports/analysis/d089/decide_d089.txt`, `v31_s1.json`, `v31_s2.json`): **F6 and F7 add for iVTL only.** Trunks 1 / 2; the flag-only control is within 1.9 % everywhere.
+  - *Formants*: beyond F5, F6 and F7 add nothing to F1 (within +-1 % in every band) or F4 (within +-1.8 %). Alone, F6 is about half as good a substitute for F5: F1 4-5 % from 14 cm up (F5 9 %), F4 13-16 % (F5 29-32 %). F2 and F3 move 0-3.5 % anywhere. So F5 carries what the upper formants have for F1-F4.
+  - *iVTL*: each one adds. All frames: F5 alone 6.6 / 7.4 %, F6 alone 13.3 / 12.9 %; F6 beyond F5 9.1 / 7.4 %; F7 beyond F5 + F6 6.9 / 6.4 %. At 16.6-18.5 cm, F7 adds 13.9 / 11.5 % on top of F5 + F6. Below 14 cm, F7 (never in band there) adds nothing.
+  - *aVTL*: 1-4 % for any of them (reported only); its clip context already covers it.
+  - *Reading*: for the formant heads, F5 is the one upper output worth trying, as an output or loss term trained jointly. For the per-frame length (iVTL), the upper resonances carry most of what h lacks, and in a length-dependent way: the more of them are in band, the more they add. So a length-oriented arm would want F5-F7, or the band they sit in, rather than F5 alone. Synthetic plane-wave labels: this is an upper bound on how usable F6 and F7 are in real speech (the entry's caveats).
