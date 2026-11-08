@@ -1,0 +1,31 @@
+D-090: upper formant outputs, F5 (A) and F5-F7 (B), in 5b's decay branch, against 5b's own decay branches, seeds paired
+
+per run: synthetic F1-F4 MAE Hz | RPA | resynth F1-F3 | probe 11 F1 slope (Hb, PTDB) | probe 12 w_label | women's cp F1 bias Hz
+  d040_5b_s1_b20k      [20.6 39.8 57.  88.8] | 99.43 | [ 26.2  84.9 101.2] | 0.978, 1.043 | [0.2  0.35 0.42 0.38] | +4.3
+  d040_5b_s2_b20k      [21.7 40.7 58.7 86.3] | 99.45 | [26.1 86.8 99.6] | 0.975, 1.039 | [0.21 0.34 0.39 0.33] | +4.1
+  d090_f5_s1           [20.9 40.2 58.4 90.2] | 99.42 | [ 26.7  86.8 102.8] | 0.978, 1.047 | [0.19 0.34 0.41 0.37] | +4.1
+  d090_f5_s2           [21.9 41.7 59.2 87.3] | 99.45 | [26.3 87.6 99.5] | 0.975, 1.040 | [0.2  0.34 0.38 0.31] | +3.8
+  d090_f57_s1          [21.2 40.4 59.5 91.6] | 99.43 | [ 27.1  88.5 103.3] | 0.982, 1.056 | [0.19 0.33 0.39 0.35] | +3.7
+  d090_f57_s2          [22.  42.4 60.3 89.2] | 99.45 | [26.6 86.4 99.8] | 0.975, 1.032 | [0.2  0.33 0.37 0.3 ] | +3.1
+
+arm A (f5) — decides
+  seed 1: synthetic F1-F4 +0.4, +0.4, +0.9, +0.6 SE (+1.6 %), RPA -0.00; Hillenbrand F1/F2/F3 -0.0, +0.0, -1.5 Hz; women's cp |error| -0.0 Hz; scale error halved: False
+  seed 2: synthetic F1-F4 +0.2, +1.2, +0.4, +0.4 SE (+1.4 %), RPA +0.00; Hillenbrand F1/F2/F3 +0.3, +0.3, +0.6 Hz; women's cp |error| -0.5 Hz; scale error halved: False
+  seed means: synthetic +0.3, +0.8, +0.6, +0.5 SE, RPA +0.00, Hillenbrand +0.1, +0.1, -0.5 Hz, women's cp |error| -0.2 Hz -> non-inferior: True
+  gains on both seeds: {'scale': False, 'synthetic': False, 'closed phase': False}
+  (2) length (f5-5b): reliability interval [-0.010, +0.016], w/m 0.869 -> True; (3) f0 probe excess +0.6 c/oct -> True
+  the rule on each seed alone: {1: False, 2: False}
+
+arm B (f57) — decides
+  seed 1: synthetic F1-F4 +0.7, +0.7, +1.5, +1.1 SE (+2.9 %), RPA +0.01; Hillenbrand F1/F2/F3 -0.4, +0.1, -1.7 Hz; women's cp |error| -0.1 Hz; scale error halved: False
+  seed 2: synthetic F1-F4 +0.4, +1.9, +1.0, +1.2 SE (+3.0 %), RPA +0.00; Hillenbrand F1/F2/F3 +0.2, +0.8, +1.1 Hz; women's cp |error| -0.6 Hz; scale error halved: False
+  seed means: synthetic +0.6, +1.3, +1.3, +1.1 SE, RPA +0.00, Hillenbrand -0.1, +0.5, -0.3 Hz, women's cp |error| -0.3 Hz -> non-inferior: True
+  gains on both seeds: {'scale': False, 'synthetic': False, 'closed phase': False}
+  (2) length (f57-5b): reliability interval [-0.050, +0.002], w/m 0.883 -> False; (3) f0 probe excess +3.5 c/oct -> True
+  the rule on each seed alone: {1: False, 2: False}
+
+attribution, B (f57) against A (f5) (Hillenbrand F1/F2/F3 Hz, paired; synthetic F1-F4 MAE %):
+  seed 1: [-0.4  0.1 -0.2]; +1.3 %
+  seed 2: [-0.1  0.5  0.5]; +1.6 %
+reported beside the length guard: 5b's seeds differ by +0.034 [+0.005, +0.060] in Hillenbrand reliability (s2 - s1; D-065's note), so a paired seed mean against 5b carries s2's good draw
+DECISION: arm A is not a candidate; arm B is not a candidate

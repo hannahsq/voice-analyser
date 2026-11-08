@@ -1,0 +1,128 @@
+
+[d040_5b_s1_b20k] synthetic per-clip median |error| (c): tube, not from f0 10  cascade, not from f0 50  length from f0 21; coverage frames 0.80 / 0.98
+[d040_5b_s1_b20k] probe: median |slope| f0 <= 250 Hz 9.5 c/oct; shuffle null median 9.0 (95 % 12.6); excess +0.5; P(null >= obs) 0.404; vowel spread 21 c; bias by length 13: +10  15.5: +9  18: -11
+
+[d040_5b_s2_b20k] synthetic per-clip median |error| (c): tube, not from f0 12  cascade, not from f0 47  length from f0 24; coverage frames 0.79 / 0.99
+[d040_5b_s2_b20k] probe: median |slope| f0 <= 250 Hz 9.1 c/oct; shuffle null median 8.4 (95 % 11.4); excess +0.7; P(null >= obs) 0.356; vowel spread 18 c; bias by length 13: +15  15.5: +17  18: -10
+
+[d090_f57_s1] synthetic per-clip median |error| (c): tube, not from f0 11  cascade, not from f0 49  length from f0 22; coverage frames 0.80 / 0.98
+[d090_f57_s1] probe: median |slope| f0 <= 250 Hz 11.6 c/oct; shuffle null median 7.5 (95 % 11.6); excess +4.2; P(null >= obs) 0.048; vowel spread 21 c; bias by length 13: -2  15.5: +1  18: +2
+
+[d090_f57_s2] synthetic per-clip median |error| (c): tube, not from f0 12  cascade, not from f0 51  length from f0 19; coverage frames 0.80 / 0.98
+[d090_f57_s2] probe: median |slope| f0 <= 250 Hz 10.5 c/oct; shuffle null median 7.7 (95 % 11.3); excess +2.8; P(null >= obs) 0.093; vowel spread 19 c; bias by length 13: +0  15.5: +7  18: -6
+
+Hillenbrand dev (m 27, w 29, b 16, g 11 speakers, 996 files): point [95 % speaker bootstrap]
+  reliability
+    d040_5b_s1_b20k                 0.228 [   0.168,    0.274]
+    d040_5b_s2_b20k                 0.261 [   0.205,    0.303]
+    d090_f57_s1                     0.207 [   0.152,    0.249]
+    d090_f57_s2                     0.235 [   0.179,    0.276]
+    A                               0.153 [   0.104,    0.198]
+  rel men
+    d040_5b_s1_b20k                 0.254 [   0.164,    0.332]
+    d040_5b_s2_b20k                 0.328 [   0.235,    0.402]
+    d090_f57_s1                     0.231 [   0.145,    0.302]
+    d090_f57_s2                     0.278 [   0.188,    0.340]
+    A                               0.170 [   0.089,    0.255]
+  rel women
+    d040_5b_s1_b20k                 0.201 [   0.130,    0.259]
+    d040_5b_s2_b20k                 0.194 [   0.136,    0.244]
+    d090_f57_s1                     0.184 [   0.117,    0.234]
+    d090_f57_s2                     0.191 [   0.123,    0.248]
+    A                               0.135 [   0.089,    0.174]
+  w/m
+    d040_5b_s1_b20k                 0.869 [   0.844,    0.900]
+    d040_5b_s2_b20k                 0.860 [   0.843,    0.893]
+    d090_f57_s1                     0.886 [   0.849,    0.906]
+    d090_f57_s2                     0.879 [   0.851,    0.897]
+    A                               0.863 [   0.849,    0.891]
+  within SD c
+    d040_5b_s1_b20k               119.030 [ 113.492,  124.966]
+    d040_5b_s2_b20k               110.776 [ 105.592,  116.099]
+    d090_f57_s1                   116.076 [ 110.773,  121.437]
+    d090_f57_s2                   111.468 [ 106.479,  116.572]
+    A                             155.816 [ 149.963,  161.710]
+  men cm
+    d040_5b_s1_b20k                17.015 [  16.514,   17.347]
+    d040_5b_s2_b20k                17.316 [  16.824,   17.524]
+    d090_f57_s1                    16.430 [  16.101,   17.023]
+    d090_f57_s2                    16.485 [  16.210,   16.929]
+    A                              17.837 [  17.431,   18.062]
+  women cm
+    d040_5b_s1_b20k                14.782 [  14.542,   15.078]
+    d040_5b_s2_b20k                14.900 [  14.638,   15.138]
+    d090_f57_s1                    14.550 [  14.365,   14.778]
+    d090_f57_s2                    14.498 [  14.257,   14.626]
+    A                              15.390 [  15.248,   15.657]
+  children cm
+    d040_5b_s1_b20k                13.869 [  13.721,   14.218]
+    d040_5b_s2_b20k                13.986 [  13.642,   14.232]
+    d090_f57_s1                    13.829 [  13.580,   14.221]
+    d090_f57_s2                    13.554 [  13.247,   13.833]
+    A                              14.679 [  14.421,   15.008]
+  r(len, f0) in sex
+    d040_5b_s1_b20k                -0.399 [  -0.641,   -0.127]
+    d040_5b_s2_b20k                -0.417 [  -0.674,   -0.128]
+    d090_f57_s1                    -0.399 [  -0.653,   -0.106]
+    d090_f57_s2                    -0.434 [  -0.693,   -0.137]
+    A                              -0.347 [  -0.582,   -0.093]
+
+Paired differences (speaker bootstrap)
+  d040_5b_s1_b20k - A                          reliability    +0.075 [  +0.037,   +0.113]
+  d040_5b_s1_b20k - A                          w/m            +0.006 [  -0.025,   +0.023]
+  d040_5b_s1_b20k - A                          within SD c   -36.786 [ -41.579,  -31.902]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            reliability    -0.034 [  -0.060,   -0.005]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            w/m            +0.008 [  -0.011,   +0.019]
+  d040_5b_s1_b20k - d040_5b_s2_b20k            within SD c    +8.253 [  +5.542,  +11.353]
+  d040_5b_s1_b20k - d090_f57_s1                reliability    +0.020 [  -0.007,   +0.047]
+  d040_5b_s1_b20k - d090_f57_s1                w/m            -0.017 [  -0.036,   +0.005]
+  d040_5b_s1_b20k - d090_f57_s1                within SD c    +2.954 [  -0.292,   +6.163]
+  d040_5b_s1_b20k - d090_f57_s2                reliability    -0.007 [  -0.047,   +0.033]
+  d040_5b_s1_b20k - d090_f57_s2                w/m            -0.011 [  -0.029,   +0.011]
+  d040_5b_s1_b20k - d090_f57_s2                within SD c    +7.562 [  +4.129,  +11.416]
+  d040_5b_s2_b20k - A                          reliability    +0.109 [  +0.064,   +0.150]
+  d040_5b_s2_b20k - A                          w/m            -0.002 [  -0.028,   +0.017]
+  d040_5b_s2_b20k - A                          within SD c   -45.040 [ -48.915,  -41.423]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            reliability    +0.034 [  +0.005,   +0.060]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            w/m            -0.008 [  -0.019,   +0.011]
+  d040_5b_s2_b20k - d040_5b_s1_b20k            within SD c    -8.253 [ -11.353,   -5.542]
+  d040_5b_s2_b20k - d090_f57_s1                reliability    +0.054 [  +0.019,   +0.085]
+  d040_5b_s2_b20k - d090_f57_s1                w/m            -0.025 [  -0.039,   +0.005]
+  d040_5b_s2_b20k - d090_f57_s1                within SD c    -5.299 [  -8.752,   -1.965]
+  d040_5b_s2_b20k - d090_f57_s2                reliability    +0.026 [  -0.002,   +0.055]
+  d040_5b_s2_b20k - d090_f57_s2                w/m            -0.019 [  -0.029,   +0.005]
+  d040_5b_s2_b20k - d090_f57_s2                within SD c    -0.692 [  -3.086,   +1.597]
+  d090_f57_s1 - A                              reliability    +0.055 [  +0.019,   +0.092]
+  d090_f57_s1 - A                              w/m            +0.023 [  -0.010,   +0.037]
+  d090_f57_s1 - A                              within SD c   -39.741 [ -44.401,  -35.238]
+  d090_f57_s1 - d040_5b_s1_b20k                reliability    -0.020 [  -0.047,   +0.007]
+  d090_f57_s1 - d040_5b_s1_b20k                w/m            +0.017 [  -0.005,   +0.036]
+  d090_f57_s1 - d040_5b_s1_b20k                within SD c    -2.954 [  -6.163,   +0.292]
+  d090_f57_s1 - d040_5b_s2_b20k                reliability    -0.054 [  -0.085,   -0.019]
+  d090_f57_s1 - d040_5b_s2_b20k                w/m            +0.025 [  -0.005,   +0.039]
+  d090_f57_s1 - d040_5b_s2_b20k                within SD c    +5.299 [  +1.965,   +8.752]
+  d090_f57_s1 - d090_f57_s2                    reliability    -0.027 [  -0.055,   +0.000]
+  d090_f57_s1 - d090_f57_s2                    w/m            +0.006 [  -0.010,   +0.021]
+  d090_f57_s1 - d090_f57_s2                    within SD c    +4.607 [  +1.742,   +7.643]
+  d090_f57_s2 - A                              reliability    +0.082 [  +0.033,   +0.126]
+  d090_f57_s2 - A                              w/m            +0.017 [  -0.016,   +0.028]
+  d090_f57_s2 - A                              within SD c   -44.348 [ -47.816,  -40.843]
+  d090_f57_s2 - d040_5b_s1_b20k                reliability    +0.007 [  -0.033,   +0.047]
+  d090_f57_s2 - d040_5b_s1_b20k                w/m            +0.011 [  -0.011,   +0.029]
+  d090_f57_s2 - d040_5b_s1_b20k                within SD c    -7.562 [ -11.416,   -4.129]
+  d090_f57_s2 - d040_5b_s2_b20k                reliability    -0.026 [  -0.055,   +0.002]
+  d090_f57_s2 - d040_5b_s2_b20k                w/m            +0.019 [  -0.005,   +0.029]
+  d090_f57_s2 - d040_5b_s2_b20k                within SD c    +0.692 [  -1.597,   +3.086]
+  d090_f57_s2 - d090_f57_s1                    reliability    +0.027 [  -0.000,   +0.055]
+  d090_f57_s2 - d090_f57_s1                    w/m            -0.006 [  -0.021,   +0.010]
+  d090_f57_s2 - d090_f57_s1                    within SD c    -4.607 [  -7.643,   -1.742]
+
+Seed mean f57 (d090_f57_s1 + d090_f57_s2): reliability - A +0.069 [+0.026, +0.106]; w/m 0.883; probe excess +3.5 c/oct
+
+Seed mean 5b (d040_5b_s1_b20k + d040_5b_s2_b20k): reliability - A +0.092 [+0.052, +0.129]; w/m 0.865; probe excess +0.6 c/oct
+
+Paired seed means f57-5b: reliability -0.023 [-0.050, +0.002]; w/m 0.883; probe excess +3.5 c/oct
+
+Paired seed means s1: reliability -0.020 [-0.047, +0.007]; w/m 0.886; probe excess +4.2 c/oct
+
+Paired seed means s2: reliability -0.026 [-0.055, +0.002]; w/m 0.879; probe excess +2.8 c/oct
