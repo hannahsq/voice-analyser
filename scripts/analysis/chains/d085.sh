@@ -74,7 +74,16 @@ B1=d040_5b_s1_b20k; B2=d040_5b_s2_b20k; CB=d085_base_b20k; CH=d085_heads_b20k
 [ -s $O/vtl_joint.json ] || VA_SEED_MEANS="5b=$B1+$B2" VA_SEED_PAIRS="base-5b=$CB:$B1+$B2;heads-5b=$CH:$B1+$B2;heads-base=$CH:$CB" \
   $PY -u $SA/vtl_score_joint.py $O/vtl_joint.txt $B1=runs/$B1/ckpt_last.pt $B2=runs/$B2/ckpt_last.pt \
   $CB=runs/$CB/ckpt_last.pt $CH=runs/$CH/ckpt_last.pt > $O/vtl_joint.out 2>&1 || fail "vtl scoring"
+# added 2026-11-11 with decide_d085.py (the copy running since 01:42 predates them; decide_d085.py runs them itself):
+# long-clip evaluation at 1600 / 400 frames and Q1's glottal-slope frames, probe 10, KL's gap growth
+ALL="$B1 $B2 $CB $CH"
+ls cache/d085/v2kn_$CH.npz cache/d085/v2kn_$CB.npz > /dev/null 2>&1 || $PY -u $SA/d085_score.py $(for r in $ALL; do printf '%s=runs/%s/ckpt_last.pt ' $r $r; done)   >> runs/d085_post.log 2>&1 < /dev/null || fail "d085_score"
+for r in $RUNS; do
+  [ -s reports/probes/articulation/$r.json ] || $PY -m vocal_analysis.eval.probes.run score articulation runs/$r/ckpt_last.pt     >> runs/d085_post.log 2>&1 < /dev/null || fail "probe 10 $r"
+done
+[ -s $O/kl/main_per_file.tsv ] || $PY -u $SA/d060_kl_gap.py main $O/kl $(for r in $ALL; do printf '%s=runs/%s/ckpt_last.pt ' $r $r; done)   >> runs/d085_post.log 2>&1 < /dev/null || fail "kl"
 say "d085: scoring done"
 [ -f $SA/decide_d085.py ] || { say "d085: decide script missing; stopping before the decision"; exit 0; }
 $PY -I $SA/decide_d085.py "$SW" > $O/decide_d085.txt 2>&1 || fail "decide"
+say "d085: $(grep '^DECISION' $O/decide_d085.txt)"
 say "d085: done"
