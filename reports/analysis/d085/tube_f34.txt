@@ -1,0 +1,3 @@
+train_v2    cascade  val frames  13003 | F3 SD   723 Hz, MAE from F1,F2,iVTL   325 Hz | F4 SD   869 Hz, MAE from F1,F2,iVTL   285 Hz
+train_v2    tube     val frames  18169 | F3 SD   608 Hz, MAE from F1,F2,iVTL   110 Hz | F4 SD   879 Hz, MAE from F1,F2,iVTL   121 Hz
+train_v2ku  tube     val frames  24351 | F3 SD   606 Hz, MAE from F1,F2,iVTL   121 Hz | F4 SD   898 Hz, MAE from F1,F2,iVTL   117 Hz
