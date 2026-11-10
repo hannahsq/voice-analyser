@@ -79,7 +79,7 @@ REAL-TIME INFERENCE
 
 ## 4. Definitions and output schema
 
-- **Formant (Fn):** frequency of the n-th resonance (pole) of the vocal tract transfer function, not the n-th spectral peak. Synthetic and resynthesised labels follow this definition, so the model learns resonances.
+- **Formant (Fn):** frequency of the n-th resonance (pole) of the vocal tract transfer function, not the n-th spectral peak. Synthetic and resynthesised labels follow this definition, so the model learns resonances. *Amended 2026-11-10 (decisions D-091)*: in voiced speech the glottis opens every cycle and couples the tract to the subglottal system, so F1 has two candidates, the closed-glottis pole and the resonance as it acts over the whole cycle. The reported F1 is the second, the acoustic F1: the closed-glottis value is not recoverable from the sound by these models (D-078 to D-082), and the acoustic one is what LPC references measure. The two are equal on uncoupled synthetic audio.
 - **Bandwidth (Bn):** −3 dB bandwidth of the n-th resonance.
 - **f0:** fundamental frequency of the glottal source. **Voicing:** probability that the frame is periodic phonation.
 - **Hk:** amplitude (dB) of the k-th harmonic (at k·f0) in the radiated signal, from a least-squares harmonic fit (§8.1).

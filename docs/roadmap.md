@@ -4,6 +4,17 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
 
 ## Now
 
+**Direction changed 2026-11-10 (D-091)**, after a review of the plan, the F1 register and the log. This block overrides the order below where they differ; the older text stays as the record.
+
+- **The F1 level work stops.** On the closed-phase reference there is no women-specific overread left (v3.1: women +4.2, men +5.7 Hz), and what remains is below what six dev women and three disagreeing references resolve. The reported F1 is the acoustic F1. Head and read-out arms on v3.1's trunk are closed as a line. D-085 is held (Hannah's call).
+- **Order**:
+  1. D-092 (does v3.1's level on KL need the coupled glottis?) and D-093 (is Hillenbrand's group gradient explained by f0 and the vowel?): cheap, and the last F1-cause entries unless they name a mechanism.
+  2. Close M3: items 7 and 10 below, then the lockbox, once.
+  3. M4 (item 9), led by the f0-change equivariance if D-094 finds v3.1 breaks it on real envelopes, by the reconstruction loss if not.
+  4. Evaluation power: D-095 (draft: Saarbrücken's allocation and a within-speaker f0 slope).
+  5. D-096: repeatability and the minimal detectable change, the number the outcomes aim needs.
+  6. M5's code (streaming VQT, the causal student) alongside; none of it waits on F1.
+
 *State on 2026-10-30. Results and reasoning are in D-025 to D-049 (decisions.md).*
 
 - **Teacher v3.1** (D-040, tag `teacher-v3.1`): `d040_5b_s2_b20k`, D-031's rA recipe with the joint VTL head; dev-tier suite in `reports/suite/d040_5b_s2_b20k_dev.md`. Teacher v3 (D-025) is superseded as the single model; **labeller v3** (the per-frame mean in log frequency of v3's seeds 1 and 2) is still the labeller.

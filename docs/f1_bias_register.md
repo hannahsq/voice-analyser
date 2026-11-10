@@ -54,6 +54,7 @@ A register of every hypothesis tested for the upward F1 bias that synthetically 
 
 ## Open
 
+- **Accepted for now (2026-11-10, D-091)**: the level work stops. On the closed-phase reference the overread is no longer women's (v3.1: women +4.2, men +5.7 Hz) and is below what the references resolve (they span 18 Hz for women; the label definition moves the level 21 Hz). The reported F1 is the acoustic F1. Two cause entries remain, registered and not yet run: **D-092** (does v3.1's +17 / +7 Hz level on KL need the coupled glottis, or does a rigid render carry it?) and **D-093** (is Hillenbrand's group gradient, men +13 to girls +35 Hz, explained by f0 and the vowel's F1?). Rows go in the tables above when they report. The items below stand as written before that decision.
 - ~~**Dynamics**~~: ruled out for the overread by D-049 (real speech dynamics and source, exact labels: no bias, either sex).
 - **Source pulse shape**: resynthesis keeps the real (inverse-filtered) source and shows no bias (D-049), which makes the source an unlikely cause; another family of synthetic pulse shapes remains untested.
 - **The real vocal tract** (real bandwidths, wall vibration, subglottal coupling and the open-phase shift): what resynthesis replaces, so now the main suspect with the definition below.
