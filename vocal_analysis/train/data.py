@@ -24,7 +24,9 @@ from ..synth.shards import INT16_SCALE, ShardReader
 
 LABEL_KEYS = ("f0", "voiced", "sonorant", "whisper", "formants", "bandwidths", "rd", "source_h_db")
 # labels only some sets carry, consolidated when the shards have them (D-078: the cycle-mean acoustic formants)
-OPTIONAL_LABEL_KEYS = ("formants_acoustic", "glottal_opening")
+# D-085: also the acoustic bandwidths, the open quotient and the clip's coupling, for the paired closed / acoustic heads
+OPTIONAL_LABEL_KEYS = ("formants_acoustic", "bandwidths_acoustic", "glottal_opening", "open_quotient", "gap_offset",
+                       "coupling_df", "coupling_bm")
 N_TRAIN_FORMANTS = 4
 N_UPPER = 3  # D-090: F5-F7 labels, for the upper heads (unused without them)
 TRACT_LEFT_WEIGHT = (0.15, 0.5)
@@ -48,9 +50,16 @@ def consolidate(root: str | Path, log=print) -> Path:
     shards = reader.shards
     n_audio = n_frames = 0
     sizes = []
+    optional = None
     for s in shards:
         with np.load(s) as z:
             sizes.append((int(z["audio_offsets"][-1]), int(z["frame_offsets"][-1])))
+            have = {k for k in OPTIONAL_LABEL_KEYS if f"label_{k}" in z.files}
+        # D-085: a set re-rendered after a label change can keep older shards (train_long_v3 did); packing them
+        # would leave the later keys' frames unwritten
+        if optional is not None and have != optional:
+            raise ValueError(f"{s.name}: optional labels {sorted(have)} differ from the first shard's {sorted(optional)}")
+        optional = have
     n_audio, n_frames = map(sum, zip(*sizes))
     audio = np.lib.format.open_memmap(out / "audio.npy", "w+", np.int16, (n_audio,))
     labels: dict[str, np.memmap] = {}
@@ -91,7 +100,7 @@ def _pad_labels(key: str, v: np.ndarray, n: int) -> np.ndarray:
     keep finite on every frame (f0 carries its contour through unvoiced frames; the comb reads it), repeat the last."""
     if v.dtype == bool:
         return np.zeros((n,) + v.shape[1:], bool)
-    if key in ("formants", "bandwidths", "vtl", "vtl_inst", "glottal_opening"):
+    if key in ("formants", "bandwidths", "vtl", "vtl_inst", "glottal_opening", *OPTIONAL_LABEL_KEYS):
         return np.full((n,) + v.shape[1:], np.nan, v.dtype)
     return np.repeat(v[-1:], n, axis=0)
 
