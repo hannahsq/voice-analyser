@@ -117,7 +117,7 @@ class SynthCrops:
                  fixed: bool = False, tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT,
                  observability: bool = False, obs_config=None, obs_floor: str = "recording",
                  obs_rec_snr_db: float | None = None, vtl: bool = False, vtl_inst: bool = False,
-                 formant_label: str = "formants", opening: bool = False):
+                 formant_label: str = "formants", opening: bool = False, acoustic: bool = False):
         self.dir = Path(flat_dir)
         self.clip_ids = np.asarray(clip_ids)
         self.n_frames = n_frames
@@ -141,6 +141,9 @@ class SynthCrops:
         self.formant_label = formant_label
         # D-080: also the per-frame glottal opening ("glottal_opening", <a>) where the set has it; NaN elsewhere
         self.opening = opening
+        # D-085: also "formants_acoustic" and "bandwidths_acoustic" (the closed labels where a set has no acoustic ones:
+        # the two are equal on uncoupled audio)
+        self.acoustic = acoustic
         self._arrays = None
 
     def _open(self):
@@ -151,6 +154,10 @@ class SynthCrops:
                             **{k: load(f"label_{k}.npy") for k in LABEL_KEYS}}
             if self.formant_label != "formants":
                 self._arrays["formants"] = load(f"label_{self.formant_label}.npy")
+            if self.acoustic:
+                for k, base in (("formants_acoustic", "formants"), ("bandwidths_acoustic", "bandwidths")):
+                    f = self.dir / f"label_{k}.npy"
+                    self._arrays[k] = load(f.name) if f.exists() else load(f"label_{base}.npy")
             if self.opening and (self.dir / "label_glottal_opening.npy").exists():
                 self._arrays["glottal_opening"] = load("label_glottal_opening.npy")
             if self.observability and (self.dir / "obs_sig.npy").exists():
@@ -183,6 +190,8 @@ class SynthCrops:
         x = arr["audio"][a0:a1].astype(np.float32) / INT16_SCALE
         n_clip_frames = int(f1_ - f0_)
         lab = {k: np.asarray(arr[k][f0_:f1_]) for k in LABEL_KEYS}
+        if self.acoustic:
+            lab.update({k: np.asarray(arr[k][f0_:f1_]) for k in ("formants_acoustic", "bandwidths_acoustic")})
         if self.opening:
             lab["glottal_opening"] = (np.asarray(arr["glottal_opening"][f0_:f1_], np.float32) if "glottal_opening" in arr
                                       else np.full(n_clip_frames, np.nan, np.float32))
@@ -254,6 +263,9 @@ class SynthCrops:
         lab["upper_formants"] = np.pad(up, ((0, 0), (0, N_UPPER - up.shape[1])), constant_values=np.nan)
         lab["formants"] = lab["formants"][:, :N_TRAIN_FORMANTS]
         lab["bandwidths"] = lab["bandwidths"][:, :N_TRAIN_FORMANTS]
+        for k in ("formants_acoustic", "bandwidths_acoustic"):
+            if k in lab:
+                lab[k] = lab[k][:, :N_TRAIN_FORMANTS]
         c0 = start * HOP - N_MAX // 2
         n_audio = (t - 1) * HOP + N_MAX
         seg = np.zeros(n_audio, np.float32)
@@ -272,7 +284,8 @@ class LengthBatches:
     clip (AMR launches ffmpeg), not per frame. Yields lists of (index, n_frames, n_crops) for SynthCrops."""
 
     def __init__(self, n_batches: int, epoch_size: int, frames: tuple[int, int], frames_per_batch: int, seed: int = 0,
-                 n_lengths: int = 8, crop_span: int = 200, long_frac: float | None = None):
+                 n_lengths: int = 8, crop_span: int = 200, long_frac: float | None = None,
+                 long_frames: tuple[int, int] | None = None, long_batch_frac: float = 0.0, long_part: int | None = None):
         self.n_batches, self.epoch_size, self.fpb, self.crop_span = n_batches, epoch_size, frames_per_batch, crop_span
         self.lengths = np.unique(np.round(np.geomspace(frames[0], frames[1], n_lengths)).astype(int))
         # long_frac: the share of batches (so of frames) with lengths of at least 0.97 * crop_span, split equally
@@ -281,6 +294,10 @@ class LengthBatches:
         if long_frac is not None:
             long = self.lengths >= 0.97 * crop_span
             self.p = np.where(long, long_frac / long.sum(), (1.0 - long_frac) / (~long).sum())
+        # D-085: a long_batch_frac share of batches holds one crop per clip at one of 4 lengths spaced geometrically over
+        # long_frames, every crop from MixedCrops part long_part (items (index, n_frames, 1, part)); 0 = earlier runs exactly
+        self.long_lengths = np.unique(np.round(np.geomspace(*long_frames, 4)).astype(int)) if long_frames else None
+        self.long_batch_frac, self.long_part = long_batch_frac, long_part
         self.rng = np.random.default_rng(seed)  # main process; carries on across epochs, so each epoch differs
 
     def __len__(self) -> int:
@@ -288,6 +305,11 @@ class LengthBatches:
 
     def __iter__(self):
         for _ in range(self.n_batches):
+            if self.long_batch_frac > 0 and self.rng.random() < self.long_batch_frac:
+                t = int(self.rng.choice(self.long_lengths))
+                b = max(1, round(self.fpb / t))
+                yield [(int(i), t, 1, self.long_part) for i in self.rng.integers(self.epoch_size, size=b)]
+                continue
             t = int(self.rng.choice(self.lengths, p=self.p))
             k = max(1, math.ceil(self.crop_span / t - 0.1))  # crops per clip: at most about crop_span frames per clip
             b = max(1, round(self.fpb / (t * k)))
@@ -314,6 +336,9 @@ class MixedCrops:
 
         idx, rest = (item[0], item[1:]) if isinstance(item, tuple) else (item, None)
         rng = np.random.default_rng([self.seed, idx, 17] if self.fixed else [self.seed, idx, 17, int(torch.randint(1 << 30, (1,)))])
+        if rest is not None and len(rest) == 3:  # D-085: (n_frames, n_crops, part) from a long batch: that part
+            k, rest = rest[2], rest[:2]
+            return self.parts[k][(int(rng.integers(len(self.parts[k]))), *rest)]
         k = int(rng.choice(len(self.parts), p=self.p))
         j = int(rng.integers(len(self.parts[k])))
         return self.parts[k][(j, *rest) if rest is not None else j]

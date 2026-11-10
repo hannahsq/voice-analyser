@@ -70,6 +70,14 @@ class TeacherConfig:
     # D-090 / D-085: n_upper extra formant heads (F5, F6, ...) on UPPER_AXIS, linear on h ("upper_heads.*"), each
     # soft-masked above the one before (F5 above F4's mean), behind their own gradient gate (Teacher.upper_gate)
     n_upper: int = 0
+    # D-085: a second, acoustic set of formant heads ("acoustic_heads.*", "acoustic_bw_head"), the flat read-out's form
+    # with its own chain of fed means, beside the closed-glottis set: outputs "formant_logits_acoustic",
+    # "logb_mean_acoustic", "logb_logvar_acoustic"
+    acoustic_heads: bool = False
+    # D-085: the anatomical length head also reads the instantaneous length (log2 cm, detached; the true one or the
+    # model's own, Teacher.forward's vtl_inst_fed) through "vtl_link" (a 64-wide projection of h plus that length ->
+    # 128 -> 2, its output layer at zero, added to vtl_head's output); needs vtl_inst_head
+    vtl_link: bool = False
     # D-054: how the formant and bandwidth heads read the trunk. "flat": linear heads on the pooled per-frame vector h
     # (every model to D-051); "mlp": the same with one hidden layer of readout_hidden (a capacity control); "film":
     # frequency-resolved (`FreqReadout`): the encoder's conv maps, modulated by h, upsampled back to the VQT's bins, one
@@ -434,8 +442,20 @@ class Teacher(nn.Module):
             for m in self.fed_heads:
                 nn.init.zeros_(m.weight)
                 nn.init.zeros_(m.bias)
+        if cfg.acoustic_heads:
+            if cfg.readout != "flat":
+                raise ValueError("acoustic_heads needs the flat read-out")
+            self.acoustic_heads = nn.ModuleList([nn.Linear(d + n, FORMANT_AXIS.n_bins) for n in range(N_FORMANTS)])
+            self.acoustic_bw_head = nn.Linear(d, 2 * N_FORMANTS)
+        if cfg.vtl_link:
+            if not (cfg.vtl_head and cfg.vtl_inst_head):
+                raise ValueError("vtl_link needs vtl_head and vtl_inst_head")
+            self.vtl_link = nn.Sequential(nn.Linear(d, 64), nn.GELU())
+            self.vtl_link_out = nn.Sequential(nn.Linear(65, 128), nn.GELU(), nn.Linear(128, 2))
+            nn.init.zeros_(self.vtl_link_out[-1].weight)
+            nn.init.zeros_(self.vtl_link_out[-1].bias)
         if cfg.n_upper:
-            self.upper_heads = nn.ModuleList([nn.Linear(d, UPPER_AXIS.n_bins) for _ in range(cfg.n_upper)])
+            self.upper_heads =nn.ModuleList([nn.Linear(d, UPPER_AXIS.n_bins) for _ in range(cfg.n_upper)])
             self.upper_gate = 1.0  # set by the trainer each step
             self.register_buffer("up_bins", torch.arange(UPPER_AXIS.n_bins, dtype=torch.float32), persistent=False)
         self.register_buffer("log2_vqt", LOG2_VQT.clone(), persistent=False)
@@ -454,10 +474,11 @@ class Teacher(nn.Module):
         return torch.exp2((f0_logits.softmax(-1) * self.f0_log2).sum(-1))
 
     def forward(self, logpow: torch.Tensor, comb_f0: torch.Tensor | None = None, comb_voiced: torch.Tensor | None = None,
-                formant_fed: torch.Tensor | None = None) -> dict:
+                formant_fed: torch.Tensor | None = None, vtl_inst_fed: torch.Tensor | None = None) -> dict:
         """logpow: (B, F, T) VQT log power. comb_f0/comb_voiced override the comb source (teacher forcing).
         formant_fed: (B, T, N) bin indices fed to later formant heads and the mask in place of the chain's own means,
-        NaN where not given (D-086, teacher forcing of the chain)."""
+        NaN where not given (D-086, teacher forcing of the chain). vtl_inst_fed: (B, T) log2 cm read by vtl_link in place
+        of the instantaneous head's own (detached) output, NaN where not given (D-085)."""
         x = normalise(logpow)
         h0 = self.f0_net(x)
         out = {"f0_logits": self.f0_head(h0), "voicing_logit": self.voicing_head(h0)[..., 0]}
@@ -500,6 +521,19 @@ class Teacher(nn.Module):
         out.update(formant_logits=torch.stack(logits, 2),  # (B, T, N, bins)
                    logb_mean=bw[..., :N_FORMANTS] + 4.5, logb_logvar=bw[..., N_FORMANTS:],
                    sonorant_logit=self.sonorant_head(h)[..., 0].float())
+        if self.cfg.acoustic_heads:  # D-085: the same chain on its own heads and its own means
+            alog, afed = [], []
+            for n in range(N_FORMANTS):
+                inp = torch.cat([h] + [(m / FORMANT_AXIS.n_bins)[..., None].to(h.dtype) for m in afed], -1) if afed else h
+                lg = self.acoustic_heads[n](inp).float()
+                if afed:
+                    below = (afed[-1][..., None] - self.cfg.mask_margin_bins - self.fm_bins).clamp_min(0.0)
+                    lg = lg - self.cfg.mask_strength * torch.tanh(below / self.cfg.mask_margin_bins)
+                alog.append(lg)
+                afed.append((lg.softmax(-1) * self.fm_bins).sum(-1))
+            abw = self.acoustic_bw_head(h).float()
+            out.update(formant_logits_acoustic=torch.stack(alog, 2), logb_mean_acoustic=abw[..., :N_FORMANTS] + 4.5,
+                       logb_logvar_acoustic=abw[..., N_FORMANTS:])
         if self.cfg.obs_head:
             pos = torch.stack(means, -1).detach() / FORMANT_AXIS.n_bins
             out["obs_logit"] = self.obs_head(torch.cat([h, pos.to(h.dtype)], -1)).float()  # (B, T, N)
@@ -507,10 +541,17 @@ class Teacher(nn.Module):
             g = self.vtl_gate
             hv = h.detach() if g == 0 else h if g == 1 else _GradGate.apply(h, float(g))
             v = self.vtl_head(hv).float()
-            out["vtl_mu"], out["vtl_logvar"] = v[..., 0], v[..., 1]
             if self.cfg.vtl_inst_head:
                 vi = self.vtl_inst_head(hv).float()
                 out["vtl_inst_mu"], out["vtl_inst_logvar"] = vi[..., 0], vi[..., 1]
+            if self.cfg.vtl_link:  # D-085: the instantaneous length, detached, true where fed; centred near 4 (16 cm)
+                li = vi[..., 0].detach()
+                if vtl_inst_fed is not None:
+                    t = vtl_inst_fed.to(li.dtype)
+                    li = torch.where(torch.isfinite(t), t, li)
+                z = torch.cat([self.vtl_link(hv), (li - 4.0)[..., None].to(hv.dtype)], -1)
+                v = v + self.vtl_link_out(z).float()
+            out["vtl_mu"], out["vtl_logvar"] = v[..., 0], v[..., 1]
         if self.cfg.opening_head:
             g = self.opening_gate
             ho = h.detach() if g == 0 else h if g == 1 else _GradGate.apply(h, float(g))

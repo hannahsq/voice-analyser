@@ -147,6 +147,28 @@ class TrainConfig:
     upper_lr: float | None = None
     opening_detach: int = 300
     opening_gate_ramp: int = 700
+    # D-085: the paired acoustic formant set (TeacherConfig.acoustic_heads), trained from scratch on every set's
+    # "formants_acoustic" / "bandwidths_acoustic" (the closed labels where a set has none); a main task, never cut
+    acoustic: bool = False
+    # D-085: the anatomical head reads the instantaneous length (TeacherConfig.vtl_link; modules in the VTL group): the
+    # true one with a probability of 1 until the VTL gate opens, then decaying to 0 over vtl_link_truth_steps
+    vtl_link: bool = False
+    vtl_link_truth_steps: int = 4000
+    # D-085: long crops. long_batch_frac of batches are crops at 4 lengths over long_frames, all from long_set (a
+    # synthetic set outside the short mix); its last 2 % of clips are validated at long_val_frames ("eval_long")
+    long_set: str | None = None
+    long_frames: tuple[int, int] = (400, 1600)
+    long_batch_frac: float = 0.0
+    long_val_frames: int = 1600
+    # D-085: auxiliary losses normalised by their running mean |value| (EMA, aux_ema), and weighted so that together
+    # they are aux_budget of the total (against the main tasks' running weighted sum), split equally between concepts
+    # and equally within each. None: loss_weights as given (every run before D-085)
+    aux_budget: float | None = None
+    aux_concepts: dict = field(default_factory=lambda: {"length": ["vtl", "vtl_inst"]})
+    aux_ema: float = 0.99
+    # the running mean is floored here: the length terms are Gaussian NLLs, which pass through 0 as they train, and a
+    # mean near 0 would send their weight to infinity (the smoke test, 2026-11-10: a loss of 1e6 at step 50)
+    aux_floor: float = 1.0
 
 
 def _git() -> dict:
@@ -310,7 +332,7 @@ def _vtl_gate(step: int, cfg: TrainConfig) -> float:
     return 0.0 if rel < 0 else min(1.0, rel / max(1, cfg.vtl_gate_ramp))
 
 
-VTL_PREFIXES = ("vtl_head.", "vtl_inst_head.")  # D-036 / D-051: the heads in the VTL parameter group
+VTL_PREFIXES = ("vtl_head.", "vtl_inst_head.", "vtl_link.", "vtl_link_out.")  # D-036 / D-051: the heads in the VTL parameter group
 READOUT_PREFIX = ("readout.",)  # D-056: a frequency-resolved read-out's modules
 SIDE_PREFIX = ("enc.side.",)  # D-072: the path beside the flatten
 OPENING_PREFIX = ("opening_head.",)  # D-080
@@ -383,6 +405,49 @@ def _p_fed_truth(step: int, cfg: TrainConfig) -> float:
     if not cfg.fed_truth_steps:
         return 0.0
     return max(0.0, 1.0 - (step - cfg.decay_start) / cfg.fed_truth_steps)
+
+
+def _p_link_truth(step: int, cfg: TrainConfig) -> float:
+    """D-085: P(vtl_link reads the true instantaneous length): 1 until the VTL gate opens, then -> 0 over
+    vtl_link_truth_steps."""
+    rel = step - _vtl_origin(cfg) - cfg.vtl_detach
+    return 1.0 if rel < 0 else max(0.0, 1.0 - rel / max(1, cfg.vtl_link_truth_steps))
+
+
+class _AuxWeights:
+    """D-085: loss weights with the auxiliary terms (cfg.aux_concepts) normalised by their running mean |value| and
+    scaled so that together they make aux_budget of the total, against the main tasks' running weighted sum. Kept on
+    the device (no host sync); the first step uses the fixed weights and seeds the means. |value|, since the length
+    terms are Gaussian NLLs, which go negative."""
+
+    def __init__(self, cfg: TrainConfig):
+        from .losses import WEIGHTS
+
+        self.base = {**WEIGHTS, **cfg.loss_weights}
+        self.concepts = {c: list(ks) for c, ks in cfg.aux_concepts.items()}
+        self.aux = {k for ks in self.concepts.values() for k in ks}
+        self.budget, self.decay, self.floor = cfg.aux_budget, cfg.aux_ema, cfg.aux_floor
+        self.ema: dict = {}
+
+    def _avg(self, key, v):
+        v = v.detach().float().abs()
+        self.ema[key] = v if key not in self.ema else self.decay * self.ema[key] + (1 - self.decay) * v
+
+    def update(self, parts: dict) -> None:
+        self._avg("_main", sum(self.base[k] * v.detach().float() for k, v in parts.items() if k not in self.aux))
+        for k in self.aux & parts.keys():
+            self._avg(k, parts[k])
+
+    def weights(self) -> dict:
+        w = dict(self.base)
+        if "_main" not in self.ema:
+            return w
+        share = self.budget / (1.0 - self.budget) * self.ema["_main"] / max(1, len(self.concepts))
+        for ks in self.concepts.values():
+            for k in ks:
+                if k in self.ema:
+                    w[k] = share / len(ks) / self.ema[k].clamp_min(self.floor)
+        return w
 
 
 def _fed_bins(formants_hz):
@@ -472,6 +537,13 @@ def evaluate(model, batches, device) -> dict:
             if "opening" in out and "glottal_opening" in lab:
                 rows["opening_p"].append(out["opening"].float().cpu().numpy())
                 rows["opening"].append(lab["glottal_opening"].cpu().numpy())
+            if "formant_logits_acoustic" in out and "formants_acoustic" in lab:  # D-085
+                fa, _ = decode(out["formant_logits_acoustic"].float().softmax(-1).cpu().numpy(), FORMANT_AXIS)
+                ra = lab["formants_acoustic"].cpu().numpy()
+                rows.setdefault("fa_err", []).append(fa - ra)
+                rows.setdefault("fa_ref", []).append(ra)
+                rows.setdefault("fa_shift", []).append(fa - fm)  # the model's acoustic - closed, per frame
+                rows.setdefault("fa_shift_ref", []).append(ra - ref_f)
     model.train()
     rows = {k: v for k, v in rows.items() if v}
     cat = {k: np.concatenate([r.reshape(-1, *r.shape[2:]) for r in v]) for k, v in rows.items()}
@@ -483,6 +555,13 @@ def evaluate(model, batches, device) -> dict:
         ok = np.isfinite(r)
         res[f"F{n + 1}_mae_hz"] = float(np.mean(np.abs(e[ok])))
         res[f"F{n + 1}_dr"] = float(np.mean((np.abs(e[ok]) <= 0.2 * r[ok]) & (np.abs(e[ok]) <= 200)))
+    if "fa_err" in cat:  # D-085: the acoustic set's MAE, and its shift from the closed set against the labels' shift
+        ea, ra, sh, shr = cat["fa_err"][son], cat["fa_ref"][son], cat["fa_shift"][son], cat["fa_shift_ref"][son]
+        for n in range(ea.shape[1]):
+            ok = np.isfinite(ra[:, n]) & np.isfinite(shr[:, n])
+            if ok.any():
+                res[f"Fa{n + 1}_mae_hz"] = float(np.mean(np.abs(ea[ok, n])))
+                res[f"Fa{n + 1}_shift_err_hz"] = float(np.mean(sh[ok, n] - shr[ok, n]))
     v = np.isfinite(cat["f0_c"])
     res["f0_rpa"] = float(np.mean(np.abs(cat["f0_c"][v]) <= 50))
     res["voicing_acc"] = float(np.mean(cat["voiced_ok"]))
@@ -600,6 +679,12 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         model_cfg = replace(model_cfg, n_upper=cfg.upper)
     if cfg.fed_truth_steps is not None and cfg.decay_start is None:
         raise ValueError("fed_truth_steps is counted from a branch point (decay_start)")
+    if cfg.acoustic:  # D-085: from scratch only
+        model_cfg = replace(model_cfg, acoustic_heads=True)
+    if cfg.vtl_link:
+        if not (cfg.vtl and cfg.vtl_inst):
+            raise ValueError("vtl_link needs vtl and vtl_inst")
+        model_cfg = replace(model_cfg, vtl_link=True)
     new_vtl = bool(cfg.vtl) and not model_cfg.vtl_head  # D-036: the head is added at this branch
     if cfg.vtl:
         if cfg.optimizer not in ("adamw", "adan", "muon", "muon_adan"):  # D-040: Muon runs keep it out of Muon
@@ -718,7 +803,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         raise FileNotFoundError(f"obs_head needs {flat}'s observability store (obs_store.write_store)")
     vtl, vti = bool(cfg.vtl), bool(cfg.vtl_inst)
     ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs, vtl=vtl,
-                    vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label)
+                    vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label, acoustic=cfg.acoustic)
     if cfg.resynth:
         parts, sizes = [], []
         for d in cfg.resynth:
@@ -726,7 +811,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             n = json.loads((rflat / "done").read_text())["n_clips"]
             parts.append(SynthCrops(rflat, np.arange(n), cfg.n_frames, channel, seed=cfg.seed + 1 + len(parts),
                                     epoch_size=epoch, tract_left_weight=cfg.tract_left_weight, observability=obs, vtl=vtl,
-                                    vtl_inst=vti, opening=cfg.opening))
+                                    vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic))
             sizes.append(n)
         weights = [1.0 - cfg.resynth_frac] + [cfg.resynth_frac * n / sum(sizes) for n in sizes]
         if not cfg.synth_extra:
@@ -742,10 +827,10 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             xtr, xva = split_ids(n)
             xseed = cfg.seed if cfg.synth_extra_replace else cfg.seed + 101 + len(xparts)  # replace: the main set's seed
             xparts.append(SynthCrops(xflat, xtr, cfg.n_frames, channel, seed=xseed, epoch_size=epoch,
-                                     observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening))
+                                     observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic))
             xsizes.append(len(xtr))
             extra_val[f"eval_extra:{Path(d).name}"] = SynthCrops(xflat, xva[: cfg.val_clips], cfg.n_frames, val_channel, seed=12345,
-                                                                  fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening)
+                                                                  fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic)
         f = cfg.synth_extra_frac
         if cfg.synth_extra_replace:  # in the main set's place, position and seed: the mix is the usual one with the set swapped
             if len(xparts) != 1:
@@ -755,31 +840,51 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             all_parts, weights = [*base_parts, *xparts], [(1.0 - f) * w for w in base_w] + [f * n / sum(xsizes) for n in xsizes]
         ds = MixedCrops(all_parts, weights, epoch, seed=cfg.seed)
         log(f"extra synthetic: {sum(xsizes):,} clips in {len(xsizes)} sets, {f:.0%} of items")
+    long_part = None
+    if cfg.long_set:  # D-085: a part of the mix at weight 0, reached only by long batches
+        if not cfg.crop_frames:
+            raise ValueError("long_set needs crop_frames (LengthBatches)")
+        lflat = consolidate(cfg.long_set, log=log)
+        n = json.loads((lflat / "done").read_text())["n_clips"]
+        ltr, lva = split_ids(n)
+        lpart = SynthCrops(lflat, ltr, cfg.n_frames, channel, seed=cfg.seed + 211, epoch_size=epoch, observability=obs,
+                           vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic)
+        if isinstance(ds, MixedCrops):
+            ds = MixedCrops([*ds.parts, lpart], [*ds.p, 0.0], epoch, seed=cfg.seed)
+        else:
+            ds = MixedCrops([ds, lpart], [1.0, 0.0], epoch, seed=cfg.seed)
+        long_part = len(ds.parts) - 1
+        extra_val["eval_long"] = SynthCrops(lflat, lva[: cfg.val_clips], cfg.long_val_frames, val_channel, seed=12345,
+                                            fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic)
+        log(f"long crops: {len(ltr):,} clips of {lflat.parent.name}, {cfg.long_batch_frac:.0%} of batches at "
+            f"{tuple(cfg.long_frames)} frames")
     common = dict(num_workers=cfg.workers, collate_fn=collate, persistent_workers=True, pin_memory=False, prefetch_factor=4)
     if cfg.crop_frames:
         batches = LengthBatches(1000, epoch, tuple(cfg.crop_frames), cfg.batch * cfg.n_frames, seed=cfg.seed + step,
-                                crop_span=cfg.n_frames, long_frac=cfg.crop_long_frac)
+                                crop_span=cfg.n_frames, long_frac=cfg.crop_long_frac, long_frames=tuple(cfg.long_frames),
+                                long_batch_frac=cfg.long_batch_frac if cfg.long_set else 0.0, long_part=long_part)
         loader = DataLoader(ds, batch_sampler=batches, **common)
     else:
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     # vtl only adds the label (no random draws), so the crops stay those of runs before it was passed
-    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening,
+    val_ds = SynthCrops(flat, val_ids, cfg.n_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic,
                         formant_label=cfg.formant_label)
     short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl,
-                          vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label)
+                          vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label, acoustic=cfg.acoustic)
     resynth_val = {}
     for d in cfg.resynth_val:
         rflat = consolidate(d, log=log)
         n = json.loads((rflat / "done").read_text())["n_clips"]
         ids = np.random.default_rng(0).permutation(n)[: cfg.val_clips]  # spread over recordings, fixed
         resynth_val[f"eval_resynth:{Path(d).name}"] = SynthCrops(rflat, np.sort(ids), cfg.n_frames, val_channel, seed=12345, fixed=True,
-                                                                  tract_left_weight=cfg.tract_left_weight, opening=cfg.opening)
+                                                                  tract_left_weight=cfg.tract_left_weight, opening=cfg.opening, acoustic=cfg.acoustic)
     vq = TorchVQT(device)
     val_sets = {"eval": cache_batches(DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate), vq, device),
                 "eval_short": cache_batches(DataLoader(short_ds, cfg.batch * cfg.n_frames // cfg.val_short_frames,
                                                        num_workers=4, collate_fn=collate), vq, device)}
     for name, rv in (resynth_val | extra_val).items():
-        val_sets[name] = cache_batches(DataLoader(rv, cfg.batch, num_workers=4, collate_fn=collate), vq, device)
+        bs = max(1, cfg.batch * cfg.n_frames // cfg.long_val_frames) if name == "eval_long" else cfg.batch
+        val_sets[name] = cache_batches(DataLoader(rv, bs, num_workers=4, collate_fn=collate), vq, device)
     rng = np.random.default_rng(cfg.seed + step)
 
     def save(path):
@@ -794,6 +899,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         tmp.replace(path)
         sf_mode("train")
 
+    aux = _AuxWeights(cfg) if cfg.aux_budget is not None else None
     logf = (out / "log.jsonl").open("a", encoding="utf-8")
     t0, seen = time.time(), 0
     acc: dict = {}  # name -> running sum (tensor until the log step)
@@ -820,9 +926,13 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 comb_f0 = torch.nan_to_num(lab["f0"], nan=100.0)  # resynthesised f0 labels can be NaN; unvoiced there, so no comb
                 p_fed = _p_fed_truth(step, cfg)
                 fed = _fed_bins(lab["formants"]) if p_fed > 0 and rng.random() < p_fed else None
+                p_link = _p_link_truth(step, cfg) if cfg.vtl_link else 0.0
+                ifed = lab["vtl_inst"] if p_link > 0 and "vtl_inst" in lab and rng.random() < p_link else None
                 out_ = model(lp, comb_f0=comb_f0 if truth else None, comb_voiced=lab["voiced"].float() if truth else None,
-                             formant_fed=fed)
-            loss, parts = teacher_loss(out_, lab, cfg.loss_weights)
+                             formant_fed=fed, vtl_inst_fed=ifed)
+            loss, parts = teacher_loss(out_, lab, cfg.loss_weights if aux is None else aux.weights())
+            if aux is not None:
+                aux.update(parts)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             gn = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)

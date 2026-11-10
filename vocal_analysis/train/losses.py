@@ -31,7 +31,8 @@ def heatmap_ce(logits: torch.Tensor, values_hz: torch.Tensor, mask: torch.Tensor
     return _masked_mean(ce, mask & valid, weight)
 
 
-WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5, "obs": 0.2, "vtl": 0.0125, "vtl_inst": 0.0125, "opening": 1.0, "upper": 1.0}  # vtl: D-036's registered weight
+WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5, "obs": 0.2, "vtl": 0.0125, "vtl_inst": 0.0125, "opening": 1.0, "upper": 1.0,
+           "formants_acoustic": 1.0, "bandwidth_acoustic": 0.2}  # D-085: the acoustic set at the closed set's weights  # vtl: D-036's registered weight
 
 
 def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[torch.Tensor, dict]:
@@ -53,6 +54,15 @@ def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[tor
     mean, logvar = out["logb_mean"], out["logb_logvar"].clamp(-8, 4)
     nll = 0.5 * (logvar + (torch.nan_to_num(logb) - mean) ** 2 / logvar.exp())
     parts["bandwidth"] = _masked_mean(nll, bmask, w_fm)
+    if "formant_logits_acoustic" in out and "formants_acoustic" in lab:  # D-085: the acoustic set, as the closed one
+        fa = out["formant_logits_acoustic"]
+        parts["formants_acoustic"] = sum(heatmap_ce(fa[:, :, n], lab["formants_acoustic"][..., n], son, FORMANT_AXIS, w_fm)
+                                         for n in range(fa.shape[2])) / fa.shape[2]
+        ba = lab["bandwidths_acoustic"]
+        amask = son[..., None] & torch.isfinite(ba)
+        mean_a, lv_a = out["logb_mean_acoustic"], out["logb_logvar_acoustic"].clamp(-8, 4)
+        nll_a = 0.5 * (lv_a + (torch.nan_to_num(torch.log(ba.clamp_min(1.0))) - mean_a) ** 2 / lv_a.exp())
+        parts["bandwidth_acoustic"] = _masked_mean(nll_a, amask, w_fm)
     if "obs_logit" in out and "obs" in lab:  # D-027: soft-target BCE on sonorant frames with a label
         o = lab["obs"]
         omask = son[..., None] & torch.isfinite(o)
