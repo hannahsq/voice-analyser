@@ -1,0 +1,52 @@
+D-085 gradient check: trunk (f0_net + enc) gradient norm per loss part; 8 short crops of 400 frames (train_v2 validation), 2 long crops of 1600 (train_long_v3u held-out), all clips with length labels (tube, length not drawn from f0); VTL gate 1; CPU, float32
+
+5b s2, step 2000 (runs/d040_5b_s2/ckpt_002000.pt)
+  part                   weight |         short 400         |         long 1600        
+                                |   unweighted     weighted |   unweighted     weighted
+  f0                     1.0000 |        0.531        0.531 |        0.113        0.113
+  voicing                0.5000 |        0.470        0.235 |        1.149        0.574
+  sonorant               0.5000 |        0.373        0.187 |        0.296        0.148
+  formants               1.0000 |        0.830        0.830 |        2.305        2.305
+  bandwidth              0.2000 |        2.547        0.509 |        5.172        1.034
+  vtl                    0.0125 |        3.672        0.046 |       13.087        0.164
+  total (weighted)       1.0000 |        1.247        1.247 |        2.770        2.770
+
+D-085 base, step 2000 (runs/d085_base/ckpt_002000.pt)
+  part                   weight |         short 400         |         long 1600        
+                                |   unweighted     weighted |   unweighted     weighted
+  f0                     1.0000 |        0.559        0.559 |        0.647        0.647
+  voicing                0.5000 |        0.587        0.293 |        1.814        0.907
+  sonorant               0.5000 |        0.227        0.114 |        0.628        0.314
+  formants               1.0000 |        0.910        0.910 |        0.877        0.877
+  bandwidth              0.2000 |        1.618        0.324 |        3.688        0.738
+  vtl                    0.6398 |        4.201        2.688 |        4.394        2.811
+  vtl_inst               0.6970 |        4.807        3.350 |        3.811        2.656
+  total (weighted)       1.0000 |        2.468        2.468 |        2.183        2.183
+
+D-085 base, step 16000 (runs/d085_base/ckpt_016000.pt)
+  part                   weight |         short 400         |         long 1600        
+                                |   unweighted     weighted |   unweighted     weighted
+  f0                     1.0000 |        0.176        0.176 |        0.363        0.363
+  voicing                0.5000 |        0.194        0.097 |        0.564        0.282
+  sonorant               0.5000 |        0.043        0.021 |        0.119        0.059
+  formants               1.0000 |        0.356        0.356 |        0.864        0.864
+  bandwidth              0.2000 |        1.177        0.235 |        2.048        0.410
+  vtl                    0.2911 |        1.638        0.477 |       13.880        4.040
+  vtl_inst               0.2886 |        7.077        2.043 |        9.544        2.755
+  total (weighted)       1.0000 |        2.378        2.378 |        6.909        6.909
+
+D-085 heads, step 2000 (runs/d085_heads/ckpt_002000.pt)
+  part                   weight |         short 400         |         long 1600        
+                                |   unweighted     weighted |   unweighted     weighted
+  f0                     1.0000 |        0.681        0.681 |        0.839        0.839
+  voicing                0.5000 |        1.022        0.511 |        1.328        0.664
+  sonorant               0.5000 |        0.325        0.162 |        0.405        0.203
+  formants               1.0000 |        0.862        0.862 |        1.270        1.270
+  bandwidth              0.2000 |        2.691        0.538 |        1.658        0.332
+  formants_acoustic      1.0000 |        1.000        1.000 |        0.776        0.776
+  bandwidth_acoustic     0.2000 |        1.275        0.255 |        3.249        0.650
+  vtl                    1.4220 |        5.578        7.932 |        4.876        6.933
+  vtl_inst               1.2917 |        6.414        8.285 |        7.817       10.098
+  upper                  1.0000 |        0.618        0.618 |        0.844        0.844
+  total (weighted)       1.0000 |        8.044        8.044 |       13.812       13.812
+
