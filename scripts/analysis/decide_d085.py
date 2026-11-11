@@ -18,7 +18,10 @@ acoustic head's slope, KL's gap growth (D-074), probe 10, probe 11, the iVTL hea
 Runs the scoring steps the chain started before this script existed did not (d085_score.py, probe 10 for both arms,
 KL's gap growth), each skipped if its output exists. `--check` reads D-090's arms (`d090_f5_s1` as "base",
 `d090_f57_s1` as "heads") and CPU scores from scratchpad/d085_check (16 clips), to check the script reads its inputs;
-not a D-085 result."""
+not a D-085 result.
+
+D-098 (the rerun with D-036's fixed length weights) uses this script unchanged with VA_D085_TAG=d098: runs
+`d098_{base,heads}_b20k`, scores in cache/d098, reports in reports/analysis/d098, the same rule."""
 import json
 import os
 import subprocess
@@ -32,11 +35,12 @@ sys.stdout.reconfigure(encoding="utf-8")
 import decide_d056 as D  # noqa: E402
 
 CHECK = "--check" in sys.argv
-O = Path("reports/analysis/d085")
+TAG = os.environ.get("VA_D085_TAG", "d085")  # D-098: "d098"
+O = Path(f"reports/analysis/{TAG}")
 REF = ("d040_5b_s1_b20k", "d040_5b_s2_b20k")
-BASE, HEADS = ("d090_f5_s1", "d090_f57_s1") if CHECK else ("d085_base_b20k", "d085_heads_b20k")
+BASE, HEADS = ("d090_f5_s1", "d090_f57_s1") if CHECK else (f"{TAG}_base_b20k", f"{TAG}_heads_b20k")
 RUNS = (*REF, BASE, HEADS)
-SC = Path("scratchpad/d085_check") if CHECK else Path("cache/d085")
+SC = Path("scratchpad/d085_check") if CHECK else Path(f"cache/{TAG}")
 KL = O / "kl"
 LANDMARKS = "label ceiling 0.29 (D-082), frozen v3.1 0.36, full recovery 0.89 (the closed label's own slope)"
 T = {"slope": 0.03, "mae_one": 0.08, "mae_mean": 0.05, "cp": 4.0, "avtl": 0.10, "rel": 0.07}
@@ -44,12 +48,12 @@ T = {"slope": 0.03, "mae_one": 0.08, "mae_mean": 0.05, "cp": 4.0, "avtl": 0.10, 
 
 def ensure_scores():
     """The scoring steps added to the chain after it started (each skips if its output exists)."""
-    py, log = sys.executable, open("runs/d085_post.log", "a")
+    py, log = sys.executable, open(f"runs/{TAG}_post.log", "a")
     env = {**os.environ, "MIOPEN_FIND_MODE": "FAST", "VA_DEVICE": os.environ.get("VA_DEVICE", "cuda")}
     run = lambda *a: subprocess.run([py, "-u", *a], stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,  # noqa: E731
                                     env=env, check=True)
     if not all((SC / f"long_{r}.json").exists() and (SC / f"v2kn_{r}.npz").exists() for r in RUNS):
-        run("scripts/analysis/d085_score.py", *[f"{r}=runs/{r}/ckpt_last.pt" for r in RUNS])
+        run("scripts/analysis/d085_score.py", *[f"{r}=runs/{r}/ckpt_last.pt" for r in RUNS], "--out", str(SC))
     for r in (BASE, HEADS):
         if not Path(f"reports/probes/articulation/{r}.json").exists():
             run("-m", "vocal_analysis.eval.probes.run", "score", "articulation", f"runs/{r}/ckpt_last.pt")
@@ -153,7 +157,7 @@ def main():
     S = Path([a for a in sys.argv[1:] if a != "--check"][0])
     if not CHECK:
         ensure_scores()
-    L = [f"D-085: the screening run; base and heads arms (one seed each) against each other and against v3.1 (5b's decay "
+    L = [f"{TAG.upper().replace('D', 'D-')}: the screening run; base and heads arms (one seed each) against each other and against v3.1 (5b's decay "
          f"branches, seed mean)" + ("  [CHECK MODE: D-090's f5 / f57 seed-1 arms as base / heads, 16-clip CPU scores; "
                                     "not a D-085 result]" if CHECK else ""), ""]
 
