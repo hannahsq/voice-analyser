@@ -10,7 +10,8 @@ Released teachers carry an annotated git tag at their training commit. Versions 
 
 Sizes: **full GRU** = front end 24 / 48 / 64 channels, f0 16, embedding 384, BiGRU 256 × 2 (f0 128). **Full
 Conformer** = the same front end, Conformer width 128, 2 layers, 4 heads (f0: dilated convs). **S2** = front end
-8 / 16 / 32, f0 8, embedding 192 (the fast proxy, D-024).
+8 / 16 / 32, f0 8, embedding 192 (the fast proxy, D-024). Layer-by-layer descriptions, parameter counts and
+diagrams of every architecture are in `architectures.md`.
 
 ## Teachers
 
