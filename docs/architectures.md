@@ -187,7 +187,7 @@ formant are suppressed. D-084 found the heads ignore the fed means (an input of 
 and only the mask acts.
 
 ```mermaid
-flowchart LR
+flowchart TD
     h["h"] --> H1["F1 head"]
     H1 -->|"μ1 / 368"| H2["F2 head"]
     h --> H2
@@ -288,7 +288,7 @@ one logit per VQT bin per formant, interpolated onto the formant axis. Bandwidth
 features at formant n's expected position (detached), concatenated with h, through 64 → 2.
 
 ```mermaid
-flowchart LR
+flowchart TD
     M3["conv map 64 × 91"] --> FILM["FiLM by h<br/>(1 + γ) · x + β"] --> L3["1×1 → 32, Block"]
     L3 --> U2["upsample to 182"]
     M2["conv map 48 × 182"] --> P2["1×1 → 32"] --> S2(("+"))
@@ -338,7 +338,7 @@ without the comb (2 input channels), scaled up. **32.7 M parameters**, 27.5 M of
 | output | Linear 384 → 1024 (Parakeet's width), at 10 ms frames |
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph P["Parakeet (frozen)"]
         direction TB
         mel["128-bin mel, 10 ms"] --> sub["8× subsampling<br/>80 ms frames"] --> L["Conformer layers 1–5<br/>(of 24), width 1024"]
