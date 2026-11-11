@@ -92,7 +92,7 @@ f0 encoder: 2 input channels; Blocks × 3 at 16 (8) channels and 363 bins (dilat
 Blocks × 2 (dilations 1, 2); flatten 2912 (1456) → 256, GELU.
 
 ```mermaid
-flowchart LR
+flowchart TD
     X["3 × 363"] --> B1["Block r=1<br/>24 ch"] --> B2["Block r=2"] --> B3["Block r=4"]
     B3 --> D1["Down<br/>48 × 182"] --> B4["Blocks r=1,2,4,8<br/>48 ch"]
     B4 --> D2["Down<br/>64 × 91"] --> B5["Blocks r=1,2<br/>64 ch"]
