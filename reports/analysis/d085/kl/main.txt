@@ -1,0 +1,15 @@
+D-060 main: F1 error (Hz, seed mean of d040_5b_s1_b20k, d040_5b_s2_b20k, d085_base_b20k, d085_heads_b20k), median over files [95 % bootstrap]; vibrato 1.0 semitone at 5.0 Hz
+
+Male   gap 0.0:  +21.4 [+16.9, +24.0]  (80 files)
+Male   gap 0.1:  +22.4 [+18.7, +25.9]  (80 files)
+Male   gap 0.2:  +37.4 [+29.9, +44.8]  (80 files)
+Male   gap 0.3:  +50.5 [+40.2, +54.2]  (80 files)
+Male paired gap 0.3 - 0 over 80 files: +25.2 [+19.3, +32.2] Hz; files with |diff| < 5 Hz: 16%
+
+Female gap 0.0:  +30.1 [+26.0, +33.4]  (80 files)
+Female gap 0.1:  +31.7 [+27.8, +37.5]  (80 files)
+Female gap 0.2:  +45.0 [+36.7, +50.5]  (80 files)
+Female gap 0.3:  +55.8 [+45.5, +63.4]  (80 files)
+Female paired gap 0.3 - 0 over 80 files: +20.4 [+14.5, +26.2] Hz; files with |diff| < 5 Hz: 9%
+
+D-060: GROWS
