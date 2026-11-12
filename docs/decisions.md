@@ -3642,3 +3642,4 @@ None of them can make a narrow peak inside the formant range.
 - It fails without that: compare by kind with D-104 (no sections) to see what the structure costs or buys.
 
 *Cost*: CPU, about 15 minutes on 8 processes.
+- *Amendment 1 (2026-11-12, before the full run; seen: a one-clip timing run's output)*: two script fixes. (1) The comparison loss at the label F1 is now the render without any nuisance sections (D-104's, Rd only). With D-105's 'frozen' code it was the starting sections, and the narrow high poles at 7.5 kHz made that 17.5, which meant nothing. (2) The high poles start at 7500 Hz as registered (the midpoint of F4 and 7800 Hz only where F4 is above 7400 Hz). The first draft used the midpoint everywhere.
