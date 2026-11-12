@@ -3578,6 +3578,11 @@ D-099's runs are added when they exist, as a dated addendum.
     - At low f0 the SNR gate leaves few harmonics above 2 kHz (6 % below 150 Hz), so on noisy voices the loss says little about F3 and F4 there.
     - On coupled audio the loss's F1 sits between the closed and acoustic labels, so as a training signal it pulls F1 part of the way towards the acoustic F1, the reported F1 (D-091).
   - *Next* (Hannah's call): (a) the same check with the nuisance sections free (two poles and two zeros fitted per frame by gradient, F1 on its grid). If they absorb the extras and the tube's difference without moving F1, the gate is met as the training arm would run. Or (b) take the instrument as it stands to the training gate, `considering.md`'s check on renders and PTDB-TUG dev.
+- *Diagnostic (2026-11-13, after D-104 to D-106; descriptive; `scripts/analysis/d104_kind_diag.py`, `reports/analysis/d104/kind_diag.txt`)*: where the render mismatch is. RMS residual (dB) of the gated targets against the label render plus the LF source at the label Rd, per frame (medians by f0 band):
+  - cascade and tube clips without extra sections: 0.5-1.0 dB;
+  - clips with extra sections: 2.1-3.6 dB, falling to 0.5-0.9 dB when the clip's own sections are added to the render.
+
+  In train_v2, tube clips are rendered through the same cascade from the tube's poles (`sampler`: no interactive source, no articulation movement). So the tube engine adds no mismatch, and D-104's "tube" spread came from the third of tube clips that also carry extras (D-104's kinds counted them as tube). The whole remaining mismatch is the extra pole-zero sections, which the synthesiser draws once per clip (`tract.sample_extras`: a nasal pair, pole 200-1200 Hz and zero 100-400 Hz from it; three weak subglottal pairs near 600 / 1400 / 2200 Hz scaled by size).
 
 ## D-105 (registered 2026-11-12; seen beforehand: D-104's result): D-104's check with the nuisance sections free
 
@@ -3654,3 +3659,61 @@ None of them can make a narrow peak inside the formant range.
     - SoFilNet's structure stops the narrow pole-zero bumps D-105 found. Below 150 Hz, with many harmonics, the sections absorb the tube's and the extras' differences and F1 is pinned (|.| 15 c, the best of the three).
     - From 150 Hz up, F1 drifts again, though no section sits at it. With 13 free numbers per frame (12 sections and Rd) against the 6-20 harmonics left after the SNR gate, several broad shapes fit the frame equally well, and F1 moves to suit them. The limit is the count of free numbers per frame against harmonics, not which section competes.
     - That points to sections held per clip (`considering.md` option 3, D-105's list): a clip has hundreds of frames and its nasal, subglottal and tube-loss shapes change slowly. The other way is no sections, with D-104's spread.
+
+## D-107 (registered 2026-11-13; seen beforehand: D-104 to D-106 and D-104's kind diagnostic): extra sections held per clip
+
+*Status*: registered (Hannah, 2026-11-13: run this and the learnability probe, D-108, "before returning to the critical path"). The design is mine. Script `scripts/analysis/d107_clip_sections.py`, report `reports/analysis/d107/`.
+
+*Question*: D-104's kind diagnostic puts the whole remaining render mismatch in the extra pole-zero sections. The synthesiser holds them fixed per clip, and so, roughly, do real voices (subglottal resonances per speaker, the velum slow against 10 ms frames). D-105 and D-106 freed sections per frame and lost F1. Do sections held per clip absorb the extras and leave F1 at the label?
+
+*The one change, against D-105*: the sections are per clip, not per frame. Their structure is the extras' own: four pole-zero pairs, poles and zeros 150-4000 Hz, bandwidths 40-400 Hz, each a sigmoid in log frequency.
+- *Start*: each pair cancelling (pole = zero) at 400, 900, 1500 and 2300 Hz, 150 Hz wide.
+- *Penalty*: 0.1 x the sum over pairs of (log2 pole f - log2 zero f)^2 + (log2 pole b - log2 zero b)^2. It keeps a pair cancelled (off) unless the frames need it; two-thirds of clips have no extras.
+- *Fit, alternating, four rounds from the cancelled start*: (a) with the sections fixed, per frame, F1 by D-104's grid (5 c over +-400 c) with Rd searched (0.05 steps); (b) with each frame's F1 at its round-(a) value, the sections (shared over the clip's scored frames) and Rd per frame by Adam (0.05, 200 steps). The recovered F1 is round 4's (a).
+- Everything else is D-104 / D-105 as run: the clips, frames, SNR-gated targets, mode `rd`, F2-F8 and bandwidths at their labels.
+
+*Gate*: D-104's, unchanged.
+
+*Reported*:
+- By kind (none / nasal / subglottal extras), beside D-104 to D-106.
+- **Steady-vowel clips apart**: clips whose labelled F1 spans less than 100 c (10th to 90th percentile over scored frames). There a per-clip section near F1 could trade with a constant F1 shift.
+- How close the fitted sections land to the true extras (clips with extras: the nearest fitted pole to each true pole, cents).
+- The residual on clips without extras, against D-104's, to show the penalty's cost.
+
+*Readings*:
+- Passes: per-clip sections are compatible with F1, and a training arm can carry them.
+- Fails only on steady-vowel clips: the sections need SoFilNet's constraints or a margin from F1 there as well.
+- Fails broadly: per-clip sections aren't enough, and D-104's instrument (no sections) is the one to train with.
+
+*Caveat*: on these clips the extras are per clip by construction. Real nasal coupling varies within a clip; that is the training gate's question.
+
+*Cost*: CPU, about 30 minutes on 8 processes.
+
+## D-108 (registered 2026-11-13; seen beforehand: nothing of v3.1's features on extra sections): can v3.1's frozen trunk read the extra sections?
+
+*Status*: registered (with D-107, as above). The design is mine. Script `scripts/analysis/d108_extras_probe.py`, report `reports/analysis/d108/`.
+
+*Question*: supervised heads for the nasal and subglottal sections (to feed the renderer) are worth a training arm only if the trunk carries them. As D-079 and D-082 did for the opening and the closed F1: on frozen features, is it there?
+
+*Data*: train_v2 clips regenerated from its config and seed: 4000 from the training split to fit the probes, and the first 1000 of the validation split to score them.
+- *Features*: v3.1 (`d040_5b_s2_b20k`), the encoder's per-frame output (D-082's hook), mean and SD over each clip's sonorant frames.
+- *Input baseline*: the same pooling on the normalised VQT input. It shows whether the trunk keeps what the input has.
+
+*Targets*, per clip, from `meta["extras"]` (a nasal pair is drawn first, then three subglottal pairs):
+- nasal present; subglottal present;
+- on clips with each, the nasal pole and zero (log2 Hz) and the subglottal scale (log2 of the first pole over 600 Hz).
+
+*Probes*: logistic regression for presence, ridge regression for the frequencies, features standardised on the training clips, the regularisation picked by 5-fold cross-validation on the training clips. Shuffle null: 200 permutations of the training labels.
+
+*Measures*: held-out AUC for presence, and R^2 and MAE (cents) for the frequencies, each beside its shuffle null's 95th percentile, for the trunk and the input.
+
+*Rule*:
+- **Learnable**: both presence AUCs >= 0.85 and the nasal pole and subglottal scale R^2 >= 0.5 from the trunk.
+- **Not learnable**: both AUCs < 0.70.
+- Otherwise **partly**.
+
+The input baseline reads alongside: if the input carries it and the trunk doesn't, v3.1 discards it, and a trained head might bring it back, as D-085's trained trunk did for the closed F1.
+
+*Consequence*: learnable or partly, the training arm with supervised section heads (`considering.md`, 2026-11-13) has something to work with. Not learnable, per-clip fitted sections (D-107) are the fallback. Either way the arm itself waits: Hannah's order is D-107 and D-108, then back to the critical path.
+
+*Cost*: CPU renders (5000 clips), a few minutes of GPU for features, CPU probes.

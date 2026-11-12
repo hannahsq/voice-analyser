@@ -73,6 +73,8 @@ A reading of every entry below against the changed direction (D-091: the F1 leve
     - (b) How often articulation moves within a clip under fixed anatomy in train_v2, train_long_v3u and train_v2ku. If it is rare, upweighting or adding such clips is the label-supervised form of the same invariance, with no new loss.
   - *Underneath*: whether iVTL measures articulation at all. Its rounded / unrounded order (D-100) is also what a formant-scale reader gives. D-097's lip-tube test would settle it, and a loss steering aVTL by iVTL is only as good as iVTL.
   - *For the outcomes aim*: a per-recording length from several seconds of running speech is already at 0.7-0.8 (PTDB-TUG, D-100), so per-word anatomy isn't needed for session-level comparisons.
+- **Supervised nasal and subglottal section heads for the reconstruction renderer** (Hannah, 2026-11-13, after D-104's kind diagnostic). The render mismatch left after D-104 is entirely the extra pole-zero sections. Free per-frame sections (D-105, D-106) lose F1. Heads trained on the synthesiser's own section labels (`meta["extras"]`; on interactive tube clips the subglottal load) would anchor the sections to the physics, and the renderer would read them, true early and predicted later (the truth-ramp idea above). Risks: extra heads have cost formant accuracy before (D-080); the synthesiser's nasal and subglottal priors decide what they learn; on real audio only the reconstruction loss trains them. Order: D-107 (per-clip sections compatible with F1?) and D-108 (does the trunk carry them?) first; the training arm, with formant guards, after the critical path. Nasality and subglottal coupling might also be outcome measures in their own right.
+
 
 ## Models
 
