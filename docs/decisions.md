@@ -3310,3 +3310,55 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 *Reading*: one narrow seed. A width call rests on the base pair agreeing with each other, and the narrow seed's own spread is assumed to be 5b's (two seeds at that width). If narrow matches base, the gains belong to the data and the long crops at v3.1's size. Then a cheaper model carries them, and the next question is long crops against the coupled share at the narrow width.
 
 *Cost*: about 16 h of GPU with the two runs side by side (narrow is cheaper), then about 1 h of scoring. Start when Hannah says.
+
+## D-100 (registered 2026-11-12; descriptive, no decision rule; seen beforehand: every model's Hillenbrand length reliability from its own entry, nothing of these reads): length reliability with longer context, and how much of it is the iVTL head
+
+*Status*: registered (Hannah, 2026-11-12: "What does reliability look like on longer dev clips? I'd especially be interested to put bounds on how much is the iVTL head and how much is the longer context"). Descriptive: no decision rule, nothing adopted. Script `scripts/analysis/d100_context.py`, report `reports/analysis/d100/context.txt`.
+
+*Why*: aVTL's Hillenbrand dev reliability has stayed at 0.22-0.26 in every trained model (D-036 to D-098). D-098's base cut aVTL error on long synthetic clips by 28-36 % without moving it (-0.004). Two candidate reasons:
+- *Context*: Hillenbrand's words are 0.35-0.74 s long, so long context can't act on them.
+- *iVTL*: an iVTL head, or a better split between aVTL and iVTL, doesn't carry over to real voices.
+
+*Data* (dev tier only):
+- *Hillenbrand*: dev men and women, 12 hVd words each. Frames are the reference frames, as `vtl_score_joint.py`.
+- *PTDB-TUG*: dev speakers, 6 women and 6 men, 5.4-9.9 s sentences. Frames are where the reference f0 is voiced; the first 40 sentences per speaker in manifest order. Six speakers per sex make it noisy, so it is reported beside Hillenbrand, not pooled with it.
+
+*Reads* of each item (word or sentence), always scored on the same frames with the same precision-weighted mean (`vtl_score_joint.py`'s `agg`), so only the audio around the item changes:
+- **R1, alone, 4 s windows**: the item by itself through `analyse()`'s default (the reliability reported so far).
+- **R2, in context, 4 s windows**: the item inside a same-speaker concatenation, through the default windows. Each frame sees up to about 2 s either side.
+- **R3, in context, whole**: the same concatenation in one pass, with no windows.
+- *Concatenations*: a speaker's items in a seeded random order (seed 100), joined by 0.2 s of silence. For Hillenbrand, all 12 words (about 8-11 s). For PTDB-TUG, consecutive pairs of sentences (about 11-20 s).
+- *Also read*: R0, PTDB-TUG's sentences alone in one pass (a 5-10 s context without joins).
+
+*Models*:
+
+| Model | Width | iVTL head | Long-crop training | Coupled share |
+|---|---|---|---|---|
+| 5b (`d040_5b_s{1,2}_b20k`) | v3.1 | no | no | no |
+| 5c (`d051_5c_s{1,2}_b20k`) | v3.1 | yes | no; long synthetic clips cropped to 400 frames | no |
+| A0 (`d080_a0_s{1,2}`) | v3.1 | no | no | yes |
+| D-098 base | wide | yes | yes | yes |
+| D-098 heads | wide | yes, and iVTL into aVTL | yes | yes |
+
+D-099's runs are added when they exist, as a dated addendum.
+
+*Measures*:
+- Reliability (`vtl_score_joint.py`'s: between-speaker variance of speaker means over that plus the within-speaker variance, per sex; the mean of men and women).
+- Within-speaker SD (cents).
+- Paired speaker-bootstrap intervals (2000 draws): between reads within a model, and between models within a read. Seed means where a model has two seeds.
+
+*Bounds* (how each is read):
+- **Context at inference**: R3 - R1 and R2 - R1 per model. A model trained on long crops (D-098) shows what context gives a model that has learned to use it. Models trained at 400 frames show the cost or gain of handing them more than they trained on (D-028).
+- **The iVTL head, between models**: 5c - 5b at R1 and R3, at v3.1's width without long-crop training. D-051 found this negative (-0.042). It is re-read here with context.
+- **The iVTL head, within a model** (models with an iVTL output). Over items within a speaker, the pooled within-speaker regression of the aVTL estimate on the iVTL estimate gives:
+  - its R², the share of aVTL's within-speaker variance that moves with iVTL;
+  - the reliability of aVTL with that part removed (aVTL - b x (iVTL - the speaker's mean iVTL)).
+
+  This is an upper bound on what a perfect aVTL / iVTL split could add: it also removes any error the two heads share that isn't iVTL. With the context reads it bounds the two from both sides: context from R1 -> R3, the head's leakage from the regression.
+- *Reported*: the women / men ratio and group medians per read, so a reliability gain from compressing every speaker towards a constant is visible. It shouldn't come up, since reliability is scale-free.
+
+*Caveats*:
+- Concatenated words with silent joins are not natural running speech. PTDB-TUG's sentence pairs and R0 are the more natural reads.
+- Context includes the speaker's other vowels. A model could use that legitimately (anatomy is shared) or average vowel quality away. Both raise reliability, and this entry can't tell them apart.
+
+*Cost*: GPU inference only. 9 models x (996 words + 480 sentences, 3-4 reads each), about 30-45 min.
