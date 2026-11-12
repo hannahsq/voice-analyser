@@ -120,3 +120,19 @@ def test_rd_source_recovers_f1_and_rd_gradient():
     loss, _ = R.reconstruction_loss(db, ok, f0t, pf[None, None], pb[None, None], source="rd", profile="offset", rd=rd)
     loss.backward()
     assert torch.isfinite(rd.grad).all() and rd.grad.item() < 0  # raising Rd towards 1.1 lowers the loss
+
+
+def test_snr_gate_drops_harmonics_under_noise():
+    rng = np.random.default_rng(0)
+    f0, n = 120.0, FS
+    t = np.arange(n) / FS
+    k = np.arange(1, 30)
+    amps = np.where(k <= 10, 1.0, 1e-4)  # harmonics 11+ far below the noise
+    x = sum(a * np.cos(2 * np.pi * kk * f0 * t) for kk, a in zip(k, amps)) + 0.003 * rng.standard_normal(n)
+    T = n // R.HOP + 1
+    _, ok_all = R.harmonic_targets(x, np.full(T, f0), np.ones(T, bool), fmax=3500, k_max=32, floor_db=120)
+    db, ok = R.harmonic_targets(x, np.full(T, f0), np.ones(T, bool), fmax=3500, k_max=32, floor_db=120, snr_min_db=10)
+    i = T // 2
+    assert ok_all[i, :29].all()
+    assert ok[i, :10].all() and ok[i, 10:29].mean() <= 0.1  # a noise-only harmonic passes 10 dB about 0.7 % of the time
+    assert np.max(np.abs(db[i, :10])) < 0.5  # strong harmonics keep their level (0 dB)

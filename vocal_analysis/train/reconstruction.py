@@ -86,12 +86,18 @@ def render_db(f: torch.Tensor, poles_f: torch.Tensor, poles_b: torch.Tensor, zer
 
 # --------------------------------------------------------------------------------------------- targets (numpy)
 def harmonic_targets(audio: np.ndarray, f0: np.ndarray, voiced: np.ndarray, fmax: float = 5000.0, k_max: int = 64,
-                     min_win_s: float = 0.025, periods: float = 3.0, floor_db: float = 60.0) -> tuple[np.ndarray, np.ndarray]:
+                     min_win_s: float = 0.025, periods: float = 3.0, floor_db: float = 60.0,
+                     snr_min_db: float | None = None) -> tuple[np.ndarray, np.ndarray]:
     """Per 10 ms frame (frame i centred at i * HOP): the amplitudes in dB of harmonics k f0 (k = 1.. up to fmax and
     k_max), by a Hann-weighted least-squares fit of cosines and sines at k f0 over max(min_win_s, periods / f0).
     Returns (amp_db (T, k_max), valid (T, k_max)); invalid where unvoiced, f0 missing, k f0 > fmax, or more than
     floor_db below the frame's strongest harmonic (the noise floor). f0 is a fixed estimate (the labeller's), not the
-    model's, so the target doesn't move with the model."""
+    model's, so the target doesn't move with the model.
+
+    snr_min_db (D-104, amendment 1): also invalid where the harmonic's power a_k^2 is less than this far above the local
+    noise: the mean power of the four nearest sinusoids at half-integer multiples (k +- 0.5, k +- 1.5) f0, fitted jointly
+    with the harmonics in the same window, so the noise is measured by the same estimator. Aspiration noise
+    otherwise sets the level of weak high harmonics (D-103: up to +22 dB at 4-5 kHz at low HNR)."""
     x = np.asarray(audio, np.float64)
     T = len(f0)
     amp = np.full((T, k_max), np.nan)
@@ -114,6 +120,15 @@ def harmonic_targets(audio: np.ndarray, f0: np.ndarray, voiced: np.ndarray, fmax
         coef = np.linalg.lstsq(A, x[a:b] * w, rcond=None)[0]
         mag = np.hypot(coef[:K], coef[K:])
         amp[i, :K] = 20 * np.log10(mag + 1e-12)
+        if snr_min_db is not None:  # noise: sinusoids at (k + 1/2) f0, fitted jointly with the harmonics in the same window
+            kh = np.arange(K + 1) + 0.5
+            phh = 2 * np.pi * f * n[:, None] * kh[None] / FS
+            Aj = np.concatenate([A, np.cos(phh) * w[:, None], np.sin(phh) * w[:, None]], 1)
+            cj = np.linalg.lstsq(Aj, x[a:b] * w, rcond=None)[0]
+            bh = cj[2 * K:2 * K + K + 1] ** 2 + cj[2 * K + K + 1:] ** 2  # (K + 1,) noise powers at 0.5 .. K + 0.5
+            nz = np.array([bh[max(0, j - 1):j + 3].mean() for j in range(K)])  # the four nearest half-integers
+            snr = 10 * np.log10(mag ** 2 + 1e-30) - 10 * np.log10(nz + 1e-30)
+            amp[i, :K] = np.where(snr >= snr_min_db, amp[i, :K], np.nan)
     valid = np.isfinite(amp)
     peak = np.nanmax(np.where(valid, amp, -np.inf), 1, keepdims=True)
     valid &= amp >= peak - floor_db

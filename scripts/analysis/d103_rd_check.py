@@ -12,10 +12,11 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+SNR = float(sys.argv[sys.argv.index("--snr") + 1]) if "--snr" in sys.argv else None  # D-104
 MODES = {"rd": ("rd", "offset"), "rd_tilt": ("rd", "tilt"), "tilt": ("profile", "tilt")}
 
 
-def one(job):
+def one(job, snr=None):
     import torch
 
     torch.set_num_threads(1)
@@ -23,11 +24,13 @@ def one(job):
     from vocal_analysis.synth.sampler import generate
     from vocal_analysis.train import reconstruction as R
 
-    root, coupled, i = job
+    root, coupled, i = job[:3]
+    snr = job[3] if len(job) > 3 else snr
     idx, cfg = load_cfg(root)
     clip = generate(int(i), cfg, idx["seed"])
     lab = clip.labels
-    db, ok = R.harmonic_targets(clip.audio, lab["f0"], lab["voiced"].astype(bool), k_max=64)
+    db, ok = R.harmonic_targets(clip.audio, lab["f0"], lab["voiced"].astype(bool), k_max=64, snr_min_db=snr)
+    ok0 = R.harmonic_targets(clip.audio, lab["f0"], lab["voiced"].astype(bool), k_max=64)[1] if snr is not None else ok
     fr = np.flatnonzero(lab["voiced"].astype(bool) & lab["sonorant"].astype(bool) & np.isfinite(lab["formants"][:, 0])
                         & (ok.sum(1) >= 4))[::5]
     fr = fr[fr < len(db)]
@@ -65,7 +68,9 @@ def one(job):
     rd_lab = lab["rd"][fr]
     return [{"f0": float(lab["f0"][fr[n]]), "kind": kind, "coupled": coupled, "closed": float(np.log2(Fc[n, 0])),
              "acoustic": float(np.log2(Fa[n, 0])), **{f"rec_{m}": float(rec[m][n]) for m in MODES},
-             **{f"edge_{m}": bool(edge[m][n]) for m in MODES}, "rd_best": float(best_rd[n]), "rd_label": float(rd_lab[n])}
+             **{f"edge_{m}": bool(edge[m][n]) for m in MODES}, "rd_best": float(best_rd[n]), "rd_label": float(rd_lab[n]),
+             "n_valid0": int(ok0[fr[n]].sum()), "n_valid": int(ok[fr[n]].sum()),
+             "n_hi0": int(ok0[fr[n], int(2000 // lab["f0"][fr[n]]):].sum()), "n_hi": int(ok[fr[n], int(2000 // lab["f0"][fr[n]]):].sum())}
             for n in range(N)]
 
 
@@ -77,7 +82,7 @@ if __name__ == "__main__":
     jobs = []
     for root, coupled in (("data/synth/train_v2", False), ("data/synth/train_v2ku", True)):
         idx, _ = load_cfg(root)
-        jobs += [(root, coupled, int(i)) for i in split_ids(idx["n_clips"])[1][:n_clips]]
+        jobs += [(root, coupled, int(i), SNR) for i in split_ids(idx["n_clips"])[1][:n_clips]]
     if "--serial" in sys.argv:
         got = [one(j) for j in jobs]
     else:
@@ -90,7 +95,7 @@ if __name__ == "__main__":
     def med(v):
         return f"{np.median(v):+6.1f}" if len(v) else "   n/a"
 
-    L = ["D-103: the reconstruction loss's F1 minimum with every other parameter at its label, LF source by Rd "
+    L = [("D-104 (SNR-gated targets, %g dB): " % SNR if SNR is not None else "") + "D-103: the reconstruction loss's F1 minimum with every other parameter at its label, LF source by Rd "
          "(cents; median over frames; Rd minimised per F1 candidate)", ""]
     gate = []
     for coupled in (False, True):
@@ -121,6 +126,15 @@ if __name__ == "__main__":
         d = np.array([r["rd_best"] - r["rd_label"] for r in lf])
         L.append(f"reported: best Rd at the label F1 (mode rd) - label Rd, uncoupled: median {np.median(d):+.2f}, "
                  f"median |.| {np.median(np.abs(d)):.2f} ({len(d)} frames)")
+        L.append("")
+    if SNR is not None:
+        L.append(f"reported: harmonics removed by the SNR gate ({SNR:g} dB), uncoupled frames (all / above 2 kHz):")
+        for lo, hi in BANDS:
+            s = [r for r in rows if not r["coupled"] and lo <= r["f0"] < hi]
+            if s:
+                a0, a1 = sum(r["n_valid0"] for r in s), sum(r["n_valid"] for r in s)
+                h0, h1 = sum(r["n_hi0"] for r in s), sum(r["n_hi"] for r in s)
+                L.append(f"  f0 {lo:.0f}-{hi if hi < 1e8 else 'up'}: {100 * (1 - a1 / max(a0, 1)):.0f} % / {100 * (1 - h1 / max(h0, 1)):.0f} %")
         L.append("")
     ok = all(abs(m) <= 10 and a <= 10 and e <= 10 for _, m, a, e in gate)
     L.append("GATE: " + ("PASSES" if ok else "FAILS") + " (mode rd, uncoupled, bands below 400 Hz: "

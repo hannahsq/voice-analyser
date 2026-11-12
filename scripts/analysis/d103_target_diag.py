@@ -22,7 +22,7 @@ if __name__ == "__main__":
     from vocal_analysis.train import reconstruction as R
     from vocal_analysis.train.data import split_ids
 
-    n = int(sys.argv[1]) if len(sys.argv) > 1 else 80
+    n = int(next((a for a in sys.argv[1:] if a.isdigit()), 80))
     idx, cfg = load_cfg("data/synth/train_v2")
     edges = [0, 500, 1000, 2000, 3000, 4000, 5000]
     res = []  # (f0, drift cents, band index, residual)
@@ -31,7 +31,8 @@ if __name__ == "__main__":
         if c.meta.get("tube") or (c.meta.get("n_extra_poles") or 0) > 0:
             continue
         lab = c.labels
-        db, ok = R.harmonic_targets(c.audio, lab["f0"], lab["voiced"].astype(bool), k_max=64)
+        db, ok = R.harmonic_targets(c.audio, lab["f0"], lab["voiced"].astype(bool), k_max=64,
+                                    snr_min_db=float(sys.argv[sys.argv.index("--snr") + 1]) if "--snr" in sys.argv else None)
         fr = np.flatnonzero(lab["voiced"].astype(bool) & lab["sonorant"].astype(bool) & np.isfinite(lab["formants"][:, 0])
                             & ok[:, :4].all(1))[::5]
         for t in fr:
