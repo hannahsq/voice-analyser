@@ -1,0 +1,2 @@
+d098_base: median gradient norm steps 501-1000 2.80, 2001-3000 3.22, ratio 1.15 (ok, limit 2.0)
+d098_heads: median gradient norm steps 501-1000 5.22, 2001-3000 4.22, ratio 0.81 (ok, limit 2.0)

@@ -1,0 +1,304 @@
+{
+ "length_bwhold/all/F1": {
+  "point": 0.9802208233041436,
+  "low": 0.9070143871441129,
+  "high": 1.014164977715112,
+  "null_median": 0.00043300204190369323,
+  "null_low": -0.17045689755950935,
+  "null_high": 0.18309436960145814,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/F2": {
+  "point": 0.976587637345126,
+  "low": 0.9590240042639288,
+  "high": 0.9895072567540275,
+  "null_median": 0.001970765819071507,
+  "null_low": -0.16547908837042402,
+  "null_high": 0.18522952670926732,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/F3": {
+  "point": 0.9834992515347585,
+  "low": 0.9714820473179927,
+  "high": 0.9955776091543126,
+  "null_median": -0.0012492698897265493,
+  "null_low": -0.17311568571355593,
+  "null_high": 0.18835180318261527,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/F4": {
+  "point": 0.9959020237548484,
+  "low": 0.9880625925616946,
+  "high": 1.00070767380023,
+  "null_median": 0.000219504385920877,
+  "null_low": -0.16493623372615823,
+  "null_high": 0.1972469521384116,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/B1": {
+  "point": 0.3164140962462739,
+  "low": 0.17769331392969823,
+  "high": 0.39313282478865136,
+  "null_median": 0.002695671677082224,
+  "null_low": -0.08501418980726065,
+  "null_high": 0.08589006158916289,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/all/B2": {
+  "point": -0.644460759141887,
+  "low": -0.7798834068708621,
+  "high": -0.5679801208619646,
+  "null_median": 0.0035857519532777058,
+  "null_low": -0.12422400134833604,
+  "null_high": 0.12089897941230962,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/all/B3": {
+  "point": -1.5140405361601377,
+  "low": -1.6724712776498976,
+  "high": -1.3917125909818975,
+  "null_median": -0.0027026067508176678,
+  "null_low": -0.2757437290534425,
+  "null_high": 0.2736195837866773,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/all/B4": {
+  "point": -1.4996095664826306,
+  "low": -1.6116607030485781,
+  "high": -1.4068413755990603,
+  "null_median": 0.003654556830784264,
+  "null_low": -0.28081954186897656,
+  "null_high": 0.2544926922664581,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/all/VTL": {
+  "point": 0.8988000424855426,
+  "low": 0.8143670048845569,
+  "high": 0.9318409500316179,
+  "null_median": -0.0005607025109017769,
+  "null_low": -0.16036400740045,
+  "null_high": 0.16035082191139444,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/VTLi": {
+  "point": 0.8418830582669974,
+  "low": 0.7968658432759927,
+  "high": 0.8635609546084063,
+  "null_median": 0.004157968809006009,
+  "null_low": -0.13904209622275823,
+  "null_high": 0.14551835458011386,
+  "p_null": 0.0,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 1.0
+ },
+ "length_bwhold/all/f0": {
+  "point": 0.002237691997275235,
+  "low": 0.00016126802476658844,
+  "high": 0.0047109160460253,
+  "null_median": -6.263844873191342e-05,
+  "null_low": -0.00179478911614774,
+  "null_high": 0.0017230911045116066,
+  "p_null": 0.007,
+  "n_items": 60,
+  "n_groups": 10,
+  "ideal": 0.0
+ },
+ "length_bwhold/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   -0.17107295406676537,
+   -0.14037260708490423,
+   0.14985232226803574,
+   0.319727444761773
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ },
+ "length_bwhold/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   -0.05172841362526908,
+   -0.01698589052956026,
+   0.023491478363486952,
+   0.12032613367577664
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ },
+ "length_bwhold/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.023792254857489682,
+   0.0659168244538138,
+   0.09605318649117126,
+   0.2642461300674699
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ },
+ "length_bwhold/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.379889791520457,
+   0.19775907622107555,
+   0.08193066602962311,
+   0.23425119446927983
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ },
+ "length_bwhold/sigma_growth/VTL": {
+  "per_condition_median": [
+   0.0,
+   -0.05484816019442282,
+   -0.013287884411852871,
+   0.058166314993502326,
+   0.042474830783252766
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.85,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 0.92,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.09,
+    "hold_bw": true
+   },
+   {
+    "arm": "length_bwhold",
+    "alpha": 1.18,
+    "hold_bw": true
+   }
+  ]
+ }
+}

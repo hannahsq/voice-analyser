@@ -1,0 +1,16 @@
+Bandwidth evidence (D-050, probe 12): d098_heads_b20k
+arm A: bandwidths held while formants move; model B slope against log2 alpha (ideal 0), the prior's own slope in probe 1's length arm, and reliance = model / prior (0 measures, 1 reads B off F)
+  B1  model +0.147 [-0.040, +0.223]  prior +0.060  reliance +2.44
+  B2  model -0.207 [-0.362, -0.087]  prior -0.723  reliance +0.29
+  B3  model -0.713 [-0.911, -0.586]  prior -1.925  reliance +0.37
+  B4  model -0.672 [-0.798, -0.552]  prior -1.936  reliance +0.35
+arm B: probe 7's bandwidth slopes (ideal 1) by f0 tertile (edges 131 / 223 Hz): low / mid / high
+  B1  +0.40 [+0.38, +0.44]  +0.42 [+0.42, +0.44]  +0.41 [+0.34, +0.45]
+  B2  +0.48 [+0.43, +0.55]  +0.61 [+0.53, +0.62]  +0.58 [+0.54, +0.60]
+  B3  +0.56 [+0.53, +0.66]  +0.68 [+0.59, +0.75]  +0.71 [+0.60, +0.75]
+  B4  +0.59 [+0.45, +0.61]  +0.61 [+0.60, +0.65]  +0.62 [+0.51, +0.70]
+arm C: synthetic cascade clips; model log2 B on label log2 B and prior log2 B (clip bootstrap), and var(model) / var(label)
+  B1  w_label +0.16 [+0.13, +0.18]  w_prior +0.79 [+0.76, +0.83]  var ratio 0.78  (31608 frames)
+  B2  w_label +0.28 [+0.25, +0.32]  w_prior +0.68 [+0.64, +0.72]  var ratio 0.88  (31608 frames)
+  B3  w_label +0.37 [+0.33, +0.40]  w_prior +0.60 [+0.57, +0.65]  var ratio 0.91  (31608 frames)
+  B4  w_label +0.33 [+0.29, +0.36]  w_prior +0.64 [+0.60, +0.68]  var ratio 0.89  (31608 frames)

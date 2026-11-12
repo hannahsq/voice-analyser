@@ -1,0 +1,63 @@
+D-098: the screening run; base and heads arms (one seed each) against each other and against v3.1 (5b's decay branches, seed mean)
+
+per run: synthetic F1-F4 MAE Hz at 400 frames (log) | at 1600 / 400 frames on train_long_v3u's held-out clips | RPA % | aVTL MAE % (400 log; long 1600 / 400) | iVTL MAE % | resynth F1-F3 MAE | glottal slope (closed; acoustic) | women's cp F1 bias Hz
+  d040_5b_s1_b20k    [20.6 39.8 57.  88.8] | [ 32.4  60.4  76.4 108.5] / [ 30.3  55.8  75.5 116.7] | 99.43 | 1.15 (1.68 / 2.18) | nan | [ 26.2  84.9 101.2] | +0.130 | +4.3
+  d040_5b_s2_b20k    [21.7 40.7 58.7 86.3] | [ 33.8  63.7  80.4 109.2] / [ 31.5  56.5  76.8 118.5] | 99.45 | 1.17 (1.69 / 2.13) | nan | [26.1 86.8 99.6] | +0.138 | +4.1
+  d098_base_b20k     [22.  42.3 60.3 92.2] | [ 30.7  59.9  83.1 117. ] / [ 29.4  59.3  71.4 107.6] | 99.43 | 1.10 (1.21 / 1.37) | 1.22 | [ 26.8  92.4 104.1] | +0.384 | +1.4
+  d098_heads_b20k    [22.5 43.2 62.3 90.5] | [ 32.6  65.1  81.  112.5] / [ 30.5  60.7  70.5 103.4] | 99.42 | 1.02 (1.06 / 1.23) | 1.16 | [ 28.5  94.4 107. ] | +0.321; +0.201 | +2.0
+  glottal slope landmarks: label ceiling 0.29 (D-082), frozen v3.1 0.36, full recovery 0.89 (the closed label's own slope); this script's closed label +0.887 on 122712 odd-clip frames
+  5b's seeds differ by (s2 - s1): synthetic F1-F4 [ 5.2  2.1  2.8 -2.8] %, glottal slope +0.008, aVTL +1.3 %, women's cp |error| -0.8 Hz
+
+heads - base (Q1-Q3: the heads bundle)
+  Q1 glottal slope -0.063 [-0.092, -0.035] -> CALLED, worse
+  synthetic F1-F4 MAE, 400 frames: +2.6, +2.0, +3.3, -1.8 % (mean +1.5 %) -> reported (below threshold)
+  synthetic F1-F4 MAE, 1600 frames: +6.2, +8.8, -2.5, -3.8 % (mean +2.2 %) -> CALLED, worse
+  synthetic F1-F4 MAE, long clips at 400: +3.9, +2.3, -1.2, -3.9 % (mean +0.3 %) -> reported (below threshold)
+  Q2 aVTL MAE, 400 frames: -7.7 % -> reported (below threshold)
+  Q2 aVTL MAE, 1600 frames: -12.2 % -> CALLED, better
+  Q2 aVTL MAE, long clips at 400: -10.7 % -> CALLED, better
+  Q2 Hillenbrand length reliability -0.015 [-0.045, +0.022] -> reported (below threshold)
+  Q2 probe 10, the aVTL head's slope on the instantaneous length's change (ideal 0): larynx +0.949 (ref +1.074), lips +0.967 (ref +0.917)
+  Q3 women's closed-phase F1 |error| +0.3 Hz (bias +2.0, ref +1.4) -> reported (below threshold)
+  Q3 Hillenbrand dev F1 / F2 / F3 MAE +1.5, +0.4, -6.8 Hz (paired, reported)
+  guards: RPA -0.01 point; resynth F1-F3 +6.4, +2.2, +2.8 %; w/m 0.871, f0 probe excess +1.8 c/oct; held
+
+base - 5b (Q4: the wider trunk, long context, coupled share)
+  Q1 glottal slope +0.250 [+0.192, +0.310] -> CALLED, better
+  synthetic F1-F4 MAE, 400 frames: +3.7, +5.2, +4.3, +5.3 % (mean +4.6 %) -> reported (below threshold)
+  synthetic F1-F4 MAE, 1600 frames: -7.4, -3.5, +6.0, +7.4 % (mean +0.6 %) -> reported (below threshold)
+  synthetic F1-F4 MAE, long clips at 400: -4.9, +5.6, -6.3, -8.5 % (mean -3.5 %) -> CALLED, better
+  Q2 aVTL MAE, 400 frames: -4.9 % -> reported (below threshold)
+  Q2 aVTL MAE, 1600 frames: -28.3 % -> CALLED, better
+  Q2 aVTL MAE, long clips at 400: -36.2 % -> CALLED, better
+  Q2 Hillenbrand length reliability -0.004 [-0.036, +0.023] -> reported (below threshold)
+  Q2 probe 10, the aVTL head's slope on the instantaneous length's change (ideal 0): larynx +1.074 (ref +1.061), lips +0.917 (ref +0.876)
+  Q3 women's closed-phase F1 |error| -1.1 Hz (bias +1.4, ref +4.2) -> reported (below threshold)
+  Q3 Hillenbrand dev F1 / F2 / F3 MAE -2.2, -0.6, +7.1 Hz (paired, reported)
+  guards: RPA -0.01 point; resynth F1-F3 +2.5, +7.6, +3.6 %; w/m 0.883, f0 probe excess +3.3 c/oct; held
+
+heads - 5b (reported)
+  Q1 glottal slope +0.187 [+0.137, +0.237] -> CALLED, better
+  synthetic F1-F4 MAE, 400 frames: +6.4, +7.3, +7.7, +3.4 % (mean +6.2 %) -> CALLED, worse
+  synthetic F1-F4 MAE, 1600 frames: -1.6, +5.0, +3.4, +3.4 % (mean +2.5 %) -> reported (below threshold)
+  synthetic F1-F4 MAE, long clips at 400: -1.2, +8.0, -7.4, -12.1 % (mean -3.2 %) -> CALLED, better
+  Q2 aVTL MAE, 400 frames: -12.2 % -> CALLED, better
+  Q2 aVTL MAE, 1600 frames: -37.0 % -> CALLED, better
+  Q2 aVTL MAE, long clips at 400: -43.0 % -> CALLED, better
+  Q2 Hillenbrand length reliability -0.019 [-0.048, +0.009] -> reported (below threshold)
+  Q2 probe 10, the aVTL head's slope on the instantaneous length's change (ideal 0): larynx +0.949 (ref +1.061), lips +0.967 (ref +0.876)
+  Q3 women's closed-phase F1 |error| -0.8 Hz (bias +2.0, ref +4.2) -> reported (below threshold)
+  Q3 Hillenbrand dev F1 / F2 / F3 MAE -0.7, -0.2, +0.3 Hz (paired, reported)
+  guards: RPA -0.02 point; resynth F1-F3 +9.0, +9.9, +6.5 %; w/m 0.871, f0 probe excess +1.8 c/oct; FAILED: resynth F1 +9.0 %; resynth F2 +9.9 %
+
+reported:
+  heads arm, acoustic - closed heads on uncoupled validation (train_v2, labels equal): F1 +2.5, F2 +3.8, F3 +7.3, F4 +16.8 Hz
+  heads arm, acoustic set MAE at 400 frames: 22.4, 43.7, 64.2, 96.1 Hz; coupled validation (train_v2ku's held-out), acoustic - closed against the labels' shift: F1 -3.1, F2 -5.5, F3 -8.1, F4 -17.5 Hz
+  KL gap growth (F1 error at gap 0.3 - 0, median over vowel x f0, Hz), men / women: d040_5b_s1_b20k +16.9 / +13.7; d040_5b_s2_b20k +11.0 / +9.6; d098_base_b20k +23.1 / +20.6; d098_heads_b20k +22.1 / +28.1
+  probe 11 F1 slope d040_5b_s1_b20k: Hillenbrand 0.978, PTDB-TUG 1.043
+  probe 11 F1 slope d040_5b_s2_b20k: Hillenbrand 0.975, PTDB-TUG 1.039
+  probe 11 F1 slope d098_base_b20k: Hillenbrand 0.972, PTDB-TUG 1.041
+  probe 11 F1 slope d098_heads_b20k: Hillenbrand 0.975, PTDB-TUG 1.044
+  one seed per arm: a called difference is a signal to break down later, not a confirmed effect
+
+DECISION: heads - base: Q1 glottal slope -0.063, synthetic MAE at 1600 frames +2.2 %, Q2 aVTL MAE at 1600 frames -12.2 %, Q2 aVTL MAE at long clips at 400 -10.7 %; guards held | base - 5b: Q1 glottal slope +0.250, synthetic MAE at long clips at 400 -3.5 %, Q2 aVTL MAE at 1600 frames -28.3 %, Q2 aVTL MAE at long clips at 400 -36.2 %; guards held

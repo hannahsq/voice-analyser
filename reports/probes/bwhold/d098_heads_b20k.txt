@@ -1,0 +1,19 @@
+Probe 'bwhold' (D-050): d098_heads_b20k
+items 60; beta median +0.06, |beta| < 0.2: 60
+slopes: point [95 % group bootstrap]; shuffle null median [2.5, 97.5 %]; ideal. Changes: log2 (x 1200 = cents)
+  length_bwhold/all/F1       +0.985 [+0.954, +1.013]  null +0.002 [-0.178, +0.183]  n 60/10  ideal 1
+  length_bwhold/all/F2       +0.985 [+0.976, +0.989]  null +0.001 [-0.175, +0.190]  n 60/10  ideal 1
+  length_bwhold/all/F3       +0.992 [+0.986, +0.997]  null +0.001 [-0.172, +0.189]  n 60/10  ideal 1
+  length_bwhold/all/F4       +0.993 [+0.989, +1.004]  null -0.002 [-0.170, +0.193]  n 60/10  ideal 1
+  length_bwhold/all/B1       +0.147 [-0.040, +0.223]  null +0.001 [-0.078, +0.079]  n 60/10  ideal 0
+  length_bwhold/all/B2       -0.207 [-0.362, -0.087]  null +0.002 [-0.102, +0.103]  n 60/10  ideal 0
+  length_bwhold/all/B3       -0.713 [-0.911, -0.586]  null -0.003 [-0.171, +0.158]  n 60/10  ideal 0
+  length_bwhold/all/B4       -0.672 [-0.798, -0.552]  null +0.001 [-0.144, +0.156]  n 60/10  ideal 0
+  length_bwhold/all/VTL      +0.914 [+0.871, +0.945]  null +0.005 [-0.156, +0.166]  n 60/10  ideal 1
+  length_bwhold/all/VTLi     +0.928 [+0.882, +0.955]  null +0.003 [-0.149, +0.162]  n 60/10  ideal 1
+  length_bwhold/all/f0       +0.003 [+0.000, +0.003]  null -0.000 [-0.002, +0.002]  n 60/10  ideal 0
+  length_bwhold/sigma_growth/F1 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:-0.19 alpha=0.92,hold_bw=True:-0.15 alpha=1.09,hold_bw=True:+0.16 alpha=1.18,hold_bw=True:+0.37
+  length_bwhold/sigma_growth/F2 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:-0.10 alpha=0.92,hold_bw=True:-0.03 alpha=1.09,hold_bw=True:+0.15 alpha=1.18,hold_bw=True:+0.33
+  length_bwhold/sigma_growth/F3 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:-0.01 alpha=0.92,hold_bw=True:-0.02 alpha=1.09,hold_bw=True:+0.16 alpha=1.18,hold_bw=True:+0.35
+  length_bwhold/sigma_growth/F4 sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.23 alpha=0.92,hold_bw=True:+0.13 alpha=1.09,hold_bw=True:+0.12 alpha=1.18,hold_bw=True:+0.38
+  length_bwhold/sigma_growth/VTL sigma log2 change: ref:+0.00 alpha=0.85,hold_bw=True:+0.18 alpha=0.92,hold_bw=True:+0.13 alpha=1.09,hold_bw=True:+0.06 alpha=1.18,hold_bw=True:-0.07

@@ -1,0 +1,18 @@
+tiers: dev
+
+Hillenbrand, d098_base_b20k vs d098_heads_b20k (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    41.3    42.2  diff   +0.8 [-0.5, +2.3]  within noise
+  F1 MAE children:    48.9    50.9  diff   +2.0 [-0.0, +4.3]  within noise
+  F1 MAE men     :    19.6    21.3  diff   +1.7 [+0.6, +2.7]  WORSE
+  F1 MAE all     :    36.7    38.2  diff   +1.5 [+0.5, +2.5]  WORSE
+  F2 MAE all     :    43.2    43.6  diff   +0.4 [-0.2, +1.0]  within noise
+  F2 DR  all     :    98.4    98.4  diff   +0.1 [-0.2, +0.3]  within noise
+  F3 MAE all     :    55.1    48.3  diff   -6.8 [-16.5, +0.5]  within noise
+  F3 DR  all     :    98.0    98.1  diff   +0.1 [-0.4, +0.7]  within noise
+  F4 MAE all     :   104.6   102.0  diff   -2.7 [-11.7, +5.3]  within noise
+  F4 DR  all     :    91.1    91.7  diff   +0.6 [-0.9, +2.1]  within noise
+
+PTDB-TUG f0 RPA, d098_base_b20k vs d098_heads_b20k
+  all frames    :  87.2  87.5  diff  +0.2 [+0.1, +0.4]  better  (n 154653)
+  modal         :  94.0  94.1  diff  +0.2 [-0.0, +0.3]  within noise  (n 126992)
+  modal < 85 Hz :  86.2  86.6  diff  +0.4 [+0.0, +2.1]  better  (n 11014)
