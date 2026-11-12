@@ -3735,7 +3735,7 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 
 ## D-109 (registered 2026-11-13; seen beforehand: D-104 to D-107, the pre-checks below, nothing of any run with the loss): the reconstruction loss on real audio in 5b's decay branch
 
-*Status*: registered (Hannah, 2026-11-13: "Feel free to register/implement/run whatever you need to keep the GPU occupied until morning once the learnability probe results are in. I'll leave the judgement up to you."). The design is mine. M4's first training gate (`roadmap.md` Now item 3: M4 leads with the reconstruction loss). Chain `scripts/analysis/chains/d109.sh`, decision `scripts/analysis/decide_d109.py`, reports `reports/analysis/d109/`.
+*Status*: **done 2026-11-13: not a candidate (not robust to the seed); F1 on real women moves up, towards the acoustic F1** (see Result). Registered (Hannah, 2026-11-13: "Feel free to register/implement/run whatever you need to keep the GPU occupied until morning once the learnability probe results are in. I'll leave the judgement up to you."). The design is mine. M4's first training gate (`roadmap.md` Now item 3: M4 leads with the reconstruction loss). Chain `scripts/analysis/chains/d109.sh`, decision `scripts/analysis/decide_d109.py`, reports `reports/analysis/d109/`.
 
 *Question*: does the reconstruction loss on real voices (plan section 5.3), added to v3.1's recipe, move the formant outputs on real voices towards the closed-phase reference without costing the synthetic and real-voice guards?
 
@@ -3780,4 +3780,19 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 - VocalSet and Zeroth are also in the supervised resynthesis share (as resynthesised audio with the labeller's targets). The recon stores are their originals.
 
 *Cost*: two branches side by side, about 4-5 h, then D-090's scoring, about 1.5 h.
-
+- *Result (2026-11-13, `reports/analysis/d109/decide_d109.txt`)*: **not a candidate (not robust to the seed).**
+  - Stop rule passed at step 17000: gradient-norm ratio 1.02 / 1.03, formant-term ratio 1.003 / 1.003 (`watch.txt`).
+  - Reconstruction loss (mean over 500 steps): s1 9.5 -> 7.2 -> 6.7, s2 9.5 -> 7.9 -> 8.7 (steps 16500 / 18000 / 20000). The formant term ended a little lower than 5b's in both (2.45 / 2.46 against about 2.5 at the start).
+  - *Non-inferior* on the seed means: synthetic F1-F4 +0.1 / +0.3 / +0.3 / +0.5 SE; RPA +0.01; Hillenbrand paired F1 / F2 / F3 -1.2 / -2.0 / -3.7 Hz; women's closed-phase F1 |error| -1.7 Hz.
+  - *Gains*: seed 1 only (women's closed-phase |error| -3.0 Hz; seed 2 -0.4 Hz). No scale or synthetic gain on either seed.
+  - *Guards*: length (2) fails narrowly: reliability interval [-0.025, -0.000], w/m 0.875. Reliability: s1 0.223 against 0.228, s2 0.241 against 0.261. f0 (3) holds: excess +1.9 c/oct.
+  - The rule holds on seed 1 alone, not on seed 2.
+  - **Reported: F1 on real women moves up.**
+    - Women's signed closed-phase F1 bias: +4.3 / +4.1 Hz (5b) -> **+11.9 / +14.6 Hz**.
+    - Probe 11's PTDB-TUG F1 slope moves away from 1: 1.043 / 1.039 -> 1.125 / 1.070. Hillenbrand's stays: 0.978 / 0.975 -> 0.979 / 0.979.
+    - Probe 12's w_label is unchanged (bandwidths not widened).
+  - *Reading* (the registered "non-inferior with no robust gain"; the length guard is D-065's pattern at the same size). Not concluded; a hypothesis for the next entry:
+    - The loss moves F1 *up* on real voices, against the closed-phase reference.
+    - That is the direction the instrument itself points on coupled synthetic clips. There the reconstruction minimum sits at the closed F1 +25-30 c, near the acoustic F1 (D-104, D-107; D-092: coupling raises the cycle-averaged F1).
+    - A renderer fitted to whole-cycle harmonics measures the acoustic F1, not the closed-phase F1. So pointed at the closed-set head, the loss pulls it towards the acoustic value. The +8-10 Hz shift in women's bias is about that size (about 25 c at 500-600 Hz).
+    - If so, the loss belongs on an acoustic formant head (D-085's acoustic set; 5b has none), or the renderer needs the coupling (D-092) before it can train the closed set. Checking this (the size of the per-speaker shift against the acoustic-closed gap) comes before any higher weight.

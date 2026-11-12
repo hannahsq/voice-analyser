@@ -1,0 +1,16 @@
+D-109: the reconstruction loss on real audio in 5b's decay branch, against 5b's own decay branches, seeds paired
+
+per run: synthetic F1-F4 MAE Hz | RPA | resynth F1-F3 | probe 11 F1 slope (Hb, PTDB) | probe 12 w_label | women's cp F1 bias Hz
+  d040_5b_s1_b20k      [20.6 39.8 57.  88.8] | 99.43 | [ 26.2  84.9 101.2] | 0.978, 1.043 | [0.2  0.35 0.42 0.38] | +4.3
+  d040_5b_s2_b20k      [21.7 40.7 58.7 86.3] | 99.45 | [26.1 86.8 99.6] | 0.975, 1.039 | [0.21 0.34 0.39 0.33] | +4.1
+  d109_s1              [20.7 40.  57.  89.8] | 99.44 | [ 26.4  84.5 100.8] | 0.979, 1.125 | [0.19 0.35 0.41 0.35] | +11.9
+  d109_s2              [21.8 41.  59.6 87.9] | 99.46 | [26.6 88.4 99.5] | 0.979, 1.070 | [0.21 0.34 0.38 0.32] | +14.6
+
+  seed 1: synthetic F1-F4 +0.1, +0.2, -0.0, +0.4 SE (+0.5 %), RPA +0.01; Hillenbrand F1/F2/F3 -2.0, -1.8, -5.2 Hz; women's cp |error| -3.0 Hz; scale error halved: False
+  seed 2: synthetic F1-F4 +0.2, +0.4, +0.6, +0.6 SE (+1.3 %), RPA +0.01; Hillenbrand F1/F2/F3 -0.5, -2.3, -2.2 Hz; women's cp |error| -0.4 Hz; scale error halved: False
+  seed means: synthetic +0.1, +0.3, +0.3, +0.5 SE, RPA +0.01, Hillenbrand -1.2, -2.0, -3.7 Hz, women's cp |error| -1.7 Hz -> non-inferior: True
+  gains on both seeds: {'scale': False, 'synthetic': False, 'closed phase': False}
+  (2) length: reliability interval [-0.025, -0.000], w/m 0.875 -> False; (3) f0 probe excess +1.9 c/oct -> True
+  the rule on each seed alone: {1: True, 2: False}
+reported beside the length guard: 5b's seeds differ by +0.034 [+0.005, +0.060] in Hillenbrand reliability (s2 - s1; D-065's note), so a paired seed mean against 5b carries s2's good draw
+DECISION: the reconstruction arm is not a candidate (NOT ROBUST TO THE SEED)

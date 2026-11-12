@@ -1,0 +1,28 @@
+  [d109_s1/hillenbrand] 400/1668
+  [d109_s1/hillenbrand] 800/1668
+  [d109_s1/hillenbrand] 1200/1668
+  [d109_s1/hillenbrand] 1600/1668
+  [d109_s1/ptdb_tug] 250/1579  (RTF 0.022)
+  [d109_s1/ptdb_tug] 500/1579  (RTF 0.022)
+  [d109_s1/ptdb_tug] 750/1579  (RTF 0.022)
+  [d109_s1/ptdb_tug] 1000/1579  (RTF 0.022)
+  [d109_s1/ptdb_tug] 1250/1579  (RTF 0.022)
+  [d109_s1/ptdb_tug] 1500/1579  (RTF 0.022)
+tiers: dev
+
+Hillenbrand, d040_5b_s1_b20k vs d109_s1 (paired speaker bootstrap, 95 %)
+  F1 MAE women   :    44.4    41.4  diff   -3.1 [-4.1, -2.1]  better
+  F1 MAE children:    49.8    48.5  diff   -1.4 [-2.4, -0.3]  better
+  F1 MAE men     :    22.6    21.1  diff   -1.5 [-2.0, -0.9]  better
+  F1 MAE all     :    39.1    37.1  diff   -2.0 [-2.5, -1.5]  better
+  F2 MAE all     :    44.1    42.3  diff   -1.8 [-2.4, -0.9]  better
+  F2 DR  all     :    98.2    98.4  diff   +0.2 [+0.1, +0.4]  better
+  F3 MAE all     :    50.8    45.6  diff   -5.2 [-10.1, -1.6]  better
+  F3 DR  all     :    98.0    98.3  diff   +0.3 [-0.1, +0.7]  within noise
+  F4 MAE all     :    99.5    94.6  diff   -4.9 [-13.7, +2.1]  within noise
+  F4 DR  all     :    92.0    92.5  diff   +0.5 [-0.6, +1.8]  within noise
+
+PTDB-TUG f0 RPA, d040_5b_s1_b20k vs d109_s1
+  all frames    :  87.4  87.4  diff  -0.0 [-0.1, +0.0]  within noise  (n 154653)
+  modal         :  94.1  94.0  diff  -0.0 [-0.0, -0.0]  WORSE  (n 126992)
+  modal < 85 Hz :  86.9  86.9  diff  +0.0 [+0.0, +0.6]  better  (n 11014)
