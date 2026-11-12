@@ -3441,3 +3441,33 @@ D-099's runs are added when they exist, as a dated addendum.
     - **The vowel ordering is what articulation predicts, but it doesn't show iVTL reads articulation.** Rounded vowels have low F2 / F3, and any formant-based length (A, D-035) reads them as long. A head reading formant scale would give the same order. The prediction's caveat didn't name this; it should have.
     - iVTL's contrast also shrinks from about 170 to 100 c with context. An instantaneous length shouldn't depend on the neighbouring words, so at least one read is wrong: context either removes vowel-driven error from iVTL or smears neighbours into it. These reads can't say which.
     - What could separate them: the known-increment tests (D-097, lip tubes) and synthetic vowels with matched formants but different lengths.
+
+## D-101 (registered 2026-11-12; seen beforehand: D-094's full result, gate and real items): D-094's gate with the exact envelope. Is v3.1's F1 trend on WORLD pairs CheapTrick's, or v3.1's own?
+
+*Status*: registered (Hannah, 2026-11-12: "measure twice, cut once ... let's rerun the gate with your suggestion"). The design below is mine. Script `scripts/analysis/d101_exact_gate.py`, report `reports/analysis/d101/`.
+
+*Question*: D-094's gate failed. On WORLD resyntheses of 60 clean train_v2 validation clips, v3.1's F1 followed f0 at 150-250 Hz (+0.160 [+0.077, +0.207]) and not below 150 Hz (+0.002). WORLD's envelope there is CheapTrick's estimate from the harmonics at the clip's own f0. Either that estimate makes F1 ill-defined (a broad or shifted peak), so the trend is the instrument's; or v3.1 reads the harmonics wherever a peak is smooth, so the trend is v3.1's and T2 has something to teach.
+
+*The one change*: the envelope WORLD synthesises from. Everything else is D-094's gate as run: the same 60 clips (regenerated from train_v2's config and seed, the same order and band matching), Harvest f0 and D4C aperiodicity from the clip, the factors 0.84 / 0.92 / 1 / 1.09 / 1.19, peak 0.9, the frames (Harvest and DIO voiced, amendment 3), the model (`d040_5b_s2_b20k`) and the measure.
+- *Exact envelope*, per 10 ms frame: the clip's labelled tract, the eight formant labels' poles at their labelled bandwidths (digital two-pole resonators at 16 kHz, unit gain at 0 Hz), as a power spectrum on CheapTrick's 513 bins. It is multiplied by a smooth level and tilt: a straight line in log power against log frequency, fitted to CheapTrick's own envelope for that frame over 100-5000 Hz. So the level and the source / radiation tilt stay WORLD's, and only the resonance shape is exact. Frames without formant labels (unvoiced, silence) keep CheapTrick's envelope.
+- What this leaves out of the clip's real tract: the cascade's extra pole-zero pairs (`extras`), and the glottal source's spectral detail beyond the fitted tilt. Neither moves with the factor.
+
+*Measure*: as D-094's gate. The slope of log2 F1 (F2-F4, bandwidths, aVTL reported) on log2 of the factor, group bootstrap over clips, shuffle null, overall and by f0 band (< 150, 150-250, > 250 Hz).
+
+*Rule*:
+- **CheapTrick's artefact**: the exact-envelope gate passes D-094's gate test (overall |slope| <= 0.03 and every band with at least 10 clips within +-0.05), and its 150-250 Hz slope is at most half of D-094's (+0.080).
+- **v3.1's own**: the 150-250 Hz slope is >= +0.05 with its interval above 0.
+- Otherwise **unresolved**.
+
+*Reported*:
+- D-094's CheapTrick gate beside it, clip for clip (the paired difference in slope per clip, group bootstrap).
+- The envelopes' F1 peak: on CheapTrick's envelope, the largest peak between 0.6 and 1.6 times the labelled F1, against the label (median cents) and its -3 dB width, by band.
+
+*Consequence*:
+- v3.1's own: v3.1 follows harmonics under a smooth F1 peak, as real women's voices also showed in D-094 (+0.080, reported). T2's first arm is then registered with WORLD pairs. They hold the envelope fixed whatever the estimator, so the constraint is exact. This gate measure (exact envelopes) and D-094's real-item slope serve as its measures.
+- CheapTrick's artefact: D-094's real-voice trend can't be separated from the estimator. Then M4 leads with the reconstruction loss, as D-094's "nothing" branch planned, and T2 waits for a pair method whose envelope is exact by construction.
+- Unresolved: Hannah's call.
+
+*Caveats*: one model, 60 clips (33 in the band that decides). The exact envelope's peaks are sharper than CheapTrick's by construction, so a pass shows the trend needs a smeared peak, not where real voices' peaks sit.
+
+*Cost*: CPU renders a few minutes, GPU scoring about 5 minutes.
