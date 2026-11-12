@@ -1,0 +1,17 @@
+D-108: frozen-feature probes for the extra sections; train 4000 clips, held-out 1000; presence prevalence (train) nasal 0.15, subglottal 0.19
+
+trunk (v3.1 encoder), 256 features
+  nasal present              AUC 0.832   (shuffle null 95th pct 0.563)
+  subglottal present         AUC 0.740   (shuffle null 95th pct 0.546)
+  nasal pole (log2 Hz)       R^2 +0.265, median |error| 444 c (n 619 / 155; shuffle null 95th pct R^2 -0.081; label SD 814 c)
+  nasal zero (log2 Hz)       R^2 +0.127, median |error| 713 c (n 619 / 155; shuffle null 95th pct R^2 -0.014; label SD 1169 c)
+  subglottal scale (log2)    R^2 +0.893, median |error| 69 c (n 757 / 208; shuffle null 95th pct R^2 +0.042; label SD 317 c)
+
+input (VQT), 726 features
+  nasal present              AUC 0.605   (shuffle null 95th pct 0.549)
+  subglottal present         AUC 0.561   (shuffle null 95th pct 0.551)
+  nasal pole (log2 Hz)       R^2 +0.255, median |error| 440 c (n 619 / 155; shuffle null 95th pct R^2 +0.062; label SD 814 c)
+  nasal zero (log2 Hz)       R^2 +0.067, median |error| 814 c (n 619 / 155; shuffle null 95th pct R^2 +0.012; label SD 1169 c)
+  subglottal scale (log2)    R^2 +0.445, median |error| 151 c (n 757 / 208; shuffle null 95th pct R^2 +0.015; label SD 317 c)
+
+DECISION: PARTLY (trunk: AUC nasal 0.832, subglottal 0.740; R^2 nasal pole +0.265, subglottal scale +0.893)

@@ -3699,7 +3699,7 @@ None of them can make a narrow peak inside the formant range.
 
 ## D-108 (registered 2026-11-13; seen beforehand: nothing of v3.1's features on extra sections): can v3.1's frozen trunk read the extra sections?
 
-*Status*: registered (with D-107, as above). The design is mine. Script `scripts/analysis/d108_extras_probe.py`, report `reports/analysis/d108/`.
+*Status*: **done 2026-11-13: partly** (presence AUC 0.83 nasal, 0.74 subglottal; see Result). Registered (with D-107, as above). The design is mine. Script `scripts/analysis/d108_extras_probe.py`, report `reports/analysis/d108/`.
 
 *Question*: supervised heads for the nasal and subglottal sections (to feed the renderer) are worth a training arm only if the trunk carries them. As D-079 and D-082 did for the opening and the closed F1: on frozen features, is it there?
 
@@ -3725,6 +3725,13 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 *Consequence*: learnable or partly, the training arm with supervised section heads (`considering.md`, 2026-11-13) has something to work with. Not learnable, per-clip fitted sections (D-107) are the fallback. Either way the arm itself waits: Hannah's order is D-107 and D-108, then back to the critical path.
 
 *Cost*: CPU renders (5000 clips), a few minutes of GPU for features, CPU probes.
+- *Result (2026-11-13, `reports/analysis/d108/d108.txt`)*: **partly.** Held-out, trunk (input in brackets); shuffle nulls' 95th percentiles AUC 0.55-0.56, R^2 below +0.09:
+  - nasal present AUC **0.832** (0.605); subglottal present AUC **0.740** (0.561);
+  - nasal pole R^2 +0.265, median |error| 444 c of a label SD of 814 c (+0.255); nasal zero R^2 +0.127 (+0.067);
+  - subglottal scale R^2 **+0.893**, median |error| 69 c of 317 c (+0.445).
+  - The trunk carries more than the pooled input on every target, so v3.1 keeps (and builds) evidence of the sections. Presence is there but short of the learnable mark, and the nasal frequencies are weak.
+  - **Caveat on the subglottal scale**: in the synthesiser it is REF_L / length times 5 % noise (`tract.sample_extras`), so it is mostly the tract length, which the trunk carries for the aVTL head. The 69 c error is under the draw's own 85 c, so this R^2 says the probe reads length, not that the trunk sees the subglottal poles. Presence (AUC 0.74) is the subglottal evidence proper.
+  - *Consequence* (registered): the supervised section-head arm has something to work with (presence, the nasal pole roughly). It waits until after the critical path, as Hannah ordered. A head for the subglottal frequencies could be derived from the length head rather than learned.
 
 ## D-109 (registered 2026-11-13; seen beforehand: D-104 to D-107, the pre-checks below, nothing of any run with the loss): the reconstruction loss on real audio in 5b's decay branch
 
