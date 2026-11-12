@@ -1,0 +1,36 @@
+D-093: Hillenbrand dev F1 error of v3.1 (seed mean of d040_5b_s1_b20k + d040_5b_s2_b20k), steady-state frames, against f0 and the predicted F1; 996 tokens, men 27, women 29, children 27 speakers
+
+error by group (mean cents / Hz; median Hz):
+  m: +46.0 c / +15.0 Hz; median +12.7 Hz; median f0 132 Hz; n 324
+  w: +89.6 c / +34.9 Hz; median +28.4 Hz; median f0 220 Hz; n 348
+  b: +91.7 c / +35.7 Hz; median +32.9 Hz; median f0 221 Hz; n 192
+  g: +106.4 c / +40.1 Hz; median +32.7 Hz; median f0 238 Hz; n 132
+
+women - men:
+  unconditioned +43.6 c [+21.7, +65.8]
+  conditioned on the (f0, predicted F1) grid +nan c [+25.5, +142.0]; 0 % of women's tokens in shared cells; ratio to unconditioned +nan
+  f0 route (amendment item 3): within-group slope -0.7 c per octave; predicted gap -0.5 c; ratio -0.01 [-0.93, +0.85]
+
+children - men:
+  unconditioned +51.7 c [+28.7, +77.7]
+  conditioned on the (f0, predicted F1) grid +nan c [-31.2, +124.7]; 0 % of children's tokens in shared cells; ratio to unconditioned +nan
+  f0 route (amendment item 3): within-group slope -0.7 c per octave; predicted gap -0.6 c; ratio -0.01 [-0.90, +0.73]
+
+rule route: f0 slope (women's shared-cell share under 30 %); per contrast: women - men not explained (interval [-0.93, +0.85] crosses a threshold); children - men not explained (interval [-0.90, +0.73] crosses a threshold)
+
+reported: OLS of the error (cents) on centred log2 f0, log2 predicted F1 and their product [speaker bootstrap]
+  without group terms: intercept +75.6 [+65.1, +86.6]; log2 f0 +27.6 [+3.6, +52.6]; log2 F1 +82.7 [+57.9, +108.8]; product +63.6 [+13.7, +113.6]
+  with group terms: intercept +48.5 [+18.4, +74.3]; log2 f0 -10.1 [-59.6, +37.1]; log2 F1 +76.2 [+51.7, +102.5]; product +69.7 [+22.2, +119.1]; women +41.0 [+1.4, +83.0]; children +38.5 [-2.3, +87.9]
+
+reported: error by vowel and group (mean cents)
+     grp     iy     uw     ih     oo     er     ei     oa     ae     uh     eh     aw     ah
+       m   +75    +64    +20    +15     +1    +15    +32    +39    +55    +49    +80   +107
+       w   -18    -20    +80   +133   +112    +89    +97    +90   +134    +72   +170   +136
+       b   -88    +51    +92   +108    +70   +131   +133    +73   +207    +94   +126   +102
+       g  -104    +68   +148   +164   +105   +223   +139   +162   +125   +159    +89     -1
+
+reported: the surface on PTDB-TUG dev frames (Praat F1 as the predictor; closed-phase reference)
+  women: predicted median +27.8 Hz, actual median +4.2 Hz (3867 frames; f0 220 Hz)
+  men: predicted median +11.3 Hz, actual median +5.5 Hz (3876 frames; f0 112 Hz)
+
+DECISION: NOT EXPLAINED (route: f0 slope (women's shared-cell share under 30 %); women - men: unconditioned +43.6 c, conditioned +nan c [+25.5, +142.0], f0 route ratio -0.01; children - men: unconditioned +51.7 c, conditioned +nan c [-31.2, +124.7], f0 route ratio -0.01)
