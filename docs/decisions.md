@@ -3362,3 +3362,17 @@ D-099's runs are added when they exist, as a dated addendum.
 - Context includes the speaker's other vowels. A model could use that legitimately (anatomy is shared) or average vowel quality away. Both raise reliability, and this entry can't tell them apart.
 
 *Cost*: GPU inference only. 9 models x (996 words + 480 sentences, 3-4 reads each), about 30-45 min.
+- *Addendum (2026-11-12, during D-100's reads, before any output was looked at): the vowel ordering of iVTL.* Hannah asked for it alongside. It is computed on CPU from the cached Hillenbrand reads, so it adds no GPU work. Script `scripts/analysis/d100_vowels.py`, report `reports/analysis/d100/vowels.txt`.
+  - *Measure*: each word's iVTL and aVTL estimate, centred on its speaker's mean over all 12 words (log2 cm, reported in cents). Then the median over speakers per vowel, men and women apart and pooled, for reads R1 and R3.
+  - *Prediction*, articulatory (lip rounding and protrusion lengthen the tract; rounded back vowels also tend to lower the larynx):
+    - The rounded vowels, /u/ (uw), /ʊ/ (oo), /o/ (oa), /ɔ/ (aw) and American /ɝ/ (er), read **longer** in iVTL than the unrounded ones: /i/ (iy), /ɪ/ (ih), /e/ (ei), /ɛ/ (eh), /æ/ (ae), /ɑ/ (ah), /ʌ/ (uh).
+    - The primary contrast is the rounded mean minus the unrounded mean of the centred iVTL, with a speaker-bootstrap interval. The expected size is a few per cent (about 50-130 cents).
+    - No order is predicted within either set.
+  - *Reported*:
+    - the same contrast for aVTL, which should be 0 for an anatomical length; its size relative to iVTL's is the leakage;
+    - the full per-vowel table;
+    - the rank correlation between each model's iVTL and aVTL vowel means;
+    - the iVTL contrast's share of aVTL's within-speaker variance.
+  - *Caveats*:
+    - Whether the training labels carry rounding as length depends on the synthesisers. In the tube, length includes the lips of the vowel's area function. The cascade has no articulation: its iVTL is a drawn number. So a null could be the labels, not the model.
+    - Vowel duration and f0 also differ by vowel (high vowels have higher intrinsic f0), so a contrast could partly be f0 leakage. The rounded set mixes high (/u/, /ʊ/) and low (/ɔ/) vowels, which partly balances that. The within-speaker correlation of each vowel's iVTL with its f0 is reported.
