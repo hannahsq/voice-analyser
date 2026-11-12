@@ -3279,3 +3279,34 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
   - *Scores*: `d085_score.py` on both A0 seeds (`cache/d098`). Then `scripts/analysis/d098_pilot.py` (`reports/analysis/d098/pilot_a0.txt`) puts A0's seed mean on D-098's measures, beside 5b's seed mean and base: glottal slope (with the clip-bootstrap interval of A0 - base), synthetic F1-F4 MAE at 400 frames (training log), at 1600 frames and on the long clips at 400, aVTL MAE at the same three, women's PTDB-TUG closed-phase F1 bias and the |error| change, and resynthesised F1-F3.
   - *Rule*: the width control is ruled out only if A0 reaches base on every measure base was called better on against v3.1. Those measures are the glottal slope, aVTL MAE at 1600 frames and on the long clips at 400, and synthetic MAE on the long clips at 400. "Reaches" means A0 - base is better than, or below, D-085's thresholds: the slope at 0.03, aVTL at 10 %, synthetic MAE by `mae_call`. Then the coupled share alone accounts for base's gains. Otherwise the control is registered: v3.1's width (128 / 384, LR 0.002 by the width rule) on base's exact data and recipe, seed 1, 16k + 4k, beside a second seed of base.
   - *Reading*: A0 differs from base in four ways besides width, so the pilot can rule the control out but cannot attribute anything to width. Where A0 matches base on a measure, the coupled share (in a short branch) is enough for that measure. Where it falls short, the gap belongs to width, long context, full-length training on the mix or the drawn strength, unseparated.
+  - *Pilot result (2026-11-12, `reports/analysis/d098/pilot_a0.txt`)*: **the width control is not ruled out.** A0 falls short of base on all four ruled measures:
+    - glottal slope -0.031 [-0.060, -0.006], just past the 0.03 threshold;
+    - aVTL MAE +20.9 % at 1600 frames and +11.4 % on the long clips at 400;
+    - synthetic MAE on the long clips at 400, F1 +8.6 %.
+    So the control is registered (D-099).
+    - *Reported*: A0 accounts for most of base's glottal-slope gain on its own: 0.353 (seeds 0.361 / 0.344) against 5b's 0.134 and base's 0.384. It also takes about two thirds of base's aVTL gain on the long clips at 400 (2.16 -> 1.53 %, base 1.37) and less than half at 1600 (1.69 -> 1.46 %, base 1.21). Women's closed-phase F1 bias is -0.1 Hz for A0, +1.4 for base and +4.2 for 5b; A0 - base |error| +0.7 Hz. A0 is better than base on resynthesised F2 (-8.5 %), and 2.9-6.7 % worse on short-crop synthetic F1-F3.
+    - *Reading*: the coupled share is the main source of base's Q1 gain. What is left for width, long context and full-length training together is a slope of about 0.03 and most of the gain at 1600 frames. The pilot can't say which of those it is.
+
+## D-099 (registered 2026-11-12; seen beforehand: D-098's result and its pilot, no run of this entry): the width control, and base's second seed
+
+*Status*: registered (Hannah, 2026-11-12: "if that doesn't rule it out, register 2"; the pilot didn't). The choices below are mine; she can amend them before the start, recorded as an amendment. Not started.
+
+*Questions*:
+- **W, does the width matter?** D-098's base bundles three changes against v3.1: the width, the long crops and the coupled share. This run holds the data and recipe and changes only the width.
+- **C, do base's calls replicate?** D-098 has one seed per arm. Base was called better against v3.1 on the glottal slope, aVTL MAE at 1600 frames and on the long clips at 400, and synthetic MAE on the long clips at 400.
+
+*Runs* (two, side by side; `scripts/analysis/chains/d099.sh`): each is D-098's base arm exactly, with one change.
+- **narrow** (`d099_narrow` -> `_b20k`): v3.1's width, conformer_dim 128 and embed 384, at v3.1's learning rate 0.002 (D-085's width rule, 0.002 x 128 / width). Seed 1, as D-098's base.
+- **base_s2** (`d099_base_s2` -> `_b20k`): D-098's base at seed 2.
+- Everything else is D-098's base. Checked: the chain's flags equal D-098's token for token, bar seed and width. The data are train_v2, the resynthesised pools, train_v2ku's coupled share (strength drawn) at 42 % and train_long_v3u's long crops in 20 % of batches. The length weights stay fixed at 0.0125, the iVTL head is on, and training is 16000 steps plus a 4000-step decay branch.
+- D-098's stop rule guards both runs (`d098_watch.py`, gradient-norm ratio at step 3000 at most 2).
+
+*Decision rule* (D-085's thresholds and measures unchanged: glottal slope 0.03, synthetic MAE 8 % per formant or 5 % mean, aVTL 10 %, women's closed-phase |error| 4 Hz, length reliability 0.07; D-085 amendment 3's guards):
+- **W**: base, as the seed mean of `d098_base_b20k` and `d099_base_s2_b20k`, minus narrow. A difference past its threshold is called, as in D-085. Width is **shown to help** on a measure only if both base seeds alone are better than narrow there, past the threshold. Width **costs** on a measure if both seeds are worse past the threshold, or if a guard fails for base against narrow. Otherwise the measure is reported.
+- **C**: base_s2 minus 5b's seed mean. One of D-098's base calls is **replicated** if base_s2 alone makes the same call in the same direction, past the threshold, and its guards hold. Base is a candidate for the semi-private confirmation if every one replicates.
+- *Reported*: narrow - 5b (v3.1's width with base's data and from-scratch recipe); narrow - A0 (D-080's branch); the per-seed values; KL gap growth; probe 10 and 11; the iVTL head's MAE.
+- The decision script (`scripts/analysis/decide_d099.py`) is written and checked before any D-099 result. Choices it makes that this rule leaves open are recorded as an amendment, saying what had been seen.
+
+*Reading*: one narrow seed. A width call rests on the base pair agreeing with each other, and the narrow seed's own spread is assumed to be 5b's (two seeds at that width). If narrow matches base, the gains belong to the data and the long crops at v3.1's size. Then a cheaper model carries them, and the next question is long crops against the coupled share at the narrow width.
+
+*Cost*: about 16 h of GPU with the two runs side by side (narrow is cheaper), then about 1 h of scoring. Start when Hannah says.
