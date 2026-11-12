@@ -3525,7 +3525,7 @@ D-099's runs are added when they exist, as a dated addendum.
 
 ## D-103 (registered 2026-11-12; seen beforehand: D-102's result and diagnostic, nothing of an Rd source in the loss): an LF source by Rd in the reconstruction renderer, and D-102's check with Rd estimated
 
-*Status*: registered (Hannah, 2026-11-12: "Yes please" to the Rd source with the recheck as its gate). The design is mine. Code in `vocal_analysis/train/reconstruction.py`; script `scripts/analysis/d103_rd_check.py`; report `reports/analysis/d103/`.
+*Status*: **done 2026-11-12: the gate fails; the high-harmonic targets measure aspiration noise** (see Result and diagnostic; D-104 follows). Registered (Hannah, 2026-11-12: "Yes please" to the Rd source with the recheck as its gate). The design is mine. Code in `vocal_analysis/train/reconstruction.py`; script `scripts/analysis/d103_rd_check.py`; report `reports/analysis/d103/`.
 
 *Why*: D-102 found the loss sound and the source model wrong. Given the exact LF source, F1's minimum is at the label in every f0 band; with a straight-line source it is not. Rd is the LF model's one shape parameter, so the renderer can carry the source with one number per frame.
 
@@ -3546,3 +3546,23 @@ D-099's runs are added when they exist, as a dated addendum.
 *Caveat*: on synthetic clips the source is LF by construction, so this checks that the renderer and the loss can use an LF source, not that real sources are LF. The real-voice side is the training gate's (`considering.md`): PTDB-TUG dev's shift against the closed-phase reference.
 
 *Cost*: CPU, under an hour.
+- *Result (2026-11-12, `reports/analysis/d103/d103.txt`; 8605 uncoupled and 8168 coupled frames)*: **the gate fails.** Mode `rd`, uncoupled, by band (< 150 / 150-250 / 250-400 Hz): recovered - label -80 / -40 / -15 c, median |.| 100 / 55 / 55 c, edge 21 / 17 / 14 %.
+  - By kind: cascade -40 / -30 / 0 c; cascade+extras -20 / -15 / -35 c; tube -143 / -50 / -25 c. Above 400 Hz +10 c, |.| 160 c.
+  - `rd_tilt` is about the same, and `tilt` (D-102's) is barely different. The best Rd at the label F1 is within 0.18 of the label (median |.|), so the source is found.
+  - Coupled, recovered - closed: -10 / -10 / -5 / +20 c; - acoustic: -51 / -45 / -34 / -5 c.
+  - Against D-102's diagnostic (exact source, harmonics 1-8 only, F1 at +0 c), the difference is the harmonics above 8.
+- *Diagnostic (2026-11-12, after the result; descriptive; `scripts/analysis/d103_target_diag.py`, `reports/analysis/d103/target_diag.txt`)*: target - render - LF source at the label Rd, against harmonics 1-4, by harmonic frequency (cascade clips without extras).
+  - At f0 < 150 Hz: 0 dB up to 2 kHz, then +4 / +10 / +14 dB at 2-3 / 3-4 / 4-5 kHz. At 150-250 Hz: +1 / +5 / +11 dB. At 250-400 Hz: within +-0.6 dB everywhere.
+  - f0 drift across the fit window barely matters (+4 vs +5 dB at 2-3 kHz). The clip's HNR decides it: at 4-5 kHz the residual is +22 dB for HNR under 15 dB, +10 to +14 dB for 15-35 dB, and 0.0 dB above 35 dB (0 in every band).
+  - The first hypothesis (high harmonics underestimated through f0 drift) was wrong in sign.
+  - *Reading*: the targets at weak high harmonics measure the aspiration noise, not the harmonics. At low f0 those harmonics are many, and they pull the fit. Real voices carry aspiration noise too, so this is the targets' problem, not the synthesiser's. A harmonic should count only where it stands above the local noise: D-104.
+
+## D-104 (registered 2026-11-12; seen beforehand: D-103's result and its diagnostic): noise-gated harmonic targets, and D-103's check again
+
+*Status*: registered (follows D-103 within Hannah's "Yes please" to the Rd source and its gate; the design is mine). Code in `vocal_analysis/train/reconstruction.py`, script `scripts/analysis/d103_rd_check.py` (unchanged but for the targets), report `reports/analysis/d104/`.
+
+*The one change*: `harmonic_targets` marks a harmonic valid only where its local SNR is at least 10 dB. The noise is the least-squares fit's own residual (the windowed frame minus the fitted harmonics), its power averaged over the DFT bins within +-f0/2 of k f0. The signal is the harmonic's windowed peak, a_k times the window's sum over 2. At 10 dB, additive noise biases a harmonic's level by at most about +0.4 dB. Everything else is D-103 as run: the clips, frames, F1 grid, Rd search, modes, the 60 dB floor (kept), and the gate and its thresholds.
+
+*Gate*: D-103's, unchanged. Also reported: the share of harmonics the SNR gate removes, by f0 band and harmonic frequency; and D-103's target diagnostic on the gated targets (it should read about 0 dB at every frequency).
+
+*Caveat*: the SNR threshold is a choice; 10 dB is the one fixed here. Frames whose valid harmonics drop below 4 carry no loss, so the gate can lower the frame count; the count is reported.

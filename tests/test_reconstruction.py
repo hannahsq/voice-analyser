@@ -91,3 +91,32 @@ def test_nuisance_head_ranges():
     assert out["pole_f"].shape == (2, 5, 2) and out["zero_f"].shape == (2, 5, 2)
     assert (out["zero_f"] >= 250).all() and (out["zero_f"] <= 4000).all()
     assert (out["pole_b"] >= 40).all() and (out["pole_b"] <= 1000).all()
+
+
+def test_lf_source_matches_glottal_table():
+    from vocal_analysis.synth import glottal
+
+    rd = np.array([0.45, 1.0, 1.73, 2.6])
+    got = R.lf_source_db(torch.tensor(rd, dtype=torch.float64), 8).numpy()
+    assert np.max(np.abs(got - glottal.source_h_db(rd, 8))) < 1e-6
+
+
+def test_rd_source_recovers_f1_and_rd_gradient():
+    f0, K, rd_true = 140.0, 30, 1.1
+    f = f0 * torch.arange(1, K + 1, dtype=torch.float64)
+    pf = torch.tensor([520.0, 1400.0, 2500.0, 3400.0], dtype=torch.float64)
+    pb = torch.tensor([70.0, 90.0, 120.0, 180.0], dtype=torch.float64)
+    db = (R.render_db(f, pf, pb, radiation=False) + R.lf_source_db(torch.tensor(rd_true, dtype=torch.float64), K) - 12.0)[None, None]
+    ok = torch.ones(1, 1, K, dtype=torch.bool)
+    f0t = torch.tensor([[f0]], dtype=torch.float64)
+    grid = np.arange(440.0, 600.0, 5.0)
+    losses = []
+    for g in grid:
+        p = pf.clone()
+        p[0] = g
+        losses.append(R.reconstruction_loss(db, ok, f0t, p[None, None], pb[None, None], source="rd", profile="offset")[0].item())
+    assert abs(grid[int(np.argmin(losses))] - 520.0) <= 5.0
+    rd = torch.tensor([[0.8]], dtype=torch.float64, requires_grad=True)
+    loss, _ = R.reconstruction_loss(db, ok, f0t, pf[None, None], pb[None, None], source="rd", profile="offset", rd=rd)
+    loss.backward()
+    assert torch.isfinite(rd.grad).all() and rd.grad.item() < 0  # raising Rd towards 1.1 lowers the loss

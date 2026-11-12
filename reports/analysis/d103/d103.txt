@@ -1,0 +1,33 @@
+D-103: the reconstruction loss's F1 minimum with every other parameter at its label, LF source by Rd (cents; median over frames; Rd minimised per F1 candidate)
+
+uncoupled clips (train_v2 validation): recovered - label; 8605 frames
+  all             f0 0-150     n  2553: rd  -80.0 (|.| 100.0, edge 21.2 %); rd_tilt  -80.0 (|.|  90.0, edge 20.2 %); tilt  -90.0 (|.| 110.0, edge 21.9 %)
+  all             f0 150-250   n  1471: rd  -40.0 (|.|  55.0, edge 16.5 %); rd_tilt  -40.0 (|.|  60.0, edge 10.5 %); tilt  -35.0 (|.|  70.0, edge 12.6 %)
+  all             f0 250-400   n  1769: rd  -15.0 (|.|  55.0, edge 14.2 %); rd_tilt   -5.0 (|.|  60.0, edge  7.7 %); tilt   +0.0 (|.| 105.0, edge 11.5 %)
+  all             f0 400-up    n  2812: rd  +10.0 (|.| 160.0, edge 22.3 %); rd_tilt  +15.0 (|.| 195.0, edge 24.2 %); tilt  +20.0 (|.| 265.0, edge 38.9 %)
+  cascade         f0 0-150     n   846: rd  -40.0 (|.|  55.0, edge 12.2 %); rd_tilt  -40.0 (|.|  50.0, edge 11.1 %); tilt  -45.0 (|.|  65.0, edge 11.9 %)
+  cascade         f0 150-250   n   452: rd  -30.0 (|.|  45.0, edge 11.5 %); rd_tilt  -25.0 (|.|  50.0, edge  7.5 %); tilt  -20.0 (|.|  50.0, edge  7.1 %)
+  cascade         f0 250-400   n   553: rd   +0.0 (|.|  20.0, edge  5.1 %); rd_tilt   +0.0 (|.|  25.0, edge  3.6 %); tilt  +15.0 (|.|  45.0, edge  7.8 %)
+  cascade         f0 400-up    n   901: rd   +5.0 (|.| 130.0, edge 21.9 %); rd_tilt   +5.0 (|.| 175.0, edge 25.9 %); tilt  -60.0 (|.| 325.0, edge 46.1 %)
+  cascade+extras  f0 0-150     n   255: rd  -20.0 (|.|  40.0, edge  3.5 %); rd_tilt  -20.0 (|.|  40.0, edge  4.7 %); tilt  -10.0 (|.|  45.0, edge  4.3 %)
+  cascade+extras  f0 150-250   n   135: rd  -15.0 (|.|  65.0, edge 15.6 %); rd_tilt  -10.0 (|.|  70.0, edge 15.6 %); tilt  +10.0 (|.|  95.0, edge 16.3 %)
+  cascade+extras  f0 250-400   n   197: rd  -35.0 (|.| 115.0, edge 23.9 %); rd_tilt  -20.0 (|.| 100.0, edge 17.8 %); tilt  -15.0 (|.| 160.0, edge 22.3 %)
+  cascade+extras  f0 400-up    n   234: rd   -2.5 (|.| 277.5, edge 34.2 %); rd_tilt  +37.5 (|.| 320.0, edge 40.6 %); tilt  +90.0 (|.| 390.0, edge 49.1 %)
+  tube            f0 0-150     n  1452: rd -142.5 (|.| 155.0, edge 29.6 %); rd_tilt -155.0 (|.| 160.0, edge 28.2 %); tilt -175.0 (|.| 185.0, edge 30.7 %)
+  tube            f0 150-250   n   884: rd  -50.0 (|.|  57.5, edge 19.1 %); rd_tilt  -60.0 (|.|  70.0, edge 11.2 %); tilt  -55.0 (|.|  80.0, edge 14.9 %)
+  tube            f0 250-400   n  1019: rd  -25.0 (|.|  90.0, edge 17.3 %); rd_tilt  -15.0 (|.|  75.0, edge  8.0 %); tilt  -15.0 (|.| 140.0, edge 11.4 %)
+  tube            f0 400-up    n  1677: rd  +10.0 (|.| 165.0, edge 20.9 %); rd_tilt  +25.0 (|.| 190.0, edge 21.0 %); tilt  +40.0 (|.| 240.0, edge 33.6 %)
+
+coupled tube clips (train_v2ku held-out): recovered - closed | - acoustic; 8168 frames
+  all             f0 0-150     n  2051: rd  -10.0 |  -50.6 (edge 14.0 %); rd_tilt  -30.0 |  -68.7 (edge 10.1 %); tilt  -35.0 |  -67.7 (edge 11.6 %)
+  all             f0 150-250   n  1193: rd  -10.0 |  -44.8 (edge 15.7 %); rd_tilt   -5.0 |  -44.8 (edge 11.2 %); tilt   +5.0 |  -29.3 (edge 11.7 %)
+  all             f0 250-400   n  1670: rd   -5.0 |  -34.4 (edge 14.8 %); rd_tilt  +10.0 |  -28.1 (edge  7.5 %); tilt  +45.0 |   +7.0 (edge 10.4 %)
+  all             f0 400-up    n  3254: rd  +20.0 |   -4.6 (edge 29.3 %); rd_tilt  +42.5 |   +8.8 (edge 28.1 %); tilt  +50.0 |   +7.0 (edge 38.3 %)
+  tube            f0 0-150     n  2051: rd  -10.0 |  -50.6 (edge 14.0 %); rd_tilt  -30.0 |  -68.7 (edge 10.1 %); tilt  -35.0 |  -67.7 (edge 11.6 %)
+  tube            f0 150-250   n  1193: rd  -10.0 |  -44.8 (edge 15.7 %); rd_tilt   -5.0 |  -44.8 (edge 11.2 %); tilt   +5.0 |  -29.3 (edge 11.7 %)
+  tube            f0 250-400   n  1670: rd   -5.0 |  -34.4 (edge 14.8 %); rd_tilt  +10.0 |  -28.1 (edge  7.5 %); tilt  +45.0 |   +7.0 (edge 10.4 %)
+  tube            f0 400-up    n  3254: rd  +20.0 |   -4.6 (edge 29.3 %); rd_tilt  +42.5 |   +8.8 (edge 28.1 %); tilt  +50.0 |   +7.0 (edge 38.3 %)
+
+reported: best Rd at the label F1 (mode rd) - label Rd, uncoupled: median -0.05, median |.| 0.18 (8605 frames)
+
+GATE: FAILS (mode rd, uncoupled, bands below 400 Hz: f0 0-150 median -80.0 c, |.| 100.0 c, edge 21.2 %; f0 150-250 median -40.0 c, |.| 55.0 c, edge 16.5 %; f0 250-400 median -15.0 c, |.| 55.0 c, edge 14.2 %)

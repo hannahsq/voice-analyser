@@ -46,6 +46,27 @@ def radiation_db(f: torch.Tensor, fs: float = FS) -> torch.Tensor:
     return 10.0 * torch.log(2.0 - 2.0 * torch.cos(2.0 * np.pi * f / fs) + 1e-20) / LN10
 
 
+_LF_DB: dict = {}
+RD_SEARCH = np.round(np.arange(0.3, 2.7 + 1e-9, 0.05), 2)
+
+
+def lf_source_db(rd: torch.Tensor, k_max: int) -> torch.Tensor:
+    """The LF flow derivative's harmonic levels in dB (re Ee = 1) for harmonics 1..k_max at Rd (any shape), linear in
+    Rd on synth.glottal's 0.01 grid, so differentiable in rd (D-103). Shape rd.shape + (k_max,)."""
+    from ..synth import glottal
+
+    key = (k_max, rd.dtype, rd.device)
+    if key not in _LF_DB:
+        logmag, _ = glottal.harmonic_table()
+        _LF_DB[key] = torch.tensor(20.0 * logmag[:, :k_max] / LN10, dtype=rd.dtype, device=rd.device)
+    tab = _LF_DB[key]
+    pos = (rd.clamp(glottal.RD_MIN, glottal.RD_MAX) - glottal.RD_MIN) / 0.01
+    i0 = pos.floor().clamp(0, tab.shape[0] - 2)
+    w = (pos - i0).unsqueeze(-1)
+    i0 = i0.long()
+    return (1 - w) * tab[i0] + w * tab[i0 + 1]
+
+
 def render_db(f: torch.Tensor, poles_f: torch.Tensor, poles_b: torch.Tensor, zeros_f: torch.Tensor | None = None,
               zeros_b: torch.Tensor | None = None, radiation: bool = True) -> torch.Tensor:
     """Cascade magnitude in dB at f (..., K). poles_f / poles_b (..., P) and zeros (..., Z) share f's leading dims;
@@ -121,20 +142,38 @@ def profile_out(resid: torch.Tensor, f: torch.Tensor, w: torch.Tensor, profile: 
 def reconstruction_loss(target_db: torch.Tensor, valid: torch.Tensor, f0: torch.Tensor, poles_f: torch.Tensor,
                         poles_b: torch.Tensor, zeros_f: torch.Tensor | None = None, zeros_b: torch.Tensor | None = None,
                         frame_mask: torch.Tensor | None = None, profile: str = "tilt", delta_db: float = 6.0,
-                        min_harmonics: int = 4, radiation: bool = True) -> tuple[torch.Tensor, torch.Tensor]:
+                        min_harmonics: int = 4, radiation: bool = True, source: str = "profile",
+                        rd: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
     """Huber loss (dB) between the observed harmonics and the render sampled at k f0, after profiling the source out.
 
     target_db / valid (B, T, K) from `harmonic_targets`; f0 (B, T) the same fixed f0 the targets used; poles / zeros
     (B, T, P) / (B, T, Z) in Hz; frame_mask (B, T) e.g. sonorant frames. Frames with fewer than min_harmonics valid
-    harmonics carry no loss (too few points to profile a slope out). Returns (mean over frames, per-frame loss)."""
+    harmonics carry no loss (too few points to profile a slope out). Returns (mean over frames, per-frame loss).
+
+    source "profile": the source is the profiled offset / slope / curvature (`profile`). source "rd" (D-103): the LF
+    flow derivative at Rd is added to the render, the radiation is off (the derivative carries it), and `profile`
+    ("offset" or "tilt") is profiled on top; rd (B, T) given, or None to search RD_SEARCH per frame and keep each
+    frame's best (the gradient then flows through the chosen Rd's loss)."""
     K = target_db.shape[-1]
     f = f0.unsqueeze(-1) * torch.arange(1, K + 1, dtype=f0.dtype, device=f0.device)
     w = valid.to(target_db.dtype)
-    rend = render_db(torch.where(valid, f, torch.full_like(f, 1000.0)), poles_f, poles_b, zeros_f, zeros_b, radiation)
-    resid = profile_out((target_db - rend) * w, f, w, profile) * w
-    per = torch.nn.functional.huber_loss(resid, torch.zeros_like(resid), reduction="none", delta=delta_db)
     n = w.sum(-1)
-    per_frame = (per * w).sum(-1) / n.clamp_min(1.0)
+
+    def frame_loss(src_db):
+        resid = profile_out((target_db - rend - src_db) * w, f, w, profile) * w
+        per = torch.nn.functional.huber_loss(resid, torch.zeros_like(resid), reduction="none", delta=delta_db)
+        return (per * w).sum(-1) / n.clamp_min(1.0)
+
+    if source == "rd":
+        rend = render_db(torch.where(valid, f, torch.full_like(f, 1000.0)), poles_f, poles_b, zeros_f, zeros_b, False)
+        if rd is not None:
+            per_frame = frame_loss(lf_source_db(rd, K))
+        else:
+            cand = torch.stack([frame_loss(lf_source_db(torch.full_like(f0, float(r)), K)) for r in RD_SEARCH], 0)
+            per_frame = cand.min(0).values
+    else:
+        rend = render_db(torch.where(valid, f, torch.full_like(f, 1000.0)), poles_f, poles_b, zeros_f, zeros_b, radiation)
+        per_frame = frame_loss(torch.zeros_like(rend))
     use = n >= min_harmonics
     if frame_mask is not None:
         use = use & frame_mask.bool()
