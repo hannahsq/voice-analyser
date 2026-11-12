@@ -3612,3 +3612,33 @@ D-099's runs are added when they exist, as a dated addendum.
   - Fitted nuisance frequencies (uncoupled, quartiles): pole 1 751 / 940 / 1075 Hz and zero 1 776 / 952 / 1068 Hz; pole 2 2841 / 3092 / 3495 and zero 2 2785 / 3018 / 3207. Each pair stays near its start and near each other: a pole and zero slightly apart make a local bump or dip, which reshapes the F1 or F3 region as needed.
   - *Reading* (the registered "nuisance poles often at F1" branch): with eight free nuisance parameters per frame, against the 4-20 valid harmonics left after the SNR gate at low f0, the render fits almost anything, and F1 is no longer identified. This is a per-frame free fit, the worst case. A network's nuisance outputs come from a shared trunk and are smoother, but nothing in the loss stops them doing the same.
   - *What a training arm would need*, each its own registration, one at a time: (i) the nuisance sections kept away from F1 (a band starting a margin above F1, e.g. 1.3 x F1, or a penalty); (ii) fewer sections (the plan's one zero rather than two pole-zero pairs); (iii) sections held per clip or slowly varying, not per frame (nasal and subglottal pairs change slowly); or (iv) no nuisance sections, with D-104's spread on tube and extra-section clips accepted (|.| 20-45 c, bias about 0).
+
+## D-106 (registered 2026-11-12; seen beforehand: D-105's result, and SoFilNet's renderer as described in its paper): D-105's check with SoFilNet's nuisance structure
+
+*Status*: registered (Hannah, 2026-11-12: "Yes please" to trying SoFilNet's structure). The design is mine. Script `scripts/analysis/d106_sofilnet_check.py`, report `reports/analysis/d106/`.
+
+*Why*: D-105's free nuisance sections took F1's place. Each pole sat beside its zero (about 940 Hz and 3 kHz) and made narrow bumps that could stand in for F1. SoFilNet (Meka et al. 2026, section III-C; `docs/papers/literature.md`) separates its extra sections from the formants by structure:
+- its "extra" poles may sit anywhere (50-7800 Hz) but must be broader than 1 kHz;
+- its "high" poles lie between the highest formant and 7.8 kHz;
+- its zeros are confined to 250-4000 Hz.
+
+None of them can make a narrow peak inside the formant range.
+
+*The one change*: the nuisance structure. It is now two high poles (frequency between the frame's F4 label and 7800 Hz, bandwidth 40-1000 Hz), two broad poles (50-7800 Hz, bandwidth 1000-4000 Hz) and two zeros (250-4000 Hz, bandwidth 40-4000 Hz; the wide end lets a zero all but switch off, as SoFilNet's radius floor does). Each parameter is a sigmoid in log frequency within its range.
+- *Start*: each broad pole paired with a zero at the same frequency and bandwidth (1000 and 3000 Hz, 3000 Hz wide), so they cancel; the high poles at 7500 Hz, 500 Hz wide; Rd 1.0.
+- SoFilNet's numbers not stated in its paper (the broad poles' maximum bandwidth, the high poles' and zeros' bandwidth ranges) are my choices, given above.
+- Everything else is D-105 as run: the clips, frames, SNR-gated targets, mode `rd`, Adam (0.05, 200 steps), the coarse-to-fine F1 search, and the gate and its thresholds.
+
+*Gate*: D-104's, unchanged.
+
+*Reported*, as D-105, plus:
+- how often a fitted zero ends within 10 % of the label F1;
+- the broad poles' and zeros' final bandwidths (quartiles);
+- D-105's and D-104's numbers beside each band.
+
+*Readings*:
+- The gate passes: SoFilNet's structure lets the sections absorb the extras and the tube's differences without competing with F1. The training arm's nuisance head takes this structure.
+- It fails, with zeros often at F1: the zeros compete. Next comes per-clip sections or a margin, each its own entry.
+- It fails without that: compare by kind with D-104 (no sections) to see what the structure costs or buys.
+
+*Cost*: CPU, about 15 minutes on 8 processes.
