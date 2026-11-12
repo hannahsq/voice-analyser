@@ -3289,7 +3289,7 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 
 ## D-099 (registered 2026-11-12; seen beforehand: D-098's result and its pilot, no run of this entry): the width control, and base's second seed
 
-*Status*: registered (Hannah, 2026-11-12: "if that doesn't rule it out, register 2"; the pilot didn't). The choices below are mine; she can amend them before the start, recorded as an amendment. Not started.
+*Status*: **parked 2026-11-12, not started** (Hannah: "park the diversion and go back to aiming for M4"). Registered (Hannah, 2026-11-12: "if that doesn't rule it out, register 2"; the pilot didn't). The choices below are mine; she can amend them before a start, recorded as an amendment. The chain (`scripts/analysis/chains/d099.sh`) and the rule stand as written; `decide_d099.py` is not written.
 
 *Questions*:
 - **W, does the width matter?** D-098's base bundles three changes against v3.1: the width, the long crops and the coupled share. This run holds the data and recipe and changes only the width.

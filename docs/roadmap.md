@@ -7,6 +7,7 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
 **Direction changed 2026-11-10 (D-091)**, after a review of the plan, the F1 register and the log. This block overrides the order below where they differ; the older text stays as the record.
 
 - **The F1 level work stops.** On the closed-phase reference there is no women-specific overread left (v3.1: women +4.2, men +5.7 Hz), and what remains is below what six dev women and three disagreeing references resolve. The reported F1 is the acoustic F1. Head and read-out arms on v3.1's trunk are closed as a line. D-085 is held (Hannah's call).
+- **Parked 2026-11-12: the screening line** (Hannah: "park the diversion and go back to aiming for M4"). D-085 ran (confounded), D-098 reran it (base a candidate for a seed confirmation: glottal slope 0.13 -> 0.38, aVTL -28 to -36 % on long clips, guards held), and D-099 (width control plus base's second seed) is registered, not started. D-100 (length reliability with context) is done; the aVTL / iVTL ideas it raised are in `considering.md` (2026-11-12). Resume D-099 when M4 allows; nothing in M4 waits on it.
 - **Order**:
   1. D-092 (does v3.1's level on KL need the coupled glottis?) and D-093 (is Hillenbrand's group gradient explained by f0 and the vowel?): cheap, and the last F1-cause entries unless they name a mechanism.
   2. Close M3: items 7 and 10 below, then the lockbox, once.
