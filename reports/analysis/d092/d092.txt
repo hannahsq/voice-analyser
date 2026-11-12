@@ -1,0 +1,32 @@
+D-092: v3.1's F1 level on KL renders, coupled (C) against the uncoupled flow through a rigid glottis (R); seed mean of d040_5b_s1_b20k + d040_5b_s2_b20k; Hz; median over files [95 % bootstrap over (vowel, f0)]
+
+identity check (I - C, v3.1's reading on C's own flow through a rigid glottis minus on C): median +0.08 Hz, median |.| 0.25, largest |.| 14.2 -> passes
+
+gap 0.0:
+  Male   L_C +11.5 [-9.9, +24.0] (75 fitted files); L_R +6.9 [-0.1, +10.7] (fitted), +6.9 [-0.5, +10.9] (all 80); C raw +23.2 [+19.7, +24.3]; R - RT +0.6 [+0.3, +0.9]; R - R6 +0.1 [-0.0, +0.1]
+  Female L_C +19.1 [-13.3, +31.3] (76 fitted files); L_R +1.6 [-2.7, +7.2] (fitted), +1.6 [-2.7, +6.6] (all 80); C raw +30.0 [+24.9, +34.5]; R - RT +0.3 [-0.1, +0.8]; R - R6 +0.1 [-0.0, +0.2]
+
+gap 0.3:
+  Male   L_C +0.5 [-12.5, +6.9] (76 fitted files); L_R +1.8 [+0.1, +3.5] (fitted), +2.1 [+0.9, +3.7] (all 80); C raw +41.1 [+32.0, +52.1]; R - RT +0.7 [+0.4, +1.0]; R - R6 +0.1 [+0.0, +0.1]
+  Female L_C +11.9 [-16.5, +32.7] (76 fitted files); L_R +1.9 [-0.5, +4.5] (fitted), +2.3 [-0.5, +4.7] (all 80); C raw +49.5 [+40.1, +61.0]; R - RT +0.1 [-0.1, +0.4]; R - R6 +0.1 [-0.0, +0.2]
+
+rule (women, gap 0): L_R +1.6 -> coupled; men +6.9 -> mixed
+tilt: women R - RT +0.3 [-0.1, +0.8] -> no tilt share
+
+reported: by vowel, gap 0, median over f0 (Hz): C - dE / R / R - RT
+  Male: i +16/+46/+1  I +9/+1/-1  E +17/+5/+0  ae +6/+4/+1  V +8/+4/+1  A +24/-0/+1  O +13/+4/+1  U +11/+1/+0  o -17/+0/+1  u +16/+22/+1
+  Female: i +55/+48/-0  I -7/-2/-0  E +46/+7/+1  ae +6/+0/+2  V +26/-3/-0  A +12/-2/+0  O +11/-1/+0  U -10/+1/+1  o -45/-5/+0  u +38/+13/-0
+reported: R's error (gap 0) by log2(F1 / f0) band, both sexes pooled (median Hz, files)
+  F1/f0 2^[0, 1): R +31.4, C - dE +41.3 (24 files; women 19)
+  F1/f0 2^[1, 1.5): R -26.7, C - dE -58.8 (31 files; women 20)
+  F1/f0 2^[1.5, 2): R +18.4, C - dE +65.6 (49 files; women 28)
+  F1/f0 2^[2, 2.5): R -4.8, C - dE -14.2 (36 files; women 13)
+  F1/f0 2^[2.5, 9): R +1.3, C - dE -1.1 (20 files; women 0)
+reported: spectral tilt (dB/oct, D-045's measure), median over files, gap 0
+  Male: C -1.7, R -4.1, RT -8.7
+  Female: C +2.5, R -0.3, RT -4.8
+reported: aVTL on C, paired gap 0.3 - 0 per (vowel, f0), median [95 %]; ideal 0
+  Male: -13.05 % [-14.57, -12.62] (-2.28 cm at 17.46 cm)
+  Female: -12.84 % [-15.57, -11.28] (-2.00 cm at 15.6 cm)
+
+DECISION: THE LEVEL COMES WITH THE COUPLED FLOW'S RIPPLE AND SKEW (women L_R +1.6, L_C +19.1); tilt no share
