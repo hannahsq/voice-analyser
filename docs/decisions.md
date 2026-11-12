@@ -3482,3 +3482,27 @@ D-099's runs are added when they exist, as a dated addendum.
   - *Reported*: with the exact envelope, B2-B4 rise slightly with f0 (+0.06 to +0.10); B1 is flat (+0.004). D-094's B1 -0.57 on real items was also CheapTrick's.
   - *Reading*: given an envelope whose F1 peak is where the label is, v3.1's F1 doesn't follow f0. The trend in D-094's gate came from CheapTrick's estimate. At 150-250 Hz, harmonics 150-250 Hz apart sample F1 too sparsely for CheapTrick to place the peak, so its F1 lands up to a semitone off, smeared, and shifts with the sampling. D-094's real-voice slope (women +0.080) used the same estimator, so it says nothing about v3.1 on real envelopes.
   - *Consequence* (registered): **M4 leads with the reconstruction loss.** T2 waits for a pair method whose envelope is exact by construction. Synthetic and resynthesised clips with known tracts qualify (the counterfactual probe's f0 arm is one, and v3.1 already passes it, D-050); WORLD analysis of real recordings at these f0s does not. Any later WORLD-based tool in M4 (pairs, or WORLD as a renderer) carries this check: its envelope estimate must place F1 within a known tolerance at the f0s it is used at.
+
+## D-102 (registered 2026-11-12; descriptive, no decision rule; seen beforehand: the renderer's unit tests, nothing on rendered clips): the reconstruction loss's render check. Where does it put F1 when everything else is exact?
+
+*Status*: registered (Hannah, 2026-11-12: "Yes please" to starting M4's code after D-101). Code: `vocal_analysis/train/reconstruction.py` (renderer, harmonic targets, source profiling, loss, nuisance head; `tests/test_reconstruction.py`). Script `scripts/analysis/d102_render_check.py`, report `reports/analysis/d102/`.
+
+*Why*: before any training arm, the loss's own pull on F1. `considering.md`'s gate ("on renders with known labels, adding the reconstruction loss must not move F1 from the labels by more than the noise floor") is the training-time version. This is the instrument-level one: with every other parameter at its label, does the loss's minimum sit at the label?
+
+*Design*:
+- *Clips*: 200 of train_v2's validation clips, regenerated clean (the set's config and seed: cascade and tube, uncoupled). And 200 of train_v2ku's held-out clips (coupled tube clips, strength drawn), regenerated the same way, where the closed and acoustic F1 labels differ.
+- *Targets*: `harmonic_targets` from the clip audio, with the labelled f0 and voicing, so f0 error is not part of this check.
+- *Search*: on every 5th voiced sonorant frame, F1 over the closed label x 2^(c / 1200) for c from -400 to +400 cents in 5-cent steps. F2-F8 and every bandwidth stay at their labels, there are no nuisance sections, and the source is profiled (`tilt`). The recovered F1 is the grid's minimum. On coupled clips the other formants sit at the acoustic labels, where the set has them.
+- *Measures*:
+  - the median recovered - label (cents; uncoupled against the closed label, coupled against both);
+  - the share of frames at the grid's edge;
+  - both by f0 band (< 150, 150-250, 250-400, > 400 Hz) and by kind (cascade without extras, cascade with extra pole-zero pairs, tube);
+  - the median recovered - label for the `offset` and `quadratic` profiles (reported).
+- *Readings, fixed now*:
+  - Uncoupled, median |recovered - label| <= 10 cents in every band with at least 50 frames: the loss is unbiased given exact other parameters. Otherwise the bias names its cause, whether the source's shape against the profile (bands, profiles) or unrendered sections (cascade with extras).
+  - Coupled: closer to the acoustic label means the loss reads the whole-cycle F1, as section 5.3 and D-091 expect.
+  - Edge share above 10 % in a band: F1 isn't identified there from harmonics alone.
+
+*Not here*: training, the network, the nuisance head's freedom (a nuisance pole could take F1's place; that is the training gate's question).
+
+*Cost*: CPU, minutes.
