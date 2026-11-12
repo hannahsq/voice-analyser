@@ -1,0 +1,25 @@
+D-101: D-094's gate with the exact envelope; teacher v3.1 (d040_5b_s2_b20k); slope of log2 output on log2 f0 factor; point [95 % bootstrap over clips], shuffle null; ideal 0 (f0: 1)
+
+exact envelope, F1, all 60 clips: +0.003 [-0.007, +0.016]  null -0.000 [-0.012, +0.014]  n 60   (D-094 CheapTrick: +0.039 [+0.017, +0.110]  null +0.001 [-0.021, +0.020]  n 60)
+  f0 0-150 Hz: exact +0.009 [-0.001, +0.029]  null -0.000 [-0.014, +0.012]  n 24
+      CheapTrick +0.002 [-0.005, +0.015]  null -0.000 [-0.015, +0.015]  n 24; exact - CheapTrick per clip +0.015 [+0.002, +0.037]
+  f0 150-250 Hz: exact -0.006 [-0.065, +0.029]  null +0.000 [-0.025, +0.024]  n 33
+      CheapTrick +0.160 [+0.077, +0.207]  null +0.000 [-0.067, +0.072]  n 33; exact - CheapTrick per clip -0.160 [-0.254, -0.088]
+  f0 250-up Hz: exact -0.015 [-0.048, +0.073]  null -0.003 [-0.057, +0.058]  n 3
+      CheapTrick +0.630 [+0.110, +0.795]  null +0.009 [-0.424, +0.396]  n 3; exact - CheapTrick per clip -0.644 [-0.722, -0.158]
+  F2: exact +0.003 [-0.005, +0.008]  null -0.000 [-0.006, +0.007]  n 60
+  F3: exact +0.001 [-0.003, +0.006]  null -0.000 [-0.003, +0.003]  n 60
+  F4: exact -0.001 [-0.007, +0.001]  null +0.000 [-0.003, +0.003]  n 60
+  B1: exact +0.004 [-0.032, +0.030]  null -0.002 [-0.034, +0.033]  n 60
+  B2: exact +0.064 [+0.027, +0.102]  null -0.001 [-0.034, +0.033]  n 60
+  B3: exact +0.099 [+0.063, +0.186]  null -0.001 [-0.036, +0.037]  n 60
+  B4: exact +0.087 [+0.031, +0.137]  null -0.001 [-0.036, +0.037]  n 60
+  VTL: exact +0.003 [-0.001, +0.009]  null +0.000 [-0.003, +0.003]  n 60
+  f0: exact +1.000 [+0.999, +1.001]  null -0.001 [-0.194, +0.200]  n 60
+
+reported: the envelope's F1 peak (largest peak within 0.6-1.6 x F1 on scored frames): median cents from the label / median -3 dB width Hz, by band
+  f0 0-150 Hz: CheapTrick -19 c / 94 Hz; exact -7 c / 62 Hz (24 clips)
+  f0 150-250 Hz: CheapTrick -118 c / 188 Hz; exact -13 c / 78 Hz (33 clips)
+  f0 250-up Hz: CheapTrick -14 c / 453 Hz; exact -12 c / 78 Hz (3 clips)
+
+DECISION: CHEAPTRICK'S ARTEFACT (exact-envelope gate passes: all +0.003; 150-250 Hz -0.006 [-0.065, +0.029] against CheapTrick's +0.160)

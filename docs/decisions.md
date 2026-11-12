@@ -3444,7 +3444,7 @@ D-099's runs are added when they exist, as a dated addendum.
 
 ## D-101 (registered 2026-11-12; seen beforehand: D-094's full result, gate and real items): D-094's gate with the exact envelope. Is v3.1's F1 trend on WORLD pairs CheapTrick's, or v3.1's own?
 
-*Status*: registered (Hannah, 2026-11-12: "measure twice, cut once ... let's rerun the gate with your suggestion"). The design below is mine. Script `scripts/analysis/d101_exact_gate.py`, report `reports/analysis/d101/`.
+*Status*: **done 2026-11-12: CheapTrick's artefact; M4 leads with the reconstruction loss** (see Result). Registered (Hannah, 2026-11-12: "measure twice, cut once ... let's rerun the gate with your suggestion"). The design below is mine. Script `scripts/analysis/d101_exact_gate.py`, report `reports/analysis/d101/`.
 
 *Question*: D-094's gate failed. On WORLD resyntheses of 60 clean train_v2 validation clips, v3.1's F1 followed f0 at 150-250 Hz (+0.160 [+0.077, +0.207]) and not below 150 Hz (+0.002). WORLD's envelope there is CheapTrick's estimate from the harmonics at the clip's own f0. Either that estimate makes F1 ill-defined (a broad or shifted peak), so the trend is the instrument's; or v3.1 reads the harmonics wherever a peak is smooth, so the trend is v3.1's and T2 has something to teach.
 
@@ -3471,3 +3471,14 @@ D-099's runs are added when they exist, as a dated addendum.
 *Caveats*: one model, 60 clips (33 in the band that decides). The exact envelope's peaks are sharper than CheapTrick's by construction, so a pass shows the trend needs a smeared peak, not where real voices' peaks sit.
 
 *Cost*: CPU renders a few minutes, GPU scoring about 5 minutes.
+- *Result (2026-11-12, `reports/analysis/d101/d101.txt`)*: **CheapTrick's artefact.**
+  - *The exact-envelope gate passes*: F1 slope +0.003 [-0.007, +0.016] over all 60 clips. By band:
+    - below 150 Hz, +0.009 [-0.001, +0.029];
+    - **150-250 Hz, -0.006 [-0.065, +0.029]**, against CheapTrick's +0.160 (per clip, exact minus CheapTrick, -0.160 [-0.254, -0.088]);
+    - above 250 Hz, -0.015 (3 clips).
+
+    F2-F4 and aVTL stay within +-0.003, and f0 follows at 1.000.
+  - *The envelopes' F1 peak*: at 150-250 Hz, CheapTrick's sits -118 cents from the label, with a -3 dB width of 188 Hz. The exact envelope's sits -13 c, 78 Hz wide. Below 150 Hz the two are -19 c / 94 Hz and -7 c / 62 Hz.
+  - *Reported*: with the exact envelope, B2-B4 rise slightly with f0 (+0.06 to +0.10); B1 is flat (+0.004). D-094's B1 -0.57 on real items was also CheapTrick's.
+  - *Reading*: given an envelope whose F1 peak is where the label is, v3.1's F1 doesn't follow f0. The trend in D-094's gate came from CheapTrick's estimate. At 150-250 Hz, harmonics 150-250 Hz apart sample F1 too sparsely for CheapTrick to place the peak, so its F1 lands up to a semitone off, smeared, and shifts with the sampling. D-094's real-voice slope (women +0.080) used the same estimator, so it says nothing about v3.1 on real envelopes.
+  - *Consequence* (registered): **M4 leads with the reconstruction loss.** T2 waits for a pair method whose envelope is exact by construction. Synthetic and resynthesised clips with known tracts qualify (the counterfactual probe's f0 arm is one, and v3.1 already passes it, D-050); WORLD analysis of real recordings at these f0s does not. Any later WORLD-based tool in M4 (pairs, or WORLD as a renderer) carries this check: its envelope estimate must place F1 within a known tolerance at the f0s it is used at.

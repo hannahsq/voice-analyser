@@ -12,6 +12,7 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
   1. D-092 (does v3.1's level on KL need the coupled glottis?) and D-093 (is Hillenbrand's group gradient explained by f0 and the vowel?): cheap, and the last F1-cause entries unless they name a mechanism.
   2. Close M3: items 7 and 10 below, then the lockbox, once.
   3. M4 (item 9), led by the f0-change equivariance if D-094 finds v3.1 breaks it on real envelopes, by the reconstruction loss if not.
+     *Decided 2026-11-12 (D-092 to D-094, D-101)*: **M4 leads with the reconstruction loss.** D-094's WORLD gate failed, and D-101 traced the failure to CheapTrick's envelope (v3.1 is invariant given the exact envelope). T2 waits for pairs with exact envelopes. D-092: KL's level comes with the coupled flow, so the renderer has to model coupling's detail near F1, not a smooth envelope. D-093: Hillenbrand's group gradient is not f0 or the vowel.
   4. Evaluation power: D-095 (draft: Saarbrücken's allocation and a within-speaker f0 slope).
   5. D-096: repeatability and the minimal detectable change, the number the outcomes aim needs.
   6. M5's code (streaming VQT, the causal student) alongside; none of it waits on F1.
