@@ -3522,3 +3522,27 @@ D-099's runs are added when they exist, as a dated addendum.
 
   A first run of the diagnostic added radiation on top of the LF derivative (+6 dB/oct twice) and is superseded. `reconstruction_loss` gained a `radiation` switch for it.
   - *Reading*: the loss, the targets and the renderer are sound. The bias is the source model. A straight line in log frequency can't follow the LF spectrum's low harmonics (H1-H2, the glottal formant), so F1 moves to absorb the difference, down at low f0. Given the right source, harmonics identify F1 at every f0. **The renderer needs a parametric source**: an LF source by Rd, with the radiation off, as `considering.md` suggested. Rd can be profiled per frame by a 1-D search with the offset in closed form, or predicted as a nuisance output. A recheck of this kind (exact-label search, then a profiled or predicted Rd) comes before any training arm.
+
+## D-103 (registered 2026-11-12; seen beforehand: D-102's result and diagnostic, nothing of an Rd source in the loss): an LF source by Rd in the reconstruction renderer, and D-102's check with Rd estimated
+
+*Status*: registered (Hannah, 2026-11-12: "Yes please" to the Rd source with the recheck as its gate). The design is mine. Code in `vocal_analysis/train/reconstruction.py`; script `scripts/analysis/d103_rd_check.py`; report `reports/analysis/d103/`.
+
+*Why*: D-102 found the loss sound and the source model wrong. Given the exact LF source, F1's minimum is at the label in every f0 band; with a straight-line source it is not. Rd is the LF model's one shape parameter, so the renderer can carry the source with one number per frame.
+
+*The change*: a source mode `rd`. The renderer adds the LF flow derivative's harmonic levels at Rd (`synth.glottal`'s table, 0.01 steps over 0.3-2.7, linear in Rd, so differentiable), with the radiation off (the flow derivative carries it). Only the level is profiled in closed form. Rd is either given (a predicted nuisance output, for training) or searched per frame over 0.3-2.7 in 0.05 steps, keeping each frame's best Rd (for this check, and as a fallback).
+
+*Check* (D-102's design, unchanged except the source): the same clips, frames, F1 grid (-400 to +400 c, 5-c steps), other parameters at their labels, no nuisance sections. For each F1 candidate, the frame's loss is minimised over Rd.
+- Modes:
+  - `rd` (primary): Rd searched, level profiled;
+  - `rd_tilt` (reported): Rd searched, level and slope profiled, the variant a real channel's tilt would need;
+  - `tilt`: D-102's, for reference.
+- Measures, as D-102: the median recovered - label by f0 band and kind, the edge share, and coupled clips against both labels. Also reported: each frame's best Rd against the label Rd (uncoupled LF clips; median absolute difference).
+
+*Gate* (before any training arm):
+- **passes** if, on uncoupled clips in mode `rd`, the median |recovered - label| per band is <= 10 c and the median recovered - label is within +-10 c, in every band with at least 50 frames below 400 Hz, and the edge share is <= 10 % in those bands;
+- above 400 Hz, D-102 found F1 unidentified from harmonics with a straight-line source, so it is reported, and a training arm would weight frames there down or out;
+- **fails** otherwise, and the failing band and kind name what the renderer still lacks (extras: the cascade's pole-zero pairs; tube: losses or radiation the cascade sections don't have).
+
+*Caveat*: on synthetic clips the source is LF by construction, so this checks that the renderer and the loss can use an LF source, not that real sources are LF. The real-voice side is the training gate's (`considering.md`): PTDB-TUG dev's shift against the closed-phase reference.
+
+*Cost*: CPU, under an hour.
