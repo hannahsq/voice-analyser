@@ -3615,7 +3615,7 @@ D-099's runs are added when they exist, as a dated addendum.
 
 ## D-106 (registered 2026-11-12; seen beforehand: D-105's result, and SoFilNet's renderer as described in its paper): D-105's check with SoFilNet's nuisance structure
 
-*Status*: registered (Hannah, 2026-11-12: "Yes please" to trying SoFilNet's structure). The design is mine. Script `scripts/analysis/d106_sofilnet_check.py`, report `reports/analysis/d106/`.
+*Status*: **done 2026-11-12: the gate fails; better than D-104 below 150 Hz, worse above** (see Result). Registered (Hannah, 2026-11-12: "Yes please" to trying SoFilNet's structure). The design is mine. Script `scripts/analysis/d106_sofilnet_check.py`, report `reports/analysis/d106/`.
 
 *Why*: D-105's free nuisance sections took F1's place. Each pole sat beside its zero (about 940 Hz and 3 kHz) and made narrow bumps that could stand in for F1. SoFilNet (Meka et al. 2026, section III-C; `docs/papers/literature.md`) separates its extra sections from the formants by structure:
 - its "extra" poles may sit anywhere (50-7800 Hz) but must be broader than 1 kHz;
@@ -3643,3 +3643,14 @@ None of them can make a narrow peak inside the formant range.
 
 *Cost*: CPU, about 15 minutes on 8 processes.
 - *Amendment 1 (2026-11-12, before the full run; seen: a one-clip timing run's output)*: two script fixes. (1) The comparison loss at the label F1 is now the render without any nuisance sections (D-104's, Rd only). With D-105's 'frozen' code it was the starting sections, and the narrow high poles at 7.5 kHz made that 17.5, which meant nothing. (2) The high poles start at 7500 Hz as registered (the midpoint of F4 and 7800 Hz only where F4 is above 7400 Hz). The first draft used the midpoint everywhere.
+- *Result (2026-11-12, `reports/analysis/d106/d106.txt`)*: **the gate fails, by less than D-105; better than D-104 below 150 Hz and worse above.**
+  - Uncoupled, all kinds (< 150 / 150-250 / 250-400 Hz): median recovered - label +0 / +0 / +0 c, median |.| **15 / 30 / 80 c**, edge 4.9 / 4.7 / 6.3 %. That compares with D-104 (no sections) at 20 / 15 / 25 c and D-105 (free sections) at 70 / 135 / 175 c. Above 400 Hz: +88 c, |.| 230 c.
+  - By kind, |.| (D-104 in brackets): cascade 5 / 20 / 20 c (5 / 5 / 10); cascade with extras 40 / 50 / 120 c (35 / 45 / 73); tube 20 / 30 / 110 c (25 / 20 / 45).
+  - The sections take up most of the residual at the label F1 (loss 0.71 -> 0.10 below 150 Hz; on clips with extras 1.96 -> 0.34).
+  - Sections near F1: a broad pole within 10 % of the label F1 in 6-12 % of frames, a zero in 6-15 %. Both are about what a section placed at random over its range would give (a zero spread log-uniformly over 250-4000 Hz falls within +-10 % of a given F1 about 7 % of the time, two zeros about 14 %). So neither kind is drawn to F1.
+  - Fitted sections (quartiles): broad poles 394 / 760 / 1549 Hz and 1700 / 2515 / 3543 Hz, about 2.7 kHz wide; zeros 692 / 998 / 1289 Hz and 2262 / 3303 / 3646 Hz, mostly wide (median 3.1 kHz), so often nearly off.
+  - Coupled: recovered - closed +15 / +25 / +50 c, - acoustic -12 / -7 / +13 c.
+  - *Reading* (the registered "fails without zeros at F1" branch):
+    - SoFilNet's structure stops the narrow pole-zero bumps D-105 found. Below 150 Hz, with many harmonics, the sections absorb the tube's and the extras' differences and F1 is pinned (|.| 15 c, the best of the three).
+    - From 150 Hz up, F1 drifts again, though no section sits at it. With 13 free numbers per frame (12 sections and Rd) against the 6-20 harmonics left after the SNR gate, several broad shapes fit the frame equally well, and F1 moves to suit them. The limit is the count of free numbers per frame against harmonics, not which section competes.
+    - That points to sections held per clip (`considering.md` option 3, D-105's list): a clip has hundreds of frames and its nasal, subglottal and tube-loss shapes change slowly. The other way is no sections, with D-104's spread.

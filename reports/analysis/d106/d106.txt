@@ -1,0 +1,33 @@
+D-106: D-105's check with SoFilNet's nuisance structure (2 high poles above F4, 2 broad poles >= 1 kHz wide, 2 zeros 250-4000 Hz; fitted per frame and F1 candidate), Rd continuous; SNR-gated targets 10 dB (cents; median over frames)
+
+uncoupled clips: recovered - label; 6870 frames
+  all             f0 0-150     n  2368:   +0.0 (|.|  15.0, edge  4.9 %); broad pole within 10 % of label F1  9.5 % (of recovered  9.1 %), zero within 10 % of label F1  9.4 %; loss at label F1 with sections / without 0.10 / 0.71
+  all             f0 150-250   n  1308:   +0.0 (|.|  30.0, edge  4.7 %); broad pole within 10 % of label F1 10.0 % (of recovered 10.5 %), zero within 10 % of label F1  7.7 %; loss at label F1 with sections / without 0.09 / 0.64
+  all             f0 250-400   n  1484:   +0.0 (|.|  80.0, edge  6.3 %); broad pole within 10 % of label F1  9.4 % (of recovered  9.8 %), zero within 10 % of label F1 11.4 %; loss at label F1 with sections / without 0.07 / 0.46
+  all             f0 400-up    n  1710:  +87.5 (|.| 230.0, edge 22.7 %); broad pole within 10 % of label F1  7.5 % (of recovered  6.3 %), zero within 10 % of label F1 10.0 %; loss at label F1 with sections / without 0.05 / 0.17
+  cascade         f0 0-150     n   784:   +0.0 (|.|   5.0, edge  2.6 %); broad pole within 10 % of label F1 10.5 % (of recovered 10.1 %), zero within 10 % of label F1  7.7 %; loss at label F1 with sections / without 0.06 / 0.36
+  cascade         f0 150-250   n   381:   +0.0 (|.|  20.0, edge  5.0 %); broad pole within 10 % of label F1  9.7 % (of recovered  9.4 %), zero within 10 % of label F1  8.9 %; loss at label F1 with sections / without 0.04 / 0.24
+  cascade         f0 250-400   n   475:   +0.0 (|.|  20.0, edge  3.4 %); broad pole within 10 % of label F1 11.6 % (of recovered 11.2 %), zero within 10 % of label F1 14.5 %; loss at label F1 with sections / without 0.04 / 0.17
+  cascade         f0 400-up    n   544: +100.0 (|.| 235.0, edge 21.5 %); broad pole within 10 % of label F1  7.0 % (of recovered  5.1 %), zero within 10 % of label F1 12.9 %; loss at label F1 with sections / without 0.03 / 0.09
+  cascade+extras  f0 0-150     n   213:   -5.0 (|.|  40.0, edge  6.6 %); broad pole within 10 % of label F1  8.0 % (of recovered  6.1 %), zero within 10 % of label F1 10.8 %; loss at label F1 with sections / without 0.34 / 1.96
+  cascade+extras  f0 150-250   n   103:   -5.0 (|.|  50.0, edge  3.9 %); broad pole within 10 % of label F1  6.8 % (of recovered  4.9 %), zero within 10 % of label F1  5.8 %; loss at label F1 with sections / without 0.45 / 2.32
+  cascade+extras  f0 250-400   n   126:   +2.5 (|.| 120.0, edge  7.9 %); broad pole within 10 % of label F1  7.1 % (of recovered  6.3 %), zero within 10 % of label F1 11.9 %; loss at label F1 with sections / without 0.34 / 1.88
+  cascade+extras  f0 400-up    n   113: +135.0 (|.| 230.0, edge 24.8 %); broad pole within 10 % of label F1  6.2 % (of recovered  6.2 %), zero within 10 % of label F1  7.1 %; loss at label F1 with sections / without 0.00 / 0.88
+  tube            f0 0-150     n  1371:   +0.0 (|.|  20.0, edge  6.0 %); broad pole within 10 % of label F1  9.2 % (of recovered  9.0 %), zero within 10 % of label F1 10.1 %; loss at label F1 with sections / without 0.11 / 1.03
+  tube            f0 150-250   n   824:   +0.0 (|.|  30.0, edge  4.7 %); broad pole within 10 % of label F1 10.6 % (of recovered 11.7 %), zero within 10 % of label F1  7.4 %; loss at label F1 with sections / without 0.12 / 0.89
+  tube            f0 250-400   n   883:   +5.0 (|.| 110.0, edge  7.6 %); broad pole within 10 % of label F1  8.5 % (of recovered  9.6 %), zero within 10 % of label F1  9.6 %; loss at label F1 with sections / without 0.08 / 0.71
+  tube            f0 400-up    n  1053:  +75.0 (|.| 230.0, edge 23.1 %); broad pole within 10 % of label F1  8.0 % (of recovered  6.9 %), zero within 10 % of label F1  8.8 %; loss at label F1 with sections / without 0.06 / 0.22
+
+coupled tube clips: recovered - closed | - acoustic; 6871 frames
+  all             f0 0-150     n  1971:  +15.0 | - acoustic  -12.3 (|.|  40.0, edge  6.0 %); broad pole within 10 % of label F1 12.1 % (of recovered 12.2 %), zero within 10 % of label F1 10.0 %; loss at label F1 with sections / without 0.19 / 0.86
+  all             f0 150-250   n  1130:  +25.0 | - acoustic   -6.6 (|.|  55.0, edge  3.7 %); broad pole within 10 % of label F1 11.6 % (of recovered 10.4 %), zero within 10 % of label F1  8.4 %; loss at label F1 with sections / without 0.28 / 1.02
+  all             f0 250-400   n  1489:  +50.0 | - acoustic  +12.8 (|.| 130.0, edge  9.1 %); broad pole within 10 % of label F1 10.0 % (of recovered  9.5 %), zero within 10 % of label F1  7.3 %; loss at label F1 with sections / without 0.29 / 1.24
+  all             f0 400-up    n  2281: +140.0 | - acoustic  +98.1 (|.| 250.0, edge 28.4 %); broad pole within 10 % of label F1  6.3 % (of recovered  5.9 %), zero within 10 % of label F1  8.9 %; loss at label F1 with sections / without 0.12 / 0.92
+  tube            f0 0-150     n  1971:  +15.0 | - acoustic  -12.3 (|.|  40.0, edge  6.0 %); broad pole within 10 % of label F1 12.1 % (of recovered 12.2 %), zero within 10 % of label F1 10.0 %; loss at label F1 with sections / without 0.19 / 0.86
+  tube            f0 150-250   n  1130:  +25.0 | - acoustic   -6.6 (|.|  55.0, edge  3.7 %); broad pole within 10 % of label F1 11.6 % (of recovered 10.4 %), zero within 10 % of label F1  8.4 %; loss at label F1 with sections / without 0.28 / 1.02
+  tube            f0 250-400   n  1489:  +50.0 | - acoustic  +12.8 (|.| 130.0, edge  9.1 %); broad pole within 10 % of label F1 10.0 % (of recovered  9.5 %), zero within 10 % of label F1  7.3 %; loss at label F1 with sections / without 0.29 / 1.24
+  tube            f0 400-up    n  2281: +140.0 | - acoustic  +98.1 (|.| 250.0, edge 28.4 %); broad pole within 10 % of label F1  6.3 % (of recovered  5.9 %), zero within 10 % of label F1  8.9 %; loss at label F1 with sections / without 0.12 / 0.92
+
+reported: fitted sections at the minimum, uncoupled, quartiles (Hz): broad pole 1 F 394 / 760 / 1549; broad pole 2 F 1700 / 2515 / 3543; zero 1 F 692 / 998 / 1289; zero 2 F 2262 / 3303 / 3646; broad pole 1 B 1828 / 2693 / 3117; broad pole 2 B 1650 / 2708 / 3337; zero 1 B 1489 / 3110 / 3444; zero 2 B 2350 / 3094 / 3539
+
+GATE: FAILS (uncoupled, bands below 400 Hz: f0 0-150 median +0.0 c, |.| 15.0 c, edge 4.9 %; f0 150-250 median +0.0 c, |.| 30.0 c, edge 4.7 %; f0 250-400 median +0.0 c, |.| 80.0 c, edge 6.3 %)
