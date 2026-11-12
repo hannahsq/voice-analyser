@@ -3578,3 +3578,29 @@ D-099's runs are added when they exist, as a dated addendum.
     - At low f0 the SNR gate leaves few harmonics above 2 kHz (6 % below 150 Hz), so on noisy voices the loss says little about F3 and F4 there.
     - On coupled audio the loss's F1 sits between the closed and acoustic labels, so as a training signal it pulls F1 part of the way towards the acoustic F1, the reported F1 (D-091).
   - *Next* (Hannah's call): (a) the same check with the nuisance sections free (two poles and two zeros fitted per frame by gradient, F1 on its grid). If they absorb the extras and the tube's difference without moving F1, the gate is met as the training arm would run. Or (b) take the instrument as it stands to the training gate, `considering.md`'s check on renders and PTDB-TUG dev.
+
+## D-105 (registered 2026-11-12; seen beforehand: D-104's result): D-104's check with the nuisance sections free
+
+*Status*: registered (Hannah, 2026-11-12: "Lets go with a"). The design is mine. Script `scripts/analysis/d105_nuisance_check.py`, report `reports/analysis/d105/`.
+
+*Question*: D-104's remaining spread (median |.| 20-25 c) is on cascade clips with extra pole-zero pairs and on tube clips, the two kinds whose spectra hold something the render doesn't. The nuisance head exists for that. Do two free poles and two free zeros absorb those differences without moving F1, or do they take F1's place?
+
+*The one change*: per frame and F1 candidate, the renderer also has the nuisance sections the training arm would use (`NuisanceHead`'s ranges: poles 200-7500 Hz, zeros 250-4000 Hz, bandwidths 40-1000 Hz, each a sigmoid in log frequency). Their eight parameters and Rd (continuous, `lf_source_db`) are fitted by Adam (learning rate 0.05 on the unconstrained values, 200 steps), batched over every frame and candidate.
+- *Start*: each pole paired with a zero at the same frequency and bandwidth, so they cancel and the start is the D-104 render. Pair 1 at 1000 Hz and pair 2 at 3000 Hz, both 300 Hz wide; Rd 1.0.
+- Everything else is D-104 as run: the clips, frames, SNR-gated targets (10 dB, amendment 1), mode `rd` (level profiled), the other formants and bandwidths at their labels, and the gate and its thresholds.
+- *The F1 search, coarse to fine*: the fit is costly, so first a 25-c grid over -400 to +400 c, then 5-c steps within +-25 c of the coarse minimum. The recovered F1 is the fine grid's minimum. The edge share counts coarse minima at +-400 c.
+
+*Gate*: D-104's (D-103's), unchanged. Uncoupled clips below 400 Hz, by band, need the median recovered - label within +-10 c, median |.| <= 10 c and edge <= 10 %.
+
+*Reported*:
+- By kind, as before, beside D-104's numbers.
+- How often a fitted nuisance pole ends up within +-10 % of the label F1 (it stands in for F1), and of the recovered F1.
+- The nuisance zeros' and poles' final frequencies (quartiles).
+- The loss at the minimum against D-104's (the share of residual the sections remove).
+
+*Readings*:
+- The gate passes: the training arm's renderer pins F1 on the synthetic kinds, with the extras and the tube's differences absorbed.
+- It fails, with nuisance poles often at F1: the sections compete with F1. A training arm would then need them kept away from F1, by a band, a margin from the predicted F1, or a penalty, registered on its own.
+- It fails without that: the sections are not enough for those kinds, and the failing kind names what is missing.
+
+*Cost*: CPU, about an hour on 8 processes.
