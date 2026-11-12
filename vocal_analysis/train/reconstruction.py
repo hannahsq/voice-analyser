@@ -121,7 +121,7 @@ def profile_out(resid: torch.Tensor, f: torch.Tensor, w: torch.Tensor, profile: 
 def reconstruction_loss(target_db: torch.Tensor, valid: torch.Tensor, f0: torch.Tensor, poles_f: torch.Tensor,
                         poles_b: torch.Tensor, zeros_f: torch.Tensor | None = None, zeros_b: torch.Tensor | None = None,
                         frame_mask: torch.Tensor | None = None, profile: str = "tilt", delta_db: float = 6.0,
-                        min_harmonics: int = 4) -> tuple[torch.Tensor, torch.Tensor]:
+                        min_harmonics: int = 4, radiation: bool = True) -> tuple[torch.Tensor, torch.Tensor]:
     """Huber loss (dB) between the observed harmonics and the render sampled at k f0, after profiling the source out.
 
     target_db / valid (B, T, K) from `harmonic_targets`; f0 (B, T) the same fixed f0 the targets used; poles / zeros
@@ -130,7 +130,7 @@ def reconstruction_loss(target_db: torch.Tensor, valid: torch.Tensor, f0: torch.
     K = target_db.shape[-1]
     f = f0.unsqueeze(-1) * torch.arange(1, K + 1, dtype=f0.dtype, device=f0.device)
     w = valid.to(target_db.dtype)
-    rend = render_db(torch.where(valid, f, torch.full_like(f, 1000.0)), poles_f, poles_b, zeros_f, zeros_b)
+    rend = render_db(torch.where(valid, f, torch.full_like(f, 1000.0)), poles_f, poles_b, zeros_f, zeros_b, radiation)
     resid = profile_out((target_db - rend) * w, f, w, profile) * w
     per = torch.nn.functional.huber_loss(resid, torch.zeros_like(resid), reduction="none", delta=delta_db)
     n = w.sum(-1)

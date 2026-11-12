@@ -1,0 +1,31 @@
+D-102: the reconstruction loss's F1 minimum with every other parameter at its label (cents; median over frames)
+
+uncoupled clips (train_v2 validation): recovered - label; profile tilt unless named
+  all             f0 0-150     n  2553:  -90.0 (|.| 110.0); offset -400.0, quadratic  -20.0; edge 21.9 %
+  all             f0 150-250   n  1471:  -35.0 (|.|  70.0); offset -225.0, quadratic  +20.0; edge 12.6 %
+  all             f0 250-400   n  1769:   +0.0 (|.| 105.0); offset -100.0, quadratic  +35.0; edge 11.5 %
+  all             f0 400-up    n  2812:  +20.0 (|.| 265.0); offset +270.0, quadratic  +45.0; edge 38.9 %
+  cascade         f0 0-150     n   846:  -45.0 (|.|  65.0); offset -370.0, quadratic  -10.0; edge 11.9 %
+  cascade         f0 150-250   n   452:  -20.0 (|.|  50.0); offset -145.0, quadratic  +22.5; edge  7.1 %
+  cascade         f0 250-400   n   553:  +15.0 (|.|  45.0); offset -100.0, quadratic  +25.0; edge  7.8 %
+  cascade         f0 400-up    n   901:  -60.0 (|.| 325.0); offset +365.0, quadratic  +15.0; edge 46.1 %
+  cascade+extras  f0 0-150     n   255:  -10.0 (|.|  45.0); offset -375.0, quadratic  -15.0; edge  4.3 %
+  cascade+extras  f0 150-250   n   135:  +10.0 (|.|  95.0); offset -200.0, quadratic   +0.0; edge 16.3 %
+  cascade+extras  f0 250-400   n   197:  -15.0 (|.| 160.0); offset -105.0, quadratic  +20.0; edge 22.3 %
+  cascade+extras  f0 400-up    n   234:  +90.0 (|.| 390.0); offset +307.5, quadratic  +20.0; edge 49.1 %
+  tube            f0 0-150     n  1452: -175.0 (|.| 185.0); offset -400.0, quadratic  -35.0; edge 30.7 %
+  tube            f0 150-250   n   884:  -55.0 (|.|  80.0); offset -270.0, quadratic  +20.0; edge 14.9 %
+  tube            f0 250-400   n  1019:  -15.0 (|.| 140.0); offset -100.0, quadratic  +45.0; edge 11.4 %
+  tube            f0 400-up    n  1677:  +40.0 (|.| 240.0); offset +215.0, quadratic  +65.0; edge 33.6 %
+
+coupled tube clips (train_v2ku held-out): recovered - closed | - acoustic; acoustic - closed; profile tilt unless named
+  all             f0 0-150     n  2051: - closed  -35.0 | - acoustic  -67.7; acoustic - closed  +32.7; |.| closed  85.0 acoustic  90.6; edge 11.6 %
+  all             f0 150-250   n  1193: - closed   +5.0 | - acoustic  -29.3; acoustic - closed  +31.7; |.| closed  85.0 acoustic  69.8; edge 11.7 %
+  all             f0 250-400   n  1670: - closed  +45.0 | - acoustic   +7.0; acoustic - closed  +35.0; |.| closed 115.0 acoustic  99.3; edge 10.4 %
+  all             f0 400-up    n  3254: - closed  +50.0 | - acoustic   +7.0; acoustic - closed  +31.3; |.| closed 280.0 acoustic 262.1; edge 38.3 %
+  tube            f0 0-150     n  2051: - closed  -35.0 | - acoustic  -67.7; acoustic - closed  +32.7; |.| closed  85.0 acoustic  90.6; edge 11.6 %
+  tube            f0 150-250   n  1193: - closed   +5.0 | - acoustic  -29.3; acoustic - closed  +31.7; |.| closed  85.0 acoustic  69.8; edge 11.7 %
+  tube            f0 250-400   n  1670: - closed  +45.0 | - acoustic   +7.0; acoustic - closed  +35.0; |.| closed 115.0 acoustic  99.3; edge 10.4 %
+  tube            f0 400-up    n  3254: - closed  +50.0 | - acoustic   +7.0; acoustic - closed  +31.3; |.| closed 280.0 acoustic 262.1; edge 38.3 %
+
+READING: uncoupled biased: 0-150 90.0 c, 150-250 35.0 c, 400-up 20.0 c; coupled: nearer the acoustic label

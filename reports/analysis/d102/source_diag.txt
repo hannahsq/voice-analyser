@@ -1,0 +1,6 @@
+D-102 source diagnostic: cascade clips without extras, 1537 frames, harmonics 1-8
+
+  f0 0-150: n 539; (a) target - render - source, SD over k (dB) median 0.35; (b) source shape left after offset + slope, SD 1.42 dB; (c) F1 minimum with the exact source +0 c (|.| 5), edge 0.2 %; median F1/f0 5.3
+  f0 150-250: n 316; (a) target - render - source, SD over k (dB) median 0.79; (b) source shape left after offset + slope, SD 1.70 dB; (c) F1 minimum with the exact source +0 c (|.| 5), edge 0.0 %; median F1/f0 2.8
+  f0 250-400: n 406; (a) target - render - source, SD over k (dB) median 0.59; (b) source shape left after offset + slope, SD 1.76 dB; (c) F1 minimum with the exact source +0 c (|.| 5), edge 0.0 %; median F1/f0 2.1
+  f0 400-up: n 276; (a) target - render - source, SD over k (dB) median 0.73; (b) source shape left after offset + slope, SD 2.09 dB; (c) F1 minimum with the exact source +0 c (|.| 10), edge 1.4 %; median F1/f0 1.4

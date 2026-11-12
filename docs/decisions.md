@@ -3485,7 +3485,7 @@ D-099's runs are added when they exist, as a dated addendum.
 
 ## D-102 (registered 2026-11-12; descriptive, no decision rule; seen beforehand: the renderer's unit tests, nothing on rendered clips): the reconstruction loss's render check. Where does it put F1 when everything else is exact?
 
-*Status*: registered (Hannah, 2026-11-12: "Yes please" to starting M4's code after D-101). Code: `vocal_analysis/train/reconstruction.py` (renderer, harmonic targets, source profiling, loss, nuisance head; `tests/test_reconstruction.py`). Script `scripts/analysis/d102_render_check.py`, report `reports/analysis/d102/`.
+*Status*: **done 2026-11-12: biased by the source model; with the exact source F1 is recovered at every f0** (see Result and diagnostic). Registered (Hannah, 2026-11-12: "Yes please" to starting M4's code after D-101). Code: `vocal_analysis/train/reconstruction.py` (renderer, harmonic targets, source profiling, loss, nuisance head; `tests/test_reconstruction.py`). Script `scripts/analysis/d102_render_check.py`, report `reports/analysis/d102/`.
 
 *Why*: before any training arm, the loss's own pull on F1. `considering.md`'s gate ("on renders with known labels, adding the reconstruction loss must not move F1 from the labels by more than the noise floor") is the training-time version. This is the instrument-level one: with every other parameter at its label, does the loss's minimum sit at the label?
 
@@ -3506,3 +3506,19 @@ D-099's runs are added when they exist, as a dated addendum.
 *Not here*: training, the network, the nuisance head's freedom (a nuisance pole could take F1's place; that is the training gate's question).
 
 *Cost*: CPU, minutes.
+- *Result (2026-11-12, `reports/analysis/d102/d102.txt`; 200 + 200 clips, 8605 uncoupled and 8168 coupled frames)*: **biased: a straight-line source lets F1 absorb the source's shape.** Before the full run, a 5-clip smoke test of the script was seen; it showed the same pattern.
+  - *Uncoupled, `tilt` profile*: recovered - label by band (< 150 / 150-250 / 250-400 / > 400 Hz):
+    - all clips: -90 / -35 / 0 / +20 c, with 22 / 13 / 12 / 39 % of frames at the grid's edge;
+    - cascade without extras: -45 / -20 / +15 / -60 c;
+    - tube: -175 / -55 / -15 / +40 c.
+
+    `offset` alone: -400 / -225 / -100 / +270 c, the low-f0 frames almost all at the lower edge. `quadratic`: -20 / +20 / +35 / +45 c, and cascade -10 / +22 / +25 / +15 c.
+  - *Coupled* (tube): recovered - closed -35 / +5 / +45 / +50 c; recovered - acoustic -68 / -29 / +7 / +7 c (acoustic - closed about +32 c). Nearer the acoustic label from 250 Hz up; at low f0 below both.
+  - *Readings*: uncoupled is biased in three bands (0-150 90 c, 150-250 35 c, > 400 20 c). The profiles name the cause: the less of the source's shape the profile removes, the further F1 goes (offset >> tilt > quadratic). Above 400 Hz, 39 % of frames at the edge: F1 isn't identified from harmonics alone there, as expected with one or two harmonics under F1.
+- *Diagnostic (2026-11-12, after the result; descriptive, outside the registration; `scripts/analysis/d102_source_diag.py`, `reports/analysis/d102/source_diag.txt`)*: is it the source model, or the targets or renderer? On 1537 frames of cascade clips without extras, using the generator's own LF source levels for harmonics 1-8 (`source_h_db`, the flow derivative, which already carries radiation, so the renderer's radiation is off):
+  - (a) target - render - source is flat across harmonics 1-8 (median SD 0.35-0.79 dB by band), so the targets and the renderer are right;
+  - (b) the LF source's shape left after removing an offset and a slope is 1.4-2.1 dB (SD over harmonics 1-8): the curvature the `tilt` profile can't absorb;
+  - (c) with the exact source and only an offset profiled, F1's minimum is **+0 c (|.| 5 c) in every band, edge 0-1.4 %**, up to f0 > 400 Hz.
+
+  A first run of the diagnostic added radiation on top of the LF derivative (+6 dB/oct twice) and is superseded. `reconstruction_loss` gained a `radiation` switch for it.
+  - *Reading*: the loss, the targets and the renderer are sound. The bias is the source model. A straight line in log frequency can't follow the LF spectrum's low harmonics (H1-H2, the glottal formant), so F1 moves to absorb the difference, down at low f0. Given the right source, harmonics identify F1 at every f0. **The renderer needs a parametric source**: an LF source by Rd, with the radiation off, as `considering.md` suggested. Rd can be profiled per frame by a 1-D search with the offset in closed form, or predicted as a nuisance output. A recheck of this kind (exact-label search, then a profiled or predicted Rd) comes before any training arm.
