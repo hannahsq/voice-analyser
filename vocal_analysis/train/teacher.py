@@ -169,6 +169,15 @@ class TrainConfig:
     # the running mean is floored here: the length terms are Gaussian NLLs, which pass through 0 as they train, and a
     # mean near 0 would send their weight to infinity (the smoke test, 2026-11-10: a loss of 1e6 at step 50)
     aux_floor: float = 1.0
+    # D-109 (M4): the reconstruction loss (train.reconstruction.model_recon_loss) on real-audio crops from recon_stores
+    # (train.recon_data.build_store), one batch of recon_batch crops of recon_frames per step, weight recon_weight.
+    # Off by default: every run before D-109 trains without it
+    recon_stores: tuple = ()
+    recon_weight: float = 0.0
+    recon_batch: int = 16
+    recon_frames: int = 200
+    recon_fmax: float = 5000.0  # harmonics above it are dropped from the loss
+    recon_hpc: bool = False  # F5-F8 rendered by reconstruction.upper_poles from the model's F4
 
 
 def _git() -> dict:
@@ -900,6 +909,19 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         sf_mode("train")
 
     aux = _AuxWeights(cfg) if cfg.aux_budget is not None else None
+    recon_iter = None
+    if cfg.recon_stores and cfg.recon_weight > 0:  # D-109
+        from .recon_data import ReconCrops, collate_recon
+        from .reconstruction import model_recon_loss
+
+        rds = ReconCrops(list(cfg.recon_stores), cfg.recon_frames, seed=cfg.seed + 307 + step, epoch_size=10 ** 7)
+
+        def _recon_batches():
+            while True:
+                yield from DataLoader(rds, cfg.recon_batch, num_workers=2, collate_fn=collate_recon, persistent_workers=False)
+
+        recon_iter = _recon_batches()
+        log(f"reconstruction loss: {len(rds.files)} recordings, weight {cfg.recon_weight}, {cfg.recon_batch} x {cfg.recon_frames} frames per step")
     logf = (out / "log.jsonl").open("a", encoding="utf-8")
     t0, seen = time.time(), 0
     acc: dict = {}  # name -> running sum (tensor until the log step)
@@ -933,6 +955,14 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             loss, parts = teacher_loss(out_, lab, cfg.loss_weights if aux is None else aux.weights())
             if aux is not None:
                 aux.update(parts)
+            if recon_iter is not None:  # D-109: a real-audio batch, the model's own f0 comb
+                ra, rl = next(recon_iter)
+                ra, rl = ra.to(device, non_blocking=True), _to(rl, device)
+                with torch.autocast(device.type, dtype=torch.bfloat16):
+                    rout = model(vq.log_power_with_context(ra, rl["f0"].shape[1]))
+                rloss = model_recon_loss(rout, rl, fmax=cfg.recon_fmax, hpc=cfg.recon_hpc)
+                loss = loss + cfg.recon_weight * rloss
+                parts = {**parts, "recon": rloss.detach()}
             opt.zero_grad(set_to_none=True)
             loss.backward()
             gn = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
@@ -952,7 +982,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                        "audio_s_per_s": seen / 100 / dt, "time": time.time()}
                 logf.write(json.dumps(rec) + "\n")
                 logf.flush()
-                vtl_part = (f" vtl {rec['vtl']:.2f}" if "vtl" in rec else "") + (f" inst {rec['vtl_inst']:.2f}" if "vtl_inst" in rec else "")
+                vtl_part = (f" vtl {rec['vtl']:.2f}" if "vtl" in rec else "") + (f" inst {rec['vtl_inst']:.2f}" if "vtl_inst" in rec else "") + (f" recon {rec['recon']:.2f}" if "recon" in rec else "")
                 log(f"step {step} loss {rec['loss']:.3f} (f0 {rec['f0']:.2f} F {rec['formants']:.2f} bw {rec['bandwidth']:.2f}{vtl_part}) "
                     f"{rec['audio_s_per_s']:.0f} s/s")
                 acc, t0, seen = {}, time.time(), 0

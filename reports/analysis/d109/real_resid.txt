@@ -1,0 +1,10 @@
+D-109 pre-check: the reconstruction loss's misfit at the branch point (d040_5b_s2 step 16000); D-109's instrument (F1-F4 + higher-pole correction, harmonics to 4000 Hz, Rd searched, level profiled); 12 batches of 16 x 200 frames
+  VocalSet (real, labeller f0)
+    frames 33804: per-frame loss median 10.45, 90th pct 24.60; with level and slope profiled: median 7.34
+    residual by harmonic frequency (Hz: median signed / median |.| dB): 0-250  +2.5 /  3.6; 250-500  +0.3 /  2.7; 500-750  -2.0 /  3.3; 750-1000  -2.2 /  4.4; 1000-1500  -1.4 /  3.4; 1500-2000  +0.9 /  2.8; 2000-2500  +0.8 /  2.9; 2500-3000  +1.5 /  3.3; 3000-3500  +1.9 /  3.7; 3500-4000  -0.6 /  4.5
+  Zeroth-Korean (real, labeller f0)
+    frames 16872: per-frame loss median 8.80, 90th pct 19.87; with level and slope profiled: median 5.39
+    residual by harmonic frequency (Hz: median signed / median |.| dB): 0-250  +1.9 /  2.6; 250-500  -1.6 /  3.1; 500-750  -2.7 /  3.5; 750-1000  +0.6 /  3.1; 1000-1500  -0.2 /  3.1; 1500-2000  +0.6 /  2.9; 2000-2500  +0.8 /  2.8; 2500-3000  +0.7 /  2.6; 3000-3500  +1.0 /  2.6; 3500-4000  +2.3 /  3.3
+  train_v2 validation crops (synthetic, training channel, label f0)
+    frames 16218: per-frame loss median 2.51, 90th pct 13.84; with level and slope profiled: median 1.35
+    residual by harmonic frequency (Hz: median signed / median |.| dB): 0-250  -0.1 /  1.0; 250-500  -0.1 /  1.1; 500-750  -0.1 /  1.3; 750-1000  -0.2 /  1.2; 1000-1500  -0.4 /  1.2; 1500-2000  -0.0 /  1.3; 2000-2500  +0.3 /  1.6; 2500-3000  +0.5 /  1.7; 3000-3500  +1.2 /  2.4; 3500-4000  +1.4 /  2.9

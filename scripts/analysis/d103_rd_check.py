@@ -2,7 +2,10 @@
 frame's loss is minimised over Rd (0.3-2.7, 0.05 steps). Modes: rd (level profiled; primary), rd_tilt (level and
 slope), tilt (D-102's). Reports each frame's best Rd at the label F1 against the label Rd. CPU, clips in parallel.
 
-    python scripts/analysis/d103_rd_check.py [n_clips] [--serial] > reports/analysis/d103/d103.txt
+    python scripts/analysis/d103_rd_check.py [n_clips] [--serial] [--snr DB] [--poles N] [--fmax HZ] [--hpc] > reports/analysis/d103/d103.txt
+
+--poles N renders only the first N poles (D-109's pre-check: the model predicts F1-F4); --fmax HZ caps the targets
+(default 5000 Hz, as before); --hpc replaces F5-F8 with reconstruction.upper_poles from the label F4.
 """
 import sys
 from pathlib import Path
@@ -13,6 +16,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 SNR = float(sys.argv[sys.argv.index("--snr") + 1]) if "--snr" in sys.argv else None  # D-104
+NPOLES = int(sys.argv[sys.argv.index("--poles") + 1]) if "--poles" in sys.argv else None  # D-109 pre-check
+HPC = "--hpc" in sys.argv  # D-109 pre-check: F5-F8 replaced by reconstruction.upper_poles from the label F4
+FMAX = float(sys.argv[sys.argv.index("--fmax") + 1]) if "--fmax" in sys.argv else 5000.0
 MODES = {"rd": ("rd", "offset"), "rd_tilt": ("rd", "tilt"), "tilt": ("profile", "tilt")}
 
 
@@ -26,11 +32,13 @@ def one(job, snr=None):
 
     root, coupled, i = job[:3]
     snr = job[3] if len(job) > 3 else snr
+    npoles, fmax = (job[4], job[5]) if len(job) > 5 else (None, 5000.0)
+    hpc = job[6] if len(job) > 6 else False
     idx, cfg = load_cfg(root)
     clip = generate(int(i), cfg, idx["seed"])
     lab = clip.labels
-    db, ok = R.harmonic_targets(clip.audio, lab["f0"], lab["voiced"].astype(bool), k_max=64, snr_min_db=snr)
-    ok0 = R.harmonic_targets(clip.audio, lab["f0"], lab["voiced"].astype(bool), k_max=64)[1] if snr is not None else ok
+    db, ok = R.harmonic_targets(clip.audio, lab["f0"], lab["voiced"].astype(bool), fmax=fmax, k_max=64, snr_min_db=snr)
+    ok0 = R.harmonic_targets(clip.audio, lab["f0"], lab["voiced"].astype(bool), fmax=fmax, k_max=64)[1] if snr is not None else ok
     fr = np.flatnonzero(lab["voiced"].astype(bool) & lab["sonorant"].astype(bool) & np.isfinite(lab["formants"][:, 0])
                         & (ok.sum(1) >= 4))[::5]
     fr = fr[fr < len(db)]
@@ -39,6 +47,11 @@ def one(job, snr=None):
     Fc = lab["formants"][fr]
     Fa = lab.get("formants_acoustic", lab["formants"])[fr] if coupled else Fc
     Ba = lab.get("bandwidths_acoustic", lab["bandwidths"])[fr] if coupled else lab["bandwidths"][fr]
+    if npoles is not None:
+        Fa, Ba = Fa[:, :npoles], Ba[:, :npoles]
+    if hpc:
+        uf, ub = R.upper_poles(torch.tensor(Fa[:, 3], dtype=torch.float64), torch.tensor(lab["f0"][fr], dtype=torch.float64))
+        Fa, Ba = np.concatenate([Fa[:, :4], uf.numpy()], 1), np.concatenate([Ba[:, :4], ub.numpy()], 1)
     C, N = len(GRID), len(fr)
     poles = np.repeat(Fa[None], C, 0).astype(np.float64)
     poles[:, :, 0] = Fc[None, :, 0] * 2 ** (GRID[:, None] / 1200)
@@ -82,7 +95,7 @@ if __name__ == "__main__":
     jobs = []
     for root, coupled in (("data/synth/train_v2", False), ("data/synth/train_v2ku", True)):
         idx, _ = load_cfg(root)
-        jobs += [(root, coupled, int(i), SNR) for i in split_ids(idx["n_clips"])[1][:n_clips]]
+        jobs += [(root, coupled, int(i), SNR, NPOLES, FMAX, HPC) for i in split_ids(idx["n_clips"])[1][:n_clips]]
     if "--serial" in sys.argv:
         got = [one(j) for j in jobs]
     else:
@@ -95,7 +108,9 @@ if __name__ == "__main__":
     def med(v):
         return f"{np.median(v):+6.1f}" if len(v) else "   n/a"
 
-    L = [("D-104 (SNR-gated targets, %g dB): " % SNR if SNR is not None else "") + "D-103: the reconstruction loss's F1 minimum with every other parameter at its label, LF source by Rd "
+    L = [(f"D-109 pre-check: poles F1-F{NPOLES} only, targets to {FMAX:g} Hz. " if NPOLES or FMAX != 5000 else "")
+         + ("F5-F8 by the higher-pole correction from the label F4. " if HPC else "")
+         + ("D-104 (SNR-gated targets, %g dB): " % SNR if SNR is not None else "") + "D-103: the reconstruction loss's F1 minimum with every other parameter at its label, LF source by Rd "
          "(cents; median over frames; Rd minimised per F1 candidate)", ""]
     gate = []
     for coupled in (False, True):

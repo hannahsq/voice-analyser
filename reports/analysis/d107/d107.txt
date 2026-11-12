@@ -1,0 +1,54 @@
+D-107: per-clip extra sections (4 pole-zero pairs, penalised towards cancelling), alternating fit; Rd per frame; SNR-gated targets (cents; median over frames)
+
+uncoupled clips: recovered - label; 6870 frames
+  all                      f0 0-150   n  2368:   +0.0 (|.|  20.0, edge  3.3 %); loss at minimum 0.33, at label without sections 0.67
+  all                      f0 150-250   n  1308:   +0.0 (|.|  20.0, edge  1.5 %); loss at minimum 0.34, at label without sections 0.63
+  all                      f0 250-400   n  1484:   +0.0 (|.|  25.0, edge  2.6 %); loss at minimum 0.23, at label without sections 0.46
+  all                      f0 400-up    n  1710:   +5.0 (|.| 100.0, edge 11.9 %); loss at minimum 0.07, at label without sections 0.16
+  extras nasal             f0 0-150   n   216:   -5.0 (|.|  35.0, edge  6.0 %); loss at minimum 0.30, at label without sections 8.82
+  extras nasal             f0 150-250   n   113:  -10.0 (|.|  35.0, edge  4.4 %); loss at minimum 0.42, at label without sections 5.22
+  extras nasal             f0 250-400   n   272:   -5.0 (|.|  82.5, edge  6.6 %); loss at minimum 0.31, at label without sections 2.86
+  extras nasal             f0 400-up    n   250:  -15.0 (|.| 185.0, edge 18.4 %); loss at minimum 0.06, at label without sections 0.52
+  extras nasal+subglottal  f0 0-150   n    48:  +50.0 (|.|  65.0, edge  4.2 %); loss at minimum 0.28, at label without sections 6.60
+  extras nasal+subglottal  f0 400-up    n    41:  +65.0 (|.|  90.0, edge  4.9 %); loss at minimum 0.21, at label without sections 3.32
+  extras none              f0 0-150   n  1839:   +0.0 (|.|  15.0, edge  2.3 %); loss at minimum 0.32, at label without sections 0.38
+  extras none              f0 150-250   n   916:   +0.0 (|.|  15.0, edge  1.1 %); loss at minimum 0.33, at label without sections 0.27
+  extras none              f0 250-400   n   990:   +0.0 (|.|  20.0, edge  1.3 %); loss at minimum 0.20, at label without sections 0.21
+  extras none              f0 400-up    n  1225:  +10.0 (|.|  90.0, edge 11.8 %); loss at minimum 0.06, at label without sections 0.09
+  extras subglottal        f0 0-150   n   265:   +0.0 (|.|  25.0, edge  7.2 %); loss at minimum 0.43, at label without sections 1.89
+  extras subglottal        f0 150-250   n   279:   +0.0 (|.|  20.0, edge  1.8 %); loss at minimum 0.37, at label without sections 1.70
+  extras subglottal        f0 250-400   n   207:   +0.0 (|.|  25.0, edge  3.4 %); loss at minimum 0.31, at label without sections 1.71
+  extras subglottal        f0 400-up    n   194:   +5.0 (|.|  92.5, edge  5.7 %); loss at minimum 0.08, at label without sections 1.12
+  moving vowel             f0 0-150   n  2368:   +0.0 (|.|  20.0, edge  3.3 %); loss at minimum 0.33, at label without sections 0.67
+  moving vowel             f0 150-250   n  1308:   +0.0 (|.|  20.0, edge  1.5 %); loss at minimum 0.34, at label without sections 0.63
+  moving vowel             f0 250-400   n  1484:   +0.0 (|.|  25.0, edge  2.6 %); loss at minimum 0.23, at label without sections 0.46
+  moving vowel             f0 400-up    n  1708:   +5.0 (|.| 100.0, edge 11.9 %); loss at minimum 0.07, at label without sections 0.16
+
+coupled tube clips: recovered - closed | - acoustic; 6871 frames
+  all                      f0 0-150   n  1971:  +25.0 | - acoustic   -5.7 (|.|  40.0, edge  3.1 %); loss at minimum 0.38, at label without sections 0.72
+  all                      f0 150-250   n  1130:  +25.0 | - acoustic   -9.9 (|.|  40.0, edge  1.5 %); loss at minimum 0.42, at label without sections 0.91
+  all                      f0 250-400   n  1489:  +30.0 | - acoustic   -1.0 (|.|  70.0, edge  3.8 %); loss at minimum 0.46, at label without sections 1.19
+  all                      f0 400-up    n  2281:  +50.0 | - acoustic  +19.1 (|.| 180.0, edge 21.2 %); loss at minimum 0.40, at label without sections 0.86
+  extras nasal             f0 0-150   n   221:  +20.0 | - acoustic   -1.6 (|.|  50.0, edge  2.7 %); loss at minimum 0.73, at label without sections 9.80
+  extras nasal             f0 150-250   n    96:  +35.0 | - acoustic  -21.9 (|.|  80.0, edge  5.2 %); loss at minimum 0.30, at label without sections 6.03
+  extras nasal             f0 250-400   n   198:  -12.5 | - acoustic  -28.0 (|.|  77.5, edge  4.0 %); loss at minimum 0.38, at label without sections 7.85
+  extras nasal             f0 400-up    n   300:  +40.0 | - acoustic  +13.2 (|.| 180.0, edge 19.0 %); loss at minimum 0.32, at label without sections 1.83
+  extras nasal+subglottal  f0 0-150   n    33:  +50.0 | - acoustic  +20.4 (|.|  50.0, edge  3.0 %); loss at minimum 0.37, at label without sections 3.31
+  extras nasal+subglottal  f0 250-400   n    27:  +45.0 | - acoustic  +12.4 (|.| 110.0, edge  7.4 %); loss at minimum 0.24, at label without sections 13.40
+  extras nasal+subglottal  f0 400-up    n    78: +142.5 | - acoustic  +99.2 (|.| 307.5, edge 30.8 %); loss at minimum 0.45, at label without sections 1.91
+  extras none              f0 0-150   n  1426:  +25.0 | - acoustic   -3.9 (|.|  35.0, edge  3.4 %); loss at minimum 0.34, at label without sections 0.39
+  extras none              f0 150-250   n   723:  +20.0 | - acoustic  -12.2 (|.|  35.0, edge  1.0 %); loss at minimum 0.40, at label without sections 0.44
+  extras none              f0 250-400   n   986:  +30.0 | - acoustic   +0.9 (|.|  67.5, edge  3.5 %); loss at minimum 0.44, at label without sections 0.54
+  extras none              f0 400-up    n  1380:  +47.5 | - acoustic  +15.8 (|.| 175.0, edge 21.3 %); loss at minimum 0.40, at label without sections 0.70
+  extras subglottal        f0 0-150   n   291:  +25.0 | - acoustic  -14.2 (|.|  35.0, edge  1.7 %); loss at minimum 0.36, at label without sections 1.47
+  extras subglottal        f0 150-250   n   311:  +35.0 | - acoustic   -1.4 (|.|  50.0, edge  1.6 %); loss at minimum 0.54, at label without sections 2.03
+  extras subglottal        f0 250-400   n   278:  +40.0 | - acoustic   +0.2 (|.|  70.0, edge  4.0 %); loss at minimum 0.53, at label without sections 1.91
+  extras subglottal        f0 400-up    n   523:  +50.0 | - acoustic  +22.5 (|.| 175.0, edge 20.8 %); loss at minimum 0.41, at label without sections 1.22
+  moving vowel             f0 0-150   n  1971:  +25.0 | - acoustic   -5.7 (|.|  40.0, edge  3.1 %); loss at minimum 0.38, at label without sections 0.72
+  moving vowel             f0 150-250   n  1130:  +25.0 | - acoustic   -9.9 (|.|  40.0, edge  1.5 %); loss at minimum 0.42, at label without sections 0.91
+  moving vowel             f0 250-400   n  1489:  +30.0 | - acoustic   -1.0 (|.|  70.0, edge  3.8 %); loss at minimum 0.46, at label without sections 1.19
+  moving vowel             f0 400-up    n  2277:  +50.0 | - acoustic  +19.2 (|.| 180.0, edge 21.2 %); loss at minimum 0.40, at label without sections 0.86
+
+reported: fitted sections against the true extras (uncoupled clips with extras): median over clips of the median distance from each true pole to the nearest fitted pole (cents): nasal 78; nasal+subglottal 156; subglottal 143
+
+GATE: FAILS (uncoupled, bands below 400 Hz: f0 0-150 median +0.0 c, |.| 20.0 c, edge 3.3 %; f0 150-250 median +0.0 c, |.| 20.0 c, edge 1.5 %; f0 250-400 median +0.0 c, |.| 25.0 c, edge 2.6 %)

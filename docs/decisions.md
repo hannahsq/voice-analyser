@@ -3662,7 +3662,7 @@ None of them can make a narrow peak inside the formant range.
 
 ## D-107 (registered 2026-11-13; seen beforehand: D-104 to D-106 and D-104's kind diagnostic): extra sections held per clip
 
-*Status*: registered (Hannah, 2026-11-13: run this and the learnability probe, D-108, "before returning to the critical path"). The design is mine. Script `scripts/analysis/d107_clip_sections.py`, report `reports/analysis/d107/`.
+*Status*: **done 2026-11-13: the gate fails broadly; per-clip sections take up the residual but don't tighten F1** (see Result). Registered (Hannah, 2026-11-13: run this and the learnability probe, D-108, "before returning to the critical path"). The design is mine. Script `scripts/analysis/d107_clip_sections.py`, report `reports/analysis/d107/`.
 
 *Question*: D-104's kind diagnostic puts the whole remaining render mismatch in the extra pole-zero sections. The synthesiser holds them fixed per clip, and so, roughly, do real voices (subglottal resonances per speaker, the velum slow against 10 ms frames). D-105 and D-106 freed sections per frame and lost F1. Do sections held per clip absorb the extras and leave F1 at the label?
 
@@ -3688,6 +3688,14 @@ None of them can make a narrow peak inside the formant range.
 *Caveat*: on these clips the extras are per clip by construction. Real nasal coupling varies within a clip; that is the training gate's question.
 
 *Cost*: CPU, about 30 minutes on 8 processes.
+- *Result (2026-11-13, `reports/analysis/d107/d107.txt`)*: **the gate fails, broadly: sections held per clip take up the extras' residual but don't tighten F1.**
+  - Uncoupled, all kinds (< 150 / 150-250 / 250-400 Hz): median recovered - label +0 / +0 / +0 c, median |.| **20 / 20 / 25 c**, edge 3.3 / 1.5 / 2.6 %. D-104 (no sections) gave 20 / 15 / 25 c, D-106 15 / 30 / 80 c, D-105 70 / 135 / 175 c. Above 400 Hz: +5 c, |.| 100 c.
+  - By kind, |.|: no extras 15 / 15 / 20 c; subglottal 25 / 20 / 25 c; nasal 35 / 35 / 83 c (D-104's cascade with extras: 35 / 45 / 73 c); nasal and subglottal (48 frames below 150 Hz) +50 c.
+  - The sections halve the loss at the minimum (0.67 -> 0.33 below 150 Hz). On nasal clips it falls from 8.8 at the label without sections to 0.3, yet F1's spread there stays at D-104's.
+  - Fitted against true sections: the nearest fitted pole to each true pole, median over clips, 78 c (nasal), 143 c (subglottal), 156 c (both). The sections land near the extras, not on them.
+  - Steady-vowel clips: none of the 400 clips met the criterion (every clip's labelled F1 spans at least 100 c), so the split is empty and the "fails only on steady-vowel clips" reading can't apply.
+  - Coupled: recovered - closed +25 / +25 / +30 c, - acoustic -6 / -10 / -1 c (D-104: +25 / +20 / +15 | -8 / -17 / -14).
+  - *Reading* (the registered "fails broadly" branch): per-clip sections add no F1 precision over no sections. The spread left at about 20 c comes from elsewhere (the source and Rd trade, the few harmonics the SNR gate leaves), not from the extras. D-104's instrument, without sections, is the one to train with: D-109.
 
 ## D-108 (registered 2026-11-13; seen beforehand: nothing of v3.1's features on extra sections): can v3.1's frozen trunk read the extra sections?
 
@@ -3717,3 +3725,52 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 *Consequence*: learnable or partly, the training arm with supervised section heads (`considering.md`, 2026-11-13) has something to work with. Not learnable, per-clip fitted sections (D-107) are the fallback. Either way the arm itself waits: Hannah's order is D-107 and D-108, then back to the critical path.
 
 *Cost*: CPU renders (5000 clips), a few minutes of GPU for features, CPU probes.
+
+## D-109 (registered 2026-11-13; seen beforehand: D-104 to D-107, the pre-checks below, nothing of any run with the loss): the reconstruction loss on real audio in 5b's decay branch
+
+*Status*: registered (Hannah, 2026-11-13: "Feel free to register/implement/run whatever you need to keep the GPU occupied until morning once the learnability probe results are in. I'll leave the judgement up to you."). The design is mine. M4's first training gate (`roadmap.md` Now item 3: M4 leads with the reconstruction loss). Chain `scripts/analysis/chains/d109.sh`, decision `scripts/analysis/decide_d109.py`, reports `reports/analysis/d109/`.
+
+*Question*: does the reconstruction loss on real voices (plan section 5.3), added to v3.1's recipe, move the formant outputs on real voices towards the closed-phase reference without costing the synthetic and real-voice guards?
+
+*Arms*: `d109_s1`, `d109_s2`: decay branches of `d040_5b_s{1,2}` from step 16000, 4000 decay steps, everything as 5b's own branches `d040_5b_s{1,2}_b20k` (the comparison, seeds paired) except **one change: the reconstruction loss added**.
+- *Data*: the recon stores (`scripts/analysis/d109_build_stores.py`, `train/recon_data.py`): 1500 recordings drawn from each of the VocalSet and Zeroth-Korean training pools' corpora (training files only; no evaluation set), the first 10 s of each, 2.3 M frames.
+  - The targets are fixed: SNR-gated (10 dB) harmonic amplitudes (D-104) at the labeller's own f0 and voicing (the pools' analysis files).
+  - The frame mask is voiced and sonorant by the labeller, with at least 4 valid harmonics.
+- *Per step*: one batch of 16 crops x 200 frames beside the supervised batch (unchanged). The model runs on it with its own f0 comb, as at inference.
+- *The loss* (`reconstruction.model_recon_loss`): D-104's instrument, applied to the model's own outputs.
+  - Poles: the model's F1-F4 (a local mean around the mode, differentiable) with B1-B4 from `logb_mean`.
+  - **Higher-pole correction**: F5-F8 continue a uniform tube from the model's F4, F_n = F4 (2n - 1) / 7, as the synthesiser draws them. Their bandwidths are the Hawks and Miller prior at f0, and they are detached.
+  - Source: LF by Rd, searched per frame (0.3-2.7 in 0.05 steps, best kept). Level profiled; Huber at 6 dB; no nuisance sections (D-105 to D-107). Harmonics up to **4000 Hz**.
+- *Weight*: **0.0247**. The rule: 0.25 x the ratio of the encoder's gradient norm from the formant term to that from the reconstruction loss, at the branch point, medians over 12 batches, seed mean (`scripts/analysis/d109_grad_ratio.py`, `reports/analysis/d109/grad_ratio.txt`: s1 0.49 / 4.26, s2 0.43 / 5.24).
+
+*Pre-checks* (seen; they set the instrument; on synthetic validation clips with the labels, `d103_rd_check.py --snr 10` with the options noted; outputs local):
+- **F1-F4 rendered alone biases F1 down at high f0.** With targets to 5000 Hz, |.| was 35 / 45 / 125 c, with medians +10 / -10 / -60 c. To 4000 Hz it was 30 / 40 / 90 c (+10 / -5 / -45). Even plain cascade clips went from D-104's 5 / 5 / 10 c to 15-35 c. The missing poles' skirts tilt the render, and Rd and F1 bend to absorb it.
+- **The higher-pole correction restores D-104's level.** To 4000 Hz, |.| is 15 / 15 / 30 c, medians +0 / -5 / -5 c, edge 8 / 5 / 8 %, and the best Rd at the label F1 matches the label Rd (median +0.00, against -0.20 without the correction). To 5000 Hz it is 20 / 20 / 40 c. Hence the correction and 4000 Hz.
+- **The misfit on real audio** (`scripts/analysis/d109_real_resid.py`, `reports/analysis/d109/real_resid.txt`; descriptive; branch-point model s2, D-109's instrument):
+  - Median per-frame loss: VocalSet 10.5, Zeroth 8.8; synthetic validation crops with the training channel 2.5.
+  - Median |residual| per harmonic: about 3 dB real against about 1.2 dB synthetic.
+  - The real residual has a shape: +2 to +2.5 dB below 250 Hz, -2 to -2.7 dB at 500-750 Hz, +1 to +2 dB at 2.5-4 kHz. A level-and-slope profile takes a third of the loss off.
+  - Part of the misfit is not formants (source shape, recording chain, nasal and subglottal sections); the loss can only move F and B to reduce it. That is the risk this gate measures.
+
+*Stop rule* (`scripts/analysis/d109_watch.py`): at step 17000, over steps 16501-17000, each arm's median gradient norm and median formant term against its 5b branch's over the same steps. Stop both arms (process trees killed, nothing scored) if any gradient-norm ratio exceeds 2, any formant-term ratio exceeds 1.10, or the reconstruction loss is not finite.
+
+*Rule*: D-086's, unchanged, as D-090 used it (`decide_d109.py`, checked in `--check` mode against D-065's gain arm).
+- *Non-inferiority* on D-040's margins, seed means: synthetic F1-F4 MAE <= +2 SE each; RPA >= -0.1; Hillenbrand paired F1 / F2 / F3 <= +4 / +9 / +20 Hz; women's closed-phase F1 |error| <= +5 Hz.
+- *A gain on both seeds* (any one): probe 11's F1 scale error halved on Hillenbrand and PTDB-TUG; synthetic F1-F4 MAE lower by >= 3 %; women's closed-phase F1 |error| lower by >= 2 Hz.
+- *Guards*: D-051's length guard (2) and f0 guard (3).
+- Candidate if all hold; seeds disagreeing -> NOT ROBUST TO THE SEED.
+
+*Reported*: the signed women's closed-phase F1 bias per run (5b: +4.3 / +4.1 Hz); the reconstruction loss over training; resynthesised F1-F3 MAE; probe 11's slopes; probe 12's w_label (bandwidths: the loss can widen them to fit the misfit).
+
+*Readings*:
+- *Candidate*: the reconstruction loss earns a seed confirmation and the next M4 step (the weight, sections, or re-tracking rounds).
+- *Non-inferior with no gain*: the loss is harmless at this weight but doesn't reach the measures. Next is a higher weight, or the real-audio misfit's own structure first (the source shape, the channel).
+- *Inferior*: the loss pulls F and B towards fitting what isn't formants. The renderer needs more of the real voice (sections held per recording, a slope or source term) before it trains anything.
+
+*Caveats*:
+- The targets use the labeller's f0. Its errors put harmonics in the wrong place, and the SNR gate removes most but not all.
+- The instrument's own spread on synthetic clips is 15-30 c below 400 Hz, with medians within 5 c.
+- VocalSet and Zeroth are also in the supervised resynthesis share (as resynthesised audio with the labeller's targets). The recon stores are their originals.
+
+*Cost*: two branches side by side, about 4-5 h, then D-090's scoring, about 1.5 h.
+

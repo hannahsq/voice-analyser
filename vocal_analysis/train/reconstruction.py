@@ -224,3 +224,70 @@ class NuisanceHead(nn.Module):
             out["zero_f"] = self._squash(y[..., 2 * p:2 * p + z], *self.bands["zero"])
             out["zero_b"] = self._squash(y[..., 2 * p + z:], *self.bw_band)
         return out
+
+
+# --------------------------------------------------------------------------------------------- training use (D-109)
+def hawks_miller_t(f: torch.Tensor, f0: torch.Tensor) -> torch.Tensor:
+    """synth.filters.hawks_miller_bandwidth in torch, extended above 5 kHz as synth.tract.bandwidth_prior (linear from
+    its 5 kHz value), at least 20 Hz"""
+    c1 = (165.327516, -6.73636734e-1, 1.80874446e-3, -4.52201682e-6, 7.49514000e-9, -4.70219241e-12)
+    c2 = (15.8146139, 8.10159009e-2, -9.79728215e-5, 5.28725064e-8, -1.07099364e-11, 7.91528509e-16)
+    s = 1.0 + 0.25 * (f0 - 132.0) / 88.0
+    fc = torch.clamp(f, max=5000.0)
+    lo = sum(c * fc ** i for i, c in enumerate(c1))
+    hi = sum(c * fc ** i for i, c in enumerate(c2))
+    hm = s * torch.where(fc < 500.0, lo, hi) * torch.clamp(f / 5000.0, min=1.0)
+    return torch.clamp(hm, min=20.0)
+
+
+def upper_poles(f4: torch.Tensor, f0: torch.Tensor, f_max: float = 7600.0) -> tuple[torch.Tensor, torch.Tensor]:
+    """D-109's higher-pole correction: F5-F8 continuing a uniform tube from F4, F_n = F4 (2n - 1) / 7 (the synthesiser
+    draws F4-F8 as the tube's resonances), with the prior's bandwidths at f0 (Hawks & Miller); NaN above f_max (the
+    synthesiser's limit). Detached: F4 is trained through its own pole only. Returns (f, b), each (..., 4)."""
+    f4 = f4.detach()
+    f = f4.unsqueeze(-1) * torch.tensor([9.0, 11.0, 13.0, 15.0], device=f4.device, dtype=f4.dtype) / 7.0
+    f0c = torch.nan_to_num(f0.detach().to(f4.dtype), nan=132.0).clamp(min=50.0).unsqueeze(-1)
+    b = hawks_miller_t(f, f0c)
+    f = torch.where(f <= f_max, f, torch.full_like(f, float("nan")))
+    return f, b
+
+
+def decode_formants(logits: torch.Tensor, half_width: int = 4) -> torch.Tensor:
+    """The model's formant heat-maps (..., n_bins) -> Hz, as `models.bins.decode` (the mean bin of the softmax within
+    +-half_width bins of the mode, renormalised), differentiable through the weights; the mode is not."""
+    from ..models.bins import FORMANT_AXIS as AX
+
+    p = torch.softmax(logits.float(), -1)
+    mode = p.argmax(-1, keepdim=True)
+    offs = torch.arange(-half_width, half_width + 1, device=logits.device)
+    idx = (mode + offs).clamp(0, AX.n_bins - 1)
+    w = torch.gather(p, -1, idx)
+    w = w / w.sum(-1, keepdim=True).clamp_min(1e-12)
+    mean_bin = (w * idx.float()).sum(-1)
+    return AX.f_min * torch.pow(2.0, mean_bin * AX.cents_per_bin / 1200.0)
+
+
+def model_recon_loss(out: dict, lab: dict, rd_grid=None, n_formants: int = 4, fmax: float | None = None,
+                     hpc: bool = False) -> torch.Tensor:
+    """D-109: the reconstruction loss of a model's own F1-F4 and B1-B4 on a real-audio batch (`recon_data.ReconCrops`):
+    LF source with Rd searched per frame (non-differentiable choice), level profiled, no nuisance sections. fmax: drop
+    harmonics above it (the stores hold targets to 5000 Hz). hpc: add `upper_poles` from the model's F4 (D-109)."""
+    F = decode_formants(out["formant_logits"])[..., :n_formants]
+    B = torch.exp(out["logb_mean"].float())[..., :n_formants]
+    grid = RD_SEARCH if rd_grid is None else rd_grid
+    tgt, ok, f0, m = lab["db"].float(), lab["ok"].bool(), lab["f0"].float(), lab["mask"].bool()
+    if fmax is not None:
+        k = torch.arange(1, ok.shape[-1] + 1, device=ok.device, dtype=f0.dtype)
+        ok = ok & (f0[..., None] * k <= fmax)
+        m = m & (ok.sum(-1) >= 4)
+    if hpc:
+        uf, ub = upper_poles(F[..., 3], f0)
+        F, B = torch.cat([F, uf], -1), torch.cat([B, ub], -1)
+    per = None
+    for r in grid:
+        _, p = reconstruction_loss(tgt, ok, f0, F, B, frame_mask=m, source="rd", profile="offset",
+                                   rd=torch.full_like(f0, float(r)))
+        p = torch.nan_to_num(p, nan=float("inf"))
+        per = p if per is None else torch.minimum(per, p)
+    use = torch.isfinite(per) & m
+    return (torch.where(use, per, torch.zeros_like(per))).sum() / use.sum().clamp_min(1)

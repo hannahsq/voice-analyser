@@ -136,3 +136,41 @@ def test_snr_gate_drops_harmonics_under_noise():
     assert ok_all[i, :29].all()
     assert ok[i, :10].all() and ok[i, 10:29].mean() <= 0.1  # a noise-only harmonic passes 10 dB about 0.7 % of the time
     assert np.max(np.abs(db[i, :10])) < 0.5  # strong harmonics keep their level (0 dB)
+
+
+def test_decode_formants_matches_numpy_decode():
+    from vocal_analysis.models.bins import FORMANT_AXIS, decode
+
+    torch.manual_seed(0)
+    logits = torch.randn(3, 5, 4, FORMANT_AXIS.n_bins) * 3
+    got = R.decode_formants(logits).numpy()
+    p = torch.softmax(logits, -1).numpy()
+    ref, _ = decode(p, FORMANT_AXIS)
+    assert np.max(np.abs(np.log2(got / ref))) * 1200 < 0.01
+
+
+def test_model_recon_loss_runs_and_backprops():
+    from vocal_analysis.models.bins import FORMANT_AXIS
+
+    torch.manual_seed(0)
+    B, T, K = 2, 6, 24
+    logits = torch.randn(B, T, 4, FORMANT_AXIS.n_bins, requires_grad=True)
+    out = {"formant_logits": logits, "logb_mean": torch.full((B, T, 4), float(np.log(100.0)), requires_grad=True)}
+    lab = {"db": torch.randn(B, T, K), "ok": torch.ones(B, T, K, dtype=torch.bool), "f0": torch.full((B, T), 150.0),
+           "mask": torch.ones(B, T, dtype=torch.bool)}
+    loss = R.model_recon_loss(out, lab, rd_grid=[0.8, 1.2])
+    loss.backward()
+    assert torch.isfinite(loss) and logits.grad.abs().sum() > 0 and out["logb_mean"].grad.abs().sum() > 0
+
+
+def test_upper_poles_match_the_prior():
+    """D-109: the higher-pole correction's bandwidths are synth.tract.bandwidth_prior's, its poles the tube's"""
+    from vocal_analysis.synth.tract import bandwidth_prior, tube_resonances
+    from vocal_analysis.train.reconstruction import upper_poles
+
+    tube = tube_resonances(14.5)
+    f, b = upper_poles(torch.tensor([tube[3]], dtype=torch.float64), torch.tensor([210.0], dtype=torch.float64))
+    want_f = np.where(tube[4:] <= 7600, tube[4:], np.nan)
+    np.testing.assert_allclose(f[0].numpy(), want_f, rtol=1e-9)
+    ok = np.isfinite(want_f)
+    np.testing.assert_allclose(b[0].numpy()[ok], bandwidth_prior(want_f[ok], 210.0), rtol=1e-9)
