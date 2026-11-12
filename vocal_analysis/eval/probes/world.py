@@ -145,8 +145,10 @@ def render(log=print) -> Path:
             n = len(vs[r]) // 160 + 1
             v = np.r_[voiced, np.zeros(max(0, n - len(voiced)), bool)][:n]
             arrays[f"audio_{c}"], arrays[f"scored_{c}"], arrays[f"voiced_{c}"] = vs[r], v, v
-            lf = lab if lab is not None else np.full((n, 4), np.nan, np.float32)
-            arrays[f"label_formants_{c}"] = lf[:n]
+            lf = np.full((n, 4), np.nan, np.float32)
+            if lab is not None:  # the generator's labels can be a frame short of the clip's frame count
+                lf[: min(n, len(lab))] = lab[:n]
+            arrays[f"label_formants_{c}"] = lf
             arrays[f"label_bandwidths_{c}"] = np.full((n, 4), np.nan, np.float32)
         f0 = analyse_world(x)["f0"]
         np.savez_compressed(OUT / f"{kind}_{k:03d}.npz", **arrays)
