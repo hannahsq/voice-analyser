@@ -3581,7 +3581,7 @@ D-099's runs are added when they exist, as a dated addendum.
 
 ## D-105 (registered 2026-11-12; seen beforehand: D-104's result): D-104's check with the nuisance sections free
 
-*Status*: registered (Hannah, 2026-11-12: "Lets go with a"). The design is mine. Script `scripts/analysis/d105_nuisance_check.py`, report `reports/analysis/d105/`.
+*Status*: **done 2026-11-12: the gate fails; free nuisance sections compete with F1** (see Result). Registered (Hannah, 2026-11-12: "Lets go with a"). The design is mine. Script `scripts/analysis/d105_nuisance_check.py`, report `reports/analysis/d105/`.
 
 *Question*: D-104's remaining spread (median |.| 20-25 c) is on cascade clips with extra pole-zero pairs and on tube clips, the two kinds whose spectra hold something the render doesn't. The nuisance head exists for that. Do two free poles and two free zeros absorb those differences without moving F1, or do they take F1's place?
 
@@ -3604,3 +3604,11 @@ D-099's runs are added when they exist, as a dated addendum.
 - It fails without that: the sections are not enough for those kinds, and the failing kind names what is missing.
 
 *Cost*: CPU, about an hour on 8 processes.
+- *Result (2026-11-12, `reports/analysis/d105/d105.txt`; 6870 uncoupled, 6871 coupled frames)*: **the gate fails: the free sections compete with F1.**
+  - Uncoupled, all kinds (< 150 / 150-250 / 250-400 Hz): median recovered - label +0 / +0 / -5 c, but median |.| **70 / 135 / 175 c** (D-104: 20 / 15 / 25), edge 11 / 11 / 13 %.
+  - On plain cascade clips, which D-104 pinned at |.| 5-10 c: 25 / 125 / 190 c.
+  - The sections take up nearly all the residual: the loss at the label F1 falls from 0.46-0.71 (frozen, Rd only) to 0.01-0.05 (free). It is just as low off the label: in 18-28 % of frames a nuisance pole ends within 10 % of the label F1 when the recovered F1 is elsewhere (within 10 % of the recovered F1: 8-9 %).
+  - Coupled: recovered - closed +20 / +25 / +10 / +25 c, - acoustic -13 / -13 / -23 / -16 c, |.| 110-245 c.
+  - Fitted nuisance frequencies (uncoupled, quartiles): pole 1 751 / 940 / 1075 Hz and zero 1 776 / 952 / 1068 Hz; pole 2 2841 / 3092 / 3495 and zero 2 2785 / 3018 / 3207. Each pair stays near its start and near each other: a pole and zero slightly apart make a local bump or dip, which reshapes the F1 or F3 region as needed.
+  - *Reading* (the registered "nuisance poles often at F1" branch): with eight free nuisance parameters per frame, against the 4-20 valid harmonics left after the SNR gate at low f0, the render fits almost anything, and F1 is no longer identified. This is a per-frame free fit, the worst case. A network's nuisance outputs come from a shared trunk and are smoother, but nothing in the loss stops them doing the same.
+  - *What a training arm would need*, each its own registration, one at a time: (i) the nuisance sections kept away from F1 (a band starting a margin above F1, e.g. 1.3 x F1, or a penalty); (ii) fewer sections (the plan's one zero rather than two pole-zero pairs); (iii) sections held per clip or slowly varying, not per frame (nasal and subglottal pairs change slowly); or (iv) no nuisance sections, with D-104's spread on tube and extra-section clips accepted (|.| 20-45 c, bias about 0).

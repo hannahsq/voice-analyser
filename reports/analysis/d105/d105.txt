@@ -1,0 +1,33 @@
+D-105: D-104's check with two nuisance poles and two zeros free (fitted per frame and F1 candidate), Rd continuous; SNR-gated targets 10 dB (cents; median over frames)
+
+uncoupled clips: recovered - label; 6870 frames
+  all             f0 0-150     n  2368:   +0.0 (|.|  70.0, edge 11.1 %); nuisance pole within 10 % of label F1 28.0 %, of recovered F1  8.2 %; loss at label F1 free / frozen 0.05 / 0.71
+  all             f0 150-250   n  1308:   +0.0 (|.| 135.0, edge 11.0 %); nuisance pole within 10 % of label F1 25.1 %, of recovered F1  7.6 %; loss at label F1 free / frozen 0.03 / 0.64
+  all             f0 250-400   n  1484:   -5.0 (|.| 175.0, edge 12.9 %); nuisance pole within 10 % of label F1 17.8 %, of recovered F1  8.8 %; loss at label F1 free / frozen 0.01 / 0.46
+  all             f0 400-up    n  1710:  -12.5 (|.| 255.0, edge 18.4 %); nuisance pole within 10 % of label F1 14.0 %, of recovered F1 11.5 %; loss at label F1 free / frozen 0.00 / 0.17
+  cascade         f0 0-150     n   784:   +0.0 (|.|  25.0, edge  6.0 %); nuisance pole within 10 % of label F1 23.0 %, of recovered F1 10.8 %; loss at label F1 free / frozen 0.05 / 0.36
+  cascade         f0 150-250   n   381:   +0.0 (|.| 125.0, edge  9.2 %); nuisance pole within 10 % of label F1 23.4 %, of recovered F1  7.3 %; loss at label F1 free / frozen 0.02 / 0.24
+  cascade         f0 250-400   n   475:   +0.0 (|.| 190.0, edge 13.1 %); nuisance pole within 10 % of label F1 25.5 %, of recovered F1 10.7 %; loss at label F1 free / frozen 0.02 / 0.17
+  cascade         f0 400-up    n   544:  +25.0 (|.| 270.0, edge 23.2 %); nuisance pole within 10 % of label F1 17.6 %, of recovered F1 11.9 %; loss at label F1 free / frozen 0.00 / 0.09
+  cascade+extras  f0 0-150     n   213:   +0.0 (|.|  70.0, edge  6.1 %); nuisance pole within 10 % of label F1 16.9 %, of recovered F1  6.6 %; loss at label F1 free / frozen 0.05 / 1.96
+  cascade+extras  f0 150-250   n   103:   +5.0 (|.|  60.0, edge  6.8 %); nuisance pole within 10 % of label F1 12.6 %, of recovered F1  7.8 %; loss at label F1 free / frozen 0.02 / 2.32
+  cascade+extras  f0 250-400   n   126:  -30.0 (|.| 150.0, edge 11.1 %); nuisance pole within 10 % of label F1 10.3 %, of recovered F1  4.0 %; loss at label F1 free / frozen 0.04 / 1.88
+  cascade+extras  f0 400-up    n   113:  -45.0 (|.| 245.0, edge 15.9 %); nuisance pole within 10 % of label F1 15.0 %, of recovered F1 12.4 %; loss at label F1 free / frozen 0.00 / 0.88
+  tube            f0 0-150     n  1371:   +0.0 (|.| 105.0, edge 14.7 %); nuisance pole within 10 % of label F1 32.7 %, of recovered F1  6.9 %; loss at label F1 free / frozen 0.06 / 1.03
+  tube            f0 150-250   n   824:   +0.0 (|.| 152.5, edge 12.4 %); nuisance pole within 10 % of label F1 27.4 %, of recovered F1  7.8 %; loss at label F1 free / frozen 0.04 / 0.89
+  tube            f0 250-400   n   883:  -10.0 (|.| 175.0, edge 13.0 %); nuisance pole within 10 % of label F1 14.7 %, of recovered F1  8.5 %; loss at label F1 free / frozen 0.01 / 0.71
+  tube            f0 400-up    n  1053:  -40.0 (|.| 250.0, edge 16.2 %); nuisance pole within 10 % of label F1 12.0 %, of recovered F1 11.1 %; loss at label F1 free / frozen 0.00 / 0.22
+
+coupled tube clips: recovered - closed | - acoustic; 6871 frames
+  all             f0 0-150     n  1971:  +20.0 | - acoustic  -13.3 (|.| 110.0, edge 16.6 %); nuisance pole within 10 % of label F1 35.7 %, of recovered F1 10.2 %; loss at label F1 free / frozen 0.11 / 0.86
+  all             f0 150-250   n  1130:  +25.0 | - acoustic  -12.6 (|.| 155.0, edge 17.6 %); nuisance pole within 10 % of label F1 32.5 %, of recovered F1 11.5 %; loss at label F1 free / frozen 0.08 / 1.02
+  all             f0 250-400   n  1489:  +10.0 | - acoustic  -23.2 (|.| 205.0, edge 15.1 %); nuisance pole within 10 % of label F1 14.8 %, of recovered F1  8.9 %; loss at label F1 free / frozen 0.04 / 1.24
+  all             f0 400-up    n  2281:  +25.0 | - acoustic  -16.0 (|.| 245.0, edge 21.2 %); nuisance pole within 10 % of label F1 12.8 %, of recovered F1 12.6 %; loss at label F1 free / frozen 0.00 / 0.92
+  tube            f0 0-150     n  1971:  +20.0 | - acoustic  -13.3 (|.| 110.0, edge 16.6 %); nuisance pole within 10 % of label F1 35.7 %, of recovered F1 10.2 %; loss at label F1 free / frozen 0.11 / 0.86
+  tube            f0 150-250   n  1130:  +25.0 | - acoustic  -12.6 (|.| 155.0, edge 17.6 %); nuisance pole within 10 % of label F1 32.5 %, of recovered F1 11.5 %; loss at label F1 free / frozen 0.08 / 1.02
+  tube            f0 250-400   n  1489:  +10.0 | - acoustic  -23.2 (|.| 205.0, edge 15.1 %); nuisance pole within 10 % of label F1 14.8 %, of recovered F1  8.9 %; loss at label F1 free / frozen 0.04 / 1.24
+  tube            f0 400-up    n  2281:  +25.0 | - acoustic  -16.0 (|.| 245.0, edge 21.2 %); nuisance pole within 10 % of label F1 12.8 %, of recovered F1 12.6 %; loss at label F1 free / frozen 0.00 / 0.92
+
+reported: fitted nuisance frequencies at the minimum, uncoupled, quartiles (Hz): pole 1 751 / 940 / 1075; pole 2 2841 / 3092 / 3495; zero 1 776 / 952 / 1068; zero 2 2785 / 3018 / 3207
+
+GATE: FAILS (uncoupled, bands below 400 Hz: f0 0-150 median +0.0 c, |.| 70.0 c, edge 11.1 %; f0 150-250 median +0.0 c, |.| 135.0 c, edge 11.0 %; f0 250-400 median -5.0 c, |.| 175.0 c, edge 12.9 %)
