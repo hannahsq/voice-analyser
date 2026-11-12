@@ -1,0 +1,77 @@
+D-100 addendum: vowel ordering on Hillenbrand dev (27 men, 29 women; each word centred on its speaker's mean, cents)
+rounded uw oo oa aw er | unrounded iy ih ei eh ae ah uh; primary: iVTL rounded - unrounded, predicted > 0
+
+== 5b (d040_5b_s1_b20k + d040_5b_s2_b20k)
+  R1: aVTL rounded - unrounded +168 c [+156, +181]
+    aVTL by vowel: oa +150  uw +134  er +119  oo +73  aw +17  uh -9  ih -51  ei -71  eh -77  iy -85  ah -90  ae -98
+      men: rounded - unrounded +162 c
+      women: rounded - unrounded +175 c
+  R3: aVTL rounded - unrounded +62 c [+57, +67]
+    aVTL by vowel: uw +62  oa +49  er +33  oo +30  aw +3  uh -10  ih -19  iy -19  ei -22  ah -34  ae -36  eh -37
+      men: rounded - unrounded +59 c
+      women: rounded - unrounded +64 c
+
+== 5c (d051_5c_s1_b20k + d051_5c_s2_b20k)
+  R1: iVTL rounded - unrounded +189 c [+177, +201]; aVTL rounded - unrounded +182 c [+171, +194]
+    iVTL by vowel: oa +160  uw +155  er +144  oo +94  aw +5  uh -14  ih -55  ae -85  eh -87  ei -90  iy -103  ah -106
+      men: rounded - unrounded +188 c
+      women: rounded - unrounded +190 c
+    aVTL by vowel: er +148  oa +147  uw +141  oo +83  aw +7  uh -9  ih -50  eh -74  ei -79  ae -88  ah -90  iy -109
+      men: rounded - unrounded +180 c
+      women: rounded - unrounded +185 c
+    iVTL vs aVTL vowel means: Spearman +0.95; aVTL on iVTL within speakers R^2 0.98 (slope 0.96); iVTL vs word f0 within speakers r +0.18
+  R3: iVTL rounded - unrounded +98 c [+91, +104]; aVTL rounded - unrounded +68 c [+63, +74]
+    iVTL by vowel: uw +93  oa +86  oo +57  er +51  aw -1  uh -9  ih -28  iy -32  ei -37  ae -54  eh -57  ah -63
+      men: rounded - unrounded +97 c
+      women: rounded - unrounded +98 c
+    aVTL by vowel: oa +57  uw +57  er +49  oo +36  aw -2  uh -8  ih -13  iy -23  ei -23  ae -38  eh -40  ah -46
+      men: rounded - unrounded +65 c
+      women: rounded - unrounded +71 c
+    iVTL vs aVTL vowel means: Spearman +0.99; aVTL on iVTL within speakers R^2 0.94 (slope 0.69); iVTL vs word f0 within speakers r +0.22
+
+== A0 (d080_a0_s1 + d080_a0_s2)
+  R1: aVTL rounded - unrounded +154 c [+142, +167]
+    aVTL by vowel: oa +145  uw +120  er +85  oo +75  aw +18  uh +3  ih -41  ei -64  ah -65  eh -77  iy -80  ae -91
+      men: rounded - unrounded +147 c
+      women: rounded - unrounded +161 c
+  R3: aVTL rounded - unrounded +63 c [+58, +68]
+    aVTL by vowel: uw +58  oa +47  er +43  oo +33  aw -6  uh -9  iy -11  ih -18  ei -23  ah -36  ae -38  eh -43
+      men: rounded - unrounded +62 c
+      women: rounded - unrounded +64 c
+
+== D-098 base (d098_base_b20k)
+  R1: iVTL rounded - unrounded +159 c [+145, +173]; aVTL rounded - unrounded +165 c [+152, +178]
+    iVTL by vowel: oa +151  uw +147  oo +98  er +62  aw +21  uh -6  ih -36  eh -72  ah -75  ae -77  ei -81  iy -102
+      men: rounded - unrounded +158 c
+      women: rounded - unrounded +160 c
+    aVTL by vowel: uw +159  oa +150  oo +86  er +81  aw +14  uh -6  ih -50  eh -77  ae -79  ei -80  ah -80  iy -91
+      men: rounded - unrounded +167 c
+      women: rounded - unrounded +163 c
+    iVTL vs aVTL vowel means: Spearman +0.97; aVTL on iVTL within speakers R^2 0.97 (slope 0.98); iVTL vs word f0 within speakers r +0.16
+  R3: iVTL rounded - unrounded +100 c [+93, +107]; aVTL rounded - unrounded +65 c [+59, +70]
+    iVTL by vowel: uw +105  oa +85  oo +61  er +43  aw -2  uh -11  ih -25  ei -41  iy -41  ae -52  eh -54  ah -60
+      men: rounded - unrounded +99 c
+      women: rounded - unrounded +101 c
+    aVTL by vowel: uw +75  oa +57  oo +30  er +29  aw -6  uh -10  ih -16  ei -22  iy -22  eh -35  ae -38  ah -42
+      men: rounded - unrounded +69 c
+      women: rounded - unrounded +60 c
+    iVTL vs aVTL vowel means: Spearman +0.99; aVTL on iVTL within speakers R^2 0.90 (slope 0.64); iVTL vs word f0 within speakers r +0.22
+
+== D-098 heads (d098_heads_b20k)
+  R1: iVTL rounded - unrounded +178 c [+166, +189]; aVTL rounded - unrounded +175 c [+164, +186]
+    iVTL by vowel: er +145  oa +143  uw +138  oo +67  aw +21  uh -5  ah -53  ih -64  ae -85  eh -91  ei -92  iy -94
+      men: rounded - unrounded +185 c
+      women: rounded - unrounded +171 c
+    aVTL by vowel: uw +152  oa +140  er +133  oo +61  aw -2  uh -9  ah -57  ih -64  ei -81  iy -83  ae -86  eh -91
+      men: rounded - unrounded +186 c
+      women: rounded - unrounded +164 c
+    iVTL vs aVTL vowel means: Spearman +0.92; aVTL on iVTL within speakers R^2 0.96 (slope 0.97); iVTL vs word f0 within speakers r +0.15
+  R3: iVTL rounded - unrounded +99 c [+93, +106]; aVTL rounded - unrounded +58 c [+52, +64]
+    iVTL by vowel: oa +84  uw +82  er +62  oo +46  aw +7  uh -12  iy -25  ih -38  ah -38  ei -42  eh -59  ae -63
+      men: rounded - unrounded +110 c
+      women: rounded - unrounded +90 c
+    aVTL by vowel: uw +69  oa +48  er +25  oo +22  iy -2  aw -11  uh -17  ei -20  ih -21  ah -28  eh -34  ae -40
+      men: rounded - unrounded +66 c
+      women: rounded - unrounded +51 c
+    iVTL vs aVTL vowel means: Spearman +0.95; aVTL on iVTL within speakers R^2 0.80 (slope 0.61); iVTL vs word f0 within speakers r +0.17
+

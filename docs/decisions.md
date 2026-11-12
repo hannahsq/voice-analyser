@@ -3313,7 +3313,7 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 
 ## D-100 (registered 2026-11-12; descriptive, no decision rule; seen beforehand: every model's Hillenbrand length reliability from its own entry, nothing of these reads): length reliability with longer context, and how much of it is the iVTL head
 
-*Status*: registered (Hannah, 2026-11-12: "What does reliability look like on longer dev clips? I'd especially be interested to put bounds on how much is the iVTL head and how much is the longer context"). Descriptive: no decision rule, nothing adopted. Script `scripts/analysis/d100_context.py`, report `reports/analysis/d100/context.txt`.
+*Status*: **done 2026-11-12** (see Result). Registered (Hannah, 2026-11-12: "What does reliability look like on longer dev clips? I'd especially be interested to put bounds on how much is the iVTL head and how much is the longer context"). Descriptive: no decision rule, nothing adopted. Script `scripts/analysis/d100_context.py`, report `reports/analysis/d100/context.txt`.
 
 *Why*: aVTL's Hillenbrand dev reliability has stayed at 0.22-0.26 in every trained model (D-036 to D-098). D-098's base cut aVTL error on long synthetic clips by 28-36 % without moving it (-0.004). Two candidate reasons:
 - *Context*: Hillenbrand's words are 0.35-0.74 s long, so long context can't act on them.
@@ -3376,3 +3376,31 @@ D-099's runs are added when they exist, as a dated addendum.
   - *Caveats*:
     - Whether the training labels carry rounding as length depends on the synthesisers. In the tube, length includes the lips of the vowel's area function. The cascade has no articulation: its iVTL is a drawn number. So a null could be the labels, not the model.
     - Vowel duration and f0 also differ by vowel (high vowels have higher intrinsic f0), so a contrast could partly be f0 leakage. The rounded set mixes high (/u/, /ʊ/) and low (/ɔ/) vowels, which partly balances that. The within-speaker correlation of each vowel's iVTL with its f0 is reported.
+- *Result (2026-11-12, `reports/analysis/d100/context.txt`, `vowels.txt`; descriptive)*:
+  - **Context dominates.** On Hillenbrand's single words, reading each word inside its speaker's 12-word concatenation raises aVTL reliability for every model:
+    - from 0.20-0.26 (R1) to 0.64-0.71 (R3), +0.42 to +0.46;
+    - within-speaker SD 103-112 -> 41-45 c;
+    - through 4 s windows (R2) already +0.30 to +0.33;
+    - the women / men ratio unchanged (0.86-0.88).
+
+    It doesn't depend on long-crop training: 5b, never trained past 400 frames, gains as much as D-098's base (R3 base - 5b -0.010 [-0.056, +0.025]).
+  - **PTDB-TUG's sentences** (5-10 s, many vowels per item) are already at 0.69-0.73 alone. Windows or one pass make no difference (R0, R2 within +-0.006). Pairs read in one pass (about 14.5 s, R3) add +0.03 to +0.08: D-098 base +0.083 [+0.045, +0.134] to 0.812, A0 +0.061, heads +0.051, 5b +0.047, 5c +0.032. Between models every interval includes 0 (6 speakers per sex).
+  - **The iVTL head, between models: no gain at any read.** 5c - 5b on Hillenbrand -0.042 (R1), -0.067 (R2), -0.064 (R3), all intervals below 0. D-098 heads - base -0.013 to -0.036, intervals including 0. On PTDB-TUG both within +-0.04.
+  - **The iVTL head, within a model: aVTL follows iVTL almost one to one within a speaker.**
+    - On single words (R1), the within-speaker regression of aVTL on iVTL has R^2 0.96-0.98 and slope 0.96-0.98 (5c, base, heads). Removing that part gives 0.87-0.91 (+0.64 to +0.71): the upper bound on a perfect split.
+    - In context (R3), the slope falls to 0.61-0.70 (R^2 0.80-0.91), and the bound is +0.23 to +0.31, to 0.91-0.96.
+    - On PTDB-TUG, R^2 0.80-0.95, bound +0.14 to +0.26.
+
+    So nearly all of aVTL's within-speaker variance on real words is shared with iVTL. Context removes about a third of that link, and the head separates them on synthetic clips (D-051, D-098) but not here.
+  - **Vowel ordering (the addendum's primary, predicted > 0): holds.**
+    - iVTL rounded - unrounded at R1: +189 c (5c), +159 c (base), +178 c (heads), every interval about +-12 c and in men and women alike. At R3: +98 to +100 c.
+    - /u/ and /o/ are longest, with /ɝ/ and /ʊ/ next. /ɔ/ sits at about 0 with the unrounded set: the one rounded vowel that doesn't follow.
+    - The R1 size, about 10 %, is above the 50-130 c expected.
+    - aVTL shows the same contrast: +165 to +182 c at R1 with Spearman 0.92-0.97 between the two heads' vowel means. That includes 5b and A0, which have no iVTL head (+168 and +154 c), so the head doesn't add the leakage either. At R3, aVTL's contrast falls to +58 to +68 c against iVTL's +100.
+    - Within-speaker r of iVTL with the word's f0: +0.15 to +0.22.
+  - *Reading*:
+    - **The bounds Hannah asked for, on single vowels.** Context at inference is worth about +0.45 reliability for any model. An iVTL head as trained is worth 0 or less between models. A perfect aVTL / iVTL split would be worth at most +0.65 alone and +0.3 after context. On running speech with 7 s items, both bounds are much smaller: context +0.03 to +0.08, the split at most +0.14 to +0.26.
+    - **Context does by averaging what the split should do by separation.** Every model pools a speaker's vowels when it can hear them, whatever its training. That is legitimate for a per-recording length (the long-term use: one session's recordings), but it isn't anatomy read per frame.
+    - **The vowel ordering is what articulation predicts, but it doesn't show iVTL reads articulation.** Rounded vowels have low F2 / F3, and any formant-based length (A, D-035) reads them as long. A head reading formant scale would give the same order. The prediction's caveat didn't name this; it should have.
+    - iVTL's contrast also shrinks from about 170 to 100 c with context. An instantaneous length shouldn't depend on the neighbouring words, so at least one read is wrong: context either removes vowel-driven error from iVTL or smears neighbours into it. These reads can't say which.
+    - What could separate them: the known-increment tests (D-097, lip tubes) and synthetic vowels with matched formants but different lengths.
