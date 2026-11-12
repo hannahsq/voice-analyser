@@ -38,16 +38,23 @@ def analyse_world(x: np.ndarray) -> dict:
 
 
 def variants(x: np.ndarray, factors=FACTORS) -> tuple[dict, np.ndarray]:
-    """{factor: audio} (same length as x, peak 0.9) and WORLD's voiced mask on the 10 ms frame grid"""
+    """{factor: audio} (same length as x, peak 0.9) and the scored mask on the 10 ms frame grid: frames both Harvest
+    and DIO (with StoneMask) call voiced (D-094 amendment 3; Harvest alone fills gaps)"""
     import pyworld as pw
 
     a = analyse_world(x)
+    xd = np.asarray(x, np.float64)
+    fd, td = pw.dio(xd, FS, frame_period=FRAME_MS)
+    fd = pw.stonemask(xd, fd, td, FS)
+    n = min(len(fd), len(a["f0"]))
+    voiced = np.zeros(len(a["f0"]), bool)
+    voiced[:n] = (a["f0"][:n] > 0) & (fd[:n] > 0)
     out = {}
     for r in factors:
         y = pw.synthesize(a["f0"] * r, a["sp"], a["ap"], FS, frame_period=FRAME_MS)[: len(x)]
         y = np.r_[y, np.zeros(max(0, len(x) - len(y)))]
         out[r] = (0.9 * y / (np.abs(y).max() + 1e-12)).astype(np.float32)
-    return out, a["f0"] > 0
+    return out, voiced
 
 
 def band(f0_med: float) -> int:
