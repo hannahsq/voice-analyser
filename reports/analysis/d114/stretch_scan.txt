@@ -1,0 +1,38 @@
+D-114 pre-check: D-109's loss against an F1 stretch about 500 Hz, F1' = 500 (F1/500)^(1+s); loss relative to s = 0 (x1000); channel 0 = level per frame (D-109), 3 = plus a 3-term curve per crop
+s grid: -0.16 -0.14 -0.12 -0.10 -0.08 -0.06 -0.04 -0.02 -0.00 +0.02 +0.04 +0.06 +0.08 +0.10 +0.12 +0.14 +0.16
+
+5b seed 1 branch point, VocalSet
+  channel 0: loss at s=0 12.394; minimum at s = +0.052 [+0.022, +0.093]
+    rel. loss x1000: +267 +218 +173 +132 +96 +64 +38 +16 +0 -11 -16 -17 -12 -3 +10 +28 +48
+  channel 3: loss at s=0 8.906; minimum at s = +0.021 [-0.004, +0.050]
+    rel. loss x1000: +180 +144 +111 +81 +56 +36 +19 +7 +0 -2 -0 +5 +15 +28 +45 +66 +91
+
+5b seed 1 branch point, Zeroth-Korean
+  channel 0: loss at s=0 10.441; minimum at s = +0.109 [+0.085, +0.131]
+    rel. loss x1000: +453 +385 +318 +254 +193 +136 +85 +39 +0 -32 -58 -77 -89 -95 -94 -88 -78
+  channel 3: loss at s=0 8.992; minimum at s = +0.065 [+0.054, +0.086]
+    rel. loss x1000: +369 +310 +253 +196 +146 +99 +59 +26 +0 -20 -35 -44 -41 -32 -15 +5 +30
+
+5b seed 1 branch point, train_v2 validation (synthetic control)
+  channel 0: loss at s=0 5.997; minimum at s = +0.006 [-0.003, +0.015]
+    rel. loss x1000: +915 +747 +584 +429 +291 +174 +84 +24 +0 +6 +49 +123 +226 +356 +506 +667 +840
+  channel 3: loss at s=0 4.160; minimum at s = +0.006 [-0.003, +0.013]
+    rel. loss x1000: +844 +691 +545 +405 +275 +166 +81 +22 +0 +6 +51 +125 +225 +351 +496 +643 +809
+
+5b seed 2 branch point, VocalSet
+  channel 0: loss at s=0 12.250; minimum at s = +0.014 [-0.019, +0.043]
+    rel. loss x1000: +162 +125 +94 +67 +45 +27 +14 +5 +0 -1 +3 +11 +23 +40 +62 +87 +117
+  channel 3: loss at s=0 9.096; minimum at s = -0.002 [-0.026, +0.037]
+    rel. loss x1000: +129 +99 +73 +51 +34 +20 +10 +2 +0 +3 +8 +18 +33 +51 +75 +101 +130
+
+5b seed 2 branch point, Zeroth-Korean
+  channel 0: loss at s=0 10.624; minimum at s = +0.104 [+0.085, +0.122]
+    rel. loss x1000: +448 +382 +317 +254 +194 +138 +87 +40 +0 -34 -60 -80 -91 -96 -94 -86 -72
+  channel 3: loss at s=0 8.968; minimum at s = +0.056 [+0.041, +0.070]
+    rel. loss x1000: +372 +312 +256 +199 +151 +107 +66 +29 +0 -19 -30 -33 -26 -17 +2 +24 +56
+
+5b seed 2 branch point, train_v2 validation (synthetic control)
+  channel 0: loss at s=0 6.006; minimum at s = +0.004 [-0.007, +0.016]
+    rel. loss x1000: +842 +677 +521 +380 +255 +153 +73 +20 +0 +10 +52 +122 +218 +345 +491 +647 +814
+  channel 3: loss at s=0 4.223; minimum at s = +0.003 [-0.004, +0.011]
+    rel. loss x1000: +775 +626 +486 +356 +240 +145 +71 +21 +0 +12 +58 +127 +223 +347 +487 +635 +793

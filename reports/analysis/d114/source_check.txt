@@ -1,0 +1,19 @@
+D-114 pre-check, part 3: each frame's best Rd (grid 0.3-2.7) and the residual (target - render - source, after the frame's level) at harmonics 1-3, dB; branch point 5b seed 2
+
+  VocalSet: 31877 frames
+    all         n  31877  Rd 10/50/90 0.30 / 0.55 / 1.60; at 2.7  2.6%, at 0.3 20.6%; residual H1 / H2 / H3 median +2.7 / -1.9 / -2.0; H1 at Rd 2.7 frames +2.6
+    f0 < 150    n   4331  Rd 10/50/90 0.30 / 0.40 / 0.90; at 2.7  0.0%, at 0.3 38.0%; residual H1 / H2 / H3 median +4.4 / +0.1 / -3.2; H1 at Rd 2.7 frames +nan
+    f0 150-250  n   6993  Rd 10/50/90 0.30 / 0.40 / 1.30; at 2.7  1.7%, at 0.3 36.1%; residual H1 / H2 / H3 median +3.3 / -2.0 / -2.5; H1 at Rd 2.7 frames -0.5
+    f0 >= 250   n  20553  Rd 10/50/90 0.30 / 0.70 / 1.85; at 2.7  3.5%, at 0.3 11.6%; residual H1 / H2 / H3 median +2.2 / -2.6 / -1.4; H1 at Rd 2.7 frames +3.1
+
+  Zeroth-Korean: 12804 frames
+    all         n  12804  Rd 10/50/90 0.30 / 0.60 / 1.40; at 2.7  1.2%, at 0.3 15.4%; residual H1 / H2 / H3 median +2.1 / -2.6 / -2.2; H1 at Rd 2.7 frames +1.2
+    f0 < 150    n   2736  Rd 10/50/90 0.30 / 0.50 / 0.95; at 2.7  0.0%, at 0.3 27.2%; residual H1 / H2 / H3 median +3.1 / -2.2 / -3.2; H1 at Rd 2.7 frames +nan
+    f0 150-250  n   6819  Rd 10/50/90 0.30 / 0.65 / 1.65; at 2.7  1.8%, at 0.3 12.0%; residual H1 / H2 / H3 median +2.0 / -2.3 / -2.7; H1 at Rd 2.7 frames +1.5
+    f0 >= 250   n   3249  Rd 10/50/90 0.30 / 0.60 / 1.30; at 2.7  0.9%, at 0.3 12.7%; residual H1 / H2 / H3 median +1.7 / -3.5 / +0.1; H1 at Rd 2.7 frames +0.3
+
+  train_v2 validation (synthetic): 14335 frames
+    all         n  14335  Rd 10/50/90 0.40 / 1.30 / 2.35; at 2.7  2.9%, at 0.3  6.0%; residual H1 / H2 / H3 median +0.1 / -0.3 / -0.2; H1 at Rd 2.7 frames +0.1
+    f0 < 150    n   4812  Rd 10/50/90 0.30 / 1.35 / 2.40; at 2.7  2.0%, at 0.3 11.9%; residual H1 / H2 / H3 median +0.1 / -0.3 / -0.3; H1 at Rd 2.7 frames -0.6
+    f0 150-250  n   2684  Rd 10/50/90 0.50 / 1.35 / 2.35; at 2.7  2.4%, at 0.3  2.5%; residual H1 / H2 / H3 median +0.0 / -0.2 / -0.1; H1 at Rd 2.7 frames -0.3
+    f0 >= 250   n   6839  Rd 10/50/90 0.50 / 1.30 / 2.35; at 2.7  3.7%, at 0.3  3.3%; residual H1 / H2 / H3 median +0.1 / -0.2 / -0.0; H1 at Rd 2.7 frames +0.9

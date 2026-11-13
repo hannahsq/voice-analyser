@@ -1,0 +1,50 @@
+D-114 pre-check: D-109's loss against an F1 stretch about 500 Hz, F1' = 500 (F1/500)^(1+s); loss relative to s = 0 (x1000); channel 0 = level per frame (D-109), 3 = plus a 3-term curve per crop
+s grid: -0.16 -0.14 -0.12 -0.10 -0.08 -0.06 -0.04 -0.02 -0.00 +0.02 +0.04 +0.06 +0.08 +0.10 +0.12 +0.14 +0.16
+
+5b seed 1 branch point, VocalSet
+  offset (D-109): loss at s=0 12.394; minimum at s = +0.052 [+0.022, +0.093]; curvature at 0 13.4 (relative 1.08)
+    rel. loss x1000: +267 +218 +173 +132 +96 +64 +38 +16 +0 -11 -16 -17 -12 -3 +10 +28 +48
+  crop curve: loss at s=0 8.906; minimum at s = +0.021 [-0.004, +0.050]; curvature at 0 12.0 (relative 1.34)
+    rel. loss x1000: +180 +144 +111 +81 +56 +36 +19 +7 +0 -2 -0 +5 +15 +28 +45 +66 +91
+  per-frame slope: loss at s=0 8.649; minimum at s = +0.056 [+0.026, +0.086]; curvature at 0 12.5 (relative 1.44)
+    rel. loss x1000: +260 +212 +169 +130 +94 +64 +38 +16 +0 -11 -18 -19 -16 -8 +5 +21 +41
+
+5b seed 1 branch point, Zeroth-Korean
+  offset (D-109): loss at s=0 10.441; minimum at s = +0.109 [+0.087, +0.131]; curvature at 0 16.8 (relative 1.61)
+    rel. loss x1000: +453 +385 +318 +254 +193 +136 +85 +39 +0 -32 -58 -77 -89 -95 -94 -88 -78
+  crop curve: loss at s=0 8.992; minimum at s = +0.065 [+0.054, +0.086]; curvature at 0 15.3 (relative 1.70)
+    rel. loss x1000: +369 +310 +253 +196 +146 +99 +59 +26 +0 -20 -35 -44 -41 -32 -15 +5 +30
+  per-frame slope: loss at s=0 6.795; minimum at s = +0.083 [+0.066, +0.100]; curvature at 0 16.6 (relative 2.44)
+    rel. loss x1000: +397 +333 +273 +215 +161 +112 +68 +31 +0 -24 -42 -53 -57 -54 -46 -31 -12
+
+5b seed 1 branch point, train_v2 validation (synthetic control)
+  offset (D-109): loss at s=0 5.381; minimum at s = -0.009 [-0.019, -0.001]; curvature at 0 79.7 (relative 14.80)
+    rel. loss x1000: +720 +567 +424 +295 +183 +94 +33 +1 +0 +30 +94 +192 +318 +463 +620 +782 +949
+  crop curve: loss at s=0 3.657; minimum at s = -0.005 [-0.015, +0.004]; curvature at 0 72.9 (relative 19.94)
+    rel. loss x1000: +716 +569 +429 +304 +194 +105 +42 +7 +0 +20 +75 +164 +278 +409 +552 +704 +858
+  per-frame slope: loss at s=0 3.323; minimum at s = -0.005 [-0.012, +0.003]; curvature at 0 63.2 (relative 19.03)
+    rel. loss x1000: +628 +497 +374 +263 +168 +92 +37 +6 +0 +18 +64 +138 +234 +348 +472 +600 +732
+
+5b seed 2 branch point, VocalSet
+  offset (D-109): loss at s=0 12.250; minimum at s = +0.014 [-0.016, +0.046]; curvature at 0 10.4 (relative 0.85)
+    rel. loss x1000: +162 +125 +94 +67 +45 +27 +14 +5 +0 -1 +3 +11 +23 +40 +62 +87 +117
+  crop curve: loss at s=0 9.096; minimum at s = -0.002 [-0.026, +0.040]; curvature at 0 11.7 (relative 1.28)
+    rel. loss x1000: +129 +99 +73 +51 +34 +20 +10 +2 +0 +3 +8 +18 +33 +51 +75 +101 +130
+  per-frame slope: loss at s=0 8.449; minimum at s = +0.014 [-0.026, +0.048]; curvature at 0 9.0 (relative 1.06)
+    rel. loss x1000: +140 +108 +80 +57 +38 +23 +12 +4 +0 -1 +3 +10 +22 +39 +60 +85 +115
+
+5b seed 2 branch point, Zeroth-Korean
+  offset (D-109): loss at s=0 10.624; minimum at s = +0.104 [+0.085, +0.122]; curvature at 0 16.4 (relative 1.55)
+    rel. loss x1000: +448 +382 +317 +254 +194 +138 +87 +40 +0 -34 -60 -80 -91 -96 -94 -86 -72
+  crop curve: loss at s=0 8.968; minimum at s = +0.056 [+0.041, +0.070]; curvature at 0 22.4 (relative 2.50)
+    rel. loss x1000: +372 +312 +256 +199 +151 +107 +66 +29 +0 -19 -30 -33 -26 -17 +2 +24 +56
+  per-frame slope: loss at s=0 6.797; minimum at s = +0.077 [+0.062, +0.090]; curvature at 0 17.3 (relative 2.55)
+    rel. loss x1000: +391 +330 +272 +216 +163 +114 +70 +32 +0 -25 -42 -52 -55 -50 -39 -21 +2
+
+5b seed 2 branch point, train_v2 validation (synthetic control)
+  offset (D-109): loss at s=0 5.447; minimum at s = -0.016 [-0.027, -0.005]; curvature at 0 75.4 (relative 13.85)
+    rel. loss x1000: +646 +500 +363 +242 +140 +63 +11 -10 +0 +40 +109 +201 +315 +451 +601 +759 +920
+  crop curve: loss at s=0 3.745; minimum at s = -0.011 [-0.021, -0.002]; curvature at 0 71.8 (relative 19.18)
+    rel. loss x1000: +651 +514 +378 +259 +157 +76 +23 -2 +0 +33 +92 +170 +273 +397 +535 +679 +826
+  per-frame slope: loss at s=0 3.352; minimum at s = -0.014 [-0.022, -0.004]; curvature at 0 61.3 (relative 18.27)
+    rel. loss x1000: +560 +436 +320 +216 +128 +61 +16 -4 +0 +29 +82 +152 +241 +346 +464 +587 +712

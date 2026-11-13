@@ -13,7 +13,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-STORES = ["cache/recon/vocalset", "cache/recon/zeroth"]
+STORES = os.environ.get("VA_RECON_STORES", "cache/recon/vocalset,cache/recon/zeroth").split(",")  # D-114: VocalSet alone
 N_BATCH = 12
 
 

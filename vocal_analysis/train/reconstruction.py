@@ -267,13 +267,38 @@ def decode_formants(logits: torch.Tensor, half_width: int = 4) -> torch.Tensor:
     return AX.f_min * torch.pow(2.0, mean_bin * AX.cents_per_bin / 1200.0)
 
 
+def crop_channel_out(resid: torch.Tensor, f: torch.Tensor, w: torch.Tensor, n_terms: int = 3) -> torch.Tensor:
+    """resid (B, T, K) minus, jointly, a level per frame and one smooth curve per crop (polynomial in log2 f, n_terms
+    beyond the constant), weighted least squares over the crop's valid harmonics. The curve stands for what is fixed
+    across a recording (the channel, an average source shape); the per-frame level for the frame's loudness."""
+    lf = torch.log2(f.clamp_min(1.0)) - 10.0
+    phi = torch.stack([lf ** (j + 1) for j in range(n_terms)], -1)  # (B, T, K, n)
+    ws = w.sum(-1, keepdim=True).clamp_min(1e-9)
+    rc = resid - (w * resid).sum(-1, keepdim=True) / ws  # per-frame level out
+    pc = phi - (w.unsqueeze(-1) * phi).sum(-2, keepdim=True) / ws.unsqueeze(-1)
+    G = torch.einsum("btkn,btk,btkm->bnm", pc, w, pc)
+    G = G + 1e-9 * G.diagonal(dim1=-2, dim2=-1).mean(-1).clamp_min(1e-9)[:, None, None] * torch.eye(n_terms, dtype=G.dtype, device=G.device)
+    c = torch.linalg.solve(G, torch.einsum("btkn,btk,btk->bn", pc, w, rc))
+    return rc - torch.einsum("btkn,bn->btk", pc, c)
+
+
 def model_recon_loss(out: dict, lab: dict, rd_grid=None, n_formants: int = 4, fmax: float | None = None,
-                     hpc: bool = False) -> torch.Tensor:
+                     hpc: bool = False, channel: int = 0) -> torch.Tensor:
     """D-109: the reconstruction loss of a model's own F1-F4 and B1-B4 on a real-audio batch (`recon_data.ReconCrops`):
     LF source with Rd searched per frame (non-differentiable choice), level profiled, no nuisance sections. fmax: drop
-    harmonics above it (the stores hold targets to 5000 Hz). hpc: add `upper_poles` from the model's F4 (D-109)."""
+    harmonics above it (the stores hold targets to 5000 Hz). hpc: add `upper_poles` from the model's F4 (D-109).
+    channel > 0: each frame's Rd is chosen as before, then a smooth curve per crop (`crop_channel_out`, that many
+    terms) is profiled out together with the per-frame level before the Huber loss."""
     F = decode_formants(out["formant_logits"])[..., :n_formants]
     B = torch.exp(out["logb_mean"].float())[..., :n_formants]
+    return recon_loss_fb(F, B, lab, rd_grid, fmax, hpc, channel)
+
+
+def recon_loss_fb(F: torch.Tensor, B: torch.Tensor, lab: dict, rd_grid=None, fmax: float | None = None, hpc: bool = False,
+                  channel: int = 0, per_frame: bool = False, profile: str = "offset") -> torch.Tensor:
+    """`model_recon_loss` given the poles (B, T, n) and bandwidths directly (analysis scripts perturb them).
+    per_frame: return the (B, T) per-frame losses instead, NaN on frames that carry none. profile: what is profiled per
+    frame on top of the LF source ("offset", D-109; "tilt" adds a slope in log f, freeing the spectral slope from Rd)."""
     grid = RD_SEARCH if rd_grid is None else rd_grid
     tgt, ok, f0, m = lab["db"].float(), lab["ok"].bool(), lab["f0"].float(), lab["mask"].bool()
     if fmax is not None:
@@ -283,11 +308,35 @@ def model_recon_loss(out: dict, lab: dict, rd_grid=None, n_formants: int = 4, fm
     if hpc:
         uf, ub = upper_poles(F[..., 3], f0)
         F, B = torch.cat([F, uf], -1), torch.cat([B, ub], -1)
+    if channel:
+        K = tgt.shape[-1]
+        f = f0.unsqueeze(-1) * torch.arange(1, K + 1, dtype=f0.dtype, device=f0.device)
+        w = (ok & m.unsqueeze(-1)).to(tgt.dtype)
+        rend = render_db(torch.where(ok, f, torch.full_like(f, 1000.0)), F, B, None, None, False)
+        with torch.no_grad():  # each frame's Rd, chosen with its level profiled (as without the channel term)
+            cand = []
+            for r in grid:
+                res = profile_out((tgt - rend - lf_source_db(torch.full_like(f0, float(r)), K)) * w, f, w, "offset") * w
+                hub = torch.nn.functional.huber_loss(res, torch.zeros_like(res), reduction="none", delta=6.0)
+                cand.append((hub * w).sum(-1) / w.sum(-1).clamp_min(1.0))
+            rd_best = torch.tensor(list(grid), dtype=f0.dtype, device=f0.device)[torch.stack(cand, 0).argmin(0)]
+        res = crop_channel_out((tgt - rend - lf_source_db(rd_best, K)) * w, f, w, channel) * w
+        hub = torch.nn.functional.huber_loss(res, torch.zeros_like(res), reduction="none", delta=6.0)
+        per = (hub * w).sum(-1) / w.sum(-1).clamp_min(1.0)
+        use = m & (ok.sum(-1) >= 4)
+        if per_frame:
+            return torch.where(use, per, torch.full_like(per, float("nan")))
+        return (per * use).sum() / use.sum().clamp_min(1)
+    if profile != "offset":  # unscored frames get dummy harmonics so the per-frame slope's solve stays non-singular
+        kk = torch.arange(1, ok.shape[-1] + 1, device=ok.device)
+        ok = ok | ((~m)[..., None] & (kk <= 4))
     per = None
     for r in grid:
-        _, p = reconstruction_loss(tgt, ok, f0, F, B, frame_mask=m, source="rd", profile="offset",
+        _, p = reconstruction_loss(tgt, ok, f0, F, B, frame_mask=m, source="rd", profile=profile,
                                    rd=torch.full_like(f0, float(r)))
         p = torch.nan_to_num(p, nan=float("inf"))
         per = p if per is None else torch.minimum(per, p)
     use = torch.isfinite(per) & m
+    if per_frame:
+        return torch.where(use, per, torch.full_like(per, float("nan")))
     return (torch.where(use, per, torch.zeros_like(per))).sum() / use.sum().clamp_min(1)

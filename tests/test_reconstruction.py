@@ -174,3 +174,34 @@ def test_upper_poles_match_the_prior():
     np.testing.assert_allclose(f[0].numpy(), want_f, rtol=1e-9)
     ok = np.isfinite(want_f)
     np.testing.assert_allclose(b[0].numpy()[ok], bandwidth_prior(want_f[ok], 210.0), rtol=1e-9)
+
+
+def test_crop_channel_out_removes_a_crop_curve_and_frame_levels():
+    """A per-crop smooth curve plus per-frame levels is removed exactly; formant-like frame-to-frame structure is not"""
+    from vocal_analysis.train.reconstruction import crop_channel_out
+
+    g = torch.Generator().manual_seed(0)
+    B, T, K = 2, 30, 20
+    f = torch.linspace(150, 3800, K).expand(B, T, K).double()
+    lf = torch.log2(f) - 10
+    curve = (torch.randn(B, 1, 1, 3, generator=g, dtype=torch.float64) * torch.stack([lf, lf ** 2, lf ** 3], -1)).sum(-1)
+    level = torch.randn(B, T, 1, generator=g, dtype=torch.float64) * 5
+    w = (torch.rand(B, T, K, generator=g) > 0.2).double()
+    out = crop_channel_out((curve + level) * w, f, w, 3) * w
+    assert out.abs().max() < 1e-5  # the solve's 1e-9 ridge leaves about 1e-7 dB
+    moving = torch.sin(lf * 3 + torch.linspace(0, 6, T).view(1, T, 1))  # changes from frame to frame
+    left = crop_channel_out(moving * w, f, w, 3) * w
+    assert (left ** 2).sum() > 0.3 * (((moving - (moving * w).sum(-1, keepdim=True) / w.sum(-1, keepdim=True)) * w) ** 2).sum()
+
+
+def test_model_recon_loss_with_channel_term_runs_and_backpropagates():
+    from vocal_analysis.models.bins import FORMANT_AXIS
+
+    B, T, K = 2, 12, 24
+    logits = torch.randn(B, T, 4, FORMANT_AXIS.n_bins, requires_grad=True)
+    out = {"formant_logits": logits, "logb_mean": torch.full((B, T, 4), float(np.log(100.0)), requires_grad=True)}
+    lab = {"db": torch.randn(B, T, K), "ok": torch.ones(B, T, K, dtype=torch.bool), "f0": torch.full((B, T), 150.0),
+           "mask": torch.ones(B, T, dtype=torch.bool)}
+    loss = R.model_recon_loss(out, lab, rd_grid=[0.8, 1.2], fmax=4000.0, hpc=True, channel=3)
+    loss.backward()
+    assert torch.isfinite(loss) and logits.grad.abs().sum() > 0

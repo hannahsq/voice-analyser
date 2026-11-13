@@ -3923,3 +3923,36 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
   - *Hillenbrand women* (base +4.0): rev_high +4.1, rev_low +4.9 (nothing brought out); **rev_all +8.8 [+5.8, +10.9]** (partial, at the edge). Null -2.9 to -2.5.
   - *Men* (reported): PTDB-TUG base +9.3, high +8.2, low +9.4, noise +7.8, all +5.4; Hillenbrand base +0.8, rev_all +5.7.
   - *Reading*: the registered branches don't apply cleanly (nothing blocks, and "all" only halves its way there). Hillenbrand's roll-off above 5 kHz, its weaker low end and its noise floor are not what blocks the shift. What moves it is the one part of the curve no single condition carries: the band from about 300 to 800 Hz (+6 dB at 400 Hz, which the registration called likely content). So the long-term spectral balance across the F1 region moves D-109's stretch in both directions, by about a third of its size; most of Hillenbrand's absence stays with its speakers or material. Consistent with the loss bending F1 to fit a fixed spectral shape, which is what M4's next step tests (D-114's pre-check: a smooth curve per crop profiled out of the loss).
+
+## D-114 (registered 2026-11-14; seen beforehand: D-109 to D-113, the pre-checks below; nothing of any run with this store): the reconstruction loss on VocalSet's recordings alone
+
+*Status*: registered (Hannah, 2026-11-14: "Back to M4's critical path, treating the shift as a property of the reconstruction loss on connected speech. Whether the stretched F1 is right still has no reference."). The design is mine. Chain `scripts/analysis/chains/d114.sh`, decision `scripts/analysis/decide_d114.py`, reports `reports/analysis/d114/`.
+
+*Question*: the pre-checks below find that D-109's loss, on its own branch-point model, prefers stretching F1 on Zeroth's read speech (s about +0.10, the size D-109 learned) and hardly at all on VocalSet's sung vowels or on synthetic audio. Trained on VocalSet alone, does the loss still help the formant outputs on real voices, without the stretch and without costing the guards?
+
+*Arms*: `d114_s1`, `d114_s2`: D-109's arms (`d040_5b_s{1,2}` from step 16000, 4000 decay steps, fmax 4000 Hz, higher-pole correction, the weight rule) with **one change: the recon stores hold VocalSet's recordings only** (`cache/recon/vocalset`, 1500 recordings; Zeroth's dropped). Weight by D-109's rule on that store: **0.0240** (gradient ratios s1 0.108, s2 0.083; `reports/analysis/d114/grad_ratio.txt`). The comparison is 5b's own branches, seeds paired, as D-109.
+
+*Pre-checks* (seen; `reports/analysis/d114/`; the branch-point models, D-109's instrument; F1 stretched about 500 Hz as F1' = 500 (F1 / 500)^(1 + s), everything else fixed; the loss's minimising s, 95 % bootstrap over batches or crops; D-109's learned stretch on PTDB-TUG women is about s = +0.08):
+- *Part 1* (`stretch_scan.txt`): D-109's loss: Zeroth +0.109 / +0.104 (seeds 1 / 2), VocalSet +0.052 / +0.014, synthetic validation +0.006 / +0.004. A smooth 3-term curve per crop profiled out as well (`reconstruction.crop_channel_out`): Zeroth +0.065 / +0.056, VocalSet +0.021 / -0.002, synthetic unchanged.
+- *Part 2* (`stretch_strata.txt`): on Zeroth the preference is not mainly F1 movement (steady frames +0.08, moving +0.13); frames with F1 below 450 Hz want F1 lower on both corpora; on Zeroth, f0 below 150 Hz wants about 0 and f0 at 250 Hz and above +0.14.
+- *Part 3* (`source_check.txt`): real voices take the pressed end of the Rd grid (median 0.55-0.60, 15-21 % of frames at 0.3; synthetic 1.30, 6 %), and even there the residual is H1 +2 to +4 dB, H2 -2 to -3 dB (synthetic +-0.3). The LF family can't give a shallow overall slope with a strong H1; lowering a low F1 lifts H1 against H2.
+- *Part 4* (`stretch_scan_variants.txt`): a per-frame slope on top of Rd: Zeroth +0.083 / +0.077, VocalSet +0.056 / +0.014 (less than the crop curve). Every variant keeps the synthetic curvature within 20 % of D-109's.
+- *Part 5* (`stretch_scan_noh1.txt`): H1 left out: Zeroth +0.073 / +0.069, VocalSet +0.014 / +0.002; H1 left out plus the crop curve: Zeroth +0.053 / +0.052, VocalSet -0.027 / -0.036. Synthetic within +-0.01 throughout.
+- *Reading of the pre-checks*: on connected speech the loss wants the stretch for several reasons at once (the source's shape at H1-H2, about a third; a fixed shape per recording, about a third; a remainder not placed: nasal frames, bandwidth errors, the labeller's f0 in fast speech are the candidates). On VocalSet it is small, and on synthetic audio nil. Hence the one change here, the data; the channel curve and leaving H1 out stay available (`recon_loss_fb`'s `channel`, `profile`; both off here) and are not part of this arm.
+
+*Stop rule*: D-109's (`d109_watch.py`, step 17000: gradient-norm ratio > 2, formant-term ratio > 1.10, or a non-finite loss stops both arms).
+
+*Rule*: D-086's, unchanged, as D-109 (`decide_d114.py`, checked in `--check` mode against D-065's gain arm: not a candidate, length guard, as recorded).
+
+*Reported*: D-109's list; and **the stretch**, D-110's measure on the new arm (`d114_shift.py`, `shift_signature.txt`): PTDB-TUG women's S on closed-phase F1 >= 600 Hz minus < 450 Hz (D-109: +22.4 - (-5.7) = +28.1 Hz) and the F1 slope. Expected from the pre-checks: well below D-109's.
+
+*Readings*:
+- *Candidate*: the loss on sung sustained vowels earns a seed confirmation and is M4's reconstruction arm; connected speech joins the store only once its misfit is modelled.
+- *Not a candidate, stretch gone* (contrast <= +10 Hz): restricted to where it is unbiased, the loss at this weight is harmless but doesn't reach the measures; D-109's seed-1 gain was likely the stretch. Next: the weight, or M4's other levers.
+- *Not a candidate, stretch still there* (contrast >= +20 Hz): the stretch is not Zeroth's alone, and the stretch scan does not predict what training learns; the scan is revisited before any further arm.
+- Between +10 and +20 Hz: reported as partial.
+
+*Caveats*: VocalSet is sung, so the loss now sees mostly sustained, higher-f0 voicing (its f0 >= 250 Hz frames are 63 % of the store's); the pre-check is a one-parameter scan at the branch point, not a prediction of training; VocalSet is also in the supervised resynthesis share (as D-109's caveat).
+
+*Cost*: about 4-5 h for the two branches, then about 1.5 h of scoring.
+

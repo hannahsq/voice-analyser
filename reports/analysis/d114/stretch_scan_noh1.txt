@@ -1,0 +1,50 @@
+D-114 pre-check: D-109's loss against an F1 stretch about 500 Hz, F1' = 500 (F1/500)^(1+s); loss relative to s = 0 (x1000); channel 0 = level per frame (D-109), 3 = plus a 3-term curve per crop
+s grid: -0.16 -0.14 -0.12 -0.10 -0.08 -0.06 -0.04 -0.02 -0.00 +0.02 +0.04 +0.06 +0.08 +0.10 +0.12 +0.14 +0.16
+
+5b seed 1 branch point, VocalSet
+  offset (D-109): loss at s=0 12.394; minimum at s = +0.052 [+0.022, +0.093]; curvature at 0 13.4 (relative 1.08)
+    rel. loss x1000: +267 +218 +173 +132 +96 +64 +38 +16 +0 -11 -16 -17 -12 -3 +10 +28 +48
+  no H1: loss at s=0 11.245; minimum at s = +0.014 [-0.020, +0.052]; curvature at 0 11.6 (relative 1.03)
+    rel. loss x1000: +163 +129 +98 +71 +49 +30 +16 +6 +0 -1 +3 +11 +23 +40 +60 +83 +109
+  no H1 + crop curve: loss at s=0 8.007; minimum at s = -0.027 [-0.070, +0.011]; curvature at 0 7.2 (relative 0.91)
+    rel. loss x1000: +55 +39 +25 +14 +6 +0 -3 -3 +0 +6 +14 +26 +40 +59 +79 +101 +124
+
+5b seed 1 branch point, Zeroth-Korean
+  offset (D-109): loss at s=0 10.441; minimum at s = +0.109 [+0.087, +0.131]; curvature at 0 16.8 (relative 1.61)
+    rel. loss x1000: +453 +385 +318 +254 +193 +136 +85 +39 +0 -32 -58 -77 -89 -95 -94 -88 -78
+  no H1: loss at s=0 9.150; minimum at s = +0.073 [+0.057, +0.090]; curvature at 0 20.0 (relative 2.19)
+    rel. loss x1000: +438 +368 +301 +238 +178 +123 +75 +33 +0 -25 -43 -52 -53 -46 -32 -11 +15
+  no H1 + crop curve: loss at s=0 8.277; minimum at s = +0.053 [+0.038, +0.073]; curvature at 0 17.3 (relative 2.10)
+    rel. loss x1000: +342 +286 +234 +183 +135 +91 +52 +22 +0 -15 -25 -26 -20 -4 +15 +40 +71
+
+5b seed 1 branch point, train_v2 validation (synthetic control)
+  offset (D-109): loss at s=0 5.090; minimum at s = +0.002 [-0.010, +0.011]; curvature at 0 90.8 (relative 17.84)
+    rel. loss x1000: +846 +685 +535 +399 +277 +168 +81 +22 +0 +15 +65 +149 +265 +407 +563 +727 +902
+  no H1: loss at s=0 4.562; minimum at s = -0.002 [-0.011, +0.007]; curvature at 0 92.8 (relative 20.35)
+    rel. loss x1000: +805 +647 +501 +369 +254 +151 +68 +16 +0 +22 +80 +170 +292 +441 +605 +771 +947
+  no H1 + crop curve: loss at s=0 3.037; minimum at s = +0.000 [-0.008, +0.009]; curvature at 0 89.4 (relative 29.42)
+    rel. loss x1000: +787 +638 +498 +373 +259 +157 +75 +19 +0 +18 +68 +149 +260 +397 +546 +697 +853
+
+5b seed 2 branch point, VocalSet
+  offset (D-109): loss at s=0 12.250; minimum at s = +0.014 [-0.016, +0.046]; curvature at 0 10.4 (relative 0.85)
+    rel. loss x1000: +162 +125 +94 +67 +45 +27 +14 +5 +0 -1 +3 +11 +23 +40 +62 +87 +117
+  no H1: loss at s=0 11.168; minimum at s = +0.002 [-0.023, +0.030]; curvature at 0 8.8 (relative 0.79)
+    rel. loss x1000: +112 +85 +62 +43 +28 +16 +7 +2 +0 +1 +7 +16 +30 +48 +70 +96 +126
+  no H1 + crop curve: loss at s=0 8.276; minimum at s = -0.036 [-0.067, +0.001]; curvature at 0 7.9 (relative 0.95)
+    rel. loss x1000: +40 +28 +17 +8 +3 -2 -3 -3 +0 +7 +16 +28 +44 +62 +83 +106 +132
+
+5b seed 2 branch point, Zeroth-Korean
+  offset (D-109): loss at s=0 10.624; minimum at s = +0.104 [+0.085, +0.122]; curvature at 0 16.4 (relative 1.55)
+    rel. loss x1000: +448 +382 +317 +254 +194 +138 +87 +40 +0 -34 -60 -80 -91 -96 -94 -86 -72
+  no H1: loss at s=0 9.236; minimum at s = +0.069 [+0.056, +0.084]; curvature at 0 20.6 (relative 2.23)
+    rel. loss x1000: +436 +368 +302 +240 +181 +126 +77 +35 +0 -27 -44 -53 -53 -44 -27 -3 +28
+  no H1 + crop curve: loss at s=0 8.223; minimum at s = +0.052 [+0.037, +0.070]; curvature at 0 21.0 (relative 2.55)
+    rel. loss x1000: +370 +310 +254 +200 +149 +102 +62 +27 +0 -18 -28 -29 -23 -8 +14 +42 +79
+
+5b seed 2 branch point, train_v2 validation (synthetic control)
+  offset (D-109): loss at s=0 5.302; minimum at s = -0.001 [-0.014, +0.012]; curvature at 0 76.9 (relative 14.50)
+    rel. loss x1000: +777 +620 +472 +338 +223 +127 +56 +13 +0 +16 +67 +152 +264 +402 +562 +737 +923
+  no H1: loss at s=0 4.760; minimum at s = -0.007 [-0.020, +0.008]; curvature at 0 78.7 (relative 16.54)
+    rel. loss x1000: +735 +583 +440 +309 +197 +105 +40 +4 +0 +26 +86 +178 +294 +434 +594 +768 +956
+  no H1 + crop curve: loss at s=0 3.155; minimum at s = -0.004 [-0.016, +0.011]; curvature at 0 74.8 (relative 23.71)
+    rel. loss x1000: +716 +574 +439 +313 +202 +110 +45 +8 +0 +21 +75 +157 +259 +386 +530 +689 +855

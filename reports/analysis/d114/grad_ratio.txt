@@ -1,0 +1,4 @@
+D-109 gradient ratio: encoder gradient norms at the branch point; 12 batches each; recon fmax 4000 Hz, higher-pole correction True
+  s1: formant term 0.4635 (IQR 0.4208-0.6109); recon 4.2724 (IQR 3.6593-5.5718); recon loss 12.755; ratio 0.108
+  s2: formant term 0.3739 (IQR 0.3592-0.3942); recon 4.4869 (IQR 3.9503-5.3461); recon loss 11.832; ratio 0.083
+weight = 0.25 x mean ratio = 0.0240
