@@ -1,0 +1,2 @@
+d114_s1 vs d040_5b_s1_b20k, steps 16501-17000: gradient norm ratio 1.03 (limit 2.0), formant term ratio 1.004 (limit 1.1), reconstruction loss 8.838 -> ok
+d114_s2 vs d040_5b_s2_b20k, steps 16501-17000: gradient norm ratio 1.04 (limit 2.0), formant term ratio 1.003 (limit 1.1), reconstruction loss 8.984 -> ok
