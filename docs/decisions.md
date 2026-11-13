@@ -3891,3 +3891,30 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
   - *A3* (reported): +10.9, driven by ə (+65); open vowels +1.7 / +5.4.
   - *Reading*: Q1 is mixed by the rule, but its main limb is clear: the stretch comes with this voice's read speech, recorded on a different chain from PTDB-TUG's, so PTDB-TUG's recordings are not what carries it. The words (reported only) show it too, so Hillenbrand's absence is probably not about citation words as a style; Hillenbrand's own recordings or speakers become the leading candidates. Sustained sung vowels point the same way for the open vowels but are too noisy here to say. The whispered vowels don't move. Which model is right is not measured.
   - *Note (2026-11-13, after the result)*: the session was recorded with the microphone in a figure-8 pattern close to the lips (Hannah: null plane towards the window and door, for the noise floor). Its proximity effect puts a distance-dependent low-frequency shelf on every take (about +6 dB at 300 Hz at 10 cm), fixed for the sentences and moving slightly with the lips on sustained vowels. The paired measures here are unaffected (both models hear the same audio). It is also a recording-chain colouring of the kind D-110 left open: a near-field shelf applied to Hillenbrand, or removed from these sentences, would test whether it is what lets the shift through. Not registered.
+
+## D-113 (registered 2026-11-13; seen beforehand: D-110 to D-112, the two chains' measured differences and the null arm under every condition below; no d109 output under any degradation): does Hillenbrand's recording chain block D-109's F1 shift?
+
+*Status*: registered (Hannah, 2026-11-13: "check whether degrading your sentences or PTDB towards a Hillenbrand-like chain makes it disappear. That uses existing data only."). Inference only, dev speakers only, no training. Script `scripts/analysis/d113_chain.py`; per-frame outputs in `cache/d113/` (local); report `reports/analysis/d113/d113.txt`.
+
+*Question*: D-109's shift stretches F1 by vowel on PTDB-TUG (D-110: women's frames above 600 Hz +22 Hz, below 450 Hz -6) and in Hannah's read speech (D-112), and is absent on Hillenbrand. Every corpus reaches the model through the same 16 kHz anti-aliased resampling. Is it something within the band of Hillenbrand's recordings that blocks it?
+
+*The chains, measured* (seen; women, dev; speech frames' long-term spectrum, 1/3 octave, relative to 800-1600 Hz; `d113_chain.py` prints the curve):
+- D(f) = Hillenbrand - PTDB-TUG: 100 Hz -4, 150 Hz -10, 200 Hz -5, 300 Hz -1, 400 Hz +6, 800-5000 Hz within +-2, 6500 Hz -9, 7200 Hz -14, 7600 Hz -18 dB. Hillenbrand has a weaker low end (or PTDB-TUG's headset microphone a stronger one) and rolls off above 5 kHz. The +6 dB at 400 Hz is likely content (citation vowels against connected speech).
+- Hillenbrand's noise floor: 29-31 dB below its speech up to 800 Hz, 34-58 dB above (PTDB-TUG's: 40-57 dB below). Hillenbrand's samples are 14-bit (every value a multiple of 4).
+
+*Conditions* (linear-phase EQ by the measured curve; noise with Hillenbrand's floor spectrum at its level below each file's speech):
+- PTDB-TUG, D-110's frames: base (must reproduce the cache), **high** (D above 3 kHz), **low** (D below 300 Hz), **noise**, **all** (the whole curve, then the noise).
+- Hillenbrand, labelled frames: base, rev_high, rev_low, rev_all (the curves with the sign reversed, towards PTDB-TUG's chain).
+
+*Measure*: S = d109 seed mean - 5b seed mean, per frame. The **contrast**: median S over frames with closed-phase F1 >= 600 Hz minus that below 450 Hz (PTDB-TUG women; D-110: +28.1 Hz); on Hillenbrand women, label F1 >= 650 minus < 450 Hz (D-110: about +4). 95 % speaker bootstrap. Men reported (PTDB-TUG bands 550 / 400 Hz; D-110 about +9).
+
+*Pre-checks* (seen): base reproduces the cache (median |F1 difference| 0.00 Hz for 5b s1). The null arm (D-065 - 5b) under every condition: PTDB-TUG women's contrast +0.2 to +1.2 Hz, men's -0.4 to -0.1; Hillenbrand women's -2.9 to -2.5, men's -1.3 to +0.3.
+
+*Readings* (women primary):
+- Per PTDB-TUG condition: **blocks** if the contrast falls to +10 Hz or less (from +28; Hillenbrand's own is about +4); **does not block** if it stays at +20 or more; partial between.
+- Per Hillenbrand condition: **brings it out** if the contrast reaches +15 Hz or more; **does not** if it stays at +8 or less; partial between.
+- A chain feature carries Hillenbrand's absence if its PTDB-TUG condition blocks and its reverse brings the shift out on Hillenbrand. "All" blocking with no single feature doing so: the combination. Nothing blocking and nothing brought out: not the chain as measured; the speakers or the material (American English citation vowels; Hannah's hVd words did show it, D-112) remain.
+- *Use*: a chain feature that blocks the shift is a channel property the reconstruction loss reacts to, so M4's next step would profile it out of the loss (a per-recording channel term) before raising the weight.
+
+*Caveats*: the curves are long-term averages over different material, so D mixes chain and content (the 400 Hz term most of all; it is only in "all"); the EQ is one fixed curve for every speaker; dev only; Hillenbrand's frames are few per token.
+
