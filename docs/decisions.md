@@ -3826,3 +3826,30 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
   - *Against the control*: D-078's coupling-trained acoustic - closed pair is a near-uniform offset (+20 / +14 Hz, slope +2.4 / -3.5) with F2 and F3 moving 2-4 times F1. S has neither shape: on PTDB-TUG it is a stretch of F1's scale, and on Hillenbrand it is absent.
   - CQ coefficients (reported only): -2.3 / -2.6 per 0.1, beyond the control's own and the null's; consistent with more open voices moving more, but D-076's caveats apply and the rule left CQ out.
   - *Reading* (the registered "not coupling-like" branch): D-109's hypothesis has no support. A loss that read the acoustic F1 would raise F1 as a level on both corpora; this one stretches F1 on PTDB-TUG's read sentences (open vowels up 20 Hz, close vowels down 6) and leaves Hillenbrand's citation vowels alone. What separates the corpora is untested: connected speech against isolated hVd words, the recording chain, and the frames the closed-phase cache keeps. The next step is the registered one: the real-audio misfit's own structure (D-109's pre-check: +2 dB below 250 Hz, -2 dB at 500-750 Hz, +1-2 dB at 2.5-4 kHz; source shape and channel) before the loss trains anything. Neither the acoustic head nor a coupled renderer is indicated by this result.
+
+## D-111 (registered 2026-11-13; seen beforehand: D-110's result, the recordings' inventory and the two nulls below on them; no d109 output on them): does D-109's F1 shift appear on sustained vowels in one voice and one recording chain?
+
+*Status*: registered (Hannah, 2026-11-13: "I vote try it with what we have and I can record more if needed", after offering her own sustained-vowel recordings). Inference only, no training. Script `scripts/analysis/d111_own_vowels.py`. **The recordings are Hannah's and private**: the per-file table stays outside the repo (`runs/d111_private/`); this log carries only the reading and group medians of model differences (her default, 2026-11-13, until she says otherwise).
+
+*Question*: D-110 found D-109's shift stretches F1 by vowel on PTDB-TUG's read sentences and is absent on Hillenbrand's citation words. Every corpus reaches the model through the same 16 kHz anti-aliased resampling, so bandwidth can't separate them. What remains is the speaking style, the recording chain within the band, and the frames scored. Sustained vowels in one voice and one chain hold the chain and the speaker fixed: if the stretch appears there, connected speech is not what produces it.
+
+*Data*: Hannah's sustained sung vowels (IPA folders eː, iː, æ, ɐː, ɔ, ʉː; modes M1, M2, M3, egressive and inhaled; 0.3-7 s each, 48 and 192 kHz; f0 steady within each file, spread under 1.6 semitones bar one). Sets by the 5b seed mean's median f0:
+- **Main: M1 egressive**: 6 files, æ, ɐː, ɔ at about 160 and 228 Hz (open and open-mid vowels only).
+- *Reported*: M1 inhaled (18 files, all five vowels, 63-127 Hz); f0 250-350 Hz (5 files, M2 at about 274 Hz).
+- Left out: f0 above 350 Hz (17 files: M2 at about 405 Hz, M3), where the close vowels' F1 is at or below f0; the voiceless /h/ file.
+
+*Measure*: per file, the median over scored frames (every model voiced and sonorant, inside the voiced span less 5 frames at each end, at least 10 frames) of F1-F3. S = d109 seed mean - 5b seed mean; per seed; by vowel group (close iː, ʉː; mid eː, ɔ; open æ, ɐː).
+
+*Pre-checks* (seen; 5b and the null arm only):
+- **Branch null** S0 = D-065's gain arm - 5b (seed means; decay branches from the same checkpoints that moved nothing on PTDB-TUG). Main set: median +0.1 Hz, median |.| 3.3, max |.| 6.7, positive in 3 of 6; open files -2.2, ɔ +4.0.
+- The inhaled set is not stable: S0 there is +6.5 Hz (positive in 16 of 18; one file 184 Hz). An arm that changed nothing on real speech moves inhaled phonation, so that set is read only as S - S0.
+- Seed null (5b s1 - s2) per file: median |.| 17-23 Hz, signed +22.6 on the main set. The seeds disagree on this voice far more than on PTDB-TUG, which is why S pairs each d109 seed with its own parent.
+
+*Readings* (main set; thresholds from the branch null):
+- **Present**: S's F1 median >= +8 Hz (above the null's largest file), positive in at least 5 of 6 files, and the open files' median >= +8. On PTDB-TUG the frames above 600 Hz moved +22 (women) and +10 (men). The stretch then appears on sustained vowels in this voice and chain, so connected speech is not what produces it; Hillenbrand's own recordings, or the frames scored, become the candidates, and the broadband-excitation test becomes worth setting up (sustained vowels carry the shift).
+- **Absent**: |S's F1 median| < 4 Hz and the open files' |median| < 4. Sustained vowels here behave as Hillenbrand's do, and speaking style (connected speech) is the leading candidate. Next: read sentences and hVd words in this voice and chain.
+- Otherwise **mixed**.
+- Reported only: per seed; F2, F3; the inhaled set's S and S - S0; the 274 Hz set; the open - mid contrast (the null alone gives -6.2 Hz on it).
+
+*Caveats*: one voice, six files in the main set, one take per vowel and pitch; no close vowels in egressive phonation (Hannah would re-record the whole set together rather than mix sessions); sung, not spoken; there is no reference here, so this asks only whether the shift happens, not which model is right.
+
