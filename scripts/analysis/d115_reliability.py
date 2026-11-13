@@ -17,6 +17,7 @@ Per arm (seeds paired with 5b's own branch, then seed means), for men and women:
       reference F1 across the 12 vowels.
 Speaker bootstrap (2000, paired across arms) for (1), (2) and (4).
 """
+import os
 import sys
 from pathlib import Path
 
@@ -24,10 +25,11 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-CACHE = Path("cache/d115")
+CACHE = Path(os.environ.get("D115_CACHE", "cache/d115"))  # D-116 points this at its own per-frame caches
+AGG = os.environ.get("D115_AGG", "weighted")  # "median": the per-file median over frames (A in vtl_score_joint.py)
 BASE = {1: "d040_5b_s1_b20k", 2: "d040_5b_s2_b20k"}
 ARMS = {"d114": "d114_s{}", "d109": "d109_s{}", "f57": "d090_f57_s{}", "f5": "d090_f5_s{}"}
-REPORTED = {"d040_5b_s1_b20k": 0.228, "d040_5b_s2_b20k": 0.261, "d114_s1": 0.215, "d114_s2": 0.236}
+REPORTED = {"d040_5b_s1_b20k": 0.228, "d040_5b_s2_b20k": 0.261, "d114_s1": 0.215, "d114_s2": 0.236} if AGG == "weighted" else {}
 
 
 def hillenbrand_dev():
@@ -82,6 +84,9 @@ def per_file(name, weighted=True):
     e = []
     for j in range(len(off) - 1):
         m, s = mu[off[j]:off[j + 1]], sg[off[j]:off[j + 1]]
+        if AGG == "median":
+            e.append(float(np.nanmedian(m)))
+            continue
         w = 1 / s ** 2 if weighted else np.ones_like(s)
         e.append(float((w * m).sum() / w.sum()))
     return np.array(e)
