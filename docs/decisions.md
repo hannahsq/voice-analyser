@@ -3895,7 +3895,7 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 
 ## D-113 (registered 2026-11-13; seen beforehand: D-110 to D-112, the two chains' measured differences and the null arm under every condition below; no d109 output under any degradation): does Hillenbrand's recording chain block D-109's F1 shift?
 
-*Status*: registered (Hannah, 2026-11-13: "check whether degrading your sentences or PTDB towards a Hillenbrand-like chain makes it disappear. That uses existing data only."). Inference only, dev speakers only, no training. Script `scripts/analysis/d113_chain.py`; per-frame outputs in `cache/d113/` (local); report `reports/analysis/d113/d113.txt`.
+*Status*: **done 2026-11-14: no single chain feature blocks the shift; the whole curve takes about a third off** (see Result). Registered (Hannah, 2026-11-13: "check whether degrading your sentences or PTDB towards a Hillenbrand-like chain makes it disappear. That uses existing data only."). Inference only, dev speakers only, no training. Script `scripts/analysis/d113_chain.py`; per-frame outputs in `cache/d113/` (local); report `reports/analysis/d113/d113.txt`.
 
 *Question*: D-109's shift stretches F1 by vowel on PTDB-TUG (D-110: women's frames above 600 Hz +22 Hz, below 450 Hz -6) and in Hannah's read speech (D-112), and is absent on Hillenbrand. Every corpus reaches the model through the same 16 kHz anti-aliased resampling. Is it something within the band of Hillenbrand's recordings that blocks it?
 
@@ -3918,4 +3918,8 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 - *Use*: a chain feature that blocks the shift is a channel property the reconstruction loss reacts to, so M4's next step would profile it out of the loss (a per-recording channel term) before raising the weight.
 
 *Caveats*: the curves are long-term averages over different material, so D mixes chain and content (the 400 Hz term most of all; it is only in "all"); the EQ is one fixed curve for every speaker; dev only; Hillenbrand's frames are few per token.
-
+- *Result (2026-11-14, `reports/analysis/d113/d113.txt`)*: **no single chain feature blocks the shift; the whole curve partly does.** Base reproduced the cache (0.00 Hz).
+  - *PTDB-TUG women* (contrast, base +28.1 Hz [+23.8, +32.2]): high +26.0, low +29.0, noise +24.7 (none blocks); **all +17.5 [+14.8, +20.0]** (partial, -38 %; the level S +7.3 -> +3.7). Null within +-1.2 Hz throughout.
+  - *Hillenbrand women* (base +4.0): rev_high +4.1, rev_low +4.9 (nothing brought out); **rev_all +8.8 [+5.8, +10.9]** (partial, at the edge). Null -2.9 to -2.5.
+  - *Men* (reported): PTDB-TUG base +9.3, high +8.2, low +9.4, noise +7.8, all +5.4; Hillenbrand base +0.8, rev_all +5.7.
+  - *Reading*: the registered branches don't apply cleanly (nothing blocks, and "all" only halves its way there). Hillenbrand's roll-off above 5 kHz, its weaker low end and its noise floor are not what blocks the shift. What moves it is the one part of the curve no single condition carries: the band from about 300 to 800 Hz (+6 dB at 400 Hz, which the registration called likely content). So the long-term spectral balance across the F1 region moves D-109's stretch in both directions, by about a third of its size; most of Hillenbrand's absence stays with its speakers or material. Consistent with the loss bending F1 to fit a fixed spectral shape, which is what M4's next step tests (D-114's pre-check: a smooth curve per crop profiled out of the loss).
