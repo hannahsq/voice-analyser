@@ -3796,3 +3796,27 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
     - That is the direction the instrument itself points on coupled synthetic clips. There the reconstruction minimum sits at the closed F1 +25-30 c, near the acoustic F1 (D-104, D-107; D-092: coupling raises the cycle-averaged F1).
     - A renderer fitted to whole-cycle harmonics measures the acoustic F1, not the closed-phase F1. So pointed at the closed-set head, the loss pulls it towards the acoustic value. The +8-10 Hz shift in women's bias is about that size (about 25 c at 500-600 Hz).
     - If so, the loss belongs on an acoustic formant head (D-085's acoustic set; 5b has none), or the renderer needs the coupling (D-092) before it can train the closed set. Checking this (the size of the per-speaker shift against the acoustic-closed gap) comes before any higher weight.
+
+## D-110 (registered 2026-11-13; seen beforehand: D-109's result as recorded, the pre-checks below; no d109 column of this check's measures): is D-109's F1 shift on real voices shaped like the open-phase shift?
+
+*Status*: registered (Hannah, 2026-11-13: "Would you be able to run the check?", the check D-109's reading named). Descriptive, CPU only, no training. Script `scripts/analysis/d110_shift_signature.py`, report `reports/analysis/d110/d110.txt`.
+
+*Question*: D-109's reading proposed that a renderer fitted to whole-cycle harmonics measures the acoustic F1, so the loss pulled the closed-set head up by the open-phase shift. If so, the shift S = d109 - 5b (seed means, paired per frame) should look like that shift: a level offset, present in both sexes at about the size of the real whole-cycle - closed-phase gap, and present against a whole-cycle reference too.
+
+*Data*: PTDB-TUG dev, D-091's frames in the windowed closed-phase cache (6 women, 6 men); Hillenbrand dev, the paired-score caches (`cache/m3w/m2cache_sub`; women, men, children). Both already hold d109's outputs from D-109's scoring.
+
+*Measures* (per sex or group): S's F1 / F2 / F3 medians, F1 with a 95 % speaker bootstrap, per seed; per-speaker F1 medians; the **F1 slope**, per-speaker OLS of S on the reference F1 (closed phase on PTDB-TUG, the label on Hillenbrand) and log f0, in Hz of S per 100 Hz of F1, mean over speakers; S by F1 band; on PTDB-TUG the EGG CQ coefficient (D-076's model; reported only); the signed F1 bias before and after. Beside S, the same measures for the seed null (5b s1 - s2), D-078's coupling-trained pair (acoustic - closed heads, seed means) and the references' own gaps.
+
+*Pre-checks* (seen; the script run with D-065's gain arm in place of d109, and the controls):
+- Noise floor: D-065 - 5b (an arm that moved nothing) gives S within +-0.7 Hz and F1 slopes within +-2.8 Hz per 100 Hz on seed means (+-4.1 for one seed); the seed null's slopes within +-2.9.
+- The coupling-trained control (D-078 acoustic - closed): a near-uniform offset, women +20.0 [+19.1, +20.8], men +14.0 Hz, every speaker within 2 Hz of its sex's median, F1 slope +2.4 / -3.5, and F2 / F3 shifts 2-4 times F1's. Its CQ coefficient (-1.2 / -0.3 per 0.1) is within the null, so CQ cannot discriminate here (as D-076 found): reported only.
+- The real gaps (PTDB-TUG F1): whole-cycle LPC - closed phase women -2.7, men +6.0; Praat - closed phase women +6.6, men +3.7 Hz (D-091). 5b reads Hillenbrand F1 +28.1 (women), +12.5 (men), +33 (children) Hz above its whole-cycle reference.
+- Already known from D-109: women's closed-phase bias +4.3 / +4.1 -> +11.9 / +14.6 Hz; probe 11's PTDB-TUG F1 slope 1.043 / 1.039 -> 1.125 / 1.070 (Hillenbrand unchanged); Hillenbrand women's F1 |error| fell (seed 1 -3.1 Hz). The probe-11 change already hints at a scale-like shift; this check measures it within speakers, on both corpora and for men.
+
+*Readings* (thresholds from the noise floor):
+- **Coupling-like** (D-109's hypothesis stands): on PTDB-TUG, S's F1 > 0 for both sexes (intervals above 0); |F1 slope| < 5 Hz per 100 Hz on both corpora; and Hillenbrand women's S > 0 (interval above 0). Next: the loss on an acoustic head, or a coupled renderer (D-092).
+- **Not coupling-like** (any one): F1 slope >= 5 Hz per 100 Hz in magnitude on either corpus for women or men; Hillenbrand women's S interval at or below 0 while PTDB-TUG women's is above 0; PTDB-TUG men's S interval at or below 0. The shift then depends on vowel or corpus, not a level, and the hypothesis has no support. Next: the real-audio misfit's own structure (source shape, channel; D-109's pre-check) before the loss trains anything.
+- Otherwise **mixed**, reported as such.
+
+*Caveats*: six speakers per sex on PTDB-TUG; Hillenbrand's labels are hand-corrected LPC on isolated hVd words, a different register from PTDB-TUG's read sentences; the regression on a noisy reference F1 attenuates the slope (the same for S and the controls).
+
