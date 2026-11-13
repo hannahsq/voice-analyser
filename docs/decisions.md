@@ -3799,7 +3799,7 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 
 ## D-110 (registered 2026-11-13; seen beforehand: D-109's result as recorded, the pre-checks below; no d109 column of this check's measures): is D-109's F1 shift on real voices shaped like the open-phase shift?
 
-*Status*: registered (Hannah, 2026-11-13: "Would you be able to run the check?", the check D-109's reading named). Descriptive, CPU only, no training. Script `scripts/analysis/d110_shift_signature.py`, report `reports/analysis/d110/d110.txt`.
+*Status*: **done 2026-11-13: not coupling-like; the shift stretches F1 on PTDB-TUG and is absent on Hillenbrand** (see Result). Registered (Hannah, 2026-11-13: "Would you be able to run the check?", the check D-109's reading named). Descriptive, CPU only, no training. Script `scripts/analysis/d110_shift_signature.py`, report `reports/analysis/d110/d110.txt`.
 
 *Question*: D-109's reading proposed that a renderer fitted to whole-cycle harmonics measures the acoustic F1, so the loss pulled the closed-set head up by the open-phase shift. If so, the shift S = d109 - 5b (seed means, paired per frame) should look like that shift: a level offset, present in both sexes at about the size of the real whole-cycle - closed-phase gap, and present against a whole-cycle reference too.
 
@@ -3819,4 +3819,10 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 - Otherwise **mixed**, reported as such.
 
 *Caveats*: six speakers per sex on PTDB-TUG; Hillenbrand's labels are hand-corrected LPC on isolated hVd words, a different register from PTDB-TUG's read sentences; the regression on a noisy reference F1 attenuates the slope (the same for S and the controls).
-
+- *Result (2026-11-13, `reports/analysis/d110/d110.txt`)*: **not coupling-like** (two of the registered criteria: women's F1 slope on PTDB-TUG +8.4 Hz per 100 Hz; Hillenbrand women's S at or below 0 while PTDB-TUG women's is above).
+  - *PTDB-TUG women*: S F1 +7.3 [+4.9, +9.8] Hz (seeds +5.9 / +7.9), every speaker positive (+2.3 to +11.1). It grows with F1: -5.7 Hz where the closed-phase F1 is below 450 Hz, +3.9 at 450-600, **+22.4 above 600**. F1 slope +8.4 per 100 Hz (seeds +7.6 / +9.2; noise floor +-3). F2 +5.4, F3 +0.3.
+  - *PTDB-TUG men*: +2.8 [+2.4, +3.3] Hz, every speaker +2.2 to +3.6; F1 slope +3.05 (within the floor), but by band +0.1 / +2.5 / +9.5 Hz (below 400, 400-550, above 550); F3 +8.3.
+  - *Hillenbrand: no shift.* Women -0.7 [-1.6, -0.3], men -0.1 [-0.4, +0.2], children -0.8 [-1.1, -0.4] Hz, the seed null's size; F1 slopes +0.4 to +1.6. 5b's level against the whole-cycle labels is unchanged (women +28.1 -> +27.2 Hz).
+  - *Against the control*: D-078's coupling-trained acoustic - closed pair is a near-uniform offset (+20 / +14 Hz, slope +2.4 / -3.5) with F2 and F3 moving 2-4 times F1. S has neither shape: on PTDB-TUG it is a stretch of F1's scale, and on Hillenbrand it is absent.
+  - CQ coefficients (reported only): -2.3 / -2.6 per 0.1, beyond the control's own and the null's; consistent with more open voices moving more, but D-076's caveats apply and the rule left CQ out.
+  - *Reading* (the registered "not coupling-like" branch): D-109's hypothesis has no support. A loss that read the acoustic F1 would raise F1 as a level on both corpora; this one stretches F1 on PTDB-TUG's read sentences (open vowels up 20 Hz, close vowels down 6) and leaves Hillenbrand's citation vowels alone. What separates the corpora is untested: connected speech against isolated hVd words, the recording chain, and the frames the closed-phase cache keeps. The next step is the registered one: the real-audio misfit's own structure (D-109's pre-check: +2 dB below 250 Hz, -2 dB at 500-750 Hz, +1-2 dB at 2.5-4 kHz; source shape and channel) before the loss trains anything. Neither the acoustic head nor a coupled renderer is indicated by this result.
