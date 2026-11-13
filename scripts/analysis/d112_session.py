@@ -167,8 +167,8 @@ def summarise(units, have_r):
         meas = {"S0 = D-065 - 5b": lambda u: (M(u, "n1", "n2") - M(u, "b1", "b2"))[0],
                 "seed null 5b s1 - s2": lambda u: u["b1"][0] - u["b2"][0]}
         if have_r:
-            meas = {"S = d109 - 5b": lambda u: (M(u, "r1", "r2") - M(u, "b1", "b2"))[0],
-                    "D = d109 - D-065 (primary)": lambda u: (M(u, "r1", "r2") - M(u, "n1", "n2"))[0],
+            meas = {"S = d109 - 5b (primary)": lambda u: (M(u, "r1", "r2") - M(u, "b1", "b2"))[0],
+                    "D = d109 - D-065": lambda u: (M(u, "r1", "r2") - M(u, "n1", "n2"))[0],
                     "  seed 1 (d109 - D-065)": lambda u: u["r1"][0] - u["n1"][0],
                     "  seed 2 (d109 - D-065)": lambda u: u["r2"][0] - u["n2"][0], **meas}
         for name, fn in meas.items():
@@ -190,7 +190,7 @@ def summarise(units, have_r):
         lines.append(f"sentence: {len(ss)} sentences, {len(f1b)} frames; 5b F1 thirds split at {lo_t:.0f} / {hi_t:.0f} Hz")
         pairs = {"S0 = D-065 - 5b": ("n", "b"), "seed null 5b s1 - s2": None}
         if have_r:
-            pairs = {"S = d109 - 5b": ("r", "b"), "D = d109 - D-065 (primary)": ("r", "n"), **pairs}
+            pairs = {"S = d109 - 5b (primary)": ("r", "b"), "D = d109 - D-065": ("r", "n"), **pairs}
         for name, pr in pairs.items():
             up, lw, al = [], [], []
             for u in ss:
