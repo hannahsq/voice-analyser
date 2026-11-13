@@ -3857,3 +3857,30 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
   - *Inhaled (reported; unstable)*: S +0.7, positive in 11 of 18. S - S0 by group: close -20.7, mid -0.5, open +8.4 Hz. The same order as PTDB-TUG (open up, close down), but the null arm alone moves this set by +6.5 Hz with a 184 Hz outlier, so it carries no weight.
   - *274 Hz set (reported, 5 files)*: S +2.4; close +10.5, open +0.6 (one file); F3 +92. Too few files to read.
   - *Reading*: the shift's sign and its open-vowel lean match PTDB-TUG's, at about half the size seen there on frames above 600 Hz (women +22, men +10), on all six files and both seeds. That is not enough to say sustained vowels carry it, and not enough to say they don't, so speaking style against recording chain stays open. What would decide it is a session that holds everything but one factor: egressive close and open vowels with repeats, plus hVd words and read sentences, recorded together (Hannah would re-record the whole set rather than mix sessions; her offer, 2026-11-13). Not scheduled.
+
+## D-112 (registered 2026-11-13; seen beforehand: D-110, D-111, the session's segmentation and levels, and 5b's and the null arm's outputs on it; no d109 output on it): D-109's shift across speaking styles and excitation, in one recording session
+
+*Status*: registered (Hannah recorded the session for it, 2026-11-13, after D-111 came out mixed; the take list and its order are mine, seed 112). Inference only, no training. Script `scripts/analysis/d112_session.py`. **The recordings are Hannah's and private**: the per-take tables stay outside the repo (`runs/d112_private/`); this log carries the reading and group medians of model differences only.
+
+*Question*: D-110 left speaking style (connected speech against citation words) and the recording chain as what separates PTDB-TUG, where D-109's shift appears, from Hillenbrand, where it doesn't. One session holds the voice, the microphone, the room and the day fixed while the style and the excitation change. (Q1) Does the shift's vowel dependence appear in read sentences, and in sustained vowels? (Q2) If it appears on sustained voiced vowels, does it also appear on whispered ones (the reconstruction loss saw voiced frames only)?
+
+*Data* (one session, 44.1 kHz, one microphone position; the order fixed by the take list):
+- Sustained vowels i, ʉ, e, ə, ɔ, ɐ, æ, each voiced at A2 (measured 106-116 Hz), voiced at A3 (215-232 Hz), and whispered; three takes of each, in three rounds of 21 in random order (63 takes; one take repeated and the later kept).
+- hVd words (heed, who'd, haired, hod, had, hard), three each, random order (18). Read sentences, seven texts twice each, random order (14).
+- Segmentation by energy, labelled by order; the counts matched the take list in every block (checked before any model ran).
+
+*Measure*: per unit (take, word, sentence), the median over its scored frames of F1 (voiced units: every model voiced and sonorant; whispered: every model sonorant; sustained takes lose their first and last 0.3 s). S = d109 seed mean - 5b seed mean. The **open - close contrast** of S: the median over open units (æ, ɐ) minus the median over close units (i, ʉ); for sentences, the median over sentences of S on frames in the upper third of 5b's F1 minus that on the lower third (split at 393 and 593 Hz). 95 % bootstrap over units. Reported beside S: D = d109 - D-065, each seed, F2 and F3, the level (median S), and by vowel.
+
+*Pre-checks* (seen; 5b and the null arm D-065 only):
+- The null's contrast (S0 = D-065 - 5b, same measure): A2 -0.9, A3 +1.1, whispered +2.5, words -8.6, sentences +1.4 Hz. With group means instead of medians, single vowels dragged it to +-10-47 Hz (ɔ at A2 +39, ʉ at A3 -101), hence medians.
+- Bootstrap intervals over units understate the noise between two models (the null's words interval excluded 0), so the thresholds rest on the null's sizes, not on the intervals alone.
+- PTDB-TUG's men, whose F1 range matches these thirds (splits 400 and 550 Hz there), moved +0.1 Hz below and +9.5 above (D-110): the expected contrast if this voice behaves the same is about +9 Hz.
+
+*Readings*:
+- Per style (A2 sustained, whispered, sentences): **present** if S's contrast is >= +6 Hz (over twice the null's largest, 2.5) with its interval above 0; **absent** if it is below +3 Hz; otherwise mixed. Words and A3 are reported only (the null's words contrast is -8.6 Hz; at A3, F1 of the close vowels is under twice f0).
+- Q1: present in sentences, absent at A2: the shift comes with connected speech (consistent with Hillenbrand's absence); next, what in connected speech (formant movement, coarticulation) the loss reacts to. Present in both: not the style; the speakers or the recordings separate PTDB-TUG from Hillenbrand, and sustained vowels carry the shift, so the broadband-excitation reference can judge it. Absent in sentences: the shift doesn't reach this voice's speech, and PTDB-TUG's own recordings or speakers carry it.
+- Q2 (only if A2 is present): whispered absent: the loss learned something tied to voiced excitation (the source's shape), which points at the renderer's source model; whispered present: it changed how the envelope is read, which points at the channel.
+- Otherwise mixed, reported as such.
+
+*Caveats*: one voice and one session; sung sustained vowels in chest voice, not speech; three takes per vowel and condition; real whispered F1 sits above voiced F1 (open glottis) and the synthetic whisper doesn't model that, so only the paired difference is read; no reference, so this asks where the shift happens, not which model is right.
+
