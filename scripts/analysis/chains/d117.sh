@@ -26,7 +26,7 @@ cache() {  # $1 run name
   local C=cache/d037/$1
   mkdir -p $C
   [ -f $C/hb/done ] && return 0
-  VA_DEVICE=cuda $PY -u $SA/d037_cache.py runs/$1/ckpt_last.pt $C train val probe hb >> $C/cache.log 2>&1
+  VA_WORKERS=14 VA_DEVICE=cuda $PY -u $SA/d037_cache.py runs/$1/ckpt_last.pt $C train val probe hb >> $C/cache.log 2>&1  # 2 x 14 = 28 loader threads (vtl-mri sweep)
 }
 for pair in "d114_s1 d114_s2" "d109_s1 d109_s2" "d090_f5_s1 d090_f5_s2"; do
   set -- $pair

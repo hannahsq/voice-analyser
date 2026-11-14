@@ -45,6 +45,7 @@ DRAWS = 2
 EMB = Path("cache/emb_v1")
 CP_SUB = Path("cache/cp/ptdb_egg_sub.npz")  # ptdb_egg.py's closed-phase frames (the m3w copy; columns of other models unused)
 LIMIT = int(os.environ.get("VA_LIMIT", 0))
+WORKERS = int(os.environ.get("VA_WORKERS", 8))  # loader workers; crops are seeded per item (fixed=True), so the count changes speed only
 MIX_N = 29356  # D-038's mix part: as many crops as train has clips (one pass of D-037's cache, half its disk)
 
 
@@ -135,7 +136,7 @@ def main():
         if k0:
             log(f"  [train] resuming at {k0}/{N}")
         k, t0 = k0, time.time()
-        for audio, lab in DataLoader(Subset(ds, range(k0, N)), 16, num_workers=8, collate_fn=collate, prefetch_factor=4):
+        for audio, lab in DataLoader(Subset(ds, range(k0, N)), 16, num_workers=WORKERS, collate_fn=collate, prefetch_factor=4):
             b = len(audio)
             h, f, m, v = T.crops(audio)
             feats[k:k + b], fm[k:k + b] = h, f
@@ -185,7 +186,7 @@ def main():
             lv = mm("vtl_logvar.npy", np.float32, (N, CROP))
         arrays = [a for a in (feats, fm, lab_f, lab_s, lab_w, mu, lv) if a is not None]
         k, t0 = k0, time.time()
-        for audio, lab in DataLoader(Subset(ds, range(k0, N)), 16, num_workers=8, collate_fn=collate, prefetch_factor=4):
+        for audio, lab in DataLoader(Subset(ds, range(k0, N)), 16, num_workers=WORKERS, collate_fn=collate, prefetch_factor=4):
             b = len(audio)
             h, f, m, v = T.crops(audio)
             feats[k:k + b], fm[k:k + b] = h, f
@@ -212,7 +213,7 @@ def main():
         ds = SynthCrops(flat, ids, CROP, channel, seed=12345, fixed=True)  # cache.py's synth_train_v2
         ef = np.load(EMB / "synth_train_v2" / "formants.npy", mmap_mode="r").reshape(512, CROP, 4)[:len(ids)]
         H, F, M, V, k = [], [], [], [], 0
-        for audio, lab in DataLoader(ds, 16, num_workers=8, collate_fn=collate):
+        for audio, lab in DataLoader(ds, 16, num_workers=WORKERS, collate_fn=collate):
             b = len(audio)
             assert np.array_equal(lab["formants"].numpy(), np.asarray(ef[k:k + b]), equal_nan=True), k
             h, f, m, v = T.crops(audio)
