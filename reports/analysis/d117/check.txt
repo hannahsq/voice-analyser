@@ -1,0 +1,8 @@
+  clip.npy: shape (200,), identical True, max |diff| 0
+  feats.npy: shape (200, 400, 128), identical False, max |diff| 0.00195
+  label_formants.npy: shape (200, 400, 4), identical True, max |diff| 0
+  label_sonorant.npy: shape (200, 400), identical True, max |diff| 0
+  log2F.npy: shape (200, 400, 4), identical False, max |diff| 1.91e-06
+  log2_length.npy: shape (200,), identical True, max |diff| 0
+  vtl_logvar.npy: shape (200, 400), identical False, max |diff| 1.29e-05
+  vtl_mu.npy: shape (200, 400), identical False, max |diff| 1.43e-06

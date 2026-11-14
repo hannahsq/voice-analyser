@@ -1,0 +1,64 @@
+D-117: the VTL head refitted on each branch arm's frozen trunk (D-037's recipe, three head seeds) against 5b's refits
+
+Precondition, joint heads from the trunk caches against vtl_score_joint.py: d040_5b_s1_b20k 0.228 (0.228); d040_5b_s2_b20k 0.261 (0.261); d114_s1 0.215 (0.215); d114_s2 0.236 (0.236); d109_s1 0.223 (0.223); d109_s2 0.241 (0.241); d090_f5_s1 0.234 (0.234); d090_f5_s2 0.261 (0.261)
+
+joint heads, reliability (mean of men and women): d040_5b_s1_b20k 0.228; d040_5b_s2_b20k 0.261; d114_s1 0.215; d114_s2 0.236; d109_s1 0.223; d109_s2 0.241; d090_f5_s1 0.234; d090_f5_s2 0.261
+  d114 - 5b (joint): -0.019 [-0.028, -0.009]; seed 1 -0.013, seed 2 -0.025
+  d109 - 5b (joint): -0.013 [-0.025, -0.001]; seed 1 -0.005, seed 2 -0.020
+  f5 - 5b (joint): +0.003 [-0.010, +0.016]; seed 1 +0.007, seed 2 -0.000
+
+refit heads, reliability (mean of men and women): d040_5b_s1_b20k 0.241; d040_5b_s2_b20k 0.246; d114_s1 0.227; d114_s2 0.225; d109_s1 0.213; d109_s2 0.220; d090_f5_s1 0.259; d090_f5_s2 0.251
+  d114 - 5b (refit): -0.018 [-0.035, -0.002]; seed 1 -0.014, seed 2 -0.021
+  d109 - 5b (refit): -0.027 [-0.052, -0.004]; seed 1 -0.028, seed 2 -0.026
+  f5 - 5b (refit): +0.011 [-0.006, +0.028]; seed 1 +0.018, seed 2 +0.004
+
+Summary (registered readings use d114; f5 is the null arm's refit noise; d109 reported):
+  d114: joint -0.019 [-0.028, -0.009] -> refit -0.018 [-0.035, -0.002]; refit passes the guard's bar (lower bound > -0.02): False; at least half the joint cost recovered: False
+  d109: joint -0.013 [-0.025, -0.001] -> refit -0.027 [-0.052, -0.004]; refit passes the guard's bar (lower bound > -0.02): False; at least half the joint cost recovered: False
+  f5: joint +0.003 [-0.010, +0.016] -> refit +0.011 [-0.006, +0.028]; refit passes the guard's bar (lower bound > -0.02): True; at least half the joint cost recovered: True
+
+---- D-115's decomposition on the refits ----
+D-115: where the Hillenbrand length-reliability cost of 5b's decay-branch arms comes from (dev; men and women)
+
+Instrument check (reliability, mean of men and women): d040_5b_s1_b20k 0.241; d040_5b_s2_b20k 0.246; d114_s1 0.227; d114_s2 0.225; d109_s1 0.213; d109_s2 0.220; d090_f5_s1 0.259; d090_f5_s2 0.251
+
+== d114 - 5b (seeds paired; seed means unless noted) ==
+  men: d rel -0.025 [-0.052, +0.001] (5b 0.278); d ln B -0.077 [-0.197, +0.052]; d ln W +0.049 [+0.003, +0.093]; first-order shares: B -0.016, W -0.010
+         W's parts: vowel d ln V +0.010 [-0.047, +0.073] (vowel share of 5b's W 0.70); rest d ln R +0.142 [+0.076, +0.207]
+  women: d rel -0.011 [-0.030, +0.008] (5b 0.210); d ln B +0.032 [-0.060, +0.135]; d ln W +0.099 [+0.037, +0.162]; first-order shares: B +0.005, W -0.016
+         W's parts: vowel d ln V +0.129 [+0.069, +0.189] (vowel share of 5b's W 0.69); rest d ln R +0.047 [-0.048, +0.149]
+  seed 1 alone: men d rel -0.023, d ln B -0.167, d ln W -0.046, d ln V -0.121; women d rel -0.005, d ln B +0.076, d ln W +0.104, d ln V +0.169
+  seed 2 alone: men d rel -0.026, d ln B +0.012, d ln W +0.144, d ln V +0.142; women d rel -0.017, d ln B -0.011, d ln W +0.094, d ln V +0.089
+  (3) men within-speaker spread change: seed 1: total -6299 c^2 per speaker, top 3 speakers 90%, speakers with more spread 33%; seed 2: total +18695 c^2 per speaker, top 3 speakers 33%, speakers with more spread 85%
+  (3) women within-speaker spread change: seed 1: total +17042 c^2 per speaker, top 3 speakers 77%, speakers with more spread 66%; seed 2: total +14142 c^2 per speaker, top 3 speakers 38%, speakers with more spread 76%
+  (4) reliability change, precision-weighted -0.018; unweighted frames -0.018 [-0.035, -0.003] (500 draws)
+  (5) men vowel deviation change (c), r with vowel F1 +0.29: iy -0 uw +8 ih +1 ei -4 er -20 oo +0 oa -1 ae +7 eh +3 uh +2 aw +4 ah +2
+  (5) women vowel deviation change (c), r with vowel F1 -0.54: iy +5 uw +19 ih -5 ei -4 er +6 oo -2 oa +9 ae -4 eh -13 uh -5 aw +2 ah -7
+
+== d109 - 5b (seeds paired; seed means unless noted) ==
+  men: d rel -0.023 [-0.058, +0.008] (5b 0.278); d ln B -0.143 [-0.314, +0.017]; d ln W -0.026 [-0.081, +0.027]; first-order shares: B -0.029, W +0.005
+         W's parts: vowel d ln V -0.072 [-0.154, +0.009] (vowel share of 5b's W 0.70); rest d ln R +0.083 [-0.003, +0.164]
+  women: d rel -0.032 [-0.068, +0.003] (5b 0.210); d ln B -0.051 [-0.303, +0.160]; d ln W +0.153 [+0.091, +0.227]; first-order shares: B -0.008, W -0.025
+         W's parts: vowel d ln V +0.137 [+0.051, +0.236] (vowel share of 5b's W 0.69); rest d ln R +0.196 [+0.106, +0.301]
+  seed 1 alone: men d rel -0.024, d ln B -0.247, d ln W -0.123, d ln V -0.214; women d rel -0.033, d ln B -0.000, d ln W +0.205, d ln V +0.206
+  seed 2 alone: men d rel -0.022, d ln B -0.038, d ln W +0.071, d ln V +0.069; women d rel -0.031, d ln B -0.102, d ln W +0.100, d ln V +0.068
+  (3) men within-speaker spread change: seed 1: total -16162 c^2 per speaker, top 3 speakers 42%, speakers with more spread 26%; seed 2: total +8845 c^2 per speaker, top 3 speakers 63%, speakers with more spread 63%
+  (3) women within-speaker spread change: seed 1: total +35456 c^2 per speaker, top 3 speakers 36%, speakers with more spread 79%; seed 2: total +14961 c^2 per speaker, top 3 speakers 50%, speakers with more spread 62%
+  (4) reliability change, precision-weighted -0.027; unweighted frames -0.028 [-0.053, -0.005] (500 draws)
+  (5) men vowel deviation change (c), r with vowel F1 +0.19: iy +16 uw +12 ih +0 ei -4 er -37 oo -15 oa -4 ae +10 eh +6 uh -3 aw +13 ah +5
+  (5) women vowel deviation change (c), r with vowel F1 -0.83: iy +16 uw +18 ih +3 ei +6 er -2 oo +0 oa +11 ae -1 eh -6 uh -17 aw +3 ah -30
+
+== f5 - 5b (seeds paired; seed means unless noted) ==
+  men: d rel +0.036 [+0.011, +0.057] (5b 0.278); d ln B +0.304 [+0.198, +0.420]; d ln W +0.132 [+0.056, +0.208]; first-order shares: B +0.061, W -0.026
+         W's parts: vowel d ln V +0.148 [+0.056, +0.237] (vowel share of 5b's W 0.70); rest d ln R +0.094 [-0.006, +0.198]
+  women: d rel -0.013 [-0.041, +0.013] (5b 0.210); d ln B -0.144 [-0.287, +0.006]; d ln W -0.062 [-0.114, -0.002]; first-order shares: B -0.024, W +0.010
+         W's parts: vowel d ln V -0.036 [-0.094, +0.025] (vowel share of 5b's W 0.69); rest d ln R -0.098 [-0.184, +0.006]
+  seed 1 alone: men d rel +0.055, d ln B +0.308, d ln W +0.040, d ln V +0.045; women d rel -0.019, d ln B -0.150, d ln W -0.032, d ln V +0.047
+  seed 2 alone: men d rel +0.016, d ln B +0.300, d ln W +0.223, d ln V +0.250; women d rel -0.007, d ln B -0.137, d ln W -0.092, d ln V -0.118
+  (3) men within-speaker spread change: seed 1: total +5757 c^2 per speaker, top 3 speakers 82%, speakers with more spread 63%; seed 2: total +30124 c^2 per speaker, top 3 speakers 24%, speakers with more spread 85%
+  (3) women within-speaker spread change: seed 1: total -4898 c^2 per speaker, top 3 speakers 138%, speakers with more spread 48%; seed 2: total -12494 c^2 per speaker, top 3 speakers 51%, speakers with more spread 34%
+  (4) reliability change, precision-weighted +0.011; unweighted frames +0.011 [-0.007, +0.028] (500 draws)
+  (5) men vowel deviation change (c), r with vowel F1 -0.24: iy +16 uw +12 ih -23 ei -12 er +29 oo -5 oa +12 ae -9 eh -19 uh -8 aw +5 ah +1
+  (5) women vowel deviation change (c), r with vowel F1 -0.01: iy +10 uw +5 ih -2 ei -3 er -2 oo -6 oa -5 ae +1 eh +3 uh -4 aw -2 ah +5
+
+Scale: 5b's seeds (s2 - s1, unpaired arms): men d rel +0.022, d ln B -0.039, d ln W -0.149; women d rel -0.012, d ln B -0.156, d ln W -0.085
