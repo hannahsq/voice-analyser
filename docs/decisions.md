@@ -4006,3 +4006,26 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
   - *Women's vowel part of A* (reported): d109 +0.023 with a strong F1 order (r +0.84; ah +10, iy -9 c), D-109's stretch as expected; d114 +0.014 (r +0.43, within 8 c), D-090's arms -0.009 / -0.015.
   - *Scale*: 5b's two seeds differ in A's reliability by -0.003 (men d ln B -0.011), against +0.034 on the head: A's reliability is stable from seed to seed and the head's is not.
   - *Reading*: the formants the loss trains keep men's speakers about as far apart as any 5b branch does; what is specific to the reconstruction arms (D-115) is in the VTL head's reading of the shared trunk, not in the formant scale. So the length guard's cost is a side effect on the head, and it would not follow the loss into anything that uses the formants. Hypothesis, not tested: the head reads trunk features the loss reshapes (the spectral balance it fits), and a short head-only re-fit after a branch would recover it. Since the head's reliability also varies by +0.034 between 5b's seeds, a guard of -0.02 on it is near its own noise; whether the guard should read A or a head re-fit is a question for a later entry, not this one.
+
+## D-117 (registered 2026-11-14; seen beforehand: D-114 to D-116, D-037's and D-040's refit results, and a code check of this entry's export and report on 5b's existing caches and refits, which reproduced 5b's joint (0.228 / 0.261) and refit (0.241 / 0.246) reliabilities; no arm's trunk cached or refitted): does refitting the VTL head recover the reconstruction arm's length reliability?
+
+*Status*: registered (Hannah, 2026-11-14: "would you be able to register the VTL refit?", after D-116's suggested follow-up). The design is mine. Chain `scripts/analysis/chains/d117.sh`, script `scripts/analysis/d117_refit.py` (D-115's decomposition reused), report `reports/analysis/d117/d117.txt`. Inference and head-only training; dev speakers only.
+
+*Question*: D-116 put the reconstruction arms' length cost in the VTL head's reading of the shared trunk, not in the formants. If the trunk still carries what the head needs, a head refitted on the arm's frozen trunk recovers the reliability; if the loss removed it from the trunk's features, no head on them can. D-040's 5b-R shows a refit also takes most of the joint head's seed spread away (5b's seeds 0.228 / 0.261 joint, 0.241 / 0.246 refitted), so refit against refit is the quieter comparison.
+
+*Arms*: D-037's refit (`d037_head.py`: D-035's MLP on the formant encoder's output `h`, AdamW 1e-3, wd 0.01, 300 warm-up, cosine, 20,000 steps, batch 32, three head seeds, seed-mean estimator) on each frozen trunk, its features from `d037_cache.py` (parts train, val, probe, hb):
+- *5b*: D-040's existing 5b-R (`runs/d040/5bR_s{1,2}`, on `cache/d037/5b_s{1,2}`), reused unchanged (the refit code is unchanged since).
+- *d114* (decides), *d109* (reported) and *D-090's f5* (the null: a branch whose joint head kept 5b's reliability, +0.003): each seed's trunk cached and refitted the same way.
+- *Precondition* (in the chain, before anything else): 5b's first 200 training crops rebuilt under today's code against the 29 October cache (training-path code has changed since, all of it off by default). Labels must be identical and features equal to fp16 rounding; if not, 5b's cache and refits are rebuilt first and the comparison waits. Also, the joint heads read from each trunk's cache must reproduce `vtl_score_joint.py`'s reliabilities to 0.001.
+
+*Measure*: Hillenbrand dev length reliability (D-051's guard instrument: per file the precision-weighted mean over the reference frames; mean of men's and women's between-speaker share), arm minus 5b, seeds paired, seed means, 2000-draw speaker bootstrap; for the joint heads (D-114's -0.019 [-0.029, -0.009]) and for the refits. Reported beside: D-115's decomposition on the refits (men's between-speaker variance, women's vowel part), d109's figures, each seed alone.
+
+*Readings* (d114's refit difference, R = d114-R - 5b-R, against its joint difference J = -0.019):
+- *Unreadable* first: if f5-R - 5b-R's lower bound is at or below -0.02, refit against refit is too noisy for the guard's bar, and nothing below is read.
+- *Recovered*: R's lower bound above -0.02 **and** R >= J / 2 (at least half the cost back): the trunk keeps what the head needs; the cost is the joint head's state. A post-branch head refit, or a guard read on refitted heads, becomes a candidate for its own entry; the guard itself is not changed here.
+- *Not recovered*: R's lower bound at or below -0.02 **and** R < J / 2: the loss reshapes the trunk's features in a way no head on them undoes, even though the formants keep the speakers apart (D-116); the next question is what else the head reads.
+- *Partial*: anything else, reported as such.
+
+*Caveats*: a refit head is less f0-dependent and less well calibrated in level than a joint one (D-037), which reliability does not see; three head seeds per trunk; dev only.
+
+*Cost*: six trunk caches, two at a time, about 3 h of GPU and 40 GB of disk (112 GB free; the train parts can go to cold storage afterwards); 18 refits of about 5 min, three at a time; scoring minutes.

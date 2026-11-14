@@ -29,7 +29,7 @@ CACHE = Path(os.environ.get("D115_CACHE", "cache/d115"))  # D-116 points this at
 AGG = os.environ.get("D115_AGG", "weighted")  # "median": the per-file median over frames (A in vtl_score_joint.py)
 BASE = {1: "d040_5b_s1_b20k", 2: "d040_5b_s2_b20k"}
 ARMS = {"d114": "d114_s{}", "d109": "d109_s{}", "f57": "d090_f57_s{}", "f5": "d090_f5_s{}"}
-REPORTED = {"d040_5b_s1_b20k": 0.228, "d040_5b_s2_b20k": 0.261, "d114_s1": 0.215, "d114_s2": 0.236} if AGG == "weighted" else {}
+REPORTED = {"d040_5b_s1_b20k": 0.228, "d040_5b_s2_b20k": 0.261, "d114_s1": 0.215, "d114_s2": 0.236} if AGG == "weighted" and "D115_CACHE" not in os.environ else {}
 
 
 def hillenbrand_dev():
