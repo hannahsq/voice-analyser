@@ -4314,9 +4314,9 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 - Whether the length guard in context should replace the one on words alone or stand beside it (the draft keeps both).
 - The order. D-091 put "close M3 (roadmap items 7 and 10, then the lockbox, once)" before M4; D-109 and D-114 ran first. Item 10's stage B is now done (D-120) and item 7's suite has no closing entry. Whether M3 closes before the next M4 arm is hers to say.
 
-## D-123 (2026-11-17, draft, not registered; design notes and one pre-check on made-up crops; nothing run on audio): the reconstruction loss after D-118 to D-121
+## D-123 (drafted 2026-11-17, registered 2026-11-17; seen beforehand: D-118 to D-121 and this entry's made-up-crop pre-check; nothing of any candidate on audio): the reconstruction loss after D-118 to D-121
 
-*Status*: **draft.** The fifth item of the 2026-11-16 list: promote `considering.md`'s harmonic-sweep idea (2026-11-10) from a reference to the loss's design. The pre-check below changed what I would propose, so this records the design question and the check that should decide it; it registers no arm.
+*Status*: registered 2026-11-17 (Hannah: "Could you please register it and then start on implementation?"); the registration at the end of this entry governs the check. Drafted as: The fifth item of the 2026-11-16 list: promote `considering.md`'s harmonic-sweep idea (2026-11-10) from a reference to the loss's design. The pre-check below changed what I would propose, so this records the design question and the check that should decide it; it registers no arm.
 
 *What the loss has to do, from the four entries*:
 - *Keep*: its pull against 5b's compression of women's F1 at both ends (D-121), and the small gains on sung vowels (D-114: Hillenbrand F1 and F2, closed-phase |error| in every cell on both seeds).
@@ -4355,3 +4355,54 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
 - A candidate that passes earns one training arm on VocalSet and Zeroth under D-122's rule, if that is accepted.
 
 *What this draft does not settle*: why the real loss pushes F1 up just above 2 f0 (not the a(k) part, per the pre-check; b(f), the model's bandwidths and nasal frames are untested); whether B's lost frames matter more than A's lost notes; the weight (D-109's rule gave the loss a quarter of the formant term's encoder gradient, in a 4000-step branch).
+
+*Registration (2026-11-17; Hannah: "Could you please register it and then start on implementation?"; seen beforehand: everything above, and nothing of any candidate on audio).* Where this differs from the draft's check above, this governs. Script `scripts/analysis/d123_check.py`, report `reports/analysis/d123/check.txt`; library additions in `vocal_analysis/train/reconstruction.py` (a profiled basis per group of frames, the noise-subtracted targets), with tests. No training; nothing adopted.
+
+*Checked before registering, and what it changed*:
+- **D cannot carry the push, so it is reported, not read for the cause.** Under the 10 dB SNR gate every kept harmonic has a_k^2 >= 10 n_k, so taking n_k out moves it by at most 10 log10(1 - 0.1) = -0.46 dB, and by much less at the typical kept SNR. D-119's misfits are +3 dB at H1 and +1 to +2.7 dB at 2.5-4 kHz, and the push is 150-300 c. D stays in the run (it is cheap and the bound is worth seeing confirmed) with the prediction that it changes no cell by more than one grid step (25 c); "D with the best of the others" is dropped. A variant that also lowers the gate would change two things, and is not registered here.
+- **B'-sweep is deferred to its own entry.** It ties F1 across frames, which is a constraint on what training can move, not a loss term; a scan that moves the model's F1 by cells cannot express it. B'-fixed and B' are scanned.
+- **Flattening must not pass for fixing.** A profiled term per recording can absorb a cell's F1 shift where the cell fills its recording (a sustained vowel), leaving the loss flat in F1 there and its preferred shift near 0, which would pass the jump criterion the way B does. So a cell counts for a candidate only where the loss keeps at least a quarter of D-109's curvature in F1 in that cell (below).
+- The cells' noise floor is D-119's: the jumps to remove are 150-300 c against a control whose frame-weighted median |shift| is 5 c, and per-seed values agree within a few tens of cents; a criterion of a third of the jump sits well above that floor.
+
+*Models*: `d040_5b_s{1,2}/ckpt_016000.pt`, the branch point of D-109 and D-114 (the scans' reading is the seed mean). D-109's instrument throughout (F1-F4 and B1-B4 from the model, the higher-pole correction, harmonics to 4000 Hz, Rd searched per frame on `RD_SEARCH`, the level profiled per frame, Huber at 6 dB), with each candidate's change on top.
+
+*Data*:
+- **Stores**: 96 recordings per corpus from `cache/recon/vocalset` and `cache/recon/zeroth` (training-pool recordings, no evaluation set; drawn with seed 1123), each processed whole as five consecutive 200-frame crops in the trainer's layout, so terms per recording see the recording's 10 s. Targets as stored (D-104's), and for D recomputed from the stored audio with the noise taken out.
+- **Synthetic control**: D-119's (train_v2 validation, 24 batches of 16 x 200-frame crops, seed 1119, targets from their own audio at the label f0). A crop is its own recording here.
+- **PTDB-TUG dev** (analysis only, never trained on; dev speakers by `tiers.json`, nothing of semi-private or lockbox): every dev utterance with a frame in D-121's set (closed-phase, whole-cycle and Praat F1 finite, f0 > 0; `cache/m3w/ptdb_egg_sub.npz`). The model runs on each whole utterance (resampled to 16 kHz); targets on all its frames voiced by the reference (laryngograph) f0 at that f0, gated as D-104's; the mask is voiced frames with at least 4 valid harmonics (no sonorant labeller here). Terms per recording are fitted over the whole utterance; the scan is scored on D-121's frames only (model frame = reference frame + 2, the reference's 20 ms offset).
+
+*Candidates* (each one change to D-109's loss):
+- **base**: D-109's loss. The reference every criterion compares with.
+- **A**: an offset per harmonic number (k = 1-8) per 200-frame crop, profiled out jointly with the per-frame level (the pre-check's form).
+- **C**: a smooth curve in log frequency (`crop_channel_out`'s three terms) per recording, profiled jointly with the level.
+- **A+C**: both bases per recording, jointly.
+- **B'**: identifiable frames are those whose model F1 (unshifted) is at least 2.5 f0, or that lie in a 200-frame crop whose voiced f0 spans at least 4 semitones (5th to 95th percentile). Groups are recording x third-octave bin of the reference or labeller f0 (edges 50 x 2^(j/3) Hz). Identifiable frames are scored with the group's offset per harmonic number (k = 1-8) profiled out jointly with the level, as A. Hard frames with at least 20 identifiable frames in their group are scored with that offset fixed at its value from the unshifted model (detached) and F1 free; hard frames in groups with fewer carry no F1 reading (B's floor) and are counted.
+- **B'-fixed**: on hard frames, B1 at the Hawks and Miller prior at the frame's f0 and Rd at the recording's median best Rd over its identifiable frames (both fixed); identifiable frames as base.
+- **D** (reported, see above): base with the noise's power taken out of the targets, a_k^2 - n_k in power before the dB, n_k D-104's noise estimate at that harmonic; harmonics that fall below n_k + 3 dB stay invalid (none can under the 10 dB gate).
+- **B, the floor** (not scanned): the share of frames with model F1 below 2.5 f0, per corpus and f0 band, which B would leave without an F1 gradient; and B''s and B'-fixed's coverage beside it.
+
+*Measure, the preferred shift by cell*: the model's F1 scaled by c cents (-200 to +200 in 25 c steps) **on one cell's frames at a time**, everything else fixed; the objective is the recording's total loss over all its scored frames (so a shared term's effect on the other frames counts, as it does in the gradient; for B' the hard frames' offset stays at its unshifted value, as detached). Cells: D-119's F1 band (below 450, 450-600, 600 Hz and above) x F1 / f0 (below 1.5, 1.5-2, 2-2.5, 2.5-3.5, 3.5 and above), by the scanned model's own F1 and the frame's f0. The minimising c by a parabola through the lowest three grid points; per cell also the curvature (second difference over +-100 c of the cell's summed loss, per frame). Seed means; 95 % bootstrap over recordings (stores, 500), crops (synthetic, 500) or speakers (PTDB-TUG, 2000). A cell is **readable** for a candidate with at least 300 frames in both seeds (PTDB-TUG: D-121's floors, 200 frames and 4 speakers) and, for any candidate but base, a curvature at least 0.25 of base's in the same cell.
+
+*Criteria*:
+1. **Stores, the jump**: J = c(2-2.5) - c(1.5-2) within each F1 band where base has both cells readable. Passes if, in every such band of both corpora, the candidate has both cells readable and |J| <= |J_base| / 3.
+2. **Synthetic control**: the candidate's frame-weighted median |c| over readable cells at most 10 c (twice D-119's 5 c), and its summed F1 curvature over all scored frames at least 0.5 of base's.
+3. **PTDB-TUG dev, women**: in each readable cell, E = the scanned model's F1 minus the closed-phase F1 (median over frames, cents, seed mean, speaker bootstrap). Where E's interval excludes 0, the candidate's c has the opposite sign to E; where it includes 0, |c| <= 25 c. Passes if this holds in every readable cell. Men, and cells by the closed-phase F1 / f0 (D-121's binning; it inflates E's gradient across cells), are reported beside, not read.
+- *Code checks* (printed first; any failing makes the run **unreadable**): base's fast loss against `recon_loss_fb` (largest difference under 1e-3); C with groups of one crop against `recon_loss_fb(channel=3)` (under 1e-3); for every candidate, a target equal to the loss's own render at each frame's best Rd gives a preferred shift within 5 c of 0, and a target rendered with F1 +50 c is recovered within 5 c; D's targets on noise-free renders (no aspiration, no channel) within 0.1 dB of the stored form's.
+- *B''s pre-check, before the stores* (made-up crops, as the draft's): one recording of five crops at a shared f0 contour, a fixed tract per crop, the misfit D-119's a(k) on top of the loss's own render; crops alternate F1 above and below 2.5 f0 (f0 120, 220 and 330 Hz; F1 300-800 Hz as the pre-check's grid; flat f0 and an 8-semitone glide). B' must bring the hard crops' preferred shift within 21 c of 0 and keep at least half of base's curvature there, in every case with F1 at 1.5 f0 or above. If it fails, B' is reported but not read on the stores.
+
+*Readings* (for the cause first, then the candidates):
+- *Unreadable*: a code check fails, or a corpus has no F1 band with base's two cells readable.
+- Per candidate: passes or fails each criterion. A candidate **removes the jump** if it passes 1; it **removes it rightly** if it passes 1 to 3.
+- *The cause*, from criterion 1 alone, by which candidates remove the jump:
+  - B' (pre-check passed), or A, and not C: **the source's shape carries the jump on real recordings** (D-123's made-up-crop finding holds on audio).
+  - C and neither A nor B': **the recording's curve carries it**.
+  - A+C only: **both together**, neither alone.
+  - Both kinds (A or B', and C): **not separated** by this check.
+  - None: **not among these**; the next suspects are the model's bandwidths and nasal frames (`considering.md`, 2026-11-17).
+- Reported beside, not read: each cell's c and curvature for every candidate; the shift below 2 f0 and above 2 f0 separately (the pre-check's point that a(k) explains the first and not the second); each seed alone; B's floor and the coverage of B' and B'-fixed per corpus and f0 band; D against its bound.
+
+*Prediction* (mine, before any cell): B' passes its pre-check; on the stores B' and A+C remove the push below 2 f0 but not the push up between 2 and 3.5 f0, so their jumps fall by about half and criterion 1 fails for every candidate; the cause reading is then "not among these", with the source's shape shown in the below-2-f0 half only. D changes nothing beyond 25 c. B''s coverage is high on Zeroth and low on VocalSet.
+
+*What follows*: a candidate that removes the jump rightly earns one training arm (VocalSet and Zeroth, D-122's rule if Hannah accepts it); one that removes it but fails 3 does not, and its cause reading stands. If none removes it, the next entry tests the remaining suspects (bandwidths free per recording, the nasal gate) with this instrument.
+
+*Cost*: GPU in short operations, about 1-2 hours across both seeds (about 255 loss evaluations per batch per candidate); CPU for D's targets on 192 recordings and for PTDB-TUG's targets. Code runs on two recordings or batches to test the script print only the code checks (the script's smoke mode writes no tables); anything else seen before the full run is recorded as an amendment.
