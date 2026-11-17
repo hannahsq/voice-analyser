@@ -1,0 +1,181 @@
+D-123's registered check: the reconstruction loss's candidates
+branch-point models d040_5b_s{1,2}/ckpt_016000.pt; D-109's instrument; F1 scaled by c cents on one cell's frames at a time, objective each recording's total loss; c by a parabola through the lowest three grid points; curvature per frame over +-100 c
+
+code checks:
+  base fast loss against recon_loss_fb, largest difference: 7.63e-06 -> ok
+  C with one crop per group against recon_loss_fb(channel=3), largest difference: 0.000582 -> ok
+  zero-misfit target: base recovers (c): -0.331 -> ok
+  zero-misfit target: A recovers (c): -0.115 -> ok
+  zero-misfit target: C recovers (c): -0.324 -> ok
+  zero-misfit target: A+C recovers (c): -0.271 -> ok
+  zero-misfit target: B' recovers (c): -0.466 -> ok
+  zero-misfit target: B'-fixed recovers (c): -0.329 -> ok
+  target rendered with F1 +50 c: base recovers (c): 49.8 -> ok
+  target rendered with F1 +50 c: A recovers (c): 49.8 -> ok
+  target rendered with F1 +50 c: C recovers (c): 49.8 -> ok
+  target rendered with F1 +50 c: A+C recovers (c): 49.8 -> ok
+  target rendered with F1 +50 c: B' recovers (c): 31.7 -> FAILS
+  target rendered with F1 +50 c: B'-fixed recovers (c): 49.8 -> ok
+  (reported) D on the sampler's noise-free renders, which move: 95th percentile |change| (dB): 0.293 -> ok
+  D on steady noise-free renders (LF source, fixed tract, flat f0): 95th percentile |change| (dB): 0 -> ok
+
+B''s pre-check (made-up crops; hard crops' preferred shift and curvature kept against base): passes
+  f0 220  F1 450 (2.05 f0)  flat        base  -137 c   B'    -8 c   curvature kept  5.23  -> ok
+  f0 220  F1 450 (2.05 f0)  glide 8 st  base   -30 c   B'    -5 c   curvature kept  0.89  -> ok
+  f0 330  F1 600 (1.82 f0)  flat        base   -86 c   B'    -1 c   curvature kept  0.85  -> ok
+  f0 330  F1 600 (1.82 f0)  glide 8 st  base   -50 c   B'    -2 c   curvature kept  0.84  -> ok
+  f0 330  F1 800 (2.42 f0)  flat        base    +5 c   B'    +0 c   curvature kept  0.87  -> ok
+  f0 330  F1 800 (2.42 f0)  glide 8 st  base    -2 c   B'    -1 c   curvature kept  0.80  -> ok
+
+== VocalSet
+  cell                                frames         base c [95 %]               A               C             A+C              B'        B'-fixed               D   (candidates: c, and curvature kept against base; * readable)
+  F1 < 450, F1/f0 < 1.5                 6005    -200 [ -200,  -200]*    -77 (0.84)*   -200 (1.01)*    -79 (1.01)*    +36 (0.76)*   -200 (1.43)*   -200 (1.00)*
+  F1 < 450, F1/f0 1.5-2                 3589    -200 [ -200,  -190]*   -127 (1.15)*   -188 (1.38)*   -124 (1.39)*    -65 (1.09)*   -200 (1.15)*   -200 (1.00)*
+  F1 < 450, F1/f0 2-2.5                 3049      +5 [ -115,   +41]*    +42 (0.54)*    +40 (0.80)*    +47 (0.62)*    +62 (0.45)*    +16 (1.04)*     +4 (1.00)*
+  F1 < 450, F1/f0 2.5-3.5               2863     -37 [  -83,   +13]*    -34 (0.57)*    -10 (1.08)*     +2 (0.78)*    -21 (0.40)*    -37 (1.00)*    -36 (1.01)*
+  F1 < 450, F1/f0 >= 3.5                1538     -12 [  -39,    +4]*    -54 (0.66)*    -35 (1.09)*    -52 (0.84)*    -63 (0.45)*    -12 (1.00)*    -12 (1.01)*
+  F1 450-600, F1/f0 < 1.5               9645      -5 [  -70,   +54]*    +18 (0.44)*    +29 (0.68)*    +32 (0.49)*    -12 (0.56)*    +25 (0.81)*     -4 (1.00)*
+  F1 450-600, F1/f0 1.5-2               3141    -191 [ -200,  -143]*    -88 (0.88)*   -164 (1.16)*   -144 (1.02)*    -47 (0.83)*   -192 (1.06)*   -191 (1.00)*
+  F1 450-600, F1/f0 2-2.5               3173     +52 [  +33,   +81]*    +95 (0.44)*    +20 (0.89)*    +73 (0.71)*    +72 (0.49)*    +46 (1.11)*    +52 (1.00)*
+  F1 450-600, F1/f0 2.5-3.5             2179     -48 [ -104,    +4]*     -7 (0.91)*    -23 (1.23)*     +3 (1.09)*     -1 (0.77)*    -48 (1.00)*    -47 (1.01)*
+  F1 450-600, F1/f0 >= 3.5               743     -23 [  -48,    +5]*    -24 (0.91)*    -17 (1.16)*     -7 (0.95)*    -17 (0.79)*    -23 (1.00)*    -22 (1.01)*
+  F1 >= 600, F1/f0 < 1.5                6537     +28 [  -39,   +92]*    +26 (0.40)*    +86 (0.91)*    +30 (0.56)*   -121 (0.36)*    +19 (1.64)*    +28 (1.00)*
+  F1 >= 600, F1/f0 1.5-2                2866    -107 [ -179,    +3]*   -114 (0.42)*    -77 (0.98)*   -111 (0.66)*    -80 (0.55)*   -115 (0.99)*   -107 (1.00)*
+  F1 >= 600, F1/f0 2-2.5                2511     +35 [  -34,   +80]*    +38 (0.76)*    +44 (1.00)*    +64 (0.89)*     -2 (0.71)*    +11 (1.09)*    +35 (1.00)*
+  F1 >= 600, F1/f0 2.5-3.5              2259     -70 [ -132,   -10]*    -51 (0.80)*    -51 (0.95)*    -36 (0.82)*    -68 (0.59)*    -70 (1.00)*    -70 (1.00)*
+  F1 >= 600, F1/f0 >= 3.5               1446      -2 [  -25,   +17]*    -17 (0.57)*     -6 (1.08)*    -23 (0.87)*    -10 (0.43)*     -2 (1.00)*     -2 (1.01)*
+  all cell frames shifted together: base c -56, curvature 0.5213; A c -34, curvature 0.2355; C c -29, curvature 0.4599; A+C c -20, curvature 0.3569; B' c -32, curvature 0.2133; B'-fixed c -48, curvature 0.5624; D c -56, curvature 0.5230
+
+== Zeroth-Korean
+  cell                                frames         base c [95 %]               A               C             A+C              B'        B'-fixed               D   (candidates: c, and curvature kept against base; * readable)
+  F1 < 450, F1/f0 < 1.5                  725    -200 [ -200,  -169]*    +12 (1.02)*   -109 (0.96)*    +14 (1.05)*    +46 (1.03)*   -200 (1.01)*   -200 (0.99)*
+  F1 < 450, F1/f0 1.5-2                 2094    -200 [ -200,  -200]*   -105 (4.38)*   -168 (3.50)*    -95 (4.67)*   -104 (4.17)*   -200 (0.74)*   -200 (1.07)*
+  F1 < 450, F1/f0 2-2.5                 1941    +101 [  +81,  +122]*    +89 (1.68)*    +91 (1.77)*    +90 (1.80)*   +121 (1.17)*   +104 (0.88)*    +99 (1.07)*
+  F1 < 450, F1/f0 2.5-3.5               2733     -35 [  -92,   +48]*     +2 (1.90)*    -20 (1.76)*     +7 (2.06)*    +19 (1.83)*    -35 (1.00)*    -37 (1.04)*
+  F1 < 450, F1/f0 >= 3.5                1210     -50 [  -66,   -20]*    -54 (1.36)*    -53 (1.32)*    -47 (1.44)*    -17 (1.28)*    -50 (1.00)*    -51 (1.01)*
+  F1 450-600, F1/f0 < 1.5                252    -200 [ +nan,  +nan]     -13 (1.12)     -99 (1.13)     -10 (1.07)     -24 (0.97)    -200 (1.00)    -200 (1.00) 
+  F1 450-600, F1/f0 1.5-2               2172    -168 [ -196,  -138]*    -21 (1.75)*    -90 (1.49)*    -33 (1.74)*    -46 (1.41)*   -169 (0.98)*   -165 (1.03)*
+  F1 450-600, F1/f0 2-2.5               3348     +94 [  +78,  +107]*    +45 (1.04)*    +83 (1.17)*    +41 (1.11)*    +40 (1.04)*    +94 (1.09)*    +93 (1.01)*
+  F1 450-600, F1/f0 2.5-3.5             3036     +21 [   +3,   +42]*    -19 (1.11)*    +25 (1.16)*    -12 (1.15)*    -14 (1.09)*    +21 (1.00)*    +21 (1.01)*
+  F1 450-600, F1/f0 >= 3.5              2785     +74 [  +41,  +121]*    -23 (1.03)*    +38 (1.26)*    -20 (1.06)*    -45 (0.97)*    +74 (1.00)*    +72 (1.02)*
+  F1 >= 600, F1/f0 1.5-2                 200    -200 [ +nan,  +nan]     -94 ( nan)    -187 ( nan)    -114 ( nan)    -109 ( nan)    -200 ( nan)    -200 ( nan) 
+  F1 >= 600, F1/f0 2-2.5                1127    +134 [ +114,  +152]*    +86 (1.09)*   +131 (1.03)*    +94 (1.11)*    +86 (1.00)*   +132 (1.04)*   +134 (1.00)*
+  F1 >= 600, F1/f0 2.5-3.5              2977     +75 [  +60,   +87]*    +26 (1.07)*    +52 (1.18)*    +29 (1.09)*    +14 (1.02)*    +75 (1.00)*    +74 (1.01)*
+  F1 >= 600, F1/f0 >= 3.5               2359     +45 [  +30,   +62]*    -16 (0.94)*    +16 (1.15)*     -8 (0.96)*    -36 (0.88)*    +45 (1.00)*    +45 (1.01)*
+  all cell frames shifted together: base c +29, curvature 0.5841; A c +2, curvature 0.5723; C c +28, curvature 0.6758; A+C c +6, curvature 0.5981; B' c -2, curvature 0.5305; B'-fixed c +30, curvature 0.5896; D c +29, curvature 0.5928
+
+== train_v2 validation (synthetic control)
+  cell                                frames         base c [95 %]               A               C             A+C              B'        B'-fixed               D   (candidates: c, and curvature kept against base; * readable)
+  F1 < 450, F1/f0 < 1.5                 1292     -41 [ -131,   +32]*    -34 (0.85)*    -34 (0.93)*    -17 (0.81)*     -4 (0.73)*    -29 (1.26)*    -40 (0.99)*
+  F1 < 450, F1/f0 1.5-2                  815     -31 [  -98,   +44]*    -47 (0.82)*    -80 (0.88)*    -54 (0.80)*    -78 (0.80)*    -54 (1.32)*    -25 (1.00)*
+  F1 < 450, F1/f0 2-2.5                  393     +18 [  -25,   +54]*    +50 (0.73)*    +47 (0.90)*    +52 (0.76)*    +52 (0.65)*    +68 (0.85)*    +14 (1.02)*
+  F1 < 450, F1/f0 2.5-3.5                872      -9 [  -34,    +9]*     -0 (0.85)*    +12 (1.01)*     +4 (0.86)*     -2 (0.68)*     -9 (1.00)*    -10 (1.02)*
+  F1 < 450, F1/f0 >= 3.5                2426      +3 [  -11,   +22]*     -5 (0.92)*     +9 (1.05)*    +13 (0.87)*     -1 (0.79)*     +3 (1.00)*     +2 (1.02)*
+  F1 450-600, F1/f0 < 1.5               1730      +4 [  -70,   +90]*    +12 (0.73)*    +37 (0.76)*    +36 (0.62)*    +22 (0.60)*    +19 (1.01)*     +6 (0.99)*
+  F1 450-600, F1/f0 1.5-2                973     -67 [ -111,   -20]*    -24 (0.83)*    -55 (0.84)*    -12 (0.79)*     +0 (0.67)*    -60 (1.02)*    -63 (1.00)*
+  F1 450-600, F1/f0 2-2.5               1166      +7 [  -11,   +33]*    +16 (0.80)*    +27 (0.93)*    +19 (0.79)*    +11 (0.67)*     +9 (1.07)*     +5 (1.01)*
+  F1 450-600, F1/f0 2.5-3.5             1455     -12 [  -27,    +4]*     -6 (0.82)*     +1 (1.02)*     -4 (0.81)*     +1 (0.66)*    -12 (1.00)*    -13 (1.01)*
+  F1 450-600, F1/f0 >= 3.5              4238      +2 [   -6,   +14]*     -6 (0.83)*     -2 (1.08)*     +0 (0.90)*     -7 (0.67)*     +2 (1.00)*     +1 (1.02)*
+  F1 >= 600, F1/f0 < 1.5                2113      -2 [  -59,   +51]*    -10 (0.75)*    +16 (0.87)*     +4 (0.64)*    +14 (0.69)*     +7 (1.06)*     -0 (1.00)*
+  F1 >= 600, F1/f0 1.5-2                2226      -8 [  -35,   +14]*    -12 (0.65)*     -2 (0.83)*     -6 (0.60)*     -7 (0.52)*     -1 (1.05)*     -5 (1.01)*
+  F1 >= 600, F1/f0 2-2.5                1953     +11 [   -4,   +24]*    +12 (0.70)*    +15 (0.91)*    +12 (0.68)*    +15 (0.54)*     +8 (1.02)*     +9 (1.01)*
+  F1 >= 600, F1/f0 2.5-3.5              3224      +2 [   -7,   +13]*     +2 (0.85)*     +4 (0.98)*     +3 (0.84)*     +4 (0.64)*     +2 (1.00)*     +2 (1.01)*
+  F1 >= 600, F1/f0 >= 3.5               7546      -3 [   -8,    +2]*     -6 (0.81)*     -4 (1.01)*     -2 (0.86)*     -5 (0.66)*     -3 (1.00)*     -3 (1.01)*
+  all cell frames shifted together: base c -1, curvature 1.6315; A c -3, curvature 1.2456; C c +1, curvature 1.5423; A+C c +1, curvature 1.2699; B' c -2, curvature 1.0029; B'-fixed c -1, curvature 1.6860; D c -2, curvature 1.6471
+
+== PTDB-TUG dev
+  cell                                frames         base c [95 %]               A               C             A+C              B'        B'-fixed               D   (candidates: c, and curvature kept against base; * readable)
+  F1 < 450, F1/f0 < 1.5                   39    -200 [ +nan,  +nan]    -116 (1.16)    -191 (1.22)      +9 (1.07)     -30 (0.85)    -200 (1.04)    -200 (1.03) 
+  F1 < 450, F1/f0 1.5-2                  316    -200 [ -200,  -200]*   -126 (13.34)*   -171 (6.25)*   -125 (11.84)*   -126 (12.09)*   -200 (-1.06)    -200 (1.60)*
+  F1 < 450, F1/f0 2-2.5                  253    -200 [ -200,   -63]*    +10 (2.90)*    +41 (1.90)*    +15 (2.53)*    +22 (2.28)*    +63 (0.47)*   -200 (1.12)*
+  F1 < 450, F1/f0 2.5-3.5                 62     -62 [ +nan,  +nan]     -11 (0.99)     -26 (1.02)     -10 (1.04)     -12 (0.93)     -62 (1.00)     -60 (1.01) 
+  F1 < 450, F1/f0 >= 3.5                  30     +42 [ +nan,  +nan]     -30 (1.08)     +51 (1.09)      +8 (0.84)     +23 (1.19)     +42 (1.00)     +40 (1.02) 
+  F1 450-600, F1/f0 < 1.5                  2     +18 [ +nan,  +nan]     +74 (1.17)     +26 (0.16)    +123 (0.68)    +147 (0.65)     +18 (1.00)     +18 (0.97) 
+  F1 450-600, F1/f0 1.5-2                162    -200 [ +nan,  +nan]    -117 ( nan)    -180 ( nan)    -120 ( nan)     -88 ( nan)    -200 ( nan)    -200 ( nan) 
+  F1 450-600, F1/f0 2-2.5                365     +31 [   -7,   +67]*    +19 (1.12)*    +32 (1.11)*    +32 (1.10)*    +12 (1.26)*    +43 (1.10)*    +30 (1.02)*
+  F1 450-600, F1/f0 2.5-3.5              639     -54 [  -69,   -36]*    -22 (1.30)*    -22 (1.09)*    -25 (1.30)*    -20 (1.31)*    -54 (1.00)*    -52 (1.02)*
+  F1 450-600, F1/f0 >= 3.5                54      -5 [ +nan,  +nan]     -27 (0.99)      -2 (1.09)     -12 (0.78)      +0 (1.15)      -5 (1.00)      -5 (1.00) 
+  F1 >= 600, F1/f0 1.5-2                   3    +200 [ +nan,  +nan]    +181 ( nan)    +200 ( nan)    +200 ( nan)    +167 ( nan)    +200 ( nan)    +200 ( nan) 
+  F1 >= 600, F1/f0 2-2.5                  35    +124 [ +nan,  +nan]    +106 (1.47)    +109 (0.93)    +118 (1.22)     +27 (2.52)    +124 (1.07)    +124 (1.01) 
+  F1 >= 600, F1/f0 2.5-3.5               545    +104 [  +66,  +135]*    +32 (1.48)*    +88 (1.14)*    +40 (1.50)*    +21 (1.54)*   +104 (1.00)*   +104 (1.01)*
+  F1 >= 600, F1/f0 >= 3.5                925     +65 [  +38,   +84]*    +14 (1.02)*    +52 (1.03)*    +26 (1.00)*    +10 (1.01)*    +65 (1.00)*    +65 (1.01)*
+  men, F1 < 450, F1/f0 < 1.5               2     +56 [ +nan,  +nan]    +177 (0.84)     +80 (1.53)    +176 (0.30)     +31 (-0.30)     +56 (1.00)     +55 (1.06) 
+  men, F1 < 450, F1/f0 1.5-2              32    -200 [ +nan,  +nan]    -110 (1.49)    -129 (1.92)     -82 (2.12)     -73 (2.02)    -200 (0.63)    -200 (1.11) 
+  men, F1 < 450, F1/f0 2-2.5             119     -87 [ +nan,  +nan]     +27 (0.88)     -14 (1.03)     +58 (0.83)      +5 (0.89)     -49 (1.14)     -90 (1.01) 
+  men, F1 < 450, F1/f0 2.5-3.5           558     -84 [ -133,   -45]*    -17 (1.54)*    -36 (1.25)*     -3 (1.50)*    -19 (1.53)*    -84 (1.00)*    -83 (1.03)*
+  men, F1 < 450, F1/f0 >= 3.5            692     -19 [  -27,   -12]*    -17 (1.19)*    -15 (1.19)*    -16 (1.25)*    -19 (1.15)*    -19 (1.00)*    -19 (1.02)*
+  men, F1 450-600, F1/f0 2.5-3.5         118      -0 [ +nan,  +nan]      -5 (1.19)     +21 (1.15)      -0 (1.25)     -17 (1.18)      -0 (1.00)      -2 (1.03) 
+  men, F1 450-600, F1/f0 >= 3.5          967     +20 [   -1,   +59]*     -8 (1.17)*    +14 (1.11)*     +2 (1.17)*     -1 (1.16)*    +20 (1.00)*    +20 (1.02)*
+  men, F1 >= 600, F1/f0 >= 3.5           574     +47 [  +30,   +82]*     +3 (1.08)*    +32 (1.03)*    +14 (1.04)*     +2 (1.05)*    +47 (1.00)*    +46 (1.01)*
+  all cell frames shifted together: base c +18, curvature 0.7192; A c -5, curvature 0.8529; C c +17, curvature 0.7895; A+C c +4, curvature 0.8439; B' c -5, curvature 0.8554; B'-fixed c +18, curvature 0.7169; D c +17, curvature 0.7301
+
+CRITERION 1, the jump across 2 f0 on the stores: J = c(2-2.5) - c(1.5-2) per F1 band where base has both cells readable
+  A: VocalSet F1 < 450: base +205, A +169 no; VocalSet F1 450-600: base +243, A +182 no; VocalSet F1 >= 600: base +143, A +151 no; Zeroth-Korean F1 < 450: base +301, A +194 no; Zeroth-Korean F1 450-600: base +262, A +66 ok -> fails
+  C: VocalSet F1 < 450: base +205, C +228 no; VocalSet F1 450-600: base +243, C +184 no; VocalSet F1 >= 600: base +143, C +121 no; Zeroth-Korean F1 < 450: base +301, C +259 no; Zeroth-Korean F1 450-600: base +262, C +173 no -> fails
+  A+C: VocalSet F1 < 450: base +205, A+C +171 no; VocalSet F1 450-600: base +243, A+C +217 no; VocalSet F1 >= 600: base +143, A+C +176 no; Zeroth-Korean F1 < 450: base +301, A+C +185 no; Zeroth-Korean F1 450-600: base +262, A+C +74 ok -> fails
+  B': VocalSet F1 < 450: base +205, B' +127 no; VocalSet F1 450-600: base +243, B' +118 no; VocalSet F1 >= 600: base +143, B' +78 no; Zeroth-Korean F1 < 450: base +301, B' +225 no; Zeroth-Korean F1 450-600: base +262, B' +87 ok -> fails
+  B'-fixed: VocalSet F1 < 450: base +205, B'-fixed +216 no; VocalSet F1 450-600: base +243, B'-fixed +238 no; VocalSet F1 >= 600: base +143, B'-fixed +126 no; Zeroth-Korean F1 < 450: base +301, B'-fixed +304 no; Zeroth-Korean F1 450-600: base +262, B'-fixed +263 no -> fails
+  D: VocalSet F1 < 450: base +205, D +204 no; VocalSet F1 450-600: base +243, D +243 no; VocalSet F1 >= 600: base +143, D +142 no; Zeroth-Korean F1 < 450: base +301, D +299 no; Zeroth-Korean F1 450-600: base +262, D +258 no -> fails
+
+CRITERION 2, synthetic control: frame-weighted median |c| over readable cells <= 10 c, and total F1 curvature >= 0.5 of base's
+  A: median |c| 6 c over 15 cells; curvature kept 0.76 -> PASSES
+  C: median |c| 4 c over 15 cells; curvature kept 0.95 -> PASSES
+  A+C: median |c| 4 c over 15 cells; curvature kept 0.78 -> PASSES
+  B': median |c| 5 c over 15 cells; curvature kept 0.61 -> PASSES
+  B'-fixed: median |c| 3 c over 15 cells; curvature kept 1.03 -> PASSES
+  D: median |c| 3 c over 15 cells; curvature kept 1.01 -> PASSES
+  base for reference: median |c| 3 c
+
+CRITERION 3, PTDB-TUG dev women: where E's interval excludes 0, c opposite in sign to E; else |c| <= 25 c
+  base (6 readable cells): F1 < 450, F1/f0 1.5-2: E +69 [+45, +102], c -200 ok; F1 < 450, F1/f0 2-2.5: E +65 [+36, +126], c -200 ok; F1 450-600, F1/f0 2-2.5: E +58 [+17, +72], c +31 no; F1 450-600, F1/f0 2.5-3.5: E +22 [+9, +34], c -54 ok; F1 >= 600, F1/f0 2.5-3.5: E -35 [-77, +2], c +104 no; F1 >= 600, F1/f0 >= 3.5: E -33 [-45, -19], c +65 ok -> fails
+  A (6 readable cells): F1 < 450, F1/f0 1.5-2: E +69 [+45, +102], c -126 ok; F1 < 450, F1/f0 2-2.5: E +65 [+36, +126], c +10 no; F1 450-600, F1/f0 2-2.5: E +58 [+17, +72], c +19 no; F1 450-600, F1/f0 2.5-3.5: E +22 [+9, +34], c -22 ok; F1 >= 600, F1/f0 2.5-3.5: E -35 [-77, +2], c +32 no; F1 >= 600, F1/f0 >= 3.5: E -33 [-45, -19], c +14 ok -> fails
+  C (6 readable cells): F1 < 450, F1/f0 1.5-2: E +69 [+45, +102], c -171 ok; F1 < 450, F1/f0 2-2.5: E +65 [+36, +126], c +41 no; F1 450-600, F1/f0 2-2.5: E +58 [+17, +72], c +32 no; F1 450-600, F1/f0 2.5-3.5: E +22 [+9, +34], c -22 ok; F1 >= 600, F1/f0 2.5-3.5: E -35 [-77, +2], c +88 no; F1 >= 600, F1/f0 >= 3.5: E -33 [-45, -19], c +52 ok -> fails
+  A+C (6 readable cells): F1 < 450, F1/f0 1.5-2: E +69 [+45, +102], c -125 ok; F1 < 450, F1/f0 2-2.5: E +65 [+36, +126], c +15 no; F1 450-600, F1/f0 2-2.5: E +58 [+17, +72], c +32 no; F1 450-600, F1/f0 2.5-3.5: E +22 [+9, +34], c -25 ok; F1 >= 600, F1/f0 2.5-3.5: E -35 [-77, +2], c +40 no; F1 >= 600, F1/f0 >= 3.5: E -33 [-45, -19], c +26 ok -> fails
+  B' (6 readable cells): F1 < 450, F1/f0 1.5-2: E +69 [+45, +102], c -126 ok; F1 < 450, F1/f0 2-2.5: E +65 [+36, +126], c +22 no; F1 450-600, F1/f0 2-2.5: E +58 [+17, +72], c +12 no; F1 450-600, F1/f0 2.5-3.5: E +22 [+9, +34], c -20 ok; F1 >= 600, F1/f0 2.5-3.5: E -35 [-77, +2], c +21 ok; F1 >= 600, F1/f0 >= 3.5: E -33 [-45, -19], c +10 ok -> fails
+  B'-fixed (5 readable cells): F1 < 450, F1/f0 2-2.5: E +65 [+36, +126], c +63 no; F1 450-600, F1/f0 2-2.5: E +58 [+17, +72], c +43 no; F1 450-600, F1/f0 2.5-3.5: E +22 [+9, +34], c -54 ok; F1 >= 600, F1/f0 2.5-3.5: E -35 [-77, +2], c +104 no; F1 >= 600, F1/f0 >= 3.5: E -33 [-45, -19], c +65 ok -> fails
+  D (6 readable cells): F1 < 450, F1/f0 1.5-2: E +69 [+45, +102], c -200 ok; F1 < 450, F1/f0 2-2.5: E +65 [+36, +126], c -200 ok; F1 450-600, F1/f0 2-2.5: E +58 [+17, +72], c +30 no; F1 450-600, F1/f0 2.5-3.5: E +22 [+9, +34], c -52 ok; F1 >= 600, F1/f0 2.5-3.5: E -35 [-77, +2], c +104 no; F1 >= 600, F1/f0 >= 3.5: E -33 [-45, -19], c +65 ok -> fails
+
+REPORTED BESIDE
+  B's floor, VocalSet (seed 1): frames with model F1 below 2.5 f0: overall 79%; f0 < 150 10%, f0 150-250 61%, f0 >= 250 97%
+    B' coverage, VocalSet (seed 1): 92% of scored frames carry an F1 reading (base 100 %)
+    B'-fixed coverage, VocalSet (seed 1): 95% of scored frames carry an F1 reading (base 100 %)
+  B's floor, Zeroth-Korean (seed 1): frames with model F1 below 2.5 f0: overall 45%; f0 < 150 3%, f0 150-250 49%, f0 >= 250 87%
+    B' coverage, Zeroth-Korean (seed 1): 99% of scored frames carry an F1 reading (base 100 %)
+    B'-fixed coverage, Zeroth-Korean (seed 1): 100% of scored frames carry an F1 reading (base 100 %)
+  B's floor, train_v2 validation (synthetic control) (seed 1): frames with model F1 below 2.5 f0: overall 42%; f0 < 150 1%, f0 150-250 29%, f0 >= 250 84%
+    B' coverage, train_v2 validation (synthetic control) (seed 1): 94% of scored frames carry an F1 reading (base 100 %)
+    B'-fixed coverage, train_v2 validation (synthetic control) (seed 1): 96% of scored frames carry an F1 reading (base 100 %)
+  B's floor, PTDB-TUG dev (seed 1): frames with model F1 below 2.5 f0: overall 27%; f0 < 150 5%, f0 150-250 44%, f0 >= 250 87%
+    B' coverage, PTDB-TUG dev (seed 1): 99% of scored frames carry an F1 reading (base 100 %)
+    B'-fixed coverage, PTDB-TUG dev (seed 1): 100% of scored frames carry an F1 reading (base 100 %)
+  VocalSet, base: frame-weighted c below 2 f0 -85, at 2-3.5 f0 -6
+  VocalSet, A: frame-weighted c below 2 f0 -37, at 2-3.5 f0 +18
+  VocalSet, C: frame-weighted c below 2 f0 -56, at 2-3.5 f0 +6
+  VocalSet, A+C: frame-weighted c below 2 f0 -37, at 2-3.5 f0 +29
+  VocalSet, B': frame-weighted c below 2 f0 -42, at 2-3.5 f0 +11
+  VocalSet, B'-fixed: frame-weighted c below 2 f0 -80, at 2-3.5 f0 -10
+  VocalSet, D: frame-weighted c below 2 f0 -84, at 2-3.5 f0 -6
+  Zeroth-Korean, base: frame-weighted c below 2 f0 -186, at 2-3.5 f0 +56
+  Zeroth-Korean, A: frame-weighted c below 2 f0 -52, at 2-3.5 f0 +29
+  Zeroth-Korean, C: frame-weighted c below 2 f0 -125, at 2-3.5 f0 +51
+  Zeroth-Korean, A+C: frame-weighted c below 2 f0 -52, at 2-3.5 f0 +32
+  Zeroth-Korean, B': frame-weighted c below 2 f0 -57, at 2-3.5 f0 +34
+  Zeroth-Korean, B'-fixed: frame-weighted c below 2 f0 -186, at 2-3.5 f0 +57
+  Zeroth-Korean, D: frame-weighted c below 2 f0 -185, at 2-3.5 f0 +55
+  PTDB-TUG dev, base: frame-weighted c below 2 f0 -200, at 2-3.5 f0 -9
+  PTDB-TUG dev, A: frame-weighted c below 2 f0 -126, at 2-3.5 f0 +7
+  PTDB-TUG dev, C: frame-weighted c below 2 f0 -171, at 2-3.5 f0 +31
+  PTDB-TUG dev, A+C: frame-weighted c below 2 f0 -125, at 2-3.5 f0 +12
+  PTDB-TUG dev, B': frame-weighted c below 2 f0 -126, at 2-3.5 f0 +5
+  PTDB-TUG dev, B'-fixed: frame-weighted c below 2 f0 -, at 2-3.5 f0 +30
+  PTDB-TUG dev, D: frame-weighted c below 2 f0 -200, at 2-3.5 f0 -9
+  D against its bound, VocalSet: largest |c(D) - c(base)| over readable cells 1 c; median target change -0.023 dB, 1st percentile -0.429 dB
+  D against its bound, Zeroth-Korean: largest |c(D) - c(base)| over readable cells 3 c; median target change -0.106 dB, 1st percentile -0.449 dB
+  D against its bound, train_v2 validation (synthetic control): largest |c(D) - c(base)| over readable cells 6 c; median target change -0.074 dB, 1st percentile -0.446 dB
+  base jump, VocalSet, seed 1 alone: F1 < 450 +204, F1 450-600 +242, F1 >= 600 +144
+  base jump, VocalSet, seed 2 alone: F1 < 450 +206, F1 450-600 +245, F1 >= 600 +142
+  base jump, Zeroth-Korean, seed 1 alone: F1 < 450 +303, F1 450-600 +252, F1 >= 600 +334
+  base jump, Zeroth-Korean, seed 2 alone: F1 < 450 +299, F1 450-600 +273, F1 >= 600 +334
+
+READINGS
+  -> UNREADABLE (a code check failed or a store has no F1 band with base's two cells readable)
