@@ -205,3 +205,58 @@ def test_model_recon_loss_with_channel_term_runs_and_backpropagates():
     loss = R.model_recon_loss(out, lab, rd_grid=[0.8, 1.2], fmax=4000.0, hpc=True, channel=3)
     loss.backward()
     assert torch.isfinite(loss) and logits.grad.abs().sum() > 0
+
+
+def test_group_basis_out_with_crop_groups_matches_crop_channel_out():
+    """D-123: the general grouped profile reproduces crop_channel_out when each crop is its own group"""
+    g = torch.Generator().manual_seed(1)
+    B, T, K = 3, 25, 18
+    f = (torch.rand(B, T, 1, generator=g, dtype=torch.float64) * 150 + 100) * torch.arange(1, K + 1, dtype=torch.float64)
+    resid = torch.randn(B, T, K, generator=g, dtype=torch.float64) * 3
+    w = (torch.rand(B, T, K, generator=g) > 0.25).double()
+    want = R.crop_channel_out(resid * w, f, w, 3) * w
+    grp = torch.arange(B).repeat_interleave(T)
+    got = R.group_basis_out((resid * w).reshape(B * T, K), w.reshape(B * T, K), R.log_freq_basis(f.reshape(B * T, K), 3), grp, B)
+    assert (got.reshape(B, T, K) * w - want).abs().max() < 1e-6
+
+
+def test_group_basis_out_removes_a_per_group_harmonic_shape_and_respects_fit_and_coef():
+    g = torch.Generator().manual_seed(2)
+    N, K, nk = 40, 16, 8
+    grp = torch.arange(N) % 2
+    shape = torch.zeros(2, K, dtype=torch.float64)
+    shape[:, :nk] = torch.randn(2, nk, generator=g, dtype=torch.float64) * 2
+    level = torch.randn(N, 1, generator=g, dtype=torch.float64) * 4
+    w = torch.ones(N, K, dtype=torch.float64)
+    phi = R.harmonic_number_basis((N, K), nk, dtype=torch.float64)
+    resid = shape[grp] + level
+    out, coef = R.group_basis_out(resid, w, phi, grp, 2, return_coef=True)
+    assert out.abs().max() < 1e-6
+    # fitted on half the frames only, applied to all: the shape is shared, so the other half is cleaned too
+    fit = torch.arange(N) < N // 2
+    out2 = R.group_basis_out(resid, w, phi, grp, 2, fit=fit)
+    assert out2.abs().max() < 1e-6
+    # fixed coefficients from the first fit reproduce it
+    out3 = R.group_basis_out(resid + 0.0, w, phi, grp, 2, coef=coef)
+    assert out3.abs().max() < 1e-6
+
+
+def test_noise_subtraction_changes_clean_harmonics_little_and_lowers_noisy_ones():
+    rng = np.random.default_rng(3)
+    f0, n = 150.0, FS
+    t = np.arange(n) / FS
+    T = n // R.HOP + 1
+    x = sum(np.cos(2 * np.pi * k * f0 * t) * (1.0 if k <= 8 else 0.02) for k in range(1, 20))
+    clean, okc = R.harmonic_targets(x, np.full(T, f0), np.ones(T, bool), fmax=2800, k_max=20, floor_db=120, snr_min_db=10)
+    sub, oks = R.harmonic_targets(x, np.full(T, f0), np.ones(T, bool), fmax=2800, k_max=20, floor_db=120, snr_min_db=10,
+                                  noise_subtract=True)
+    i = T // 2
+    both = okc[i] & oks[i]
+    assert both[:8].all() and np.max(np.abs(sub[i, both] - clean[i, both])) < 0.1  # noise-free: unchanged
+    xn = x + 0.004 * rng.standard_normal(n)
+    a, oka = R.harmonic_targets(xn, np.full(T, f0), np.ones(T, bool), fmax=2800, k_max=20, floor_db=120, snr_min_db=10)
+    b, okb = R.harmonic_targets(xn, np.full(T, f0), np.ones(T, bool), fmax=2800, k_max=20, floor_db=120, snr_min_db=10,
+                                noise_subtract=True)
+    k = oka[i] & okb[i]
+    d = b[i, k] - a[i, k]
+    assert np.all(d <= 1e-9) and np.all(d >= -0.47)  # never up; at most 10 log10(0.9) under a 10 dB gate

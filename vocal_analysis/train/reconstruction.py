@@ -87,7 +87,7 @@ def render_db(f: torch.Tensor, poles_f: torch.Tensor, poles_b: torch.Tensor, zer
 # --------------------------------------------------------------------------------------------- targets (numpy)
 def harmonic_targets(audio: np.ndarray, f0: np.ndarray, voiced: np.ndarray, fmax: float = 5000.0, k_max: int = 64,
                      min_win_s: float = 0.025, periods: float = 3.0, floor_db: float = 60.0,
-                     snr_min_db: float | None = None) -> tuple[np.ndarray, np.ndarray]:
+                     snr_min_db: float | None = None, noise_subtract: bool = False) -> tuple[np.ndarray, np.ndarray]:
     """Per 10 ms frame (frame i centred at i * HOP): the amplitudes in dB of harmonics k f0 (k = 1.. up to fmax and
     k_max), by a Hann-weighted least-squares fit of cosines and sines at k f0 over max(min_win_s, periods / f0).
     Returns (amp_db (T, k_max), valid (T, k_max)); invalid where unvoiced, f0 missing, k f0 > fmax, or more than
@@ -97,7 +97,13 @@ def harmonic_targets(audio: np.ndarray, f0: np.ndarray, voiced: np.ndarray, fmax
     snr_min_db (D-104, amendment 1): also invalid where the harmonic's power a_k^2 is less than this far above the local
     noise: the mean power of the four nearest sinusoids at half-integer multiples (k +- 0.5, k +- 1.5) f0, fitted jointly
     with the harmonics in the same window, so the noise is measured by the same estimator. Aspiration noise
-    otherwise sets the level of weak high harmonics (D-103: up to +22 dB at 4-5 kHz at low HNR)."""
+    otherwise sets the level of weak high harmonics (D-103: up to +22 dB at 4-5 kHz at low HNR).
+
+    noise_subtract (D-123's D; needs snr_min_db): the noise's power is taken out of each kept harmonic, a_k^2 - n_k
+    before the dB, n_k the same noise estimate; a harmonic left less than 3 dB above n_k is invalid. Under a 10 dB gate
+    this moves a kept harmonic by at most 0.46 dB."""
+    if noise_subtract and snr_min_db is None:
+        raise ValueError("noise_subtract needs snr_min_db (the noise estimate comes from the gate's fit)")
     x = np.asarray(audio, np.float64)
     T = len(f0)
     amp = np.full((T, k_max), np.nan)
@@ -128,7 +134,13 @@ def harmonic_targets(audio: np.ndarray, f0: np.ndarray, voiced: np.ndarray, fmax
             bh = cj[2 * K:2 * K + K + 1] ** 2 + cj[2 * K + K + 1:] ** 2  # (K + 1,) noise powers at 0.5 .. K + 0.5
             nz = np.array([bh[max(0, j - 1):j + 3].mean() for j in range(K)])  # the four nearest half-integers
             snr = 10 * np.log10(mag ** 2 + 1e-30) - 10 * np.log10(nz + 1e-30)
-            amp[i, :K] = np.where(snr >= snr_min_db, amp[i, :K], np.nan)
+            keep = snr >= snr_min_db
+            if noise_subtract:
+                p = mag ** 2 - nz
+                keep &= p >= nz * 10 ** 0.3
+                amp[i, :K] = np.where(keep, 10 * np.log10(np.maximum(p, 1e-30)), np.nan)
+            else:
+                amp[i, :K] = np.where(keep, amp[i, :K], np.nan)
     valid = np.isfinite(amp)
     peak = np.nanmax(np.where(valid, amp, -np.inf), 1, keepdims=True)
     valid &= amp >= peak - floor_db
@@ -280,6 +292,51 @@ def crop_channel_out(resid: torch.Tensor, f: torch.Tensor, w: torch.Tensor, n_te
     G = G + 1e-9 * G.diagonal(dim1=-2, dim2=-1).mean(-1).clamp_min(1e-9)[:, None, None] * torch.eye(n_terms, dtype=G.dtype, device=G.device)
     c = torch.linalg.solve(G, torch.einsum("btkn,btk,btk->bn", pc, w, rc))
     return rc - torch.einsum("btkn,bn->btk", pc, c)
+
+
+def harmonic_number_basis(n_frames_k: tuple[int, int], n_k: int = 8, device=None, dtype=torch.float32) -> torch.Tensor:
+    """(N, K, n_k) one-hot over harmonic numbers 1..n_k (higher harmonics get no column): an offset per harmonic
+    number, the source's shape held across frames (D-123's A)"""
+    N, K = n_frames_k
+    phi = torch.zeros(K, n_k, device=device, dtype=dtype)
+    j = torch.arange(min(K, n_k), device=device)
+    phi[j, j] = 1.0
+    return phi.expand(N, K, n_k)
+
+
+def log_freq_basis(f: torch.Tensor, n_terms: int = 3) -> torch.Tensor:
+    """(..., K, n_terms) powers 1..n_terms of log2 f centred near 1 kHz: `crop_channel_out`'s smooth curve"""
+    lf = torch.log2(f.clamp_min(1.0)) - 10.0
+    return torch.stack([lf ** (j + 1) for j in range(n_terms)], -1)
+
+
+def group_basis_out(resid: torch.Tensor, w: torch.Tensor, phi: torch.Tensor, group: torch.Tensor, n_groups: int,
+                    fit: torch.Tensor | None = None, return_coef: bool = False, coef: torch.Tensor | None = None):
+    """resid (N, K) minus, jointly, a level per frame and one combination of the basis phi (N, K, n) per group of frames
+    (group (N,) in 0..n_groups-1), by weighted least squares over the group's valid harmonics: `crop_channel_out`'s algebra
+    for any grouping (a crop, a recording, a recording's f0 bin) and any basis. fit (N,) bool: only these frames fit the
+    coefficients (every frame still has them and its level removed). return_coef: also the (n_groups, n) coefficients.
+    coef: use these coefficients instead of fitting (the level is still profiled per frame)."""
+    ws = w.sum(-1, keepdim=True).clamp_min(1e-9)
+    rc = resid - (w * resid).sum(-1, keepdim=True) / ws  # per-frame level out
+    pc = phi - (w.unsqueeze(-1) * phi).sum(-2, keepdim=True) / ws.unsqueeze(-1)
+    if coef is not None:
+        out = rc - torch.einsum("tkn,tn->tk", pc, coef[group])
+        return (out, coef) if return_coef else out
+    wf = w if fit is None else w * fit.to(w.dtype).unsqueeze(-1)
+    n = phi.shape[-1]
+    G = torch.zeros(n_groups, n, n, dtype=resid.dtype, device=resid.device)
+    G.index_add_(0, group, torch.einsum("tkn,tk,tkm->tnm", pc, wf, pc))
+    h = torch.zeros(n_groups, n, dtype=resid.dtype, device=resid.device)
+    h.index_add_(0, group, torch.einsum("tkn,tk,tk->tn", pc, wf, rc))
+    # in float64: with the level out, an offset per harmonic number is collinear wherever a frame's valid harmonics are
+    # exactly the basis's (their sum is the level), and the small ridge only resolves that in double precision
+    G, h = G.double(), h.double()
+    eye = torch.eye(n, dtype=G.dtype, device=G.device)
+    G = G + (1e-9 * G.diagonal(dim1=-2, dim2=-1).mean(-1).clamp_min(1e-9))[:, None, None] * eye + 1e-12 * eye
+    c = torch.linalg.solve(G, h.unsqueeze(-1)).squeeze(-1).to(resid.dtype)
+    out = rc - torch.einsum("tkn,tn->tk", pc, c[group])
+    return (out, c) if return_coef else out
 
 
 def model_recon_loss(out: dict, lab: dict, rd_grid=None, n_formants: int = 4, fmax: float | None = None,
