@@ -3272,6 +3272,46 @@ If the neutral list has fewer than 3 qualifying items, it is dropped and the run
 - *Amendment 1 (2026-11-10, before anything was measured)*:
   1. *Content against voice.* Where dev speakers of one sex read the same sentences (check PTDB-TUG's design from the file listing first), a crossed decomposition per output, in cents: speaker + sentence + residual, over sentences read by at least three dev speakers of that sex. The sentence component is the content; the residual is what is left when the text is the same. The minimal detectable change is reported twice: for different text (measure 3 as registered) and for the same text (from the residual alone).
   2. *H1\*-H2\** uses the model's own formants, on purpose: it is the quantity that would be reported, so its repeatability includes F1's. Raw H1-H2 is reported beside it so that F1's share is visible. The back end has no CPP (`backend/slope.py`), so CPP is not reported unless it is implemented first.
+- *Amendment 2 (2026-11-16, before anything was measured; seen: the dev manifest's file names only)*: the script is written (`scripts/analysis/d096_repeatability.py`; drafted by a subagent from this entry, reviewed by me), and amendment 1's check of the design is done. Registered to run now (Hannah, 2026-11-16: "could you please proceed in that order?", the fourth item of the list D-118 came from).
+  1. *The design.* Of the dev files' 1,872 sentences, 2 (`sa1`, `sa2`) are read by all 12 speakers, 936 by exactly two (the woman and the man with the same number: F01 / M01, F02 / M02, F04 / M04, F09 / M09, 234 sentences per pair) and 934 by one. So amendment 1's crossed decomposition within a sex has two sentences, one degree of freedom for content. It is still reported, and carries almost nothing.
+  2. *Added, the pair estimate.* For each of the four pairs, over their 234 shared sentences and per output (cents; dB for the H measures): each speaker's values centred on that speaker's mean; the **content** variance is the covariance of the woman's and the man's values across sentences; each speaker's **residual** is their variance across those sentences minus it. Reported: the content SD, the residual SD for women and for men (means over the four pairs), content's share, each pair alone, and the same-text minimal detectable change from the residual; intervals from a bootstrap over sentences within pairs (2000), the four pairs fixed. A content effect that differs between the two speakers of a pair stays in the residual, so the same-text figure errs high.
+  3. *Choices the entry left open*, fixed here (each marked `# CHOICE:` in the script):
+     - *Frames*: the reference's voiced frames where the model's own sonorant probability is above 0.5 (PTDB-TUG has no sonorant labels); utterances with fewer than 10 such frames in either seed are left out of both.
+     - *A pseudo-recording's value*: the median over the pooled frames of its k utterances (what analysing that recording would give); the mean of the utterances' medians is printed beside it at k = 5 and 20.
+     - *Pooling*: the standard error is the root of the equal-weight mean of the speakers' variances, by sex; intervals from a speaker bootstrap within sex (2000), the same draws for both seeds.
+     - *H1 and H2* are fitted at the model's own f0, and corrected as D-053 did (upper poles from the apparent length).
+     - *The channel term*: D-050's cached channel-probe audio (20 files per dev speaker, 25 conditions against clean, frames fixed by the clean file), summarised per condition as the RMS of the paired shifts, which assumes a shift does not average away over utterances; the root sum of squares with measure 3 is printed at k = 5 and 20.
+  4. *Not filled*: the size of change each output would need to show. No figure is entered without a citation; the column stays open for Hannah.
+- *Result (2026-11-17, `reports/analysis/d096/d096.txt`; descriptive; seed means unless noted, the two seeds within a few cents of each other)*: **a recording with about 27 s of voiced sonorant speech (20 sentences) can show a change of 1.4-1.5 % in length, about 90-100 cents in F1 and about 50 cents in f0; a 7 s recording, about twice that.** 2,829 of the 2,830 dev utterances kept (median 1.3 s of voiced sonorant frames each); chain `scripts/analysis/chains/d120_d096.sh`.
+  - *Minimal detectable change at 95 %, different text, by recording length* (k = 1 / 5 / 20 utterances, about 1 / 7 / 27 s of voiced sonorant frames):
+
+    | Output | Men | Women |
+    |---|---|---|
+    | f0 | 287 / 115 / 52 c (18.0 / 7.0 / 3.2 Hz) | 321 / 111 / 50 c (35.6 / 12.5 / 5.6 Hz) |
+    | F1 | 455 / 185 / 88 c (114 / 45 / 21 Hz) | 508 / 219 / 99 c (155 / 65 / 29 Hz) |
+    | F2 | 555 / 249 / 119 c | 509 / 206 / 99 c |
+    | F3 | 220 / 103 / 48 c | 201 / 81 / 41 c |
+    | F4 | 189 / 85 / 40 c | 137 / 61 / 33 c |
+    | Length | 118 / 54 / 26 c (7.1 / 3.2 / 1.5 %; 1.22 / 0.56 / 0.27 cm) | 114 / 50 / 24 c (6.8 / 2.9 / 1.4 %; 1.03 / 0.45 / 0.22 cm) |
+    | H1\*-H2\* | 3.4 / 1.4 / 0.7 dB | 6.3 / 2.6 / 1.2 dB |
+    | H1-H2 | 3.1 / 1.3 / 0.65 dB | 5.0 / 1.9 / 0.87 dB |
+
+    Speaker-bootstrap intervals are about +-15 % of each figure (for example women's length at k = 20: 24 c [22, 27]; men's F1: 88 c [73, 102]). The figures fall a little faster than the square root of k.
+  - *H1\*-H2\* against raw H1-H2*: correcting with the model's own formants costs repeatability in women (1.22 against 0.87 dB at k = 20) and almost nothing in men (0.70 against 0.65 dB): F1's share, as amendment 1 expected.
+  - *Content against voice, the registered decomposition* (two shared sentences per sex): as expected it carries almost nothing: with one degree of freedom for content, several components come out at exactly 0 and the rest have intervals spanning a factor of two to ten. It is printed and not read.
+  - *Content against voice, the pair estimate* (amendment 2; four woman-man pairs, 235-236 shared sentences each; v3.1, single utterances): content is **61 % of the within-speaker variance of F1, 69 % of F2, 49 % of F3, 37 % of F4, 55 % of length**, and little of the source measures (f0 11 %, H1\*-H2\* 10 %, H1-H2 3 %). Content SD: F1 144 c [134, 152], F2 160 c, length 31 c [29, 33]; the four pairs agree (length 31, 28, 28, 36 c).
+    - *Same text, single utterance*: length 76 c (women) and 79 c (men) against 114 and 111 c for different text; F1 361 and 274 c against 518 and 464; f0 unchanged (280 and 289 c).
+    - So reading the same sentence at both sessions removes about a third of the single-utterance figure for length and F1. It does not divide by the content's share, because the residual holds everything a repeat of the text does not fix.
+  - *The channel term* (v3.1; RMS of the paired shift per condition, 20 files per speaker):
+    - *Length*: 8 to 37 c across the 25 conditions (0.1-0.3 cm). Narrow-band conditions move it most and in one direction: telephone band +15 / +16 c (men / women, signed), 4 kHz low-pass +24 / +18 c, AMR narrow-band 28 / 37 c RMS, babble at 10 dB 33 / 29 c. Beside a 20-sentence recording's 24-26 c these are as large as the measurement error: across two devices the detectable change is 26 to 47 c (1.5-2.7 %), not 24-26.
+    - *F1*: 19 to 94 c; reverberation is the worst (RT 0.4: 66 c men, 94 c women), codecs 29-54 c. Beside 88-99 c at k = 20 the root sum of squares is 92 to 138 c.
+    - *H1\*-H2\**: unusable through a telephone band (-24 dB men, -15 dB women: the first harmonic is filtered out); reverberation adds 3.2-3.6 dB; codecs and noise at 20 dB add under 1.2 dB.
+    - *f0*: under 16 c for men in every condition quoted; for women the RMS reaches 89-107 c under Opus at 16 kbit/s, reverberation and babble at 10 dB, with intervals from 3 to over 150 c, so a few files carry it (not examined).
+  - *Reading*:
+    - The length output's detectable change on one microphone, about 1.5 % from 27 s of read speech, is the number the outcomes aim asked for. Whether it is small enough depends on the size of change to be shown, which is not filled in here (amendment 2, point 4).
+    - Across devices the channel is as large as the measurement error for length, mostly through band-limiting. Before-and-after recordings need the same chain, or a band-limit check, more than they need more speech.
+    - Content is more than half of what moves length and F1 between utterances. A fixed text at every session is the cheapest gain available, and D-118 says the same thing from the other side: the model's length reading is vowel-dependent, and pooling a balanced set of vowels is what steadies it.
+  - *Not covered*: sessions on different days (the entry's open item), so every figure here is a lower bound on what two real sessions would need; one corpus and one microphone.
 
 ## D-097 (2026-11-10, draft, not registered; nothing recorded or rendered): a known-increment test of the length outputs, with tubes at the lips
 
@@ -4037,3 +4077,270 @@ The input baseline reads alongside: if the input carries it and the trunk doesn'
   - *d109 (reported)*: worse refitted, -0.027 [-0.052, -0.004] (seeds -0.028 / -0.026), against -0.013 joint.
   - *Decomposition on the refits (reported)*: the cost moves towards women's within-speaker spread: d114 women d ln W +0.099 [+0.037, +0.162], mostly the vowel part (d ln V +0.129 [+0.069, +0.189], both seeds); men's between-speaker fall is no longer consistent (seeds -0.167 / +0.012). d109 women d ln W +0.153, vowel part +0.137, ordered against F1 (r -0.83: close vowels read longer, open shorter by up to 30 c). f5's refits widen men's between-speaker spread (+30 %).
   - *Reading*: the reconstruction arms' trunks carry less of what a head trained on synthetic tubes needs to read length consistently on real voices; a fresh head reproduces the cost on both seeds, so it is in the features, not the joint head's state. D-116 found the formants keep speakers apart, so the head reads something besides the formant scale that the loss reshapes, and on the refits the loss shows up as vowel-dependent length in women. D-114's verdict is unchanged (it had no gain on any guard-free measure either). For M4: a reconstruction arm will keep costing the head's reliability unless the loss leaves those features alone or the head is trained on real data that ties length across vowels. What the head reads (and whether a guard on A would be the better bar) is open; not registered.
+
+## D-118 (registered 2026-11-16; seen beforehand: D-100's reads of 5b, 5c, A0 and D-098's arms, D-115 to D-117, every branch arm's reliability on words read alone; no read in context of any 5b branch arm): does the reconstruction arms' length-reliability cost remain when the words are read in context?
+
+*Status*: registered (Hannah, 2026-11-16: "could you please proceed in that order?", on a review's list of next steps whose first item was this check). The design is mine. Inference only, dev speakers only, nothing adopted. Script `scripts/analysis/d118_context_arms.py` (D-100's reads and caches, imported unchanged), report `reports/analysis/d118/d118.txt`.
+
+*Question*: D-109 and D-114 fail D-051's length guard by about 0.02 of reliability, and D-117 found the cost in the trunk's features. The guard reads each Hillenbrand word alone, where reliability is about 0.24. D-100 found the same words read inside their speaker's 12-word concatenation at 0.64-0.71, for every model. Is the reconstruction arms' cost still there in context, the read nearest to a per-recording length?
+
+*Can it go either way* (checked before registering):
+- *It can shrink*: on the refits the cost is women's vowel part of the within-speaker variance (D-117: d ln V +0.129), and context pools a speaker's vowels (D-100: within-speaker SD 108 -> 41 c).
+- *It can stay*: on the joint heads D-115 found men's between-speaker variance falling (d ln B -0.07 to -0.16), which pooling within a speaker does not touch.
+- *The bar means the same at both reads*: d rel is about rel (1 - rel) (d ln B - d ln W), and rel (1 - rel) is 0.18 at 0.244 (R1) and 0.21 at 0.706 (R3), so the same proportional change gives nearly the same d rel.
+- *One read does not predict the other*: D-100's A0 - 5b was +0.014 [+0.002, +0.027] alone and -0.027 [-0.052, -0.007] in context.
+- *Noise*: D-100's between-model intervals at R3 were 0.045 to 0.08 wide, on unrelated trunks. Branch arms share 5b's trunk to step 16000 and may be tighter; f5 is the null, and the first reading below handles the case that they are not.
+
+*Prediction* (mine, written before any read): at R3 the cost is at most half its size on words read alone.
+
+*Arms*: 5b's branch arms, seeds paired with 5b's own branches (`d040_5b_s{1,2}_b20k`, D-100's caches reused): **d114** (decides), d109 and D-090's f57 (reported; f57 fails the guard by another route, D-115), D-090's **f5** (the null: +0.003 alone).
+
+*Reads* (D-100's, unchanged): Hillenbrand dev men and women, each word R1 (alone, 4 s windows: the guard's read), R2 (inside its speaker's 12-word concatenation, 4 s windows: `analyse()`'s default on a long recording) and R3 (the concatenation in one pass); PTDB-TUG dev, the first 40 sentences per speaker, R1, R0, R2, R3. The same frames and precision-weighted mean in every read.
+
+*Precondition*: R1 through this code reproduces the reported guard reliabilities (5b 0.228 / 0.261, d114 0.215 / 0.236, d109 0.223 / 0.241) to 0.001. If not, nothing below is read.
+
+*Measure*: Hillenbrand dev reliability (D-051's: per sex, the between-speaker variance of speaker means over that plus the within-speaker variance; the mean of men and women), arm minus 5b, seeds paired, seed means, 2000-draw paired speaker bootstrap, at each read.
+
+*Readings* (d114 at R3, C3, against its own difference on words alone from this run, C1, expected -0.019):
+- *Unreadable* first: f5 - 5b's lower bound at R3 is at or below -0.02. The read in context is then too noisy for the guard's bar and nothing below is read.
+- *Gone in context*: C3's lower bound above -0.02 **and** C3 >= C1 / 2 (less than half the cost left).
+- *Kept*: C3's upper bound below 0 **and** C3 <= C1 / 2 (at least half the cost left).
+- *Partial*: anything else, reported as such.
+
+*Reported beside*: R2 for every arm; each seed alone; D-115's decomposition at R1 and R3 (d ln B, d ln W, the vowel part d ln V, by sex); the within-speaker SD and the women / men ratio; PTDB-TUG at every read (6 speakers per sex: descriptive, D-100 found every between-model interval there including 0); d109 and f57.
+
+*What follows* (nothing is adopted here):
+- *Gone*: the guard as read on single words measures a cost that a length pooled over a recording does not carry. Whether M4's length guard should be read in context is then put to Hannah in M4's own rule (the next design entry), not changed here.
+- *Kept*: the guard stands as read, and D-117's trunk-feature cost is a cost for the long-term use too.
+
+*Caveats*: concatenated words with silent joins are not running speech (D-100's caveat); context can raise reliability by averaging vowels rather than by reading anatomy, which is what a per-recording length does anyway; PTDB-TUG has 6 speakers per sex; dev only.
+
+*Cost*: 8 models, about 30-40 minutes of GPU inference; no chain is running (`runs/orchestrator.log` ends with d117 on 2026-11-14).
+- *Result (2026-11-16, `reports/analysis/d118/d118.txt`)*: **kept, and larger in context; my prediction was wrong.** The precondition holds (all six reported reliabilities reproduced to 0.001), and this file's sums match `d100_context.reliability` and `d115_reliability.parts` to 4e-16.
+  - *Readable*: f5 - 5b at R3 is +0.007 [-0.013, +0.028], lower bound above -0.02.
+  - *Primary*: **d114 - 5b on words alone -0.019 [-0.028, -0.009]; in context through 4 s windows -0.055 [-0.068, -0.043]; in context in one pass -0.071 [-0.085, -0.058]** (seeds -0.071 / -0.071). At least half the cost left and the interval below 0: the registered *kept*. The cost is 3.7 times its size on words alone, where I predicted at most half.
+  - *d109 (reported)*: -0.013, -0.070, **-0.101 [-0.121, -0.084]** (seeds -0.084 / -0.118). f57 (reported), which failed the guard on words alone, does not grow: -0.023, -0.029, -0.013 [-0.056, +0.022].
+  - *Levels at R3*: 5b 0.706, f5 0.714, f57 0.693, d114 0.635, d109 0.605; within-speaker SD 41 c for 5b and f57, 47 c for both reconstruction arms. The women / men ratio moves by under 0.02.
+  - *Decomposition at R3* (reported): the reconstruction arms' within-speaker variance is higher by a quarter to a half, nearly all of it the vowel part. d114: men d ln W +0.232 [+0.184, +0.282], d ln V +0.255; women d ln W +0.316 [+0.279, +0.348], d ln V +0.342. d109: men +0.196 / +0.239 with d ln B -0.262 [-0.344, -0.176]; women +0.390 / +0.374. On words alone the same terms were +0.05 to +0.06 for d114. f5's B and W both rise by 30 % in men and cancel; f57's women go the other way (d ln V -0.552).
+  - *PTDB-TUG sentences* (reported; 6 speakers per sex): **d114 shows no cost on running speech at any read**: -0.002 [-0.023, +0.012] alone, -0.000 [-0.019, +0.013] for pairs in one pass, with a within-speaker SD of 41 c against 5b's 43 c. d109 does: -0.034 [-0.088, +0.010] alone and -0.056 [-0.131, -0.007] in one pass (seeds -0.030 / -0.081). f5 +0.015 and +0.038 [-0.013, +0.073]. 5b's own seeds differ by -0.068 at R3 there, so only the paired differences are read.
+  - *Report note*: the first run printed NaN for seven of PTDB-TUG's between-speaker intervals (a bootstrap draw of one speaker six times has no between-speaker variance). `fmt` now leaves such draws out; the report was regenerated from the cached reads before anything was committed, and every other number is unchanged.
+  - *Reading*:
+    - The guard was not vetoing these arms over something a per-recording length does not carry. Reading a speaker's twelve words together helps 5b more than it helps a reconstruction arm: context pools the vowels, and the reconstruction arms leave more vowel-dependent length to pool. D-051's guard on words alone understated the cost.
+    - It is a cost on isolated vowels in citation words. The arm trained on sung vowels (d114) loses nothing on read sentences; the arm that also saw read speech (d109) loses on both. So the vowel-dependence follows the kind of material the loss was trained on closely enough to matter for the design: the loss on sustained vowels makes the trunk's length reading more vowel-coloured on sustained vowels.
+    - D-117's closing line stands with more weight: a reconstruction arm needs either a loss that leaves the length features alone or a term tying length across the vowels of one recording.
+  - *What follows, as registered*: the guard stands as read. For M4's own rule (the next design entry) the proposal is the opposite of what I expected to make: read the length guard in context as well, since that is where the cost is largest and the read nearest the use.
+
+## D-119 (registered 2026-11-16; seen beforehand: D-114's pre-check reports (the stretch scan, its strata by F1 band and by f0 band separately, the residual at H1-H3 by f0 band, D-109's residual by harmonic frequency), D-110's and D-114's shift tables; no table crossing F1 with F1 / f0, no decomposition of the residual, no simulated prediction): is the F1 shift the reconstruction loss prefers on real audio locked to the harmonics or to frequency?
+
+*Status*: registered (Hannah, 2026-11-16: "could you please proceed in that order?"; the second item of the same list). The design is mine. No training; the branch-point models on the existing recon stores (training-pool recordings, no evaluation set). Script `scripts/analysis/d119_harmonic_scan.py`, report `reports/analysis/d119/d119.txt`.
+
+*Question*: D-109's loss prefers a different F1 from the model's on real audio (D-114's pre-checks), and D-114 described the preference as a stretch about a fixed 500 Hz. Hannah's framing at D-114: "Whether the stretched F1 is right still has no reference." A tract resonance cannot know where the harmonics are. So if the preferred shift follows a misfit that is fixed in harmonic number (the source's shape: H1 under-rendered, H2 and H3 over-rendered at the best Rd, D-114 part 3), it is the source model's artefact and not a truer F1, and no reference is needed to say so. If it follows a misfit fixed in frequency (the recording chain, or the model's own formant and bandwidth errors), this check cannot tell an artefact from a correct pull.
+
+*Where the idea comes from, and what is post hoc*: my review (2026-11-16) read D-114's strata as fitting a harmonic-relative mechanism: Zeroth wants F1 lower below 450 Hz and higher above 600 Hz, VocalSet (63 % of frames at f0 >= 250 Hz) wants it lower in both bands, PTDB-TUG men shift up in every band and women change sign near 450 Hz, about twice their f0. That reading was made on those tables, so they are not evidence for it. What is new here: the cells crossing F1 with F1 / f0, the split of the residual into a harmonic-number part and a frequency part, and each part's predicted shift.
+
+*Can it hold* (traced before registering):
+- The loss sees the model's F1 only through the render at k f0 (`recon_loss_fb`), with one level per frame and one Rd per frame free. A residual fixed in harmonic number can be reduced by moving F1 only where F1 lies among the low harmonics, and in a direction that depends on which side of them it lies: the mechanism can reach the measure.
+- Harmonic number and frequency separate only because f0 varies: f = k f0. The stores span f0 below 150 Hz to above 250 Hz (D-114 part 3: 14 to 64 % of frames in each band), so the two parts are identifiable. Within one narrow f0 band they are not, and nothing is fitted per band.
+- The two parts might predict the same pattern across cells. That is one of the readings (*mixed*), not a failure of the check.
+
+*Data*: recon-store crops (`cache/recon/vocalset`, `cache/recon/zeroth`), 24 batches of 16 x 200 frames per corpus (seed 1119; new crops, twice D-114's count), the same crops for both models. Models: `d040_5b_s{1,2}/ckpt_016000.pt`, where D-109 and D-114 branched. Control: train_v2 validation crops with targets from their own audio at the label f0 (D-114's `synth_targets`), 12 batches. D-109's instrument throughout: the model's F1-F4 and B1-B4, the higher-pole correction, harmonics to 4000 Hz, Rd searched per frame, the level profiled per frame.
+
+*Measures*:
+1. *The residual's two parts* (descriptive). Each frame's residual at its best Rd (target - render - source, after the level; D-114 part 3's), fitted by least squares over all valid frame-harmonics as r = a(k) + b(f): a over harmonic number (1 to 12, and 13 and above pooled), b over frequency (250 Hz bins to 4000 Hz). Reported: the residual's variance and the shares a alone, b alone and both explain; both tables; the joint fit's share within each f0 band.
+2. *The preferred shift by cell*. The model's F1 scaled by c cents (-200 to +200 in 25 c steps), everything else fixed; the per-frame loss summed within cells of F1 band (below 450, 450-600, 600 Hz and above) by F1 / f0 (below 1.5, 1.5-2, 2-2.5, 2.5-3.5, 3.5 and above), cells with at least 300 frames; the minimising c (parabola through the lowest three grid points), 95 % bootstrap over crops (500).
+3. *Each part's predicted shift*, on the same frames. The frame's target is replaced by the loss's own render of the model's outputs at the frame's best Rd (zero misfit, so the minimum is at c = 0 by construction) plus one part of measure 1's fit at that frame's harmonics: a(k) alone (H), b(f) alone (F), or both (HF). The same scan and cells give each part's predicted shift.
+- *Code checks*, printed in the report: the fast per-frame loss used here against `recon_loss_fb` on the first batch; the zero-misfit target's minimum at 0; a target rendered with F1 moved by +50 c recovered at +50 c.
+
+*Readings* (per corpus, on the seed means; across cells weighted by frames, D = r(observed, H) - r(observed, F), its interval from the crop bootstrap):
+- *Unreadable* first, any of: a corpus has fewer than 6 cells; a code check fails; the synthetic control's largest |observed shift| over its cells is more than half the real corpora's median |observed shift| (the instrument's own pattern is then as large as what is read).
+- *Not in the mean residual*: r(observed, HF) below 0.5 in either corpus. The loss's preference then comes from frame-specific misfit that neither part carries, and neither mechanism is supported.
+- *Harmonic-locked*: D's interval above 0 in both corpora. The shift follows the source's shape in harmonic number: an artefact of the one-parameter source, whatever the true F1 is.
+- *Frequency-locked*: D's interval below 0 in both corpora.
+- *Mixed*: anything else (the corpora disagreeing included).
+
+*Prediction* (mine, written before any cell): harmonic-locked; and within an F1 band the observed shift is negative where F1 / f0 is below 2 and positive where it is 2.5 or more. The second part is reported as held or not per F1 band and corpus; it is not part of the rule.
+
+*Reported beside*: the observed shift by F1 / f0 alone and by F1 band alone; the slope of the observed shift on HF's across cells (1 means the mean residual accounts for the preference's size, and what is left is D-114's "not placed" remainder); each seed alone; the control's tables.
+
+*What follows* (nothing is adopted here; it sets the next reconstruction design, the fifth item of the same list):
+- *Harmonic-locked*: D-109's stretch is not evidence about F1. The loss needs a source term in harmonic number that F1 cannot absorb, tied across frames (the harmonic-sweep form, `considering.md` 2026-11-10), before connected speech returns to the store.
+- *Frequency-locked*: the term the loss lacks is in frequency (a curve per recording, as `crop_channel_out`, or the model's own B1), and whether the pull is right stays open: a reference is needed after all.
+- *Mixed* or *not in the mean residual*: both terms, or neither; the design entry says which it tries first and why.
+
+*Caveats*: the residual is measured after the model's F1 and the frame's Rd and level have been fitted, so a(k) and b(f) are what is left, not the generating misfit; the per-frame level is already out, so the additive fit is first-order; a frequency part can be the recording chain or a true formant error, which this cannot separate; one-parameter shifts of F1 only (B1 fixed), at the branch point, not a prediction of what training learns (D-114's caveat).
+
+*Cost*: about 30-45 minutes of GPU, short operations only.
+- *Amendment 1 (2026-11-16, before the full run; **results partly seen**)*: a code run of the script on two batches per corpus (`D119_SMOKE=1`, output local in `scratchpad/`; the same seed, so its crops are the full run's first two batches) printed its tables, and I read them. What they showed: the three code checks pass (fast loss within 1.3e-5 of `recon_loss_fb`; zero-misfit minimum -0.2 c; +50 c recovered at +49.9 c); observed shifts of 100 c and more, several cells at the grid's edge; D near 0 with wide intervals in both corpora (-0.06 and -0.04), which is *mixed*, against my prediction; and the control tripping the *unreadable* gate through one 43-frame cell at the grid edge.
+  - *Changed*: only the control and its gate. The control goes from 12 to 24 batches, the real corpora's count. The gate compares like with like: *unreadable* if the control's frame-weighted median |observed shift| over its cells is more than half the real corpora's (both corpora's cells pooled, frame-weighted). The registered form took the largest value over the control's cells, which grows with the number of small cells and their noise whatever the instrument does.
+  - *Not changed*: the grid (cells at its edge are flagged and read as they are), the cells, the 300-frame floor, D, the r(observed, HF) condition, the readings and the prediction.
+  - The change makes *unreadable* less likely and leaves the other readings as they were; on the smoke run's numbers that points to *mixed*, not to the reading I predicted.
+- *Result (2026-11-16, `reports/analysis/d119/d119.txt`)*: **mixed, by the registered rule; my prediction failed.** The three code checks pass. Readable: 15 cells on VocalSet and 13 on Zeroth; the control's frame-weighted median |shift| is 5 c against the real corpora's 60 c.
+  - *The rule*: the mean residual carries the pattern (r(observed, HF) +0.90 [+0.78, +0.94] on VocalSet, +0.96 [+0.95, +0.97] on Zeroth), but neither part predicts the cells better than the other: D = r_H - r_F is -0.14 [-0.36, +0.09] on VocalSet and -0.02 [-0.06, +0.01] on Zeroth, both seeds alike. Registered *mixed*.
+  - *Why D could not separate them*: a(k) alone and b(f) alone predict nearly the same pattern across these cells (on Zeroth r_H +0.92 and r_F +0.94). I registered D without checking that the two predictions differ over the cells; a run of the simulation on made-up parts would have shown it. The "can it hold" note named this outcome but did not test for it.
+  - *The residual's two parts* (measure 1): together they explain little of the residual's sum of squares, 4.7-4.9 % on VocalSet and 13.7-14.6 % on Zeroth (control 4.4-5.0 %). a(k): H1 +3.1 to +3.4 dB, H2 -1.6 on Zeroth (+0.4 / -0.5 on VocalSet), H3-H5 -0.5 to -1.2. b(f): -1.2 to -1.9 dB at 250-750 Hz and positive above 1.5 kHz (Zeroth +2.0 to +2.7 at 3.5-4 kHz). Control: H1 +0.6 / +0.7; the top bin +2.7 / +2.9.
+  - *Size*: the observed shifts are larger than the mean residual predicts: slope of observed on HF 1.52 [1.32, 1.67] on VocalSet, 1.23 [1.15, 1.29] on Zeroth.
+  - *Reported beside, and the clearest thing in the table*: **the preferred shift changes sign at F1 = 2 f0, in both corpora and in every F1 band that has cells on both sides.** By F1 / f0 alone: Zeroth -163, -200 | +104, +42, +31; VocalSet -111, -166 | +32, -51, +3 (below 1.5, 1.5-2 | 2-2.5, 2.5-3.5, 3.5 and above). Between the 1.5-2 and 2-2.5 cells of one F1 band the shift jumps by 150 to 300 c: VocalSet -200 -> -10, -175 -> +65, -115 -> +33; Zeroth -200 -> +101, -179 -> +95. By F1 band alone the corpora differ in sign above 450 Hz (VocalSet -34, -22; Zeroth +21, +65), which is D-114's stretch on Zeroth and its absence on VocalSet: the description in Hz changes with the corpus, the description in harmonics does not.
+  - *The prediction's second part* (negative below 2, positive at 2.5 and above) held in one of the four band-corpus pairs that could test it (Zeroth 450-600 Hz). VocalSet is negative again at 2.5-3.5 (-65, -39, -53) in all three bands, and Zeroth below 450 Hz is -43 at 3.5 and above.
+  - *Control*: mostly within +-25 c; the largest are +57 [+19, +104] (F1 at 600 Hz and above, F1 / f0 below 1.5) and -50 [-101, -18] (450-600 Hz, 1.5-2). The 450-600 band has the real corpora's order at a quarter of the size (-50 | +15).
+  - *Reading*: by the rule, *mixed*: the loss's preference is not shown to follow the source's shape in harmonic number rather than a shape in frequency, and D-109's stretch is not shown to be an artefact. Outside the rule, the cells say something narrower and firmer: on real audio the loss pushes F1 **away from the second harmonic** on both sides, whatever F1 is in Hz. Two explanations fit that, and nothing here separates them:
+    - (a) *the source's shape*: at its best Rd the LF source leaves H1 under-rendered and H2 to H5 over-rendered, and moving the F1 peak off H2 relieves it. An artefact.
+    - (b) *the model's own F1 sits too near H2 on real voices*, and the loss is correcting it. D-071 found sigma far too narrow where F1 lies on a harmonic (`f1_near_h2` s 1.67), and the control shows the same order at a quarter of the size, where the labels are exact. The loss working.
+    - The frame's residual is what is left after the model's F1 (the caveat), so (b) would leave the same a(k). A reference can separate them on exactly this pattern: PTDB-TUG's closed-phase F1 by F1 / f0, with 5b's error and the trained arms' shifts in the same cells (D-121).
+  - *For the reconstruction design*: both parts are needed (HF predicts better than either alone), the two together carry under 15 % of the residual's variance, and what the loss does with the rest is not placed. Which term comes first waits for D-121.
+
+## D-120 (registered 2026-11-16; descriptive, no decision rule; seen beforehand: D-071's stage A result, D-027's sigma correlations for teacher v3, the women's closed-phase bias of both v3.1 seeds; no coverage, scale factor or sigma ranking of v3.1 on any gold set): D-071's stage B, the formant sigma and voicing probability on the dev gold sets, and what a sigma gate would keep
+
+*Status*: registered (Hannah, 2026-11-16: "could you please proceed in that order?"; the fourth item of the list D-118 came from, with D-096). D-071 left stage B "registered in detail before it runs"; this is that registration. The design is mine. Roadmap item 10; M4's re-track rounds gate on sigma (D-027) and the plan's gated LP refinement reads "within the teacher's 1 sigma interval" (section 5.4). Script `scripts/analysis/d120_calibration_gold.py`, report `reports/analysis/d120/d120_stage_b.txt`. Dev tier only; nothing is fitted on a gold set and no variance scale is proposed here.
+
+*Why now*: stage A (D-071) found the formant sigma 15-40 % too wide in the core with heavier tails than a Gaussian, and far too narrow where F1 sits on a harmonic (`f1_near_h1` s 1.92). Those were exact labels. Whether sigma means anything on real voices, and whether it sorts frames by error well enough to gate on, is not recorded for v3.1: D-027's rank correlations (+0.31 to +0.36 on PTDB-TUG dev) were teacher v3's.
+
+*Models*: teacher v3.1 (`d040_5b_s2_b20k`); `d040_5b_s1_b20k` beside it. Windowed analysis.
+
+*Data* (dev speakers):
+- *Hillenbrand*: every dev file, men, women and children; the reference frames (steady state F1-F4; 20 / 50 / 80 % F1-F3); a formant the reference gives as 0 or missing is left out. f0 band from the labelled f0 (steady state; the file's value for its other frames).
+- *PTDB-TUG, formants*: the windowed closed-phase cache (`cache/m3w/ptdb_egg_sub.npz`, every third utterance, D-091's frames: closed-phase, whole-cycle and Praat F1 all finite), which already holds both seeds' F1-F3 and formant sigma per frame. No new inference. Error against the closed-phase reference.
+- *PTDB-TUG, voicing*: every third dev utterance per speaker in manifest order; `voiced_p` at every reference frame against the laryngograph track's voicing.
+
+*Measures*:
+1. *D-071's, unchanged* (its functions imported): per formant, z = the error in cents over `formant_sigma_cents`; the scale factor s (the 0.683 quantile of |z|), 1 and 2 sigma coverage, the RMS of z, the tails comparison. Voicing: expected calibration error (10 bins). Cells: set by sex (children as a third group on Hillenbrand) by f0 band (below 150, 150-300, 300-500, above 500 Hz), and all.
+   - *Changed for gold*: intervals from a bootstrap over **speakers** (1000), not clips, since a gold set's frames are correlated within a speaker; a cell needs at least 5 speakers and 200 frames. D-071's flag (s outside [0.87, 1.15], interval excluding 1) is printed but **not read as miscalibration**: on a gold set s includes the reference's own error.
+2. *The reference SD that would make coverage nominal* (D-071's stage B measure): the s_ref, in cents, solving coverage(|error| <= sqrt(sigma^2 + s_ref^2)) = 0.683 per cell; 0 where coverage is already at or above 0.683 with no reference error. Set beside the gaps between references on the same frames (whole-cycle minus closed-phase, Praat minus closed-phase: their spread in cents per cell, from the cache), which bound the closed-phase reference's own error from above.
+3. *Does sigma sort frames by error?* (what a gate needs; my addition). Per formant and sex: Spearman's rank correlation of sigma with |error| (speaker bootstrap); and the gate curve: frames kept in order of sigma at 25, 50, 75 and 100 %, with the median |error| in cents of the kept frames, and of the dropped ones at 75 %.
+4. *What a gate removes* (my addition; the plan's warning against keeping only the easy frames, section 5.4): at the 50 % and 75 % gates, the share kept within each f0 band and each sex.
+5. *F1 near a harmonic on real voices* (stage A's sharpest finding; my addition): F1's s, coverage and median |error| for frames whose reference F1 lies within 100 cents of f0 or 2 f0, against the rest, by sex.
+
+*Reading* (descriptive; these say how the result bears on M4, and decide nothing):
+- A sigma gate has something to stand on where measure 3's correlation interval is above 0 and the 50 % gate's kept frames have a median |error| at least a fifth below all frames'. Where it does not, D-027's fallback (the third observability definition) is the open question again.
+- If measure 4 shows a gate keeping under half the share of women's or high-f0 frames that it keeps of men's or low-f0 frames, the gate is a selection for easy frames, and re-track rounds would have to weight by sigma (the plan's "weight by posterior confidence; never hard-filter") and not cut on it.
+- Stage A's "too wide in the core" would show here as s below 1 with s_ref at 0. s above 1 can be the reference.
+
+*Not covered*: bandwidths and length have no gold reference here (length waits for the MRI speakers, roadmap item 6); the heat-map-quantile interval D-071 suggested for formants is its own entry; teacher v3 (roadmap item 10 named it) is not re-scored, v3.1 having superseded it.
+
+*Caveats*: six PTDB-TUG speakers per sex; the closed-phase reference fails above about 450 Hz (D-043) and is only defined where a closed phase exists, so its frames are already a selection; Hillenbrand's reference is LPC-based with hand correction and its group gradient is unexplained (D-093); the cache's sigma was computed in fp32 and `analyse()` on the GPU uses bf16 (`add_model.py`'s note: about 1.7 Hz on the median closed-phase F1 bias).
+
+*Cost*: Hillenbrand dev and a third of PTDB-TUG dev through two models, a few minutes of GPU; the rest CPU.
+- *Result (2026-11-16, `reports/analysis/d120/d120_stage_b.txt`; descriptive; v3.1 unless noted, seed 1 the same pattern throughout)*: **on real voices the formant sigma is not too wide; it ranks frames by error about as well as teacher v3's did; a cut on F1's sigma would be a selection against women and high f0.** Hillenbrand dev: 996 files, 3,984 reference frames, 83 speakers. PTDB-TUG dev: 7,743 closed-phase frames, 12 speakers; voicing on 947 utterances.
+  - *Coverage, men on PTDB-TUG*: nominal. s 1.03 [0.95, 1.10] / 1.02 / 1.01 for F1-F3, 1-sigma coverage 0.668 / 0.673 / 0.679, with a reference SD of 18 c or less needed. The 2-sigma coverage is short of what s implies (0.924 against 0.947 for F1; 0.876 against 0.949 for F2): the tails stage A found.
+  - *Coverage, women on PTDB-TUG*: s 1.34 [1.14, 1.63] / 1.33 / 1.23. The reference SD that would make F1 nominal is 80 c [47, 131], and the references on those frames disagree by more (whole-cycle LPC against closed phase 117 c, Praat 118 c, as 0.683 quantiles). So the reference's own error can account for all of it; this does not show sigma too narrow for women. F2 and F3 need 34 and 24 c against gaps of 58 and 41 c.
+  - *Coverage, Hillenbrand*: F1's s is 1.39 (men), 1.86 (women), 2.28 (children), needing a reference SD of 53, 123 and 142 c; F2 1.42-1.63 (32-37 c); F3 0.94-1.07 (nominal); F4 0.83-0.86 (the only place stage A's too-wide core shows on a gold set). The children's and women's F1 figures are D-093's group gradient seen through sigma.
+  - *Stage A's too-wide core does not carry to real voices*: on exact labels s was 0.70-0.85; here no F1-F3 cell with all f0 is below 0.94. A variance scale fitted on synthetic data (about 0.77 for the formants' core) would make real-voice intervals too narrow.
+  - *Does sigma sort frames by error?* On PTDB-TUG yes, for every formant and both sexes: rho +0.34 / +0.33 / +0.39 (men), +0.39 / +0.26 / +0.33 (women), intervals above 0.2; the half of frames with the lowest sigma has a median |error| 0.72-0.79 of all frames', and the quarter with the highest has 94 c (men's F1) and 164 c (women's F1) against 54 and 85. That matches D-027's +0.31 to +0.36 for teacher v3. On Hillenbrand it is weaker: F1 rho +0.23 / +0.18 / +0.11 (men, women, children) with the kept half at 0.83-0.85, under the reading's bar; F2 and F4 pass for adults.
+  - *What a gate removes*: at the 50 % gate on F1's sigma, PTDB-TUG keeps 61 % of men's frames and 39 % of women's; 63 % at f0 below 150 Hz, 41 % at 150-300 and 29 % at 300-500 Hz. Hillenbrand keeps 68 % of men's, 35 % of women's and 48 % of children's. The 300-500 Hz band is kept at under half the rate of the lowest band, which is the reading's line for a selection. F2's gate is milder (55 % / 45 %), F3's about even.
+  - *F1 near a harmonic*: stage A's sharpest finding is not there on real voices. PTDB-TUG women within 100 c of f0 or 2 f0: s 1.39, median |error| 89 c, against 1.34 and 84 c for the rest. On Hillenbrand such frames are better covered than the rest for women (s 1.34 against 2.01). This agrees with D-121: 5b's error has no feature at 2 f0.
+  - *Voicing*: expected calibration error 0.042 [0.03, 0.05] for men and 0.056 [0.04, 0.07] for women (D-071's bar 0.05), accuracy 0.945 and 0.931. Close to calibrated; women at the bar.
+  - *Reading*, by the registered lines:
+    - A sigma gate has something to stand on for running speech, all three formants and both sexes. On isolated vowels F1's sigma barely sorts the frames.
+    - Cutting on F1's sigma would thin exactly the frames the project most needs (women's, and f0 above 300 Hz). Re-track rounds should weight by sigma, as the plan says, and the plan's "within the teacher's 1 sigma interval" for LP refinement needs no rescaling for men; for women it cannot be checked beyond the references' own disagreement.
+    - Item 10 is not closed by this: the formants' tails remain, no variance scale is proposed (a synthetic-fitted one would be wrong in direction on real voices), and bandwidths and length have no gold reference yet.
+
+## D-121 (registered 2026-11-16; seen beforehand: D-119's result, D-110's and D-114's shift tables by closed-phase F1 band, the women's closed-phase bias of every arm; nothing on PTDB-TUG by F1 / f0, for any model or reference): around the second harmonic on PTDB-TUG, is v3.1's F1 pulled towards 2 f0, and do the reconstruction arms correct that or add a push of their own?
+
+*Status*: registered. D-119's follow-up, which its result names; not on Hannah's list of 2026-11-16, and added on my judgement because it is CPU-only on an existing cache and decides what D-119 could not. The design is mine. Dev speakers only; no inference. Script `scripts/analysis/d121_harmonic_ptdb.py`, report `reports/analysis/d121/d121.txt`.
+
+*Question*: D-119 found that the loss, at the branch point, prefers F1 further from 2 f0 on both sides (down by 100-200 c just below, up by 30-140 c just above). That is either (a) the source model's misfit, or (b) a correction of a model whose F1 sits too near H2 on real voices. PTDB-TUG's closed-phase F1 is measured inside the closed phase of each cycle and is the reference least tied to the harmonics. Against it, does 5b's F1 error change sign across F1 = 2 f0 in the direction of a pull towards H2? And the arms trained with the loss (D-109, D-114): do they move F1 away from H2 there, and does that lower or raise the error?
+
+*Can it be read* (checked before registering): the cache (`cache/m3w/ptdb_egg_sub.npz`) holds every model needed, both seeds each: 5b, d109, d114, D-090's f5 (the null arm), and the whole-cycle LPC and Praat F1 on the same frames. Women's f0 is near 200 Hz, so closed-phase F1 between 300 and 500 Hz lies on both sides of 2 f0; men's F1 is almost always above 2.5 f0, so the contrast is women's and men are reported only. Six women: the paired contrasts cancel the reference's level but not a dependence of the reference itself on the harmonics, which is why the two harmonic-following references are in the table.
+
+*Data*: PTDB-TUG dev, D-091's frames (closed-phase, whole-cycle and Praat F1 finite, f0 above 0) with every listed model finite. Cells by closed-phase F1 / f0 in D-119's bands (below 1.5, 1.5-2, 2-2.5, 2.5-3.5, 3.5 and above), by sex; a cell needs 200 frames and 4 speakers.
+
+*Measures* (cents; medians over frames; seed means; 2000-draw speaker bootstrap):
+- E: 5b's F1 minus the closed-phase F1.
+- S: an arm's F1 minus 5b's, for d109, d114 and the null f5; and the seed null (5b seed 1 minus seed 2).
+- dA: the paired change in |error| against the closed phase, arm minus 5b.
+- For the pattern's shape: whole-cycle LPC minus closed phase, and Praat minus closed phase (estimators known to follow harmonics at high f0).
+- The contrast K(X), women: X in the 1.5-2 cell minus X in the 2-2.5 cell. A pull towards H2 gives K(E) above 0 (read too high just below H2, too low just above). A push away from H2 gives K(S) below 0.
+
+*Readings* (women):
+- *Unreadable* first: either cell lacks 200 frames or 4 women; or the null arm's K(S) interval excludes 0 with a size above half of d109's.
+- *Not learned*: K(S) for d109 is not below 0 (its interval includes 0 or lies above). The branch-point preference is then not what training put into the model on these voices, and (a) against (b) is not read.
+- *Correction* (b): K(E) for 5b above 0 with its interval excluding 0, **and** d109's dA summed over the two cells below 0 with its interval excluding 0.
+- *Artefact* (a): K(E) for 5b not above 0 (interval including 0 or below), **and** d109's dA summed over the two cells above 0 with its interval excluding 0.
+- *Mixed*: anything else.
+
+*Prediction* (mine, before any cell; D-119 lowered my confidence): artefact, weakly. D-109 raised women's signed closed-phase bias from about +4 to +12-15 Hz and its gain in |error| was on one seed only, which fits a push the reference does not ask for.
+
+*Reported beside*: every cell for both sexes; d114 through the same readings (trained on VocalSet alone, where D-119's shifts were smaller above 2 f0); each seed alone; K for the two harmonic-following references.
+
+*What follows* (nothing is adopted): *correction* would mean the loss carries real F1 information exactly where the supervised model is weakest, and the design should keep that pull while removing the level and stretch effects; *artefact* would mean the source term has to be fixed before the loss sees speech again; either way the result sets which term the reconstruction design tries first.
+
+*Caveats*: six women; the closed-phase reference has its own error and is undefined where no closed phase exists, so breathy frames are missing; a model pulled towards H2 and a reference pushed away from it give the same K(E), and only the two other references' K bears on that; the cache's models were read in fp32.
+
+*Cost*: CPU, minutes.
+- *Result (2026-11-16, `reports/analysis/d121/d121.txt`)*: **mixed, by the registered rule; my prediction (artefact) is not supported either.** Women: 6 speakers, 3,867 frames, every cell with 300 frames or more; men have cells only at F1 / f0 of 2.5 and above.
+  - *The rule* (women, d109): K(E) +48 [+1, +100]; K(S) -24 [-35, -15], so the branch-point preference was learned (the null arm's K(S) is -0 [-1, +0]); the change in |error| summed over the two cells is -1 [-10, +7]. Neither *correction* nor *artefact*: registered *mixed*. d114 (reported) reads *correction* by the letter: K(S) -7 [-8, -3], |error| -5 [-10, -2].
+  - *A flaw in the measure, found after the result*: the cells are chosen on the reference's own F1, which inflates any gradient of an error against that reference across them (regression to the mean). Whole-cycle LPC and Praat show K of +98 and +80 in the same cells, more than 5b's. I named the reference's harmonic dependence as a caveat and missed this one.
+  - *Addendum (2026-11-16, after the result; not registered)*: the same table with cells by Praat's F1 / f0 and by 5b's own F1 / f0 (`D121_BIN`; `d121_bin_praat.txt`, `d121_bin_model.txt`). Cells on the model deflate a gradient where cells on the reference inflate it, so the three bracket it.
+    - K(E) for 5b: +48 [+1, +100] on the reference's cells, +22 [-3, +77] on Praat's, +6 [-7, +41] on the model's. **A pull of 5b's F1 towards 2 f0 is not shown.**
+    - What does survive all three: 5b reads **high where F1 is between 1.5 and 2 f0** (+74 / +65 / +53 c, every interval above 0; about 12-17 Hz at 400 Hz) and **low where F1 is 3.5 f0 or more** (-40 / -32 / -24 c, every interval below 0). 5b compresses women's F1 against the closed phase, with its zero near 3 f0, not at 2 f0.
+    - D-109's shift is the same under every binning, a monotone stretch crossing zero at 2 f0: -21 to -24 c below 1.5, about -11, about +12, +30, and +45 to +49 c at 3.5 and above. Men: +2 and +14 c (2.5-3.5; 3.5 and above).
+    - So D-109 moves F1 the way the closed phase asks at both ends, and the wrong way in between: it lifts the 2-3.5 range, most of the frames, where 5b was within its interval of the reference (+26 to +47 c and -2 to +11 c, intervals spanning 0), and that is the +8 to +10 Hz it added to women's signed bias. |error| falls at 1.5-2 (-5 [-11, +2], -9 [-16, -3], -8 [-10, -4] by binning) and does not move reliably elsewhere.
+    - d114's shift is the same shape at a quarter of the size (-12, -9, -2, +1, +8 c), and its |error| is lower in every cell, on both seeds and under every binning, by 1 to 8 c (1.5-2: -5 [-9, -1], -5 [-9, -2], -3 [-7, -2]); the null arm moves nothing (within 1 c). Men: -2 [-2, -1] at 2.5-3.5.
+  - *Reading*:
+    - D-119's (b), that the loss corrects a model stuck near H2, is not supported: 5b's error has no feature at 2 f0 once the binning stops favouring one. D-119's (a) stands for the *pivot*: the loss turns at the second harmonic, and the reference's zero is elsewhere.
+    - But the stretch is not only an artefact. Against the one reference that does not follow harmonics, 5b compresses women's F1, and the loss pushes against that compression at both ends. "Whether the stretched F1 is right" has a split answer on these six women: right in direction where F1 is far from 2 f0, wrong where the loss's own pivot puts most of the frames.
+    - On sung vowels alone (D-114) the loss gives a small error reduction against the closed phase that holds on both seeds, in every cell, with a null arm at zero. It is under D-086's 2 Hz bar and it is real at the paired level D-091 said these rules can resolve.
+  - *For the reconstruction design*: keep the loss's pull at the ends and remove its turn at 2 f0. That makes the harmonic-number term the first thing to add (a source shape F1 cannot absorb), ahead of the per-recording curve.
+  - *Caveats added*: six women and one reference; the binning brackets regression to the mean but does not remove it; the closed-phase reference's own behaviour near 2 f0 is unknown.
+
+## D-122 (2026-11-17, draft, not registered; a proposal for Hannah; written after D-109, D-114 and D-118 to D-121 were seen): the rule M4's training arms are judged by
+
+*Status*: **draft; nothing here applies until Hannah accepts or amends it.** The third item of the 2026-11-16 list. It cannot re-judge D-109 or D-114, which were seen before it was written; their verdicts under D-086's rule stand. It is for the next arm.
+
+*Why D-086's rule does not fit M4's arms*:
+- *Its gains were built for another question.* D-056 wrote them for read-out arms after D-054's "film" result ("The thresholds are mine; amendable before any result is seen"), and D-072, D-086, D-090, D-109 and D-114 carried them over unchanged.
+  - *Women's closed-phase |error| lower by 2 Hz*: D-085 put 2 Hz within one seed's spread (D-065's paired arms moved the bias by up to 1.9 Hz between seeds), and D-091 decided that no new arm takes this measure as its primary at bars under 10 Hz.
+  - *Synthetic F1-F4 MAE lower by 3 %*: 5b's own seeds differ by 3-5 % (D-085), and a loss on real audio has no reason to lower an error on synthetic clips.
+  - *Probe 11's F1 scale error halved*: no noise floor was ever recorded for it (`reports/probes/thresholds.json`, which D-050 named for the thresholds, does not exist).
+- *The plan asks for something else*: M4 is accepted when "each accepted round improves gold metrics beyond noise, and the ablations justify every retained loss" (plan section 12). Both reconstruction arms lowered Hillenbrand's paired F1 and F2 MAE on both seeds with intervals clear of 0 (D-109: F1 -2.0 [-2.5, -1.5] and -0.5 [-0.9, -0.2], F2 -1.8 and -2.3; D-114: F1 -1.5 [-2.0, -1.1] and -1.8 [-2.2, -1.4], F2 -1.9 and -2.0), where the null arm f5 gave -0.0 [-0.2, +0.2] and +0.3 [+0.0, +0.6]. D-086's rule has no line that reads this as a gain; it is only a non-inferiority margin there.
+- *One guard was dropped along the way*: D-040 and D-051 gated PTDB-TUG's f0 RPA at -1.0. From D-056 on, the rule's text and `decide_d109.py` (lines 52-68, `D.syn`) gate only the synthetic RPA at -0.1. Nothing has moved PTDB-TUG's RPA since (D-109: -0.0 [-0.1, +0.0] and +0.0), so no verdict changes; the guard is simply missing.
+- *The length guard reads the smaller of two costs*: on words alone the reconstruction arms lose 0.013-0.019; read in context they lose 0.071-0.101 (D-118).
+
+*Proposed rule* (each arm against its paired 5b branch; seed means, both seeds in the same direction, as now):
+1. *Non-inferiority*, D-040's margins unchanged: synthetic F1-F4 MAE no worse than +2 SE each; synthetic RPA not below -0.1; Hillenbrand paired F1 / F2 / F3 no worse than +4 / +9 / +20 Hz; women's closed-phase F1 |error| no worse than +5 Hz. **Restored**: PTDB-TUG RPA not below -1.0.
+2. *A gain on a gold set, beyond the null arm* (any one, on both seeds):
+   - Hillenbrand paired F1 MAE or F2 MAE lower, the paired speaker-bootstrap interval excluding 0 on each seed, for all speakers **and** for men alone (whose reference is not in dispute, D-093), and the seed-mean change at least three times the null arm's largest (f5: 0.3 Hz, so 1 Hz).
+   - PTDB-TUG's paired F1 |error| against the closed phase lower for women and for men, each speaker-bootstrap interval excluding 0 on each seed. A direction with an interval and no Hz bar, since a paired difference is what dev resolves (D-091) and the size has no reference.
+   - Not gains any more: synthetic MAE and probe 11's scale error (both reported).
+3. *Guards*:
+   - *Length*, read twice: D-051's guard on words alone, and the same bar (lower bound above -0.02) with the words read in context in one pass (D-118's R3). PTDB-TUG's sentences reported beside.
+   - *f0*: D-051's probe excess at or under 10 c/oct, unchanged.
+   - *Reported, not gated*: women's signed closed-phase F1 bias (D-091), and the shift by F1 / f0 against 5b's error in the same cells (D-121's table), which shows whether a gain comes with a push the reference does not ask for.
+4. *The ablation the plan requires*: an arm is a candidate only beside a null arm of the same branch design scored the same way. D-090's f5 serves until an M4 arm changes the branch recipe.
+
+*What I am not proposing*: any change to D-040's margins, to the seed rule, or to the tiers; any use of the semi-private tier (a candidate would earn that separately).
+
+*Open, for Hannah*:
+- Whether Hillenbrand's MAE may count as a gain at all for women and children while D-093's group gradient is unexplained. The draft requires men as well for that reason.
+- Whether the length guard in context should replace the one on words alone or stand beside it (the draft keeps both).
+- The order. D-091 put "close M3 (roadmap items 7 and 10, then the lockbox, once)" before M4; D-109 and D-114 ran first. Item 10's stage B is now done (D-120) and item 7's suite has no closing entry. Whether M3 closes before the next M4 arm is hers to say.
+
+## D-123 (2026-11-17, draft, not registered; design notes and one pre-check on made-up crops; nothing run on audio): the reconstruction loss after D-118 to D-121
+
+*Status*: **draft.** The fifth item of the 2026-11-16 list: promote `considering.md`'s harmonic-sweep idea (2026-11-10) from a reference to the loss's design. The pre-check below changed what I would propose, so this records the design question and the check that should decide it; it registers no arm.
+
+*What the loss has to do, from the four entries*:
+- *Keep*: its pull against 5b's compression of women's F1 at both ends (D-121), and the small gains on sung vowels (D-114: Hillenbrand F1 and F2, closed-phase |error| in every cell on both seeds).
+- *Remove*: its turn at the second harmonic (D-119: the preferred F1 jumps by 150-300 c across F1 = 2 f0 in every F1 band, which the closed-phase reference does not ask for, D-121).
+- *Stop costing*: the length head's consistency across vowels (D-118: -0.07 to -0.10 of reliability with the words read together).
+
+*Pre-check* (`scripts/analysis/d123_identifiability.py`, `reports/analysis/d123/identifiability.txt`; made-up crops, no data): one tract held still for 200 frames under an f0 contour, the target the loss's own render plus D-119's a(k) (+3.1, -1.6, -1.1, -0.5, -0.1 dB at k = 1 to 5), F1 scaled on every frame. D-109's loss against the same loss with **an offset per harmonic number held per crop** (k up to 8) profiled out with the level.
+- *D-109's loss reproduces the push below 2 f0 from a(k) alone*: -157 to -188 c where F1 is 1.4 f0, -50 to -86 c at 1.8 f0, and -137 to -146 c at 2.05 f0 on a steady note (-13 to -30 c there once f0 moves by a semitone or more), at f0 of 220 and 330 Hz. D-119 observed -160 to -200 c below 2 f0. Above 2.5 f0 it is within 21 c of the right answer, with 5 to 10 times the curvature.
+- *It does not reproduce the push up just above 2 f0* (D-119: +30 to +140 c): at F1 / f0 of 2.4 it gives +5 c. That part of the real pattern is not this a(k).
+- *The per-crop term works only where f0 moves by several semitones inside the crop*. With a glide of 8 semitones it brings the minimum to within 10 c of right and keeps 0.5 to 0.9 of the curvature in eight of the nine cases with F1 at 1.8 f0 or above (the exception, F1 300 Hz at f0 120 Hz: -32 c with 0.42). With a flat f0 or a vibrato of half a semitone it leaves 0.00 to 0.25 of the curvature in all but one case (F1 at 2.05 f0: 0.34 and 0.79): F1 and the source's shape cannot be told apart, which is the honest state of a steady note. A vibrato of a whole semitone rescues some cases and not others.
+- *It does not help where F1 is below 1.5 f0*: still -66 to -122 c, with a quarter of the curvature or less.
+- So the harmonic-sweep form is identifiable on running speech and on scales, and not on sustained vowels, which is the reverse of where D-114 retreated to.
+
+*Candidate terms* (none chosen):
+- **A, the source's shape per crop**: the offset per harmonic number above. Removes what it can where f0 moves; makes steady notes carry almost no F1 gradient. Tying it per recording (10 s) rather than per 2 s crop would widen the f0 range it sees.
+- **B, no F1 gradient where F1 is below about 2.5 f0**: the loss as it is, but frames with fewer than two harmonics below F1 train F2-F4 and the bandwidths only. On the made-up crops D-109's loss is within 21 c above 2.5 f0, and D-121's "right direction" end (3.5 f0 and above) is kept. It gives up the frames the model most needs help with, where the loss is at present misleading.
+- **C, the curve per recording in frequency** (`crop_channel_out`, already built): D-114's pre-checks took about 40 % of Zeroth's stretch off with it; D-119's b(f) part.
+- **For length**: a term outside the reconstruction loss, tying the length head's reading across the frames of one real recording (no label needed; the between-speaker scale stays with the synthetic supervision). D-117 named it. It would be its own entry, with D-118's read in context as its measure.
+
+*The check that should decide, before any training* (to register when Hannah agrees the direction):
+- *Instrument*: D-119's scan (the preferred F1 shift by cells of F1 band and F1 / f0, branch-point models), for D-109's loss and each candidate.
+- *On the stores*: the jump across 2 f0 must fall, in every F1 band of both corpora, to under a third of D-109's.
+- *On synthetic validation clips*: the preferred shift stays within the control's spread (D-119: frame-weighted median 5 c) and the loss keeps at least half its curvature in F1.
+- *On PTDB-TUG dev* (analysis only; harmonic targets at the laryngograph's f0): by D-121's cells, the preferred shift should have the sign of minus 5b's error where that error's interval excludes 0 (down at 1.5-2 f0, up at 3.5 f0 and above) and be near 0 where 5b is within its interval (2-3.5 f0). This is the first check that asks the loss, before it trains anything, whether it wants what the reference wants.
+- A candidate that passes earns one training arm on VocalSet and Zeroth under D-122's rule, if that is accepted.
+
+*What this draft does not settle*: why the real loss pushes F1 up just above 2 f0 (not the a(k) part, per the pre-check; b(f), the model's bandwidths and nasal frames are untested); whether B's lost frames matter more than A's lost notes; the weight (D-109's rule gave the loss a quarter of the formant term's encoder gradient, in a 4000-step branch).

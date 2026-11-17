@@ -1,0 +1,102 @@
+D-119: is the F1 shift D-109's reconstruction loss prefers on real audio locked to the harmonics or to frequency?
+branch-point models d040_5b_s{1,2}/ckpt_016000.pt; recon-store crops, 24 batches of 16 x 200 frames per corpus (seed 1119); control 24 batches
+shift: the model's F1 scaled by c cents, c on -200 .. +200 in 25 c steps; the minimising c by a parabola through the lowest three grid points
+
+code checks (first VocalSet batch, seed 1):
+  fast loss against recon_loss_fb, largest difference: 1.34e-05 -> ok
+  zero-misfit target: preferred shift (c), loss at 0: -0.2, 3.88e-13 -> ok
+  target rendered with F1 +50 c: recovered shift (c): +49.9 -> ok
+
+1. the residual at each frame's best Rd, fitted as a(k) + b(f) (dB; shares of the residual's sum of squares)
+  VocalSet, seed 1: 752208 frame-harmonics, residual variance 36.66 dB^2; explained by a alone 2.5%, b alone 3.0%, both 4.7%; the joint fit within f0 < 150 7.9% (n 115178), f0 150-250 6.2% (n 233097), f0 >= 250 2.5% (n 403933)
+    a(k), k = 1..12, 13+: +3.4 +0.4 -0.5 -0.9 -1.1 -0.5 -0.7 -0.7 -0.5 -0.1 +0.2 -0.0 +0.1
+    b(f), 250 Hz bins to 4000: -0.2 -1.2 -1.9 -0.7 -0.5 -0.4 +1.5 +1.5 +1.0 +0.7 +0.9 +0.7 +0.8 +0.5 -0.5 -1.6
+  VocalSet, seed 2: 752208 frame-harmonics, residual variance 35.68 dB^2; explained by a alone 3.6%, b alone 2.8%, both 4.9%; the joint fit within f0 < 150 3.7% (n 115178), f0 150-250 5.3% (n 233097), f0 >= 250 5.0% (n 403933)
+    a(k), k = 1..12, 13+: +3.1 -0.5 -1.1 -1.1 -1.0 -0.3 -0.1 +0.1 +0.2 +0.4 +0.5 +0.4 -0.2
+    b(f), 250 Hz bins to 4000: +0.1 -0.2 -1.5 -0.1 -0.4 -0.8 +1.1 +0.9 +0.3 +0.3 +0.3 +0.6 +0.8 +0.5 -0.6 -1.1
+  Zeroth-Korean, seed 1: 264615 frame-harmonics, residual variance 23.59 dB^2; explained by a alone 10.9%, b alone 10.1%, both 13.7%; the joint fit within f0 < 150 14.9% (n 64206), f0 150-250 15.0% (n 127410), f0 >= 250 10.0% (n 72999)
+    a(k), k = 1..12, 13+: +3.1 -1.6 -1.1 -0.5 -0.1 -0.1 -0.1 -0.2 -0.1 -0.1 -0.1 -0.0 +0.2
+    b(f), 250 Hz bins to 4000: -0.3 -1.7 -1.5 +1.1 +0.2 -0.6 +0.4 +0.8 +0.7 +0.6 +1.0 +0.1 +0.5 +1.7 +2.2 +2.5
+  Zeroth-Korean, seed 2: 264615 frame-harmonics, residual variance 23.80 dB^2; explained by a alone 11.9%, b alone 10.9%, both 14.6%; the joint fit within f0 < 150 15.7% (n 64206), f0 150-250 15.3% (n 127410), f0 >= 250 12.2% (n 72999)
+    a(k), k = 1..12, 13+: +3.2 -1.6 -1.2 -0.8 -0.4 -0.1 -0.1 -0.2 -0.0 +0.0 +0.0 +0.2 +0.2
+    b(f), 250 Hz bins to 4000: -0.3 -1.6 -1.7 +1.1 +0.3 -0.7 +0.3 +0.6 +0.4 +0.8 +1.1 +0.6 +0.8 +1.4 +2.0 +2.7
+  train_v2 validation (synthetic control), seed 1: 248306 frame-harmonics, residual variance 11.98 dB^2; explained by a alone 2.4%, b alone 2.7%, both 4.4%; the joint fit within f0 < 150 7.1% (n 128051), f0 150-250 2.7% (n 42499), f0 >= 250 -4.0% (n 77756)
+    a(k), k = 1..12, 13+: +0.6 -0.2 -0.1 -0.1 -0.1 -0.5 -0.5 -0.6 -0.4 -0.4 -0.3 -0.1 +0.8
+    b(f), 250 Hz bins to 4000: -0.7 -0.1 -0.1 +0.1 -0.2 -0.1 -0.1 +0.1 +0.0 +0.2 +0.3 +0.8 +1.0 +1.3 +1.7 +2.7
+  train_v2 validation (synthetic control), seed 2: 248306 frame-harmonics, residual variance 12.26 dB^2; explained by a alone 2.8%, b alone 3.2%, both 5.0%; the joint fit within f0 < 150 7.8% (n 128051), f0 150-250 2.9% (n 42499), f0 >= 250 -3.1% (n 77756)
+    a(k), k = 1..12, 13+: +0.7 -0.4 -0.1 -0.1 -0.2 -0.6 -0.6 -0.5 -0.4 -0.3 -0.2 -0.0 +0.8
+    b(f), 250 Hz bins to 4000: -0.7 -0.2 -0.1 +0.0 -0.2 -0.2 -0.1 +0.1 -0.0 +0.4 +0.5 +1.1 +1.2 +1.4 +1.7 +2.9
+
+2 and 3. the preferred F1 shift by cell (cents; cells with at least 300 frames in both seeds; seed means; 95 % crop bootstrap, 500)
+  VocalSet
+    cell                          frames                observed          seeds    H (a alone)  F (b alone)   HF (both)
+    F1 < 450, F1/f0 < 1.5           8314    -200 [ -200,  -200]   -200 /  -200         -109          -33        -145 (edge)
+    F1 < 450, F1/f0 1.5-2           4436    -200 [ -200,  -171]   -200 /  -200          -75          -37        -114 (edge)
+    F1 < 450, F1/f0 2-2.5           4721     -10 [ -114,   +19]    -35 /   +15          -33          -10         -47
+    F1 < 450, F1/f0 2.5-3.5         2499     -65 [  -92,   -38]    -62 /   -67          -25          -15         -40
+    F1 < 450, F1/f0 >= 3.5           596      +3 [  -30,   +33]     +2 /    +3           -3           -8         -11
+    F1 450-600, F1/f0 < 1.5        10998     -60 [ -110,    -1]    -26 /   -93          -84          +12         -81
+    F1 450-600, F1/f0 1.5-2         3145    -175 [ -200,  -119]   -150 /  -200          -63          -43        -113
+    F1 450-600, F1/f0 2-2.5         3008     +65 [  +44,   +88]    +50 /   +80          -14          +14          -7
+    F1 450-600, F1/f0 2.5-3.5       3677     -39 [  -70,   -12]    -40 /   -38          -15          -13         -31
+    F1 450-600, F1/f0 >= 3.5        1971      +1 [  -27,   +34]    -18 /   +20           -1          -10         -12
+    F1 >= 600, F1/f0 < 1.5          8350      -7 [  -48,   +38]    -14 /    +1          -70          +33         -36
+    F1 >= 600, F1/f0 1.5-2          4416    -115 [ -150,   -77]   -114 /  -115          -45          -16         -58
+    F1 >= 600, F1/f0 2-2.5          4317     +33 [  +13,   +54]    +27 /   +40          -13          +27         +10
+    F1 >= 600, F1/f0 2.5-3.5        3932     -53 [  -75,   -27]    -30 /   -75          -18           +6         -14
+    F1 >= 600, F1/f0 >= 3.5         3569      +4 [  -19,   +31]     +2 /    +6           +5           +8         +12
+    across cells (weighted by frames): r(observed, H) +0.68 [+0.51, +0.80]; r(observed, F) +0.82 [+0.70, +0.89]; r(observed, HF) +0.90 [+0.78, +0.94]; D = r_H - r_F -0.14 [-0.36, +0.09]; slope of observed on HF +1.52 [+1.32, +1.67]
+      seed 1 alone: r_H +0.62, r_F +0.80, r_HF +0.92, D -0.19, slope +1.67
+      seed 2 alone: r_H +0.71, r_F +0.80, r_HF +0.86, D -0.09, slope +1.35
+      prediction, F1 < 450: F1/f0 < 2 -200 -200; >= 2.5 -65 +3 -> not held
+      prediction, F1 450-600: F1/f0 < 2 -60 -175; >= 2.5 -39 +1 -> not held
+      prediction, F1 >= 600: F1/f0 < 2 -7 -115; >= 2.5 -53 +4 -> not held
+    observed by F1/f0 alone: < 1.5 -111; 1.5-2 -166; 2-2.5 +32; 2.5-3.5 -51; >= 3.5 +3
+    observed by F1 band alone: F1 < 450 -168; F1 450-600 -34; F1 >= 600 -22
+
+  Zeroth-Korean
+    cell                          frames                observed          seeds    H (a alone)  F (b alone)   HF (both)
+    F1 < 450, F1/f0 < 1.5           1222    -167 [ -194,  -122]   -134 /  -200         -169          -25        -191
+    F1 < 450, F1/f0 1.5-2           2800    -200 [ -200,  -200]   -200 /  -200         -126          -57        -188 (edge)
+    F1 < 450, F1/f0 2-2.5           2121    +101 [  +85,  +117]   +103 /   +98          +26          +16         +41
+    F1 < 450, F1/f0 2.5-3.5         2678     +20 [  -12,   +57]    +42 /    -3          +18           -3         +15
+    F1 < 450, F1/f0 >= 3.5          1207     -43 [  -58,   -21]    -22 /   -64          +21           -2         +19
+    F1 450-600, F1/f0 < 1.5          379    -137 [ -189,   -80]   -119 /  -154         -163           -8        -169
+    F1 450-600, F1/f0 1.5-2         3120    -179 [ -193,  -156]   -168 /  -191         -100          -30        -132
+    F1 450-600, F1/f0 2-2.5         4654     +95 [  +88,  +103]    +92 /   +98          +26          +23         +44
+    F1 450-600, F1/f0 2.5-3.5       3537      +6 [   -6,   +19]    +17 /    -4           +3           +0          +3
+    F1 450-600, F1/f0 >= 3.5        2799     +52 [  +36,   +71]    +54 /   +51          +16           +9         +26
+    F1 >= 600, F1/f0 2-2.5          1401    +138 [ +121,  +150]   +135 /  +140          +21          +42         +57
+    F1 >= 600, F1/f0 2.5-3.5        3980     +73 [  +62,   +84]    +74 /   +71           +8          +26         +34
+    F1 >= 600, F1/f0 >= 3.5         2740     +30 [  +23,   +39]    +35 /   +26          +11          +23         +35
+    across cells (weighted by frames): r(observed, H) +0.92 [+0.90, +0.94]; r(observed, F) +0.94 [+0.92, +0.96]; r(observed, HF) +0.96 [+0.95, +0.97]; D = r_H - r_F -0.02 [-0.06, +0.01]; slope of observed on HF +1.23 [+1.15, +1.29]
+      seed 1 alone: r_H +0.93, r_F +0.94, r_HF +0.97, D -0.01, slope +1.18
+      seed 2 alone: r_H +0.91, r_F +0.94, r_HF +0.95, D -0.03, slope +1.29
+      prediction, F1 < 450: F1/f0 < 2 -167 -200; >= 2.5 +20 -43 -> not held
+      prediction, F1 450-600: F1/f0 < 2 -137 -179; >= 2.5 +6 +52 -> held
+      prediction, F1 >= 600: F1/f0 < 2 -; >= 2.5 +73 +30 -> n/a (one side has no cell)
+    observed by F1/f0 alone: < 1.5 -163; 1.5-2 -200; 2-2.5 +104; 2.5-3.5 +42; >= 3.5 +31
+    observed by F1 band alone: F1 < 450 -120; F1 450-600 +21; F1 >= 600 +65
+
+  train_v2 validation (synthetic control)
+    cell                          frames                observed          seeds
+    F1 < 450, F1/f0 < 1.5           1665     +44 [  -37,  +120]    +21 /   +68
+    F1 < 450, F1/f0 1.5-2            735     -24 [  -80,   +29]    -18 /   -30
+    F1 < 450, F1/f0 2-2.5            399     +44 [  +11,   +92]    +26 /   +62
+    F1 < 450, F1/f0 2.5-3.5          828     +23 [   +6,   +41]    +22 /   +24
+    F1 < 450, F1/f0 >= 3.5          2415      +3 [  -10,   +18]     -4 /   +10
+    F1 450-600, F1/f0 < 1.5         1727     -39 [  -98,   +18]    -39 /   -40
+    F1 450-600, F1/f0 1.5-2         1384     -50 [ -101,   -18]    -38 /   -62
+    F1 450-600, F1/f0 2-2.5          876     +15 [   +1,   +28]     +5 /   +24
+    F1 450-600, F1/f0 2.5-3.5        912     +12 [   -0,   +23]     +8 /   +16
+    F1 450-600, F1/f0 >= 3.5        4448      +4 [   -8,   +21]     -1 /    +9
+    F1 >= 600, F1/f0 < 1.5          2166     +57 [  +19,  +104]    +50 /   +63
+    F1 >= 600, F1/f0 1.5-2          2386      +3 [  -21,   +24]    +28 /   -21
+    F1 >= 600, F1/f0 2-2.5          1948      +3 [   -9,   +14]     -3 /    +9
+    F1 >= 600, F1/f0 2.5-3.5        2800      +3 [   -5,   +12]     +4 /    +3
+    F1 >= 600, F1/f0 >= 3.5         7721      +5 [   -1,   +13]     +5 /    +6
+    observed by F1/f0 alone: < 1.5 +31; 1.5-2 -10; 2-2.5 +8; 2.5-3.5 +6; >= 3.5 +5
+    observed by F1 band alone: F1 < 450 +9; F1 450-600 +0; F1 >= 600 +6
+
+READING (registered, amendment 1's gate): cells per corpus VocalSet 15, Zeroth-Korean 13; control's frame-weighted median |observed shift| 5 c (15 cells) against the real corpora's 60 c; VocalSet: r(observed, HF) +0.90, D -0.14 [-0.36, +0.09]; Zeroth-Korean: r(observed, HF) +0.96, D -0.02 [-0.06, +0.01]
+  -> MIXED

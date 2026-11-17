@@ -1,0 +1,57 @@
+ADDENDUM, cells by model F1 / f0 (after the result; not registered). D-121: v3.1's F1 against the closed-phase F1 around the harmonics, and the reconstruction arms' shifts there (PTDB-TUG dev)
+cells: 5b (seed mean) F1 / f0; errors always against the closed-phase F1; cents; medians over frames; seed means; [95 % speaker bootstrap, 2000]
+K(X) = X in the 1.5-2 cell minus X in the 2-2.5 cell: above 0 for a pull towards 2 f0 (E), below 0 for a push away from it (S)
+
+== women: 6 speakers, 3867 frames; median f0 220 Hz, closed-phase F1 566 Hz
+                                                 < 1.5 (n 252, 6 spk) |     1.5-2 (n 845, 6 spk) |     2-2.5 (n 842, 6 spk) |  2.5-3.5 (n 1140, 6 spk) |    >= 3.5 (n 788, 6 spk) |   K (1.5-2 minus 2-2.5)
+  E: 5b - closed phase                             +16 [  -44,   +68] |       +53 [  +29,   +90] |       +47 [   -4,   +70] |        +9 [  -29,   +29] |       -24 [  -41,   -10] |     +6 [   -7,   +41]
+  seed null: 5b s1 - s2                            +15 [   +7,   +35] |        +1 [   -1,    +4] |        +2 [   -1,    +6] |        +0 [   -4,    +3] |        +0 [   -5,    +4] |     -1 [   -7,    +4]
+  ref: whole-cycle LPC - closed phase              -19 [  -36,   +19] |       +67 [  +11,  +117] |       -16 [  -31,    -3] |        -5 [  -25,    +8] |       -30 [  -54,   -14] |    +84 [  +33,  +130]
+  ref: Praat - closed phase                        -14 [  -31,   +58] |       +69 [  +11,  +110] |        +4 [  -27,   +26] |       +20 [   -0,   +37] |       +11 [   -6,   +24] |    +65 [  +14,  +100]
+  S: d109 - 5b                                     -21 [  -35,   -20] |       -10 [  -20,    +5] |       +11 [   -3,   +30] |       +30 [  +19,   +40] |       +45 [  +36,   +51] |    -20 [  -31,    -9]
+  dA: d109, change in |error|                       -4 [  -12,    +8] |        -8 [  -10,    -4] |        -2 [   -8,    +1] |        +3 [   -5,    +9] |        -1 [  -15,    +5] |     -5 [   -8,    -1]
+    S: d109 - 5b, seed 1                           -22 [  -33,   -20] |       -13 [  -20,    -1] |        +5 [   -4,   +24] |       +23 [  +17,   +38] |       +39 [  +33,   +43] |    -18 [  -31,    -6]
+    dA: d109, seed 1                                -5 [  -14,   +11] |        -6 [  -12,    -3] |        -3 [   -6,    -2] |        +1 [   -8,    +4] |        -3 [  -18,    +6] |     -3 [   -8,    +1]
+    S: d109 - 5b, seed 2                           -19 [  -37,   -17] |        -3 [  -18,   +14] |       +17 [   -1,   +35] |       +34 [  +20,   +42] |       +44 [  +40,   +55] |    -20 [  -36,    -6]
+    dA: d109, seed 2                                -0 [  -18,    +2] |        -3 [   -7,    -1] |        -1 [   -5,    +2] |        +3 [   -3,   +14] |        +2 [   -8,    +6] |     -2 [   -4,    +1]
+  S: d114 - 5b                                     -12 [  -17,   -10] |        -9 [  -12,    -3] |        -3 [   -9,    -0] |        +1 [   +0,    +3] |        +8 [   +6,    +9] |     -6 [   -7,    -1]
+  dA: d114, change in |error|                       -1 [   -3,    +0] |        -3 [   -7,    -2] |        -3 [   -7,    -2] |        -1 [   -1,    -0] |        -2 [   -3,    -0] |     +0 [   -4,    +3]
+    S: d114 - 5b, seed 1                           -18 [  -19,   -10] |        -9 [  -18,    -4] |        -3 [   -6,    -1] |        -0 [   -1,    +1] |        +4 [   +2,    +7] |     -6 [  -13,    -2]
+    dA: d114, seed 1                                -1 [   -2,    +0] |        -3 [   -4,    -1] |        -3 [   -3,    -1] |        -1 [   -1,    -1] |        -1 [   -1,    +0] |     +0 [   -2,    +1]
+    S: d114 - 5b, seed 2                           -16 [  -18,    +1] |        -2 [   -5,    -0] |        -1 [   -3,    +0] |        +1 [   +1,    +2] |        +7 [   +4,   +14] |     -1 [   -3,    +0]
+    dA: d114, seed 2                                -0 [   -1,    +1] |        -2 [   -2,    -1] |        -1 [   -2,    -0] |        -0 [   -1,    +0] |        -1 [   -3,    -1] |     -0 [   -1,    +0]
+  S: f5 (null arm) - 5b                             -1 [   -5,    -1] |        -1 [   -1,    -1] |        -1 [   -2,    +0] |        -0 [   -0,    +0] |        +1 [   +0,    +1] |     -0 [   -1,    +0]
+  dA: f5 (null arm), change in |error|              +1 [   +0,    +1] |        -1 [   -1,    -0] |        -1 [   -1,    -0] |        -0 [   -0,    +0] |        +0 [   -0,    +0] |     +0 [   -0,    +1]
+    S: f5 (null arm) - 5b, seed 1                   -1 [   -2,    -0] |        -1 [   -1,    -1] |        -1 [   -1,    -0] |        +0 [   -0,    +0] |        +1 [   +0,    +1] |     +0 [   -1,    +1]
+    dA: f5 (null arm), seed 1                       +1 [   +0,    +1] |        -0 [   -1,    -0] |        -1 [   -1,    -0] |        +0 [   -0,    +0] |        -0 [   -0,    +0] |     +0 [   -0,    +1]
+    S: f5 (null arm) - 5b, seed 2                   -1 [   -2,    -1] |        -1 [   -2,    -0] |        -1 [   -1,    +0] |        -0 [   -1,    +0] |        +0 [   -0,    +1] |     -0 [   -1,    -0]
+    dA: f5 (null arm), seed 2                       -0 [   -1,    +0] |        -0 [   -1,    +0] |        -0 [   -1,    -0] |        -0 [   -1,    +0] |        +0 [   -0,    +0] |     +0 [   -0,    +1]
+
+the registered rule on cells by model F1 / f0 (addendum, not the registered reading; women), d109 (decides): K(E) +6 [-7, +41]; K(S) -20 [-31, -9]; null arm's K(S) -0 [-1, +0]; dA summed over the two cells -10 [-18, -3] -> MIXED
+the registered rule on cells by model F1 / f0 (addendum, not the registered reading; women), d114 (reported): K(E) +6 [-7, +41]; K(S) -6 [-7, -1]; null arm's K(S) -0 [-1, +0]; dA summed over the two cells -6 [-13, -4] -> MIXED
+
+== men: 6 speakers, 3876 frames; median f0 112 Hz, closed-phase F1 454 Hz
+                                               2.5-3.5 (n 911, 6 spk) |   >= 3.5 (n 2731, 6 spk)
+  E: 5b - closed phase                             +37 [  +22,   +51] |       +16 [   -2,   +28]
+  seed null: 5b s1 - s2                             -5 [  -19,    -2] |        -2 [   -6,    -0]
+  ref: whole-cycle LPC - closed phase              +22 [  +17,   +30] |       +23 [  +16,   +32]
+  ref: Praat - closed phase                        +10 [   -4,   +22] |       +15 [   +4,   +22]
+  S: d109 - 5b                                      +2 [   +0,    +7] |       +13 [  +11,   +16]
+  dA: d109, change in |error|                       -0 [   -1,    +0] |        +2 [   -1,    +5]
+    S: d109 - 5b, seed 1                            +2 [   -0,    +6] |       +15 [  +12,   +16]
+    dA: d109, seed 1                                -1 [   -2,    +0] |        +1 [   -1,    +3]
+    S: d109 - 5b, seed 2                            +1 [   +0,    +2] |       +16 [  +11,   +19]
+    dA: d109, seed 2                                -0 [   -0,    +0] |        +1 [   -1,    +4]
+  S: d114 - 5b                                      -3 [   -5,    -2] |        +1 [   +0,    +1]
+  dA: d114, change in |error|                       -2 [   -2,    -1] |        -0 [   -0,    +0]
+    S: d114 - 5b, seed 1                            -3 [   -4,    -2] |        +1 [   +0,    +1]
+    dA: d114, seed 1                                -2 [   -2,    -1] |        -0 [   -0,    +0]
+    S: d114 - 5b, seed 2                            -1 [   -1,    -0] |        +0 [   -0,    +1]
+    dA: d114, seed 2                                -1 [   -2,    +0] |        -0 [   -1,    +0]
+  S: f5 (null arm) - 5b                             -1 [   -1,    +0] |        +0 [   -0,    +0]
+  dA: f5 (null arm), change in |error|              +0 [   +0,    +0] |        +0 [   -0,    +0]
+    S: f5 (null arm) - 5b, seed 1                   -1 [   -2,    -0] |        -0 [   -0,    +0]
+    dA: f5 (null arm), seed 1                       +0 [   -0,    +0] |        -0 [   -0,    +0]
+    S: f5 (null arm) - 5b, seed 2                   -0 [   -1,    +1] |        +0 [   -0,    +1]
+    dA: f5 (null arm), seed 2                       +0 [   -0,    +0] |        +0 [   +0,    +0]
+

@@ -1,0 +1,248 @@
+D-120 (D-071 stage B): teacher v3.1's formant sigma and voicing probability on the dev gold sets; descriptive
+z = error in cents / formant_sigma_cents; s = the 0.683 quantile of |z| (1 = nominal; > 1 sigma too narrow, or the reference's own error); intervals: speaker bootstrap
+on a gold set s and the flag include the reference's error: they are not read as miscalibration
+
+=================== d040_5b_s2_b20k (v3.1; decides) ===================
+== Hillenbrand dev: 3984 frames, 83 speakers
+  (1, 2) cells: n frames / speakers; s [95 %]; 1-sigma and 2-sigma coverage (2-sigma implied by s); RMS z; s_ref = the reference SD making coverage nominal, cents [95 %]; flags as D-071 prints them
+    men      f0 all      F1: n  1296 / 27; s 1.39 [1.30, 1.48]; coverage 0.519 / 0.843 (0.850); RMS z 1.49; s_ref 53 c [44, 60]; median sigma 55 c, median |error| 55 c FLAG
+    men      f0 all      F2: n  1291 / 27; s 1.63 [1.50, 1.82]; coverage 0.497 / 0.756 (0.779); RMS z 2.18; s_ref 37 c [28, 45]; median sigma 29 c, median |error| 29 c FLAG tails
+    men      f0 all      F3: n  1261 / 27; s 0.94 [0.83, 1.09]; coverage 0.697 / 0.896 (0.967); RMS z 1.56; s_ref 0 c [0, 11]; median sigma 26 c, median |error| 15 c tails
+    men      f0 all      F4: n   260 / 27; s 0.83 [0.70, 0.93]; coverage 0.758 / 0.946 (0.983); RMS z 1.14; s_ref 0 c [0, 0]; median sigma 44 c, median |error| 21 c FLAG tails
+    men      f0 <150     F1: n   984 / 24; s 1.39 [1.29, 1.49]; coverage 0.529 / 0.857 (0.848); RMS z 1.42; s_ref 48 c [40, 55]; median sigma 52 c, median |error| 51 c FLAG
+    men      f0 <150     F2: n   980 / 24; s 1.65 [1.47, 1.85]; coverage 0.501 / 0.757 (0.776); RMS z 2.10; s_ref 36 c [25, 46]; median sigma 28 c, median |error| 28 c FLAG
+    men      f0 <150     F3: n   954 / 24; s 0.96 [0.81, 1.17]; coverage 0.689 / 0.890 (0.962); RMS z 1.48; s_ref 0 c [0, 13]; median sigma 26 c, median |error| 15 c tails
+    men      f0 <150     F4: n   204 / 24; s 0.88 [0.71, 0.97]; coverage 0.755 / 0.951 (0.977); RMS z 1.21; s_ref 0 c [0, 0]; median sigma 44 c, median |error| 21 c tails
+    men      f0 150-300  F1: n   312 / 13; s 1.38 [1.21, 1.71]; coverage 0.487 / 0.798 (0.852); RMS z 1.69; s_ref 70 c [53, 85]; median sigma 63 c, median |error| 67 c FLAG tails
+    men      f0 150-300  F2: n   311 / 13; s 1.61 [1.37, 2.05]; coverage 0.482 / 0.752 (0.787); RMS z 2.41; s_ref 38 c [26, 57]; median sigma 34 c, median |error| 35 c FLAG
+    men      f0 150-300  F3: n   307 / 13; s 0.88 [0.74, 1.06]; coverage 0.723 / 0.915 (0.977); RMS z 1.78; s_ref 0 c [0, 12]; median sigma 27 c, median |error| 14 c tails
+    women    f0 all      F1: n  1392 / 29; s 1.86 [1.63, 2.06]; coverage 0.421 / 0.717 (0.717); RMS z 2.01; s_ref 123 c [105, 146]; median sigma 79 c, median |error| 102 c FLAG
+    women    f0 all      F2: n  1383 / 29; s 1.42 [1.32, 1.50]; coverage 0.560 / 0.808 (0.842); RMS z 1.96; s_ref 32 c [28, 37]; median sigma 35 c, median |error| 31 c FLAG tails
+    women    f0 all      F3: n  1333 / 29; s 1.01 [0.92, 1.09]; coverage 0.677 / 0.919 (0.951); RMS z 1.28; s_ref 4 c [0, 12]; median sigma 28 c, median |error| 19 c tails
+    women    f0 all      F4: n   303 / 29; s 0.86 [0.76, 0.98]; coverage 0.746 / 0.917 (0.980); RMS z 1.45; s_ref 0 c [0, 0]; median sigma 35 c, median |error| 20 c FLAG tails
+    women    f0 150-300  F1: n  1384 / 29; s 1.87 [1.63, 2.06]; coverage 0.419 / 0.717 (0.716); RMS z 2.01; s_ref 123 c [107, 150]; median sigma 79 c, median |error| 102 c FLAG
+    women    f0 150-300  F2: n  1376 / 29; s 1.42 [1.32, 1.51]; coverage 0.559 / 0.807 (0.842); RMS z 1.96; s_ref 32 c [28, 37]; median sigma 35 c, median |error| 31 c FLAG tails
+    women    f0 150-300  F3: n  1325 / 29; s 1.01 [0.93, 1.09]; coverage 0.678 / 0.919 (0.951); RMS z 1.28; s_ref 4 c [0, 12]; median sigma 28 c, median |error| 19 c tails
+    women    f0 150-300  F4: n   302 / 29; s 0.87 [0.76, 0.97]; coverage 0.745 / 0.917 (0.979); RMS z 1.45; s_ref 0 c [0, 0]; median sigma 35 c, median |error| 19 c FLAG tails
+    children f0 all      F1: n  1296 / 27; s 2.28 [2.13, 2.55]; coverage 0.383 / 0.623 (0.619); RMS z 2.96; s_ref 142 c [126, 160]; median sigma 69 c, median |error| 110 c FLAG
+    children f0 all      F2: n  1281 / 27; s 1.52 [1.39, 1.70]; coverage 0.530 / 0.785 (0.812); RMS z 2.21; s_ref 32 c [28, 40]; median sigma 31 c, median |error| 29 c FLAG tails
+    children f0 all      F3: n  1243 / 27; s 1.07 [0.97, 1.19]; coverage 0.652 / 0.903 (0.939); RMS z 2.86; s_ref 10 c [0, 15]; median sigma 30 c, median |error| 21 c tails
+    children f0 all      F4: n   276 / 27; s 0.85 [0.72, 0.92]; coverage 0.750 / 0.946 (0.981); RMS z 1.64; s_ref 0 c [0, 0]; median sigma 35 c, median |error| 19 c FLAG tails
+    children f0 150-300  F1: n  1260 / 27; s 2.28 [2.12, 2.56]; coverage 0.383 / 0.621 (0.619); RMS z 2.99; s_ref 142 c [125, 161]; median sigma 69 c, median |error| 110 c FLAG
+    children f0 150-300  F2: n  1245 / 27; s 1.51 [1.37, 1.67]; coverage 0.533 / 0.787 (0.815); RMS z 2.21; s_ref 32 c [26, 40]; median sigma 31 c, median |error| 29 c FLAG tails
+    children f0 150-300  F3: n  1208 / 27; s 1.07 [0.95, 1.19]; coverage 0.653 / 0.908 (0.940); RMS z 2.85; s_ref 10 c [0, 15]; median sigma 30 c, median |error| 21 c tails
+    children f0 150-300  F4: n   267 / 27; s 0.86 [0.75, 0.95]; coverage 0.742 / 0.944 (0.980); RMS z 1.66; s_ref 0 c [0, 0]; median sigma 35 c, median |error| 20 c FLAG tails
+    all      f0 all      F1: n  3984 / 83; s 1.80 [1.66, 1.94]; coverage 0.441 / 0.727 (0.734); RMS z 2.23; s_ref 100 c [85, 117]; median sigma 68 c, median |error| 82 c FLAG
+    all      f0 all      F2: n  3955 / 83; s 1.52 [1.43, 1.60]; coverage 0.529 / 0.784 (0.812); RMS z 2.12; s_ref 33 c [30, 37]; median sigma 32 c, median |error| 30 c FLAG tails
+    all      f0 all      F3: n  3837 / 83; s 1.02 [0.95, 1.08]; coverage 0.676 / 0.906 (0.949); RMS z 2.01; s_ref 5 c [0, 10]; median sigma 28 c, median |error| 18 c tails
+    all      f0 all      F4: n   839 / 83; s 0.85 [0.77, 0.90]; coverage 0.751 / 0.936 (0.981); RMS z 1.43; s_ref 0 c [0, 0]; median sigma 37 c, median |error| 20 c FLAG tails
+    all      f0 <150     F1: n   988 / 25; s 1.40 [1.29, 1.51]; coverage 0.529 / 0.855 (0.848); RMS z 1.43; s_ref 49 c [42, 56]; median sigma 52 c, median |error| 51 c FLAG
+    all      f0 <150     F2: n   983 / 25; s 1.65 [1.46, 1.86]; coverage 0.502 / 0.757 (0.776); RMS z 2.10; s_ref 36 c [25, 46]; median sigma 28 c, median |error| 28 c FLAG
+    all      f0 <150     F3: n   958 / 25; s 0.97 [0.81, 1.17]; coverage 0.688 / 0.890 (0.962); RMS z 1.48; s_ref 0 c [0, 11]; median sigma 26 c, median |error| 15 c tails
+    all      f0 <150     F4: n   204 / 24; s 0.88 [0.72, 0.96]; coverage 0.755 / 0.951 (0.977); RMS z 1.21; s_ref 0 c [0, 0]; median sigma 44 c, median |error| 21 c tails
+    all      f0 150-300  F1: n  2956 / 69; s 1.99 [1.85, 2.14]; coverage 0.411 / 0.685 (0.685); RMS z 2.45; s_ref 125 c [113, 136]; median sigma 73 c, median |error| 99 c FLAG
+    all      f0 150-300  F2: n  2932 / 69; s 1.47 [1.39, 1.56]; coverage 0.540 / 0.793 (0.827); RMS z 2.12; s_ref 32 c [29, 37]; median sigma 33 c, median |error| 31 c FLAG tails
+    all      f0 150-300  F3: n  2840 / 69; s 1.03 [0.94, 1.09]; coverage 0.672 / 0.914 (0.948); RMS z 2.14; s_ref 6 c [0, 12]; median sigma 29 c, median |error| 19 c tails
+    all      f0 150-300  F4: n   625 / 69; s 0.85 [0.77, 0.92]; coverage 0.746 / 0.930 (0.981); RMS z 1.50; s_ref 0 c [0, 0]; median sigma 35 c, median |error| 20 c FLAG tails
+  (3) does sigma sort frames by error? Spearman's rho(sigma, |error|) [95 %]; gate curve: median |error| (c) of the frames kept in order of sigma at 25 / 50 / 75 / 100 %; of the 25 % dropped at the 75 % gate
+    men      F1: rho +0.23 [0.17, 0.30]; kept 48 / 46 / 49 / 55; dropped at 75 % 77; 50 % gate's kept against all 0.83 -> not by the reading's bar
+    men      F2: rho +0.33 [0.24, 0.41]; kept 20 / 22 / 24 / 29; dropped at 75 % 51; 50 % gate's kept against all 0.75 -> something to stand on
+    men      F3: rho +0.18 [0.11, 0.25]; kept 11 / 13 / 13 / 15; dropped at 75 % 20; 50 % gate's kept against all 0.87 -> not by the reading's bar
+    men      F4: rho +0.37 [0.26, 0.49]; kept 12 / 14 / 17 / 21; dropped at 75 % 48; 50 % gate's kept against all 0.69 -> something to stand on
+    women    F1: rho +0.18 [0.12, 0.26]; kept 81 / 85 / 89 / 102; dropped at 75 % 135; 50 % gate's kept against all 0.83 -> not by the reading's bar
+    women    F2: rho +0.32 [0.25, 0.39]; kept 19 / 23 / 27 / 31; dropped at 75 % 48; 50 % gate's kept against all 0.73 -> something to stand on
+    women    F3: rho +0.21 [0.12, 0.28]; kept 15 / 16 / 17 / 19; dropped at 75 % 26; 50 % gate's kept against all 0.86 -> not by the reading's bar
+    women    F4: rho +0.36 [0.25, 0.47]; kept 13 / 13 / 16 / 20; dropped at 75 % 33; 50 % gate's kept against all 0.67 -> something to stand on
+    children F1: rho +0.11 [0.01, 0.22]; kept 92 / 93 / 105 / 110; dropped at 75 % 119; 50 % gate's kept against all 0.85 -> not by the reading's bar
+    children F2: rho +0.19 [0.11, 0.26]; kept 22 / 25 / 27 / 29; dropped at 75 % 40; 50 % gate's kept against all 0.85 -> not by the reading's bar
+    children F3: rho +0.23 [0.17, 0.29]; kept 17 / 18 / 19 / 21; dropped at 75 % 33; 50 % gate's kept against all 0.86 -> not by the reading's bar
+    children F4: rho +0.29 [0.18, 0.38]; kept 11 / 16 / 18 / 19; dropped at 75 % 25; 50 % gate's kept against all 0.82 -> not by the reading's bar
+    all      F1: rho +0.24 [0.19, 0.29]; kept 58 / 66 / 73 / 82; dropped at 75 % 116; 50 % gate's kept against all 0.81 -> not by the reading's bar
+    all      F2: rho +0.28 [0.24, 0.32]; kept 21 / 23 / 26 / 30; dropped at 75 % 49; 50 % gate's kept against all 0.77 -> something to stand on
+    all      F3: rho +0.21 [0.17, 0.25]; kept 14 / 16 / 16 / 18; dropped at 75 % 28; 50 % gate's kept against all 0.86 -> not by the reading's bar
+    all      F4: rho +0.34 [0.27, 0.40]; kept 12 / 15 / 17 / 20; dropped at 75 % 34; 50 % gate's kept against all 0.74 -> something to stand on
+  (4) what a gate keeps: share of each group's frames kept at the 50 % / 75 % gate (threshold over the set's frames, per formant)
+    F1: men 0.68 / 0.88 (n 1296); women 0.35 / 0.66 (n 1392); children 0.48 / 0.71 (n 1296); f0 <150 0.72 / 0.90 (n 988); f0 150-300 0.43 / 0.70 (n 2956)
+    F2: men 0.58 / 0.82 (n 1295); women 0.41 / 0.67 (n 1384); children 0.52 / 0.76 (n 1283); f0 <150 0.61 / 0.85 (n 987); f0 150-300 0.46 / 0.72 (n 2935)
+    F3: men 0.57 / 0.81 (n 1271); women 0.49 / 0.76 (n 1340); children 0.44 / 0.67 (n 1252); f0 <150 0.57 / 0.81 (n 967); f0 150-300 0.48 / 0.73 (n 2856)
+  (5) F1 within 100 cents of f0 or 2 f0 (reference F1) against the rest: n; s; 1-sigma coverage; median |error| c; median sigma c
+    men      near a harmonic: n 49 (too few) | the rest: n 1247; s 1.39; coverage 0.524; median |error| 53; median sigma 54
+    women    near a harmonic: n 356; s 1.34; coverage 0.556; median |error| 73; median sigma 87 | the rest: n 1036; s 2.01; coverage 0.375; median |error| 107; median sigma 76
+    children near a harmonic: n 323; s 2.07; coverage 0.449; median |error| 123; median sigma 89 | the rest: n 973; s 2.42; coverage 0.362; median |error| 108; median sigma 63
+    all      near a harmonic: n 728; s 1.65; coverage 0.499; median |error| 96; median sigma 87 | the rest: n 3256; s 1.84; coverage 0.428; median |error| 80; median sigma 63
+
+== PTDB-TUG dev (closed-phase reference): 7743 frames, 12 speakers
+  (1, 2) cells: n frames / speakers; s [95 %]; 1-sigma and 2-sigma coverage (2-sigma implied by s); RMS z; s_ref = the reference SD making coverage nominal, cents [95 %]; flags as D-071 prints them
+    men      f0 all      F1: n  3876 /  6; s 1.03 [0.95, 1.10]; coverage 0.668 / 0.924 (0.947); RMS z 1.15; s_ref 18 c [0, 33]; median sigma 74 c, median |error| 54 c tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 55 c; Praat - closed phase 70 c
+    men      f0 all      F2: n  3864 /  6; s 1.02 [0.98, 1.10]; coverage 0.673 / 0.876 (0.949); RMS z 2.13; s_ref 6 c [0, 13]; median sigma 38 c, median |error| 25 c tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 24 c; Praat - closed phase 50 c
+    men      f0 all      F3: n  3868 /  6; s 1.01 [0.88, 1.13]; coverage 0.679 / 0.888 (0.952); RMS z 2.80; s_ref 3 c [0, 14]; median sigma 37 c, median |error| 23 c tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 23 c; Praat - closed phase 62 c
+    men      f0 <150     F1: n  3568 /  6; s 1.03 [0.95, 1.10]; coverage 0.669 / 0.924 (0.948); RMS z 1.14; s_ref 18 c [0, 32]; median sigma 73 c, median |error| 53 c tails
+    men      f0 <150     F2: n  3556 /  6; s 1.02 [0.98, 1.12]; coverage 0.674 / 0.876 (0.949); RMS z 2.14; s_ref 7 c [0, 13]; median sigma 37 c, median |error| 25 c tails
+    men      f0 <150     F3: n  3560 /  6; s 1.01 [0.89, 1.13]; coverage 0.676 / 0.885 (0.951); RMS z 2.84; s_ref 5 c [0, 15]; median sigma 37 c, median |error| 23 c tails
+    women    f0 all      F1: n  3867 /  6; s 1.34 [1.14, 1.63]; coverage 0.563 / 0.836 (0.864); RMS z 1.84; s_ref 80 c [47, 131]; median sigma 98 c, median |error| 85 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 117 c; Praat - closed phase 118 c
+    women    f0 all      F2: n  3865 /  6; s 1.33 [1.13, 1.55]; coverage 0.587 / 0.804 (0.867); RMS z 5.32; s_ref 34 c [22, 49]; median sigma 43 c, median |error| 34 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 58 c; Praat - closed phase 88 c
+    women    f0 all      F3: n  3854 /  6; s 1.23 [1.04, 1.57]; coverage 0.597 / 0.808 (0.896); RMS z 6.60; s_ref 24 c [12, 40]; median sigma 34 c, median |error| 28 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 41 c; Praat - closed phase 79 c
+    women    f0 150-300  F1: n  3269 /  6; s 1.30 [1.11, 1.53]; coverage 0.572 / 0.850 (0.876); RMS z 1.74; s_ref 71 c [41, 115]; median sigma 95 c, median |error| 80 c FLAG tails
+    women    f0 150-300  F2: n  3267 /  6; s 1.25 [1.11, 1.48]; coverage 0.602 / 0.822 (0.891); RMS z 5.11; s_ref 29 c [18, 45]; median sigma 43 c, median |error| 33 c FLAG tails
+    women    f0 150-300  F3: n  3260 /  6; s 1.17 [0.99, 1.45]; coverage 0.619 / 0.831 (0.914); RMS z 6.17; s_ref 20 c [0, 34]; median sigma 34 c, median |error| 27 c tails
+    women    f0 300-500  F1: n   579 /  5; s 1.65 [1.40, 1.92]; coverage 0.506 / 0.753 (0.776); RMS z 2.37; s_ref 137 c [110, 216]; median sigma 108 c, median |error| 125 c FLAG
+    women    f0 300-500  F2: n   579 /  5; s 1.89 [1.55, 2.05]; coverage 0.499 / 0.696 (0.710); RMS z 6.48; s_ref 65 c [49, 70]; median sigma 43 c, median |error| 45 c FLAG
+    women    f0 300-500  F3: n   575 /  5; s 2.07 [1.56, 2.57]; coverage 0.463 / 0.675 (0.665); RMS z 8.72; s_ref 64 c [51, 81]; median sigma 35 c, median |error| 41 c FLAG
+    all      f0 all      F1: n  7743 / 12; s 1.17 [1.05, 1.32]; coverage 0.615 / 0.880 (0.912); RMS z 1.54; s_ref 45 c [23, 75]; median sigma 87 c, median |error| 66 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 78 c; Praat - closed phase 91 c
+    all      f0 all      F2: n  7729 / 12; s 1.16 [1.07, 1.32]; coverage 0.630 / 0.840 (0.914); RMS z 4.05; s_ref 21 c [12, 30]; median sigma 40 c, median |error| 29 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 36 c; Praat - closed phase 68 c
+    all      f0 all      F3: n  7722 / 12; s 1.12 [0.99, 1.27]; coverage 0.638 / 0.848 (0.927); RMS z 5.07; s_ref 15 c [0, 23]; median sigma 35 c, median |error| 25 c tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 30 c; Praat - closed phase 71 c
+    all      f0 <150     F1: n  3587 / 12; s 1.03 [0.93, 1.11]; coverage 0.669 / 0.924 (0.948); RMS z 1.14; s_ref 18 c [0, 34]; median sigma 73 c, median |error| 53 c tails
+    all      f0 <150     F2: n  3575 / 12; s 1.02 [0.97, 1.12]; coverage 0.674 / 0.876 (0.949); RMS z 2.14; s_ref 7 c [0, 14]; median sigma 37 c, median |error| 25 c tails
+    all      f0 <150     F3: n  3579 / 12; s 1.01 [0.88, 1.14]; coverage 0.677 / 0.885 (0.951); RMS z 2.83; s_ref 4 c [0, 15]; median sigma 37 c, median |error| 23 c tails
+    all      f0 150-300  F1: n  3577 / 10; s 1.28 [1.09, 1.47]; coverage 0.579 / 0.856 (0.883); RMS z 1.70; s_ref 67 c [32, 112]; median sigma 95 c, median |error| 79 c FLAG tails
+    all      f0 150-300  F2: n  3575 / 10; s 1.22 [1.10, 1.42]; coverage 0.608 / 0.827 (0.900); RMS z 4.91; s_ref 26 c [17, 40]; median sigma 43 c, median |error| 32 c FLAG tails
+    all      f0 150-300  F3: n  3568 / 10; s 1.14 [0.99, 1.35]; coverage 0.627 / 0.839 (0.920); RMS z 5.94; s_ref 18 c [0, 34]; median sigma 34 c, median |error| 26 c tails
+    all      f0 300-500  F1: n   579 /  5; s 1.65 [1.40, 1.92]; coverage 0.506 / 0.753 (0.776); RMS z 2.37; s_ref 137 c [105, 214]; median sigma 108 c, median |error| 125 c FLAG
+    all      f0 300-500  F2: n   579 /  5; s 1.89 [1.55, 2.05]; coverage 0.499 / 0.696 (0.710); RMS z 6.48; s_ref 65 c [47, 70]; median sigma 43 c, median |error| 45 c FLAG
+    all      f0 300-500  F3: n   575 /  5; s 2.07 [1.69, 2.57]; coverage 0.463 / 0.675 (0.665); RMS z 8.72; s_ref 64 c [51, 81]; median sigma 35 c, median |error| 41 c FLAG
+  (3) does sigma sort frames by error? Spearman's rho(sigma, |error|) [95 %]; gate curve: median |error| (c) of the frames kept in order of sigma at 25 / 50 / 75 / 100 %; of the 25 % dropped at the 75 % gate
+    men      F1: rho +0.34 [0.27, 0.39]; kept 38 / 42 / 46 / 54; dropped at 75 % 94; 50 % gate's kept against all 0.79 -> something to stand on
+    men      F2: rho +0.33 [0.26, 0.38]; kept 18 / 20 / 22 / 25; dropped at 75 % 46; 50 % gate's kept against all 0.78 -> something to stand on
+    men      F3: rho +0.39 [0.36, 0.43]; kept 14 / 16 / 19 / 23; dropped at 75 % 47; 50 % gate's kept against all 0.72 -> something to stand on
+    women    F1: rho +0.39 [0.35, 0.42]; kept 54 / 62 / 70 / 85; dropped at 75 % 164; 50 % gate's kept against all 0.73 -> something to stand on
+    women    F2: rho +0.26 [0.21, 0.31]; kept 24 / 27 / 30 / 34; dropped at 75 % 56; 50 % gate's kept against all 0.77 -> something to stand on
+    women    F3: rho +0.33 [0.30, 0.36]; kept 16 / 21 / 23 / 28; dropped at 75 % 51; 50 % gate's kept against all 0.74 -> something to stand on
+    all      F1: rho +0.40 [0.36, 0.43]; kept 41 / 49 / 56 / 66; dropped at 75 % 132; 50 % gate's kept against all 0.74 -> something to stand on
+    all      F2: rho +0.31 [0.26, 0.35]; kept 20 / 22 / 25 / 29; dropped at 75 % 49; 50 % gate's kept against all 0.76 -> something to stand on
+    all      F3: rho +0.36 [0.32, 0.40]; kept 15 / 18 / 21 / 25; dropped at 75 % 47; 50 % gate's kept against all 0.73 -> something to stand on
+  (4) what a gate keeps: share of each group's frames kept at the 50 % / 75 % gate (threshold over the set's frames, per formant)
+    F1: men 0.61 / 0.79 (n 3876); women 0.39 / 0.71 (n 3867); f0 <150 0.63 / 0.80 (n 3587); f0 150-300 0.41 / 0.72 (n 3577); f0 300-500 0.29 / 0.64 (n 579)
+    F2: men 0.55 / 0.75 (n 3875); women 0.45 / 0.75 (n 3866); f0 <150 0.56 / 0.75 (n 3586); f0 150-300 0.45 / 0.74 (n 3576); f0 300-500 0.42 / 0.77 (n 579)
+    F3: men 0.47 / 0.71 (n 3873); women 0.53 / 0.79 (n 3855); f0 <150 0.47 / 0.71 (n 3584); f0 150-300 0.53 / 0.79 (n 3569); f0 300-500 0.51 / 0.77 (n 575)
+  (5) F1 within 100 cents of f0 or 2 f0 (reference F1) against the rest: n; s; 1-sigma coverage; median |error| c; median sigma c
+    men      near a harmonic: n 59 (too few) | the rest: n 3817; s 1.03; coverage 0.668; median |error| 53; median sigma 74
+    women    near a harmonic: n 508; s 1.39; coverage 0.533; median |error| 89; median sigma 95 | the rest: n 3359; s 1.34; coverage 0.567; median |error| 84; median sigma 98
+    all      near a harmonic: n 567; s 1.36; coverage 0.547; median |error| 91; median sigma 97 | the rest: n 7176; s 1.16; coverage 0.621; median |error| 64; median sigma 86
+
+== PTDB-TUG dev, voicing: voiced_p at every reference frame against the laryngograph's voicing (every third utterance)
+    men      n 340052; ECE 0.042 [0.03, 0.05] (D-071's bar 0.05); reference voiced share 0.234, mean voiced_p 0.215; accuracy at 0.5 0.945
+    women    n 348356; ECE 0.056 [0.04, 0.07] (D-071's bar 0.05); reference voiced share 0.215, mean voiced_p 0.230; accuracy at 0.5 0.931
+    all      n 688408; ECE 0.049 [0.04, 0.06] (D-071's bar 0.05); reference voiced share 0.225, mean voiced_p 0.223; accuracy at 0.5 0.938
+
+=================== d040_5b_s1_b20k (beside) ===================
+== Hillenbrand dev: 3984 frames, 83 speakers
+  (1, 2) cells: n frames / speakers; s [95 %]; 1-sigma and 2-sigma coverage (2-sigma implied by s); RMS z; s_ref = the reference SD making coverage nominal, cents [95 %]; flags as D-071 prints them
+    men      f0 all      F1: n  1296 / 27; s 1.56 [1.42, 1.68]; coverage 0.481 / 0.799 (0.800); RMS z 1.79; s_ref 60 c [50, 70]; median sigma 52 c, median |error| 57 c FLAG
+    men      f0 all      F2: n  1249 / 27; s 2.09 [1.91, 2.31]; coverage 0.418 / 0.670 (0.661); RMS z 3.09; s_ref 40 c [35, 48]; median sigma 24 c, median |error| 31 c FLAG
+    men      f0 all      F3: n  1237 / 27; s 1.09 [0.94, 1.25]; coverage 0.656 / 0.870 (0.934); RMS z 1.49; s_ref 7 c [0, 14]; median sigma 22 c, median |error| 15 c tails
+    men      f0 all      F4: n   262 / 27; s 0.87 [0.72, 0.96]; coverage 0.744 / 0.935 (0.979); RMS z 1.80; s_ref 0 c [0, 0]; median sigma 40 c, median |error| 21 c FLAG tails
+    men      f0 <150     F1: n   984 / 24; s 1.55 [1.37, 1.70]; coverage 0.490 / 0.802 (0.802); RMS z 1.63; s_ref 55 c [48, 68]; median sigma 50 c, median |error| 54 c FLAG
+    men      f0 <150     F2: n   940 / 24; s 2.05 [1.88, 2.32]; coverage 0.424 / 0.672 (0.671); RMS z 3.07; s_ref 39 c [32, 46]; median sigma 23 c, median |error| 29 c FLAG
+    men      f0 <150     F3: n   935 / 24; s 1.13 [0.95, 1.30]; coverage 0.646 / 0.851 (0.924); RMS z 1.55; s_ref 9 c [0, 15]; median sigma 22 c, median |error| 15 c tails
+    men      f0 <150     F4: n   206 / 24; s 0.91 [0.71, 1.03]; coverage 0.728 / 0.932 (0.972); RMS z 1.98; s_ref 0 c [0, 4]; median sigma 39 c, median |error| 22 c tails
+    men      f0 150-300  F1: n   312 / 13; s 1.61 [1.42, 1.84]; coverage 0.455 / 0.792 (0.787); RMS z 2.24; s_ref 74 c [53, 97]; median sigma 60 c, median |error| 70 c FLAG
+    men      f0 150-300  F2: n   309 / 13; s 2.13 [1.80, 2.49]; coverage 0.398 / 0.663 (0.653); RMS z 3.17; s_ref 50 c [36, 73]; median sigma 28 c, median |error| 37 c FLAG
+    men      f0 150-300  F3: n   302 / 13; s 0.98 [0.86, 1.17]; coverage 0.689 / 0.927 (0.959); RMS z 1.27; s_ref 0 c [0, 9]; median sigma 24 c, median |error| 16 c tails
+    women    f0 all      F1: n  1392 / 29; s 1.98 [1.72, 2.18]; coverage 0.405 / 0.691 (0.689); RMS z 2.28; s_ref 121 c [105, 142]; median sigma 74 c, median |error| 100 c FLAG
+    women    f0 all      F2: n  1379 / 29; s 1.54 [1.37, 1.66]; coverage 0.534 / 0.777 (0.805); RMS z 2.45; s_ref 34 c [28, 40]; median sigma 33 c, median |error| 31 c FLAG tails
+    women    f0 all      F3: n  1334 / 29; s 1.05 [0.95, 1.16]; coverage 0.664 / 0.891 (0.944); RMS z 1.73; s_ref 7 c [0, 14]; median sigma 26 c, median |error| 20 c tails
+    women    f0 all      F4: n   302 / 29; s 0.86 [0.77, 1.01]; coverage 0.728 / 0.904 (0.980); RMS z 1.64; s_ref 0 c [0, 5]; median sigma 34 c, median |error| 17 c tails
+    women    f0 150-300  F1: n  1384 / 29; s 1.98 [1.73, 2.18]; coverage 0.406 / 0.691 (0.688); RMS z 2.28; s_ref 122 c [106, 143]; median sigma 74 c, median |error| 100 c FLAG
+    women    f0 150-300  F2: n  1371 / 29; s 1.55 [1.37, 1.66]; coverage 0.533 / 0.776 (0.804); RMS z 2.46; s_ref 34 c [28, 40]; median sigma 33 c, median |error| 31 c FLAG tails
+    women    f0 150-300  F3: n  1326 / 29; s 1.05 [0.96, 1.17]; coverage 0.662 / 0.891 (0.943); RMS z 1.73; s_ref 8 c [0, 14]; median sigma 26 c, median |error| 20 c tails
+    women    f0 150-300  F4: n   301 / 29; s 0.86 [0.77, 1.01]; coverage 0.728 / 0.904 (0.980); RMS z 1.64; s_ref 0 c [0, 2]; median sigma 34 c, median |error| 17 c tails
+    children f0 all      F1: n  1296 / 27; s 2.43 [2.24, 2.60]; coverage 0.364 / 0.600 (0.589); RMS z 3.01; s_ref 140 c [125, 158]; median sigma 66 c, median |error| 106 c FLAG
+    children f0 all      F2: n  1281 / 27; s 1.61 [1.45, 1.77]; coverage 0.528 / 0.759 (0.786); RMS z 3.22; s_ref 36 c [29, 42]; median sigma 32 c, median |error| 29 c FLAG tails
+    children f0 all      F3: n  1250 / 27; s 1.07 [0.98, 1.19]; coverage 0.648 / 0.895 (0.939); RMS z 1.37; s_ref 9 c [0, 14]; median sigma 30 c, median |error| 22 c tails
+    children f0 all      F4: n   274 / 27; s 0.79 [0.70, 0.91]; coverage 0.777 / 0.945 (0.989); RMS z 1.13; s_ref 0 c [0, 0]; median sigma 37 c, median |error| 20 c FLAG tails
+    children f0 150-300  F1: n  1260 / 27; s 2.44 [2.25, 2.61]; coverage 0.363 / 0.598 (0.588); RMS z 3.03; s_ref 140 c [125, 160]; median sigma 65 c, median |error| 106 c FLAG
+    children f0 150-300  F2: n  1245 / 27; s 1.58 [1.41, 1.75]; coverage 0.533 / 0.763 (0.793); RMS z 3.23; s_ref 35 c [29, 42]; median sigma 32 c, median |error| 29 c FLAG tails
+    children f0 150-300  F3: n  1214 / 27; s 1.07 [0.96, 1.18]; coverage 0.649 / 0.898 (0.939); RMS z 1.37; s_ref 8 c [0, 14]; median sigma 30 c, median |error| 21 c tails
+    children f0 150-300  F4: n   265 / 27; s 0.78 [0.70, 0.91]; coverage 0.777 / 0.943 (0.989); RMS z 1.14; s_ref 0 c [0, 0]; median sigma 37 c, median |error| 20 c FLAG tails
+    all      f0 all      F1: n  3984 / 83; s 1.92 [1.78, 2.06]; coverage 0.417 / 0.697 (0.702); RMS z 2.41; s_ref 104 c [93, 119]; median sigma 63 c, median |error| 82 c FLAG
+    all      f0 all      F2: n  3909 / 83; s 1.71 [1.62, 1.81]; coverage 0.495 / 0.737 (0.759); RMS z 2.93; s_ref 37 c [33, 40]; median sigma 30 c, median |error| 31 c FLAG tails
+    all      f0 all      F3: n  3821 / 83; s 1.06 [1.00, 1.14]; coverage 0.656 / 0.886 (0.940); RMS z 1.54; s_ref 8 c [2, 12]; median sigma 26 c, median |error| 19 c tails
+    all      f0 all      F4: n   838 / 83; s 0.86 [0.77, 0.91]; coverage 0.749 / 0.927 (0.981); RMS z 1.55; s_ref 0 c [0, 0]; median sigma 37 c, median |error| 19 c FLAG tails
+    all      f0 <150     F1: n   988 / 25; s 1.55 [1.37, 1.71]; coverage 0.489 / 0.801 (0.802); RMS z 1.63; s_ref 55 c [49, 67]; median sigma 50 c, median |error| 54 c FLAG
+    all      f0 <150     F2: n   944 / 25; s 2.04 [1.87, 2.34]; coverage 0.426 / 0.674 (0.672); RMS z 3.06; s_ref 38 c [31, 47]; median sigma 23 c, median |error| 29 c FLAG
+    all      f0 <150     F3: n   939 / 25; s 1.13 [0.95, 1.29]; coverage 0.647 / 0.852 (0.924); RMS z 1.55; s_ref 8 c [0, 15]; median sigma 22 c, median |error| 15 c tails
+    all      f0 <150     F4: n   206 / 24; s 0.91 [0.72, 1.01]; coverage 0.728 / 0.932 (0.972); RMS z 1.98; s_ref 0 c [0, 8]; median sigma 39 c, median |error| 22 c tails
+    all      f0 150-300  F1: n  2956 / 69; s 2.10 [1.95, 2.27]; coverage 0.393 / 0.662 (0.660); RMS z 2.62; s_ref 126 c [114, 138]; median sigma 69 c, median |error| 98 c FLAG
+    all      f0 150-300  F2: n  2925 / 69; s 1.62 [1.53, 1.71]; coverage 0.519 / 0.759 (0.782); RMS z 2.89; s_ref 36 c [31, 40]; median sigma 32 c, median |error| 31 c FLAG tails
+    all      f0 150-300  F3: n  2842 / 69; s 1.05 [0.99, 1.12]; coverage 0.659 / 0.898 (0.943); RMS z 1.54; s_ref 7 c [0, 12]; median sigma 28 c, median |error| 20 c tails
+    all      f0 150-300  F4: n   622 / 69; s 0.84 [0.77, 0.91]; coverage 0.756 / 0.924 (0.982); RMS z 1.39; s_ref 0 c [0, 0]; median sigma 36 c, median |error| 19 c FLAG tails
+  (3) does sigma sort frames by error? Spearman's rho(sigma, |error|) [95 %]; gate curve: median |error| (c) of the frames kept in order of sigma at 25 / 50 / 75 / 100 %; of the 25 % dropped at the 75 % gate
+    men      F1: rho +0.21 [0.12, 0.28]; kept 51 / 50 / 51 / 57; dropped at 75 % 88; 50 % gate's kept against all 0.88 -> not by the reading's bar
+    men      F2: rho +0.25 [0.16, 0.33]; kept 27 / 26 / 27 / 31; dropped at 75 % 54; 50 % gate's kept against all 0.83 -> not by the reading's bar
+    men      F3: rho +0.25 [0.19, 0.31]; kept 12 / 12 / 14 / 15; dropped at 75 % 21; 50 % gate's kept against all 0.81 -> not by the reading's bar
+    men      F4: rho +0.37 [0.28, 0.46]; kept 14 / 15 / 19 / 21; dropped at 75 % 35; 50 % gate's kept against all 0.72 -> something to stand on
+    women    F1: rho +0.17 [0.09, 0.25]; kept 83 / 82 / 90 / 100; dropped at 75 % 135; 50 % gate's kept against all 0.82 -> not by the reading's bar
+    women    F2: rho +0.19 [0.12, 0.27]; kept 26 / 27 / 30 / 31; dropped at 75 % 38; 50 % gate's kept against all 0.87 -> not by the reading's bar
+    women    F3: rho +0.25 [0.17, 0.32]; kept 15 / 16 / 17 / 20; dropped at 75 % 29; 50 % gate's kept against all 0.81 -> not by the reading's bar
+    women    F4: rho +0.35 [0.24, 0.44]; kept 14 / 14 / 15 / 17; dropped at 75 % 37; 50 % gate's kept against all 0.78 -> something to stand on
+    children F1: rho +0.11 [0.05, 0.17]; kept 90 / 98 / 104 / 106; dropped at 75 % 113; 50 % gate's kept against all 0.92 -> not by the reading's bar
+    children F2: rho +0.11 [0.03, 0.19]; kept 27 / 27 / 28 / 29; dropped at 75 % 37; 50 % gate's kept against all 0.93 -> not by the reading's bar
+    children F3: rho +0.23 [0.17, 0.29]; kept 17 / 18 / 20 / 22; dropped at 75 % 30; 50 % gate's kept against all 0.84 -> not by the reading's bar
+    children F4: rho +0.37 [0.22, 0.46]; kept 13 / 15 / 17 / 19; dropped at 75 % 37; 50 % gate's kept against all 0.75 -> something to stand on
+    all      F1: rho +0.22 [0.17, 0.27]; kept 62 / 67 / 74 / 82; dropped at 75 % 117; 50 % gate's kept against all 0.81 -> not by the reading's bar
+    all      F2: rho +0.18 [0.13, 0.22]; kept 25 / 27 / 28 / 31; dropped at 75 % 40; 50 % gate's kept against all 0.87 -> not by the reading's bar
+    all      F3: rho +0.27 [0.23, 0.30]; kept 13 / 15 / 17 / 19; dropped at 75 % 28; 50 % gate's kept against all 0.81 -> not by the reading's bar
+    all      F4: rho +0.37 [0.32, 0.42]; kept 13 / 15 / 16 / 19; dropped at 75 % 37; 50 % gate's kept against all 0.77 -> something to stand on
+  (4) what a gate keeps: share of each group's frames kept at the 50 % / 75 % gate (threshold over the set's frames, per formant)
+    F1: men 0.70 / 0.88 (n 1296); women 0.35 / 0.66 (n 1392); children 0.47 / 0.71 (n 1296); f0 <150 0.74 / 0.90 (n 988); f0 150-300 0.42 / 0.70 (n 2956)
+    F2: men 0.70 / 0.87 (n 1295); women 0.38 / 0.66 (n 1384); children 0.43 / 0.72 (n 1283); f0 <150 0.75 / 0.90 (n 987); f0 150-300 0.42 / 0.70 (n 2935)
+    F3: men 0.64 / 0.85 (n 1271); women 0.48 / 0.73 (n 1340); children 0.37 / 0.67 (n 1252); f0 <150 0.67 / 0.86 (n 967); f0 150-300 0.44 / 0.72 (n 2856)
+  (5) F1 within 100 cents of f0 or 2 f0 (reference F1) against the rest: n; s; 1-sigma coverage; median |error| c; median sigma c
+    men      near a harmonic: n 49 (too few) | the rest: n 1247; s 1.54; coverage 0.486; median |error| 55; median sigma 52
+    women    near a harmonic: n 356; s 1.42; coverage 0.508; median |error| 83; median sigma 84 | the rest: n 1036; s 2.12; coverage 0.370; median |error| 104; median sigma 69
+    children near a harmonic: n 323; s 2.14; coverage 0.421; median |error| 110; median sigma 80 | the rest: n 973; s 2.50; coverage 0.345; median |error| 106; median sigma 61
+    all      near a harmonic: n 728; s 1.77; coverage 0.460; median |error| 96; median sigma 81 | the rest: n 3256; s 1.97; coverage 0.407; median |error| 80; median sigma 59
+
+== PTDB-TUG dev (closed-phase reference): 7743 frames, 12 speakers
+  (1, 2) cells: n frames / speakers; s [95 %]; 1-sigma and 2-sigma coverage (2-sigma implied by s); RMS z; s_ref = the reference SD making coverage nominal, cents [95 %]; flags as D-071 prints them
+    men      f0 all      F1: n  3876 /  6; s 1.04 [0.97, 1.11]; coverage 0.665 / 0.923 (0.945); RMS z 1.16; s_ref 17 c [0, 32]; median sigma 70 c, median |error| 49 c tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 55 c; Praat - closed phase 70 c
+    men      f0 all      F2: n  3865 /  6; s 1.06 [1.01, 1.11]; coverage 0.657 / 0.887 (0.942); RMS z 2.00; s_ref 11 c [4, 15]; median sigma 38 c, median |error| 26 c tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 24 c; Praat - closed phase 50 c
+    men      f0 all      F3: n  3865 /  6; s 1.07 [0.96, 1.20]; coverage 0.655 / 0.881 (0.938); RMS z 3.10; s_ref 10 c [0, 18]; median sigma 34 c, median |error| 24 c tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 23 c; Praat - closed phase 62 c
+    men      f0 <150     F1: n  3568 /  6; s 1.05 [0.98, 1.13]; coverage 0.661 / 0.925 (0.943); RMS z 1.15; s_ref 19 c [0, 32]; median sigma 68 c, median |error| 48 c tails
+    men      f0 <150     F2: n  3557 /  6; s 1.05 [1.02, 1.11]; coverage 0.659 / 0.886 (0.942); RMS z 2.03; s_ref 10 c [3, 14]; median sigma 38 c, median |error| 26 c tails
+    men      f0 <150     F3: n  3557 /  6; s 1.08 [0.95, 1.21]; coverage 0.651 / 0.879 (0.935); RMS z 3.16; s_ref 11 c [0, 18]; median sigma 34 c, median |error| 24 c tails
+    women    f0 all      F1: n  3867 /  6; s 1.59 [1.28, 1.99]; coverage 0.485 / 0.778 (0.792); RMS z 2.15; s_ref 100 c [62, 154]; median sigma 84 c, median |error| 87 c FLAG   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 117 c; Praat - closed phase 118 c
+    women    f0 all      F2: n  3866 /  6; s 1.42 [1.19, 1.64]; coverage 0.555 / 0.790 (0.841); RMS z 6.01; s_ref 37 c [25, 51]; median sigma 39 c, median |error| 34 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 58 c; Praat - closed phase 88 c
+    women    f0 all      F3: n  3851 /  6; s 1.37 [1.18, 1.77]; coverage 0.571 / 0.793 (0.856); RMS z 7.38; s_ref 26 c [17, 42]; median sigma 31 c, median |error| 26 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 41 c; Praat - closed phase 80 c
+    women    f0 150-300  F1: n  3269 /  6; s 1.53 [1.25, 1.92]; coverage 0.500 / 0.794 (0.810); RMS z 2.07; s_ref 89 c [54, 134]; median sigma 83 c, median |error| 81 c FLAG
+    women    f0 150-300  F2: n  3268 /  6; s 1.36 [1.15, 1.61]; coverage 0.569 / 0.804 (0.858); RMS z 5.85; s_ref 33 c [20, 49]; median sigma 39 c, median |error| 32 c FLAG tails
+    women    f0 150-300  F3: n  3257 /  6; s 1.26 [1.10, 1.58]; coverage 0.592 / 0.818 (0.887); RMS z 6.90; s_ref 22 c [12, 36]; median sigma 31 c, median |error| 25 c FLAG tails
+    women    f0 300-500  F1: n   579 /  5; s 1.97 [1.42, 2.44]; coverage 0.394 / 0.686 (0.690); RMS z 2.60; s_ref 165 c [127, 245]; median sigma 93 c, median |error| 125 c FLAG
+    women    f0 300-500  F2: n   579 /  5; s 1.85 [1.56, 1.91]; coverage 0.470 / 0.712 (0.721); RMS z 6.90; s_ref 67 c [44, 71]; median sigma 40 c, median |error| 45 c FLAG
+    women    f0 300-500  F3: n   575 /  5; s 2.23 [1.84, 2.78]; coverage 0.450 / 0.650 (0.631); RMS z 9.74; s_ref 66 c [54, 83]; median sigma 33 c, median |error| 39 c FLAG
+    all      f0 all      F1: n  7743 / 12; s 1.28 [1.11, 1.50]; coverage 0.575 / 0.851 (0.882); RMS z 1.73; s_ref 56 c [27, 92]; median sigma 77 c, median |error| 65 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 78 c; Praat - closed phase 91 c
+    all      f0 all      F2: n  7731 / 12; s 1.21 [1.10, 1.39]; coverage 0.606 / 0.839 (0.900); RMS z 4.48; s_ref 23 c [16, 33]; median sigma 39 c, median |error| 29 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 36 c; Praat - closed phase 68 c
+    all      f0 all      F3: n  7716 / 12; s 1.20 [1.07, 1.38]; coverage 0.613 / 0.837 (0.904); RMS z 5.65; s_ref 19 c [10, 26]; median sigma 32 c, median |error| 25 c FLAG tails   0.683 quantile of |reference gap|; whole-cycle LPC - closed phase 30 c; Praat - closed phase 71 c
+    all      f0 <150     F1: n  3587 / 12; s 1.05 [0.97, 1.13]; coverage 0.661 / 0.924 (0.943); RMS z 1.16; s_ref 19 c [0, 33]; median sigma 68 c, median |error| 48 c tails
+    all      f0 <150     F2: n  3576 / 12; s 1.05 [1.01, 1.11]; coverage 0.659 / 0.886 (0.942); RMS z 2.03; s_ref 10 c [0, 15]; median sigma 38 c, median |error| 26 c tails
+    all      f0 <150     F3: n  3576 / 12; s 1.08 [0.95, 1.23]; coverage 0.651 / 0.878 (0.935); RMS z 3.15; s_ref 11 c [0, 19]; median sigma 34 c, median |error| 24 c tails
+    all      f0 150-300  F1: n  3577 / 10; s 1.48 [1.18, 1.79]; coverage 0.518 / 0.804 (0.822); RMS z 2.01; s_ref 83 c [46, 129]; median sigma 83 c, median |error| 78 c FLAG tails
+    all      f0 150-300  F2: n  3576 / 10; s 1.33 [1.14, 1.54]; coverage 0.575 / 0.812 (0.867); RMS z 5.61; s_ref 31 c [19, 47]; median sigma 39 c, median |error| 32 c FLAG tails
+    all      f0 150-300  F3: n  3565 / 10; s 1.24 [1.10, 1.46]; coverage 0.601 / 0.826 (0.894); RMS z 6.63; s_ref 21 c [11, 34]; median sigma 31 c, median |error| 25 c FLAG tails
+    all      f0 300-500  F1: n   579 /  5; s 1.97 [1.42, 2.52]; coverage 0.394 / 0.686 (0.690); RMS z 2.60; s_ref 165 c [127, 240]; median sigma 93 c, median |error| 125 c FLAG
+    all      f0 300-500  F2: n   579 /  5; s 1.85 [1.55, 1.91]; coverage 0.470 / 0.712 (0.721); RMS z 6.90; s_ref 67 c [40, 71]; median sigma 40 c, median |error| 45 c FLAG
+    all      f0 300-500  F3: n   575 /  5; s 2.23 [1.85, 2.77]; coverage 0.450 / 0.650 (0.631); RMS z 9.74; s_ref 66 c [54, 83]; median sigma 33 c, median |error| 39 c FLAG
+  (3) does sigma sort frames by error? Spearman's rho(sigma, |error|) [95 %]; gate curve: median |error| (c) of the frames kept in order of sigma at 25 / 50 / 75 / 100 %; of the 25 % dropped at the 75 % gate
+    men      F1: rho +0.35 [0.30, 0.38]; kept 36 / 38 / 43 / 49; dropped at 75 % 87; 50 % gate's kept against all 0.77 -> something to stand on
+    men      F2: rho +0.35 [0.31, 0.39]; kept 17 / 20 / 23 / 26; dropped at 75 % 47; 50 % gate's kept against all 0.76 -> something to stand on
+    men      F3: rho +0.42 [0.39, 0.45]; kept 14 / 17 / 19 / 24; dropped at 75 % 48; 50 % gate's kept against all 0.72 -> something to stand on
+    women    F1: rho +0.37 [0.32, 0.43]; kept 54 / 65 / 75 / 87; dropped at 75 % 159; 50 % gate's kept against all 0.75 -> something to stand on
+    women    F2: rho +0.29 [0.25, 0.34]; kept 23 / 26 / 28 / 34; dropped at 75 % 60; 50 % gate's kept against all 0.77 -> something to stand on
+    women    F3: rho +0.33 [0.30, 0.38]; kept 16 / 19 / 22 / 26; dropped at 75 % 50; 50 % gate's kept against all 0.73 -> something to stand on
+    all      F1: rho +0.39 [0.36, 0.42]; kept 39 / 46 / 55 / 65; dropped at 75 % 125; 50 % gate's kept against all 0.72 -> something to stand on
+    all      F2: rho +0.32 [0.28, 0.36]; kept 19 / 23 / 25 / 29; dropped at 75 % 53; 50 % gate's kept against all 0.78 -> something to stand on
+    all      F3: rho +0.37 [0.33, 0.41]; kept 15 / 18 / 20 / 25; dropped at 75 % 50; 50 % gate's kept against all 0.72 -> something to stand on
+  (4) what a gate keeps: share of each group's frames kept at the 50 % / 75 % gate (threshold over the set's frames, per formant)
+    F1: men 0.58 / 0.79 (n 3876); women 0.42 / 0.71 (n 3867); f0 <150 0.59 / 0.79 (n 3587); f0 150-300 0.44 / 0.72 (n 3577); f0 300-500 0.30 / 0.66 (n 579)
+    F2: men 0.52 / 0.73 (n 3875); women 0.48 / 0.77 (n 3866); f0 <150 0.52 / 0.73 (n 3586); f0 150-300 0.49 / 0.77 (n 3576); f0 300-500 0.46 / 0.77 (n 579)
+    F3: men 0.45 / 0.70 (n 3873); women 0.55 / 0.80 (n 3855); f0 <150 0.45 / 0.70 (n 3584); f0 150-300 0.55 / 0.80 (n 3569); f0 300-500 0.48 / 0.77 (n 575)
+  (5) F1 within 100 cents of f0 or 2 f0 (reference F1) against the rest: n; s; 1-sigma coverage; median |error| c; median sigma c
+    men      near a harmonic: n 59 (too few) | the rest: n 3817; s 1.05; coverage 0.662; median |error| 49; median sigma 69
+    women    near a harmonic: n 508; s 1.62; coverage 0.447; median |error| 91; median sigma 85 | the rest: n 3359; s 1.59; coverage 0.490; median |error| 86; median sigma 84
+    all      near a harmonic: n 567; s 1.52; coverage 0.487; median |error| 90; median sigma 89 | the rest: n 7176; s 1.26; coverage 0.582; median |error| 63; median sigma 76
+
+== PTDB-TUG dev, voicing: voiced_p at every reference frame against the laryngograph's voicing (every third utterance)
+    men      n 340052; ECE 0.046 [0.04, 0.05] (D-071's bar 0.05); reference voiced share 0.234, mean voiced_p 0.216; accuracy at 0.5 0.942
+    women    n 348356; ECE 0.057 [0.05, 0.07] (D-071's bar 0.05); reference voiced share 0.215, mean voiced_p 0.225; accuracy at 0.5 0.931
+    all      n 688408; ECE 0.051 [0.04, 0.06] (D-071's bar 0.05); reference voiced share 0.225, mean voiced_p 0.220; accuracy at 0.5 0.936
+

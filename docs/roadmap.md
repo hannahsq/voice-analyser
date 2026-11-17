@@ -16,6 +16,10 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
   4. Evaluation power: D-095 (draft: Saarbrücken's allocation and a within-speaker f0 slope).
   5. D-096: repeatability and the minimal detectable change, the number the outcomes aim needs.
   6. M5's code (streaming VQT, the causal student) alongside; none of it waits on F1.
+- **State on 2026-11-17 (D-118 to D-123)**, after a review of D-092 to D-117:
+  - *Done*: D-096 (a 20-sentence recording shows 1.4-1.5 % in length, 90-100 c in F1; content is over half of what moves both between utterances; band-limited channels cost as much as the measurement error for length). D-120, item 10's stage B (formant sigma is not too wide on real voices and ranks frames by error on running speech; a cut on F1's sigma would thin women's and high-f0 frames, so weight, don't cut). D-118 (the reconstruction arms' length cost is kept and larger with words read in context: -0.07 to -0.10). D-119 and D-121 (the loss pushes F1 away from 2 f0, which the closed-phase reference does not ask for, and against v3.1's compression of women's F1 at both ends, which it does).
+  - *Waiting for Hannah*: **D-122**, a draft of M4's own decision rule (gold-set gains against a null arm in place of D-086's list; PTDB-TUG's RPA guard restored; the length guard read in context too); **D-123**, a draft of the reconstruction loss's next design with the check that should decide between its candidate terms before any training; and whether M3 closes (item 7 has no closing entry) before the next M4 arm.
+  - *Still open from the order above*: D-095 (draft), item 7's closing entry, the lockbox, D-099 (parked).
 
 *State on 2026-10-30. Results and reasoning are in D-025 to D-049 (decisions.md).*
 
