@@ -28,14 +28,14 @@ DEV_FRAC = 0.6
 SEED = 20261011
 DEV_ONLY = ("cmu_arctic", "openglot", "birkholz2019")  # too few speakers to split, or analysis tools
 LOCKBOX = ("mocha_timit", "artspeech")  # not yet looked at, too small to split (artspeech: D-069)
-# Single speakers kept in the lockbox whatever their corpus's split (D-035): the USC 75-speaker MRI set's 16 speakers
-# with hand-drawn contours in 75-Speaker Annot-16, its best anatomical (MRI midline) VTL references
-LOCKBOX_SPEAKERS = frozenset(f"usc75:sub{n:03d}" for n in (9, 13, 22, 23, 28, 30, 34, 43, 47, 61, 64, 68, 70, 71, 72, 74))
-# The USC set's other 59 speakers (D-066): semi-private are the 25 in vtl-mri's evaluation set (V-012), which get dense
-# hand labels; the other 34, sparsely labelled, are dev. Taken from V-012's split (seeded,
-# stratified by sex, fixed before any of them was labelled or measured) rather than drawn again, so the tiers nest.
-USC75_SEMI = frozenset(f"usc75:sub{n:03d}" for n in (2, 3, 4, 5, 7, 20, 21, 25, 27, 31, 32, 35, 36, 38, 41, 45, 46, 48,
-                                                     49, 50, 53, 62, 69, 73, 75))
+# Single speakers kept in the lockbox whatever their corpus's split (D-125, swapping D-035 and D-066): the USC
+# 75-speaker MRI set's 25 speakers in vtl-mri's evaluation set (V-012's split: seeded, stratified by sex, fixed before
+# any of them was labelled or measured), test-only there, so their MRI reference is held out
+LOCKBOX_SPEAKERS = frozenset(f"usc75:sub{n:03d}" for n in (2, 3, 4, 5, 7, 20, 21, 25, 27, 31, 32, 35, 36, 38, 41, 45, 46,
+                                                           48, 49, 50, 53, 62, 69, 73, 75))
+# Semi-private (D-125): the 16 speakers with hand-drawn contours in 75-Speaker Annot-16, densely hand-labelled; in
+# vtl-mri's training folds, with out-of-fold predictions. The other 34, sparsely labelled, are dev (D-066).
+USC75_SEMI = frozenset(f"usc75:sub{n:03d}" for n in (9, 13, 22, 23, 28, 30, 34, 43, 47, 61, 64, 68, 70, 71, 72, 74))
 # ArtSpeech's two speakers whose images vtl-mri trains on (its V-023), dev here (D-069 amendment 1): their MRI reference
 # is in-sample, so they serve method building on dev and the held-out eight keep the lockbox pessimistic
 ARTSPEECH_DEV = frozenset(("artspeech:P1", "artspeech:P7"))

@@ -1447,6 +1447,7 @@ Roadmap Next 4; D-021 item 4; plan §8.4's divergence from principle 1. **Questi
   - **Audio**: the speakers' 2D real-time MRI recordings (AAC, 22.05 kHz mono in the MP4s, scanner noise cancelled, so a hard domain; downloaded 2026-10-26, MD5 checked, kept zipped), from the main set's video archive (CC BY 4.0).
   - **Not used before that opening**: no model is run on them, no model is tuned against them, and they don't feed calibration.
   - **Scaling to the other 59 speakers** (a segmentation model trained on Annot-16's labels) is a separate roadmap item. Their tiers are set before any of them is measured.
+  - *Superseded 2026-11-21 (D-125)*: the 16 are now **semi-private**, and vtl-mri's 25 test-only speakers the lockbox.
 - *Checked before registering* (AGENTS.md; `reports/analysis/vtl/feasibility_*.txt` on `vtl-probe`):
   - *Synthetic*: length is decodable from L5. A crop-mean ridge gets held-out R² 0.81 (tube 0.86, cascade 0.73), against a shuffle null of −0.03. True F1–F4 through the calibrated uniform tube reach 0.96, so on synthetic data the formant baseline is strong, and the head's case rests on real voices and on vowel invariance.
   - *Real noise floors* (Hillenbrand dev):
@@ -2389,6 +2390,7 @@ sex (no per-speaker lengths were looked at for choosing anything). Set now, befo
   does not matter here: it makes that speaker's length no worse, and "held out" only matters for vtl-mri's own
   accuracy estimate. 34 / 59 is 0.58, close to `DEV_FRAC`.
 - *Not changed*: the audio rule. No voice model has been run on any of these speakers.
+- *Superseded 2026-11-21 (D-125)*: the 25 are now the **lockbox** and the 16 Annot-16 speakers semi-private; dev unchanged.
 
 ## D-067 (2026-11-02, draft, not registered; nothing measured): the MRI length reference: per-frame and per-speaker lengths, posture adjustment and masking
 
@@ -2410,6 +2412,7 @@ sex (no per-speaker lengths were looked at for choosing anything). Set now, befo
   - *Lockbox*, once per milestone, rule set beforehand, two claims reported separately: same lab (USC's 16; say
     whether their reference avoids Annot-16's labels) and across labs and languages (ArtSpeech's 8, D-069; D-070 found
     the audio usable).
+  - *Tiers swapped 2026-11-21 (D-125)*: semi-private is now USC's 16 (Annot-16, densely hand-labelled) and the same-lab lockbox claim USC's 25 (vtl-mri's evaluation set); read the two lines above with the sets exchanged.
   - *Order*: vtl-mri's eval set and reference error; this entry registered with thresholds from it; dev work; the dev
     probe; semi at a release candidate; lockbox at the milestone.
 - *Pooling across tiers* (2026-11-03): dev is where the methods are tuned, so dev figures are optimistic for any
@@ -4450,6 +4453,24 @@ USC-TIMIT (Narayanan et al. 2014; 10 speakers, real-time MRI with audio, CC BY 4
 - *The other 6* (by the released metadata, none can be a USC 75 speaker), by vtl-mri's V-043 split, the same rule as D-066 (what vtl-mri keeps test-only is semi-private here):
   - **dev**: vtl-mri's 2 dev speakers (one woman, one man);
   - **semi-private**: vtl-mri's 4 test speakers (held out there too, so their reference is a held-out one, as D-069 amendment 1 wants for untouched tiers).
-- *Not lockbox*: D-067's lockbox makes two claims, same lab (USC's 16) and another lab and language (ArtSpeech's 8). USC-TIMIT is the same lab, so it adds no independent claim, and 4 speakers can't carry one alone.
+- *Not lockbox* (D-125, 2026-11-21: USC 75's same-lab lockbox is now its 25, and this reasoning stands): D-067's lockbox makes two claims, same lab (USC's 16) and another lab and language (ArtSpeech's 8). USC-TIMIT is the same lab, so it adds no independent claim, and 4 speakers can't carry one alone.
 - *Where the assignment lives*: not in `tiers.json` or anywhere in this repo. USC-TIMIT's speaker ids are public, so listing the 6 kept would show by elimination which 4 could be USC 75 participants, the link V-042 is built never to record. The per-speaker split stays private with vtl-mri's (`C:\github\datasets\usc_timit_derived\v043_split.tsv`; outside both repos); code that needs the tiers reads it from there and maps dev to dev, test to semi-private. The repo records counts only: 2 dev, 4 semi-private, 4 excluded.
 - *Before any of its audio is used here*: an entry in `ATTRIBUTION.md`, and a D-068-style check that the audio is usable for length. Its speakers read the MOCHA-TIMIT prompts; only the texts are shared, so neither the TIMIT licence rule (LDC's audio) nor MOCHA-TIMIT's evaluation-only rule (its recordings) applies to USC-TIMIT's own recordings.
+
+## D-125 (2026-11-21, Hannah; before any voice model is compared with, or run on the audio of, any non-dev MRI speaker): USC 75's lockbox and semi-private sets swap, and the older USC readout family waits for overlap answers
+
+*Status*: **decided** (Hannah, 2026-11-21: proposed by her, drafted by Claude, "Yes please"). Replaces D-035's lockbox speakers and D-066's semi-private assignment for USC 75; `tiers.py` and `tiers.json` changed with it. Dev (D-066's 34) is unchanged.
+
+- *The swap*: **lockbox** are the 25 speakers vtl-mri's V-012 keeps test-only (D-066's list: sub002, 003, 004, 005, 007, 020, 021, 025, 027, 031, 032, 035, 036, 038, 041, 045, 046, 048, 049, 050, 053, 062, 069, 073, 075; 11 men, 14 women); **semi-private** are the 16 Annot-16 speakers (D-035's list; 9 men, 7 women).
+- *Why*:
+  - *The lockbox should be the pessimistic case* (D-069 amendment 1's principle): a held-out reference whose error vtl-mri's evaluation labels measure. The 25 were never in vtl-mri's training; the 16 are in its training folds (out-of-fold predictions now, but trained on).
+  - *Power*: 25 against 16 speakers; the within-sex correlation the lockbox can detect falls from about 0.7 to about 0.6.
+  - *The labels*: the 25 are vtl-mri's evaluation set and will be densely hand-labelled for its acceptance; the 16's dense labels make a strong reference for semi-private confirmations. vtl-mri dropped Annot-16's own contours (D-067), so neither set's reference rests on them.
+  - The swap moves two whole existing sets for these structural reasons. No speaker was chosen, and nothing of any voice model on either set is known.
+- *Seen beforehand, of each set*:
+  - *Here*: no voice model has been run on the audio of either set (D-068 used dev only) and no MRI length has been compared with a voice model's on any speaker. The 16's reference lengths built from Annot-16's contours (D-035, "Seen while building it": aggregates by sex, ranges, within-speaker IQR); vtl-mri's model-length aggregates by sex on 34 of the 59 (D-066); vtl-mri's pooled reference error over its non-test speakers, which include the 16 and none of the 25 (D-067's note of 2026-11-19).
+  - *In vtl-mri*: per-speaker results on images for both sets (contours, lengths, errors against Hannah's labels), as its log records. Image-side only; they say nothing of any voice model.
+  - This session still must not learn which semi-private or lockbox MRI speakers have data problems; counts per tier only.
+- *Unchanged*: the 16 stay "No Redistribution" (Annot-16's licence); ArtSpeech (8 lockbox, P1 and P7 dev, D-069); D-067's design, whose lockbox line now reads USC's 25 for the same-lab claim and whose semi-private line reads USC's 16.
+- *USC-TIMIT* (D-124): stays 2 dev, 4 semi-private. The rule is restated: vtl-mri's test-only speakers are lockbox for USC 75 and semi-private elsewhere, since the lockbox is kept for the sets carrying a milestone's main held-out claims; USC-TIMIT, the same lab on an older readout, adds no independent one (D-124).
+- *The older USC readout family, waiting*: USC-TIMIT (10), the USC morphological database (17: 9 women, 8 men; audio with volumetric MRI of held vowels and continuants, and audio with 68 x 68 px real-time MRI at about 24 fps; unlabelled) and USC-EMO-MRI share an older scanner setup. The publisher states, to the best of its knowledge, that the morphological database shares no speaker with USC 75. Being disjoint from USC 75 does not make these sets disjoint from each other, and tiers are per person, so a person in two sets must never get two tiers. Until USC answers on every pair, none of the morphological database or USC-EMO-MRI is used, here or as a reference for anything here; D-124's interim tiers for USC-TIMIT stand. Overlap is never inferred from voices or images (that would be identifying speakers); V-042's exclusion by released metadata is the only interim tool. Once known: the family's speakers get tiers by a seeded draw stratified by sex (as V-012), as a second same-scanner claim beside USC 75's lockbox, each corpus entered in `ATTRIBUTION.md` with its licence first. If the morphological database's volumes calibrate the midline-to-area conversion in vtl-mri, those speakers count as training for anything using area functions and go to dev. USC's single-speaker long set is in the same position until its speaker is known not to be in another set.

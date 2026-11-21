@@ -23,9 +23,9 @@ def test_dev_only_and_lockbox_corpora():
 
 
 def test_lockbox_speakers_override_their_corpus():
-    a = tiers.assign(["usc75:sub009", "usc75:sub001"])
-    assert a["usc75:sub009"] == "lockbox" and a["usc75:sub001"] in ("dev", "semi")
-    assert tiers.tier_of("usc75:sub074", {"usc75:sub074": "dev"}) == "lockbox"
+    a = tiers.assign(["usc75:sub002", "usc75:sub001"])
+    assert a["usc75:sub002"] == "lockbox" and a["usc75:sub001"] in ("dev", "semi")
+    assert tiers.tier_of("usc75:sub075", {"usc75:sub075": "dev"}) == "lockbox"
 
 
 def test_filter_keeps_training_rows_and_drops_other_tiers():
@@ -70,11 +70,12 @@ def test_suite_report_reads_only_the_named_tiers(tmp_path, capsys):
 
 
 def test_usc75_tiers_nest_with_vtl_mri_split():
-    """D-066: the 16 Annot-16 speakers lockbox, vtl-mri V-012's 25 test-only speakers semi, the other 34 dev."""
+    """D-125 (swapping D-035 / D-066): vtl-mri V-012's 25 test-only speakers lockbox, the 16 Annot-16 speakers semi,
+    the other 34 dev."""
     ids = [f"usc75:sub{n:03d}" for n in range(1, 76)]
     a = tiers.assign(ids)
-    assert {s for s in ids if a[s] == "lockbox"} == tiers.LOCKBOX_SPEAKERS
-    assert {s for s in ids if a[s] == "semi"} == tiers.USC75_SEMI and len(tiers.USC75_SEMI) == 25
+    assert {s for s in ids if a[s] == "lockbox"} == tiers.LOCKBOX_SPEAKERS and len(tiers.LOCKBOX_SPEAKERS) == 25
+    assert {s for s in ids if a[s] == "semi"} == tiers.USC75_SEMI and len(tiers.USC75_SEMI) == 16
     assert sum(a[s] == "dev" for s in ids) == 34
     t = tiers.load()
     assert {s: t[s] for s in ids} == a
