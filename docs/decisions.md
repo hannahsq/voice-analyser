@@ -55,9 +55,13 @@ Other measurements from the same session, for the record:
 
 ## D-004 (2026-10-07): formant detection-rate criterion, AND vs OR (open)
 
+*Status (2026-11-21)*: **dormant, not open.** The comparison it guards, against QCP-FB's and FormantNet's published detection rates, is on VTR-TIMIT, which needs a TIMIT licence we don't have (M1's acceptance deferred it), so it has never been made. The default `mode="and"` stands; check the papers' definition if a licensed VTR comparison, or another paper's detection rate, is ever used.
+
 "Within (20 %, 200 Hz)" (plan §6.2) can mean both bounds or either bound. `metrics.detection_rate` supports both and defaults to `mode="and"` (stricter). Check the definition used by the QCP-FB and FormantNet papers before comparing against their reported numbers, and report under that definition.
 
 ## D-005 (2026-10-07): gold-set loader formats need verifying against real data
+
+*Status (2026-11-21)*: **the four loaders are verified (below); one item is left: the licences.** PTDB-TUG (`LICENCE = "ODbL-1.0 (VERIFY)"`) and MIR-1K (`"... VERIFY"`) are still unverified in code and in `ATTRIBUTION.md`. Both are evaluation-only, so nothing trained depends on them; they need settling before the benchmark repo's release (roadmap item 8). Gold sets loaded later were verified in their own entries.
 
 The loaders were written from the documented layouts before any corpus was on disk. Each module marks its assumptions with `ASSUMPTION`. Check them the first time each corpus is loaded:
 
@@ -433,6 +437,8 @@ Adopt full decoupling for teacher v3 if the probe's median |slope| falls clearly
 
 ## D-021 (2026-10-09, planned): temporal module, crop length, and vocal-tract-length outputs
 
+*Status (2026-11-21)*: **done in substance; nothing left to run under this entry.** Step 1: the Conformer was benched and then adopted (notes below; `temporal = conformer` in teacher v3, v3.1 and labeller v3, `docs/architectures.md`). Step 2: mixed crop lengths, 2026-10-11 (below), in every recipe since. Step 3: the per-formant observability label went to D-027, which is still in progress. The vocal-tract-length outputs went to the joint VTL head (D-040, 5b).
+
 Planned work, in this order, each step on the winner of the previous one and after the D-020 decision. Each comparison changes one thing.
 
 **1. Conformer instead of the BiGRUs.** The convolutional front end stays; only the temporal modules change. The main encoder's 2-layer BiGRU becomes a small Conformer (about 4 blocks, width 192–256, 4 heads, a time-convolution kernel of 15–31 frames, relative position encoding), with the same parameter count. The f0 branch's BiGRU becomes a dilated 1-D convolution stack. Recipe: d06k's (6000 constant + 4000 decay steps) on the D-020 winner's data. Compared on synthetic validation, the D-020 measures (the f0-invariance probe included, since attention could find a new path from pitch to tract) and step time. Expected: accuracy about equal; training 15–20 % faster per step (the GRUs are about 22 % of a step, and the dilated 2-D convolutions remain the main cost); CPU inference 1.5–1.8× faster (the GRUs are about 45 % of it at 4 threads, and are sequential); and streaming becomes possible with chunked attention, which a BiGRU cannot do. Mamba and RWKV are deferred: they have no fused kernels on Windows ROCm.
@@ -479,6 +485,8 @@ Check before generating (targets sampled as generated, 500 per group; F1 / F2 me
 2. *A real-voice property the teacher reads as higher F1*, which Praat largely does not (+2 to +5 Hz on the same frames): open-phase damping (wider F1 bandwidths), source spectrum (H1–H2, tilt), subglottal coupling, or how harmonics sample a real resonance. A sensitivity probe (fixed vowels, one source or physics factor varied at a time, teacher F1 shift measured) can locate it without training.
 
 ## D-023 (2026-10-10): glottal coupling within the cycle: what the teacher misreads (planned ablation)
+
+*Status (2026-11-21)*: **the ablation ran; the entry is closed.** The plan's ablation ran as `train_v2c` (2026-10-11) and `train_v2c2` (2026-10-13), both under its 5 Hz bar (notes in the following entries), so coupling as synthesised is not the main cause, and teacher v3.1 trained without it. The coupling's size was checked again in D-074 and D-075. What stays open is the definition question these terms raise (closed-glottis against effective F1): `considering.md` ("A whole-cycle effective F1 head") and `docs/f1_bias_register.md` ("F1's definition").
 
 **Terms.** Following Birkholz et al. (2019) and Titze et al. (2015): *resonances* fR1–fR3 are the poles of the closed-glottis tract (what the synthetic labels and closed-phase LPC measure); *formants* F1–F3 are spectral peaks of the actual signal, which also depend on the source. The teacher's target stays fR: it is a property of the tract alone, so before/after comparisons are not moved by changes in the voice source. Formants are what listeners hear, and an effective-formant output may be added later for perceptual questions.
 
@@ -1738,6 +1746,8 @@ Registered with Hannah's agreement, including the noise-calibrated f0 guard at t
 ## D-042 (2026-10-28, draft, not registered): is Adan too hot for a head on frozen features, or just worse?
 
 *On hold (Hannah, 2026-10-28 23:00): committed as a draft; it is registered and run only after roadmap item 8's low-effort probes (the bias triangulation: D-043, the inverse-filtering test, the domain discriminator). Its two checks before registering still apply.*
+
+*Status (2026-11-21)*: **still a draft; its precondition is met, and it has dropped in priority.** The three probes it waited for have run (D-043, D-044's ripple test, D-045's domain discriminator). Since then 5b, trained end to end with Muon + Adan, was adopted (D-040), D-041 found no f0 cost of Adan end to end, and the work moved to M4 (D-091), so nothing on the current path trains a head on frozen features with Adan. Register it (its two checks before registering first) only if a frozen-head recipe with Adan returns.
 
 Hannah: maybe Muon + Adan is not worse on frozen features, and R3a (D-040's optimiser check) only had too high a rate or too short a warm-up. R3a fitted synthetic data slightly better than AdamW (validation 22.87 against 22.70 dB) and was non-inferior on reliability; what failed was f0 dependence (probe excess +8.9 against +1.5 c/oct). Its rate, 1e-2, is rA's Adan group's (2e-3 × `rest_lr_scale` 5). That ratio was carried over from D-030's small model and scaled with Muon in D-031, never chosen for heads, and D-031 never scored f0 invariance. Frozen features also cannot adjust their scale to a head's rate as a trunk does. D-041 found no f0 cost of rA end to end, so the question is specific to heads on frozen features.
 
