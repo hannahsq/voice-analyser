@@ -13,14 +13,14 @@ What is planned and in what order. Reasons and results go in `decisions.md`; thi
   2. Close M3: items 7 and 10 below, then the lockbox, once.
   3. M4 (item 9), led by the f0-change equivariance if D-094 finds v3.1 breaks it on real envelopes, by the reconstruction loss if not.
      *Decided 2026-11-12 (D-092 to D-094, D-101)*: **M4 leads with the reconstruction loss.** D-094's WORLD gate failed, and D-101 traced the failure to CheapTrick's envelope (v3.1 is invariant given the exact envelope). T2 waits for pairs with exact envelopes. D-092: KL's level comes with the coupled flow, so the renderer has to model coupling's detail near F1, not a smooth envelope. D-093: Hillenbrand's group gradient is not f0 or the vowel.
-  4. Evaluation power: D-095 (draft: Saarbrücken's allocation and a within-speaker f0 slope).
+  4. Evaluation power: D-095 (Saarbrücken's allocation decided 2026-11-21, amendment 1; the within-speaker f0 slope still a draft).
   5. D-096: repeatability and the minimal detectable change, the number the outcomes aim needs.
   6. M5's code (streaming VQT, the causal student) alongside; none of it waits on F1.
 - **State on 2026-11-17 (D-118 to D-123)**, after a review of D-092 to D-117:
   - *Done*: D-096 (a 20-sentence recording shows 1.4-1.5 % in length, 90-100 c in F1; content is over half of what moves both between utterances; band-limited channels cost as much as the measurement error for length). D-120, item 10's stage B (formant sigma is not too wide on real voices and ranks frames by error on running speech; a cut on F1's sigma would thin women's and high-f0 frames, so weight, don't cut). D-118 (the reconstruction arms' length cost is kept and larger with words read in context: -0.07 to -0.10). D-119 and D-121 (the loss pushes F1 away from 2 f0, which the closed-phase reference does not ask for, and against v3.1's compression of women's F1 at both ends, which it does).
   - *Waiting for Hannah*: **D-122**, a draft of M4's own decision rule (gold-set gains against a null arm in place of D-086's list; PTDB-TUG's RPA guard restored; the length guard read in context too); **D-123**, a draft of the reconstruction loss's next design with the check that should decide between its candidate terms before any training; and whether M3 closes (item 7 has no closing entry) before the next M4 arm.
   - *Items 7, 8 and 10 closed 2026-11-21 (D-126)*: item 7's thresholds computed (`reports/probes/thresholds.json`); item 10 closed by D-071 and D-120; item 8's leftovers moved (training pools to M4; the Parakeet probe out). The MRI lockbox is not opened at M3 (D-125). M3's acceptance needs its rule registered and a lockbox to open (D-126, last section).
-  - *Still open from the order above*: D-095 (draft), the lockbox, D-099 (parked).
+  - *Still open from the order above*: D-095's slope measure (draft), the lockbox (2026-11-21: Saarbrücken allocated, D-095 amendment 1; MOCHA-TIMIT's loader registered, D-127), D-099 (parked).
 
 *State on 2026-10-30. Results and reasoning are in D-025 to D-049 (decisions.md).*
 

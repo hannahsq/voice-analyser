@@ -38,7 +38,7 @@ def test_filter_keeps_training_rows_and_drops_other_tiers():
 
 def test_committed_file_covers_every_gold_speaker():
     t = tiers.load()
-    assert set(t.values()) <= set(tiers.TIERS)
+    assert set(t.values()) <= set(tiers.TIERS) | set(tiers.OFF_TIERS)
     hb = [s for s in t if s.startswith("hillenbrand:")]
     assert len(hb) == 139 and sum(t[s] == "dev" for s in hb) == 83
     assert sorted(t[s] for s in t if s.startswith("ptdb_tug:")).count("dev") == 12
@@ -88,3 +88,9 @@ def test_artspeech_tiers():
     want = {s: "dev" if s in dev else "lockbox" for s in ids}
     assert tiers.assign(ids) == want
     assert {s: tiers.tier_of(s, {}) for s in ids} == want
+
+
+def test_off_tiers_never_pass_the_filter():
+    """D-095: "reserve" and "excluded" speakers are in the file but no tier selection reads them."""
+    t = {"saarbruecken:1": "reserve", "saarbruecken:2": "excluded", "saarbruecken:3": "lockbox"}
+    assert {r.speaker_id for r in tiers.filter_rows(_rows(list(t)), tiers.TIERS, t)} == {"saarbruecken:3"}

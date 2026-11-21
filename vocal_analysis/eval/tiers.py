@@ -4,6 +4,7 @@
 - semi: semi-private. Confirms a decision made on dev ("does it replicate?"), never makes one; each use is logged in
   docs/decisions.md.
 - lockbox: opened only at milestone acceptance, with the rule set beforehand; each opening is logged.
+- reserve / excluded (OFF_TIERS): in the file, never allowed by `filter_rows`.
 
 Gold sets used before 2026-10-11 are split 60 / 40 (dev / semi) by speaker, balanced within groups (Hillenbrand:
 men, women, boys, girls; PTDB-TUG: women, men). Corpora too small to split by speaker, or used as analysis tools
@@ -23,6 +24,9 @@ from typing import Iterable
 from ..data.manifest import ManifestRow
 
 TIERS = ("dev", "semi", "lockbox")
+# Values tiers.json may hold that no evaluation ever reads (D-095): "reserve", drawn and unopened, kept for a later
+# decision (training or evaluation) without a re-draw; "excluded", out of every tier (Saarbruecken's under-18s)
+OFF_TIERS = ("reserve", "excluded")
 TIER_FILE = Path(__file__).with_name("tiers.json")
 DEV_FRAC = 0.6
 SEED = 20261011
