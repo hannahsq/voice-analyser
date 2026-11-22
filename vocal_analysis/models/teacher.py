@@ -95,6 +95,14 @@ class TeacherConfig:
     side_queries: int = 8
     side_dim: int = 64
     side_bins: int = 9
+    # D-128 (M5, the causal student): every time convolution pads on the left only; GroupNorms normalise each frame
+    # on its own instead of over the clip's time axis; the Conformer's attention sees only the past (attn_window
+    # frames including the current one, 0 = the whole past); `lookahead` frames of silence are appended, so output t
+    # may read input frames up to t + lookahead. Off = the teacher, unchanged; the same weights load either way.
+    # Needs the Conformer temporal module and the flat read-out. `Teacher.step` runs it frame by frame with caches.
+    causal: bool = False
+    attn_window: int = 0
+    lookahead: int = 0
 
 
 class _GradGate(torch.autograd.Function):
@@ -123,27 +131,54 @@ def normalise(logpow: torch.Tensor) -> torch.Tensor:
     return torch.stack([shape, level], 1)
 
 
+def _norm(norm: nn.GroupNorm, x: torch.Tensor, per_frame: bool) -> torch.Tensor:
+    """GroupNorm over (channels in group, frequency, time) as the teacher, or per frame (causal: no statistic reads
+    another frame). x: (B, C, F, T) or (B, C, T)."""
+    if not per_frame:
+        return norm(x)
+    if x.dim() == 4:
+        b, c, f, t = x.shape
+        return norm(x.permute(0, 3, 1, 2).reshape(b * t, c, f)).reshape(b, t, c, f).permute(0, 2, 3, 1)
+    b, c, t = x.shape
+    return norm(x.permute(0, 2, 1).reshape(b * t, c, 1)).reshape(b, t, c).permute(0, 2, 1)
+
+
+def _context(state: torch.Tensor | None, x: torch.Tensor, n: int) -> torch.Tensor:
+    """The last n frames before x (zeros at the start, as left padding) joined to x along the last axis."""
+    if state is None:
+        state = x.new_zeros(*x.shape[:-1], n)
+    return torch.cat([state, x], -1)
+
+
 class Block(nn.Module):
-    def __init__(self, c_in: int, c_out: int, dil: int):
+    def __init__(self, c_in: int, c_out: int, dil: int, causal: bool = False):
         super().__init__()
-        self.conv = nn.Conv2d(c_in, c_out, (3, 3), padding=(dil, 1), dilation=(dil, 1))
+        self.causal = causal
+        self.conv = nn.Conv2d(c_in, c_out, (3, 3), padding=(dil, 0 if causal else 1), dilation=(dil, 1))
         self.norm = nn.GroupNorm(8, c_out)
         self.skip = nn.Conv2d(c_in, c_out, 1) if c_in != c_out else nn.Identity()
 
     def forward(self, x):
-        return self.skip(x) + Fn.gelu(self.norm(self.conv(x)))
+        y = self.conv(Fn.pad(x, (2, 0)) if self.causal else x)
+        return self.skip(x) + Fn.gelu(_norm(self.norm, y, self.causal))
+
+    def step(self, x, state):
+        """Causal only: x (B, C, F, n) new frames; state the 2 input frames before them (None at the start)."""
+        ctx = _context(state, x, 2)
+        return self.skip(x) + Fn.gelu(_norm(self.norm, self.conv(ctx), True)), ctx[..., -2:]
 
 
 class Down(nn.Module):
     """Halve frequency resolution (stride 2 along frequency only)."""
 
-    def __init__(self, c_in: int, c_out: int):
+    def __init__(self, c_in: int, c_out: int, causal: bool = False):
         super().__init__()
+        self.causal = causal
         self.conv = nn.Conv2d(c_in, c_out, (3, 1), stride=(2, 1), padding=(1, 0))
         self.norm = nn.GroupNorm(8, c_out)
 
     def forward(self, x):
-        return Fn.gelu(self.norm(self.conv(x)))
+        return Fn.gelu(_norm(self.norm, self.conv(x), self.causal))
 
 
 def _freq_after(n: int, downs: int) -> int:
@@ -152,12 +187,12 @@ def _freq_after(n: int, downs: int) -> int:
     return n
 
 
-def _rope(x: torch.Tensor) -> torch.Tensor:
+def _rope(x: torch.Tensor, offset: int = 0) -> torch.Tensor:
     """Rotary position embedding over time for (B, H, T, D): attention depends only on relative position, so any
-    crop length works."""
+    crop length works. offset: the absolute index of the first frame (streaming)."""
     d, t = x.shape[-1], x.shape[-2]
     inv = 1.0 / (10000.0 ** (torch.arange(0, d, 2, device=x.device, dtype=torch.float32) / d))
-    ang = torch.arange(t, device=x.device, dtype=torch.float32)[:, None] * inv[None]
+    ang = torch.arange(offset, offset + t, device=x.device, dtype=torch.float32)[:, None] * inv[None]
     cos, sin = ang.cos().to(x.dtype), ang.sin().to(x.dtype)
     x1, x2 = x[..., 0::2], x[..., 1::2]
     return torch.stack([x1 * cos - x2 * sin, x1 * sin + x2 * cos], -1).flatten(-2)
@@ -167,49 +202,96 @@ class ConformerBlock(nn.Module):
     """Gulati et al. (2020): half feed-forward, self-attention (rotary positions), convolution module, half
     feed-forward, LayerNorm. LayerNorm instead of BatchNorm in the convolution module (batch-size independent)."""
 
-    def __init__(self, d: int, heads: int, kernel: int, ff_mult: int):
+    def __init__(self, d: int, heads: int, kernel: int, ff_mult: int, causal: bool = False, window: int = 0):
         super().__init__()
         ff = lambda: nn.Sequential(nn.LayerNorm(d), nn.Linear(d, ff_mult * d), nn.SiLU(), nn.Linear(ff_mult * d, d))  # noqa: E731
         self.ff1, self.ff2 = ff(), ff()
         self.heads = heads
+        self.causal, self.window, self.kernel = causal, window, kernel
         self.att_norm = nn.LayerNorm(d)
         self.qkv = nn.Linear(d, 3 * d)
         self.att_out = nn.Linear(d, d)
         self.conv_norm = nn.LayerNorm(d)
         self.pw1 = nn.Linear(d, 2 * d)
-        self.dw = nn.Conv1d(d, d, kernel, padding=kernel // 2, groups=d)
+        self.dw = nn.Conv1d(d, d, kernel, padding=0 if causal else kernel // 2, groups=d)
         self.dw_norm = nn.LayerNorm(d)
         self.pw2 = nn.Linear(d, d)
         self.out_norm = nn.LayerNorm(d)
 
-    def forward(self, x):  # (B, T, d)
-        x = x + 0.5 * self.ff1(x)
+    def _mask(self, q_pos: torch.Tensor, k_pos: torch.Tensor) -> torch.Tensor:
+        """(n_q, n_k) True where query i may read key j: the past and present, within the window."""
+        lag = q_pos[:, None] - k_pos[None, :]
+        ok = lag >= 0
+        return ok & (lag < self.window) if self.window else ok
+
+    def _attend(self, x, offset: int, cache):
         b, t, d = x.shape
         q, k, v = self.qkv(self.att_norm(x)).view(b, t, 3, self.heads, d // self.heads).permute(2, 0, 3, 1, 4)
-        a = Fn.scaled_dot_product_attention(_rope(q), _rope(k), v)
-        x = x + self.att_out(a.transpose(1, 2).reshape(b, t, d))
-        h = Fn.glu(self.pw1(self.conv_norm(x)), -1)
-        h = self.dw(h.transpose(1, 2)).transpose(1, 2)
-        x = x + self.pw2(Fn.silu(self.dw_norm(h)))
+        q, k = _rope(q, offset), _rope(k, offset)
+        if cache is not None:  # streaming: the window's earlier keys and values, already rotated
+            k, v = torch.cat([cache[0], k], 2), torch.cat([cache[1], v], 2)
+        mask = None
+        if self.causal:
+            pos = torch.arange(offset - (k.shape[2] - t), offset + t, device=x.device)
+            mask = self._mask(pos[-t:], pos)
+        a = Fn.scaled_dot_product_attention(q, k, v, attn_mask=mask)
+        return self.att_out(a.transpose(1, 2).reshape(b, t, d)), (k, v)
+
+    def _conv(self, x, state):
+        h = Fn.glu(self.pw1(self.conv_norm(x)), -1).transpose(1, 2)  # (B, d, T)
+        if self.causal:
+            h = _context(state, h, self.kernel - 1)
+        out = self.dw(h).transpose(1, 2)
+        return self.pw2(Fn.silu(self.dw_norm(out))), h[..., -(self.kernel - 1):] if self.causal else None
+
+    def forward(self, x):  # (B, T, d)
+        x = x + 0.5 * self.ff1(x)
+        x = x + self._attend(x, 0, None)[0]
+        x = x + self._conv(x, None)[0]
         x = x + 0.5 * self.ff2(x)
         return self.out_norm(x)
+
+    def step(self, x, state):
+        """Causal with a window only: x (B, n, d) new frames; state (pos, keys, values, conv context) or None."""
+        pos, cache, conv = (0, None, None) if state is None else (state[0], state[1], state[2])
+        x = x + 0.5 * self.ff1(x)
+        a, (k, v) = self._attend(x, pos, cache)
+        x = x + a
+        c, conv = self._conv(x, conv)
+        x = x + c
+        x = x + 0.5 * self.ff2(x)
+        keep = self.window - 1  # the window's earlier frames; window 0 keeps the whole past (unbounded)
+        cut = max(0, k.shape[2] - keep)
+        kv = (k, v) if not self.window else (k[:, :, cut:], v[:, :, cut:])
+        return self.out_norm(x), (pos + x.shape[1], kv, conv)
 
 
 class DilatedConv1d(nn.Module):
     """Residual depthwise-separable dilated 1-D convolutions over time (the f0 branch's temporal module in the
     conformer variant)."""
 
-    def __init__(self, d: int, dilations: tuple[int, ...]):
+    def __init__(self, d: int, dilations: tuple[int, ...], causal: bool = False):
         super().__init__()
-        self.dw = nn.ModuleList([nn.Conv1d(d, d, 3, padding=r, dilation=r, groups=d) for r in dilations])
+        self.causal, self.dilations = causal, tuple(dilations)
+        self.dw = nn.ModuleList([nn.Conv1d(d, d, 3, padding=0 if causal else r, dilation=r, groups=d) for r in dilations])
         self.pw = nn.ModuleList([nn.Conv1d(d, d, 1) for _ in dilations])
         self.norms = nn.ModuleList([nn.GroupNorm(8, d) for _ in dilations])
 
     def forward(self, x):  # (B, T, d)
         h = x.transpose(1, 2)
-        for dw, pw, norm in zip(self.dw, self.pw, self.norms):
-            h = h + Fn.gelu(norm(pw(dw(h))))
+        for r, dw, pw, norm in zip(self.dilations, self.dw, self.pw, self.norms):
+            y = dw(Fn.pad(h, (2 * r, 0)) if self.causal else h)
+            h = h + Fn.gelu(_norm(norm, pw(y), self.causal))
         return h.transpose(1, 2)
+
+    def step(self, x, state):
+        """Causal only: x (B, n, d); state per layer, the 2 r input frames before x (None at the start)."""
+        h, new = x.transpose(1, 2), []
+        for i, (r, dw, pw, norm) in enumerate(zip(self.dilations, self.dw, self.pw, self.norms)):
+            ctx = _context(None if state is None else state[i], h, 2 * r)
+            new.append(ctx[..., -2 * r:])
+            h = h + Fn.gelu(_norm(norm, pw(dw(ctx)), True))
+        return h.transpose(1, 2), new
 
 
 class ProjSide(nn.Module):
@@ -253,14 +335,17 @@ class Encoder(nn.Module):
     def __init__(self, c_in: int, chans: tuple[int, ...], dil_sets: tuple[tuple[int, ...], ...], embed: int,
                  hidden: int, layers: int, temporal: str = "gru", cfg: TeacherConfig | None = None, side: str = ""):
         super().__init__()
+        causal = bool(cfg and cfg.causal)
+        if causal and temporal == "gru":
+            raise ValueError("the causal mode has no GRU temporal module (the teacher's GRUs are bidirectional)")
         mods: list[nn.Module] = []
         c = c_in
         for i, (ch, dils) in enumerate(zip(chans, dil_sets)):
             if i > 0:
-                mods.append(Down(c, ch))
+                mods.append(Down(c, ch, causal))
                 c = ch
             for d in dils:
-                mods.append(Block(c, ch, d))
+                mods.append(Block(c, ch, d, causal))
                 c = ch
         self.convs = nn.Sequential(*mods)
         self.n_freq = _freq_after(vqt.N_BINS, len(chans) - 1)
@@ -274,12 +359,13 @@ class Encoder(nn.Module):
         elif temporal == "conformer":
             d = cfg.conformer_dim
             self.t_in = nn.Linear(embed, d)
-            self.blocks = nn.Sequential(*[ConformerBlock(d, cfg.conformer_heads, cfg.conformer_kernel, cfg.conformer_ff_mult)
+            self.blocks = nn.Sequential(*[ConformerBlock(d, cfg.conformer_heads, cfg.conformer_kernel, cfg.conformer_ff_mult,
+                                                         causal, cfg.attn_window)
                                           for _ in range(cfg.conformer_layers)])
             self.out_dim = d
         elif temporal == "conv":
             self.t_in = nn.Linear(embed, cfg.f0_conv_dim)
-            self.tconv = DilatedConv1d(cfg.f0_conv_dim, cfg.f0_conv_dilations)
+            self.tconv = DilatedConv1d(cfg.f0_conv_dim, cfg.f0_conv_dilations, causal)
             self.out_dim = cfg.f0_conv_dim
         else:
             raise ValueError(f"unknown temporal module {temporal!r}")
@@ -305,6 +391,28 @@ class Encoder(nn.Module):
         else:
             h = self.tconv(self.t_in(h))
         return (h, kept) if maps else h
+
+    def step(self, x, state):
+        """Causal mode, frame by frame: x (B, C, F, n) new frames -> (h (B, n, out_dim), state). state None at the start."""
+        st = state or {}
+        new, h = {}, x
+        for i, m in enumerate(self.convs):
+            if isinstance(m, Block):
+                h, new[i] = m.step(h, st.get(i))
+            else:
+                h = m(h)
+        b, c, f, t = h.shape
+        m = h
+        h = Fn.gelu(self.proj(h.permute(0, 3, 1, 2).reshape(b, t, c * f)))
+        if hasattr(self, "side"):
+            h = h + self.side(m)
+        if self.temporal == "conformer":
+            h = self.t_in(h)
+            for j, blk in enumerate(self.blocks):
+                h, new[("conformer", j)] = blk.step(h, st.get(("conformer", j)))
+        else:
+            h, new["tconv"] = self.tconv.step(self.t_in(h), st.get("tconv"))
+        return h, new
 
 
 def _interp_matrix(src_log2: torch.Tensor, dst_log2: torch.Tensor) -> torch.Tensor:
@@ -396,6 +504,10 @@ class Teacher(nn.Module):
     def __init__(self, cfg: TeacherConfig | None = None):
         super().__init__()
         self.cfg = cfg = cfg or TeacherConfig()
+        if cfg.causal and (cfg.temporal != "conformer" or cfg.readout != "flat"):
+            raise ValueError("the causal mode needs the Conformer temporal module and the flat read-out")
+        if not cfg.causal and (cfg.attn_window or cfg.lookahead):
+            raise ValueError("attn_window and lookahead belong to the causal mode")
         c1 = cfg.f0_channels
         conformer = cfg.temporal == "conformer"
         self.f0_net = Encoder(2, (c1, c1), ((1, 2, 4), (1, 2)), 256, cfg.f0_gru_hidden, 1, "conv" if conformer else "gru", cfg)
@@ -479,8 +591,37 @@ class Teacher(nn.Module):
         formant_fed: (B, T, N) bin indices fed to later formant heads and the mask in place of the chain's own means,
         NaN where not given (D-086, teacher forcing of the chain). vtl_inst_fed: (B, T) log2 cm read by vtl_link in place
         of the instantaneous head's own (detached) output, NaN where not given (D-085)."""
+        la = self.cfg.lookahead if self.cfg.causal else 0
+        if la:  # D-128: L frames of silence appended; output t = the causal output at t + L
+            if any(v is not None for v in (comb_f0, comb_voiced, formant_fed, vtl_inst_fed)):
+                raise ValueError("teacher forcing is not available with lookahead")
+            logpow = Fn.pad(logpow, (0, la), value=-100.0)
         x = normalise(logpow)
         h0 = self.f0_net(x)
+        film = self.cfg.readout in ("film", "film_residual", *QUERY_READOUTS)
+        enc = (lambda xc: self.enc(xc, maps=True)) if film else (lambda xc: (self.enc(xc), None))
+        out = self._outputs(x, h0, enc, comb_f0, comb_voiced, formant_fed, vtl_inst_fed)
+        return {k: v[:, la:] for k, v in out.items()} if la else out
+
+    def step(self, logpow: torch.Tensor, state: dict | None = None) -> tuple[dict, dict]:
+        """D-128, causal mode: logpow (B, F, n) new VQT frames -> (outputs for those n frames, state); state None at
+        the start. The outputs are the causal network's, i.e. with lookahead L they belong to the input frames L
+        earlier (the first L are for frames before the signal); `forward` on a whole clip equals the concatenated
+        outputs from the L-th on, once L silent frames (-100 dB) have been pushed after its end."""
+        if not self.cfg.causal:
+            raise ValueError("step needs the causal mode")
+        st = state or {}
+        x = normalise(logpow)
+        h0, s0 = self.f0_net.step(x, st.get("f0"))
+        new = {"f0": s0}
+
+        def enc(xc):
+            h, new["enc"] = self.enc.step(xc, st.get("enc"))
+            return h, None
+
+        return self._outputs(x, h0, enc, None, None, None, None), new
+
+    def _outputs(self, x, h0, enc, comb_f0, comb_voiced, formant_fed, vtl_inst_fed) -> dict:
         out = {"f0_logits": self.f0_head(h0), "voicing_logit": self.voicing_head(h0)[..., 0]}
         if self.cfg.comb:
             with torch.no_grad():
@@ -489,7 +630,7 @@ class Teacher(nn.Module):
             x = torch.cat([x, self.comb(f0, vp).to(x.dtype)], 1)
         film = self.cfg.readout in ("film", "film_residual", *QUERY_READOUTS)
         flat = self.cfg.readout not in ("film", *QUERY_READOUTS)
-        h, kept = self.enc(x, maps=True) if film else (self.enc(x), None)
+        h, kept = enc(x)
         if film:
             fx = self.readout.maps(kept, h)
             raw = self.readout.logits(fx, h)

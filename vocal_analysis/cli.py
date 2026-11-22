@@ -243,6 +243,20 @@ def cmd_train(cfg: Config, args: argparse.Namespace) -> int:
     from .models.teacher import TeacherConfig
     from .train.teacher import TrainConfig, train
 
+    if args.model == "student":  # D-128: plain distillation into a causal copy of the teacher
+        from .train.distil import DistilConfig, distil
+
+        dc = DistilConfig(out=args.out or "runs/student_causal", steps=args.steps, batch=args.batch, workers=args.workers,
+                          lookahead=args.lookahead, attn_window=args.attn_window)
+        if args.teacher:
+            dc.teacher = args.teacher
+        for kv in args.train_set:  # other DistilConfig fields, parsed as for the teacher
+            k, v = kv.split("=", 1)
+            cur = getattr(dc, k)
+            setattr(dc, k, _parse_value(v) if cur is None else v.lower() in ("1", "true", "yes") if isinstance(cur, bool)
+                    else tuple(_parse_value(x) for x in v.split(",")) if isinstance(cur, tuple) else type(cur)(v))
+        distil(dc, log=lambda m: print(m, flush=True))
+        return 0
     if args.branch_from:  # decay branch of a wsd run: everything else comes from the parent run's config
         import torch
 
@@ -333,7 +347,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="other SynthConfig fields (train only, scalar fields)")
     s.set_defaults(fn=cmd_synth)
     t = sub.add_parser("train", parents=[common], help="train a model on synthetic data")
-    t.add_argument("model", choices=["teacher"])
+    t.add_argument("model", choices=["teacher", "student"],
+                   help="student: plain distillation of --teacher into its causal copy (D-128); --steps 40000 is the "
+                        "teacher's default, so pass the student's")
+    t.add_argument("--teacher", default=None, metavar="CKPT", help="student: the teacher (default: teacher v3.1)")
+    t.add_argument("--lookahead", type=int, default=0, help="student: output lookahead in frames")
+    t.add_argument("--attn-window", type=int, default=400, help="student: causal attention window in frames")
     t.add_argument("--data", default="data/synth/train_v2")
     t.add_argument("--out", default=None, help="default: runs/teacher_v2, or <parent run>_dNNk for a branch")
     t.add_argument("--steps", type=int, default=40000)
