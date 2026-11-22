@@ -1,0 +1,41 @@
+D-129: slope of log2 estimate on log2 reference (1 = no shrinkage); models d040_5b_s1_b20k, d040_5b_s2_b20k; seed mean [95 % speaker bootstrap] (each model)
+
+b: 191 files, 16 speakers
+  F1 clean       slope 1.009 [0.981, 1.050] (1.013, 1.005)
+  F1 reverb_0.2  slope 0.972 [0.946, 1.005] (0.971, 0.973); change from clean -0.037 [-0.072, -0.014]
+  F1 reverb_0.4  slope 0.951 [0.915, 0.997] (0.955, 0.946); change from clean -0.059 [-0.083, -0.034]
+  F1 reverb_0.8  slope 0.944 [0.904, 0.988] (0.944, 0.944); change from clean -0.065 [-0.098, -0.036]
+  F2 clean       slope 0.949 [0.924, 0.973] (0.949, 0.949)
+  F2 reverb_0.2  slope 0.931 [0.882, 0.967] (0.928, 0.933); change from clean -0.018 [-0.059, +0.005]
+  F2 reverb_0.4  slope 0.947 [0.920, 0.974] (0.948, 0.946); change from clean -0.002 [-0.007, +0.003]
+  F2 reverb_0.8  slope 0.938 [0.915, 0.964] (0.941, 0.936); change from clean -0.011 [-0.017, -0.004]
+
+g: 132 files, 11 speakers
+  F1 clean       slope 0.929 [0.886, 0.975] (0.941, 0.917)
+  F1 reverb_0.2  slope 0.907 [0.866, 0.948] (0.888, 0.926); change from clean -0.022 [-0.059, +0.019]
+  F1 reverb_0.4  slope 0.943 [0.907, 0.985] (0.943, 0.944); change from clean +0.014 [-0.017, +0.043]
+  F1 reverb_0.8  slope 0.902 [0.849, 0.949] (0.891, 0.913); change from clean -0.027 [-0.071, +0.017]
+  F2 clean       slope 0.931 [0.891, 0.966] (0.931, 0.930)
+  F2 reverb_0.2  slope 0.927 [0.887, 0.964] (0.929, 0.924); change from clean -0.004 [-0.013, +0.008]
+  F2 reverb_0.4  slope 0.915 [0.873, 0.955] (0.913, 0.917); change from clean -0.016 [-0.038, +0.002]
+  F2 reverb_0.8  slope 0.924 [0.886, 0.957] (0.925, 0.923); change from clean -0.007 [-0.014, +0.001]
+
+m: 324 files, 27 speakers
+  F1 clean       slope 1.019 [0.999, 1.042] (1.029, 1.009)
+  F1 reverb_0.2  slope 0.956 [0.932, 0.982] (0.962, 0.950); change from clean -0.063 [-0.085, -0.043]
+  F1 reverb_0.4  slope 0.943 [0.923, 0.969] (0.942, 0.945); change from clean -0.075 [-0.099, -0.054]
+  F1 reverb_0.8  slope 0.949 [0.921, 0.980] (0.947, 0.952); change from clean -0.069 [-0.100, -0.039]
+  F2 clean       slope 0.941 [0.930, 0.952] (0.939, 0.943)
+  F2 reverb_0.2  slope 0.933 [0.917, 0.946] (0.933, 0.933); change from clean -0.008 [-0.016, -0.001]
+  F2 reverb_0.4  slope 0.936 [0.925, 0.947] (0.936, 0.935); change from clean -0.005 [-0.009, -0.001]
+  F2 reverb_0.8  slope 0.921 [0.892, 0.941] (0.925, 0.917); change from clean -0.020 [-0.042, -0.008]
+
+w: 348 files, 29 speakers
+  F1 clean       slope 1.031 [0.996, 1.068] (1.035, 1.026)
+  F1 reverb_0.2  slope 0.956 [0.920, 0.996] (0.956, 0.956); change from clean -0.075 [-0.098, -0.054]
+  F1 reverb_0.4  slope 0.959 [0.926, 0.996] (0.954, 0.964); change from clean -0.071 [-0.104, -0.041]
+  F1 reverb_0.8  slope 0.937 [0.912, 0.964] (0.931, 0.942); change from clean -0.094 [-0.120, -0.069]
+  F2 clean       slope 0.942 [0.932, 0.951] (0.941, 0.942)
+  F2 reverb_0.2  slope 0.941 [0.930, 0.951] (0.943, 0.939); change from clean -0.001 [-0.006, +0.003]
+  F2 reverb_0.4  slope 0.936 [0.925, 0.947] (0.936, 0.937); change from clean -0.005 [-0.012, +0.002]
+  F2 reverb_0.8  slope 0.928 [0.917, 0.939] (0.930, 0.925); change from clean -0.014 [-0.020, -0.008]
