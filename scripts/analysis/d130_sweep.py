@@ -85,10 +85,23 @@ def solve(q: np.ndarray, length: float, pm: float) -> tuple[np.ndarray, np.ndarr
     from vocal_analysis.synth import tube
 
     F, Bw = np.full((len(q), N_P), np.nan), np.full((len(q), N_P), np.nan)
+    lost = []
     for i, (a, b) in enumerate(q):
-        f, bw = tube.poles(tube.build_shape(a, b, length, pm=pm), f_max_hz=7600.0)
+        try:
+            f, bw = tube.poles(tube.build_shape(a, b, length, pm=pm), f_max_hz=7600.0)
+        except RuntimeError:  # the continuation lost a root: filled from the neighbouring path points below
+            lost.append(i)
+            continue
         k = min(N_P, len(f))
         F[i, :k], Bw[i, :k] = f[:k], bw[:k]
+    if lost:
+        good = np.setdiff1d(np.arange(len(q)), lost)
+        for k in range(N_P):
+            for A in (F, Bw):
+                ok = good[np.isfinite(A[good, k])]
+                if len(ok) == len(good):
+                    A[lost, k] = 2 ** np.interp(lost, ok, np.log2(A[ok, k]))
+        print(f"  length {length}, pm {pm}: {len(lost)} of {len(q)} path points had no exact solution; interpolated", flush=True)
     return F, Bw
 
 
