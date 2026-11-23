@@ -1,0 +1,29 @@
+D-130 extra: F1 signed error median (|error| median), cents, inside Story's box and in the extension; F1 snapped to a harmonic
+f0 100 Hz
+  teacher  inside  +21 ( 30); extension  +40 ( 43), 46% of frames; snapped to a harmonic  2.0 %
+  teacher_s1 inside  +16 ( 25); extension  +33 ( 40), 46% of frames; snapped to a harmonic  3.3 %
+  L0_s0    inside   +2 ( 25); extension  +17 ( 31), 46% of frames; snapped to a harmonic  2.2 %
+  L0_s1    inside   +3 ( 26); extension  +17 ( 31), 46% of frames; snapped to a harmonic  2.5 %
+  L2_s0    inside   +2 ( 24); extension  +18 ( 30), 46% of frames; snapped to a harmonic  2.1 %
+  L2_s1    inside   +3 ( 24); extension  +19 ( 31), 46% of frames; snapped to a harmonic  2.2 %
+f0 200 Hz
+  teacher  inside  +19 ( 44); extension  +72 ( 90), 46% of frames; snapped to a harmonic  7.4 %
+  teacher_s1 inside  +29 ( 42); extension  +74 ( 86), 46% of frames; snapped to a harmonic 10.9 %
+  L0_s0    inside  +17 ( 60); extension  +75 (115), 46% of frames; snapped to a harmonic 14.1 %
+  L0_s1    inside  +17 ( 66); extension  +74 (116), 46% of frames; snapped to a harmonic 13.7 %
+  L2_s0    inside  +13 ( 58); extension  +73 (114), 46% of frames; snapped to a harmonic 14.0 %
+  L2_s1    inside  +13 ( 61); extension  +74 (116), 46% of frames; snapped to a harmonic 14.1 %
+f0 300 Hz
+  teacher  inside  +20 ( 65); extension  +40 ( 90), 42% of frames; snapped to a harmonic  1.1 %
+  teacher_s1 inside  +32 ( 64); extension  +55 ( 91), 42% of frames; snapped to a harmonic  0.2 %
+  L0_s0    inside  +61 (125); extension  +78 (157), 42% of frames; snapped to a harmonic 10.2 %
+  L0_s1    inside  +52 (122); extension  +67 (146), 42% of frames; snapped to a harmonic  9.5 %
+  L2_s0    inside  +45 (107); extension  +67 (137), 42% of frames; snapped to a harmonic  6.3 %
+  L2_s1    inside  +45 (109); extension  +64 (133), 42% of frames; snapped to a harmonic  7.2 %
+f0 400 Hz
+  teacher  inside  +67 ( 76); extension  +47 ( 80), 38% of frames; snapped to a harmonic  0.5 %
+  teacher_s1 inside  +36 ( 68); extension  +17 ( 66), 38% of frames; snapped to a harmonic  0.2 %
+  L0_s0    inside  +48 ( 92); extension  +33 ( 99), 38% of frames; snapped to a harmonic  0.7 %
+  L0_s1    inside  +43 ( 86); extension  +30 ( 94), 38% of frames; snapped to a harmonic  1.0 %
+  L2_s0    inside  +43 ( 86); extension  +30 ( 95), 38% of frames; snapped to a harmonic  0.6 %
+  L2_s1    inside  +43 ( 84); extension  +31 ( 92), 38% of frames; snapped to a harmonic  0.6 %

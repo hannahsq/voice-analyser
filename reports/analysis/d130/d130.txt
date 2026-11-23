@@ -1,0 +1,141 @@
+D-130: the vowel-plane sweep (registered 2026-11-23). Seed means; each model in brackets. Frames with p(sonorant) > 0.5.
+
+== teacher (d040_5b_s1_b20k, d040_5b_s2_b20k)
+  clean      L 17.5 f0 100: slope F1 0.889 F2 0.992; |err| F1 34 F2 16 c; calib F1 0.83 F2 0.60; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 10.44 holes 18.8 %; stripes F1 +0.031 F2 +0.005; sonorant 100 %
+  clean      L 17.5 f0 200: slope F1 0.786 F2 0.977; |err| F1 64 F2 21 c; calib F1 0.98 F2 0.83; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 9.90 holes 29.8 %; stripes F1 +0.076 F2 +0.151; sonorant 100 %
+  clean      L 17.5 f0 300: slope F1 0.754 F2 0.946; |err| F1 120 F2 29 c; calib F1 1.04 F2 0.73; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 13.46 holes 49.6 %; stripes F1 +0.253 F2 +0.130; sonorant 100 %
+  clean      L 17.5 f0 400: slope F1 0.766 F2 0.957; |err| F1 153 F2 39 c; calib F1 1.04 F2 0.71; folds F2>F3 0.2 % F1>F2 1.9 %; attractor 12.14 holes 44.0 %; stripes F1 +0.213 F2 +0.241; sonorant 100 %
+  clean      L 15.6 f0 100: slope F1 0.880 F2 0.989; |err| F1 34 F2 15 c; calib F1 0.91 F2 0.47; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 10.21 holes 19.9 %; stripes F1 +0.101 F2 +0.014; sonorant 99 %
+  clean      L 15.6 f0 200: slope F1 0.785 F2 0.973; |err| F1 55 F2 21 c; calib F1 0.91 F2 0.76; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 10.76 holes 30.1 %; stripes F1 +0.122 F2 +0.069; sonorant 100 %
+  clean      L 15.6 f0 300: slope F1 0.768 F2 0.948; |err| F1 105 F2 25 c; calib F1 0.99 F2 0.67; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 12.71 holes 48.2 %; stripes F1 +0.149 F2 +0.225; sonorant 100 %
+  clean      L 15.6 f0 400: slope F1 0.714 F2 0.974; |err| F1 149 F2 35 c; calib F1 1.24 F2 0.64; folds F2>F3 0.3 % F1>F2 0.8 %; attractor 10.14 holes 43.3 %; stripes F1 +0.215 F2 +0.120; sonorant 100 %
+  clean      L 13.0 f0 100: slope F1 0.932 F2 0.992; |err| F1 29 F2 13 c; calib F1 0.96 F2 0.40; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 6.67 holes 13.7 %; stripes F1 +0.006 F2 +0.012; sonorant 100 %
+  clean      L 13.0 f0 200: slope F1 0.794 F2 0.985; |err| F1 45 F2 18 c; calib F1 0.86 F2 0.72; folds F2>F3 0.1 % F1>F2 0.0 %; attractor 12.37 holes 29.6 %; stripes F1 +0.147 F2 +0.040; sonorant 100 %
+  clean      L 13.0 f0 300: slope F1 0.784 F2 0.975; |err| F1 98 F2 24 c; calib F1 1.13 F2 0.72; folds F2>F3 0.9 % F1>F2 0.0 %; attractor 14.51 holes 47.4 %; stripes F1 +0.006 F2 +0.204; sonorant 100 %
+  clean      L 13.0 f0 400: slope F1 0.707 F2 0.960; |err| F1 124 F2 30 c; calib F1 1.09 F2 0.63; folds F2>F3 0.4 % F1>F2 0.0 %; attractor 12.92 holes 44.6 %; stripes F1 +0.235 F2 +0.176; sonorant 100 %
+  clean      lag (ms, + = behind): lag_ms_slow -7.7; lag_ms_fast -4.6
+  clean      interleaved |err| first 300 ms vs rest: F1 44 vs 46 c, F2 12 vs 11 c
+  reverb_0.4 L 17.5 f0 100: slope F1 0.892 F2 0.985; |err| F1 40 F2 15 c; calib F1 0.79 F2 0.54; folds F2>F3 0.2 % F1>F2 0.0 %; attractor 9.01 holes 19.1 %; stripes F1 -0.023 F2 -0.014; sonorant 99 %
+  reverb_0.4 L 17.5 f0 200: slope F1 0.793 F2 0.966; |err| F1 86 F2 23 c; calib F1 1.18 F2 0.79; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 9.07 holes 31.1 %; stripes F1 +0.073 F2 +0.176; sonorant 100 %
+  reverb_0.4 L 17.5 f0 300: slope F1 0.731 F2 0.922; |err| F1 142 F2 43 c; calib F1 1.11 F2 1.03; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 11.93 holes 51.1 %; stripes F1 +0.255 F2 +0.220; sonorant 99 %
+  reverb_0.4 L 17.5 f0 400: slope F1 0.681 F2 0.942; |err| F1 183 F2 47 c; calib F1 1.05 F2 0.76; folds F2>F3 0.3 % F1>F2 2.3 %; attractor 11.46 holes 45.3 %; stripes F1 +0.155 F2 +0.296; sonorant 99 %
+  reverb_0.4 L 15.6 f0 100: slope F1 0.874 F2 0.985; |err| F1 37 F2 15 c; calib F1 0.77 F2 0.48; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 9.46 holes 21.2 %; stripes F1 +0.028 F2 +0.009; sonorant 99 %
+  reverb_0.4 L 15.6 f0 200: slope F1 0.767 F2 0.970; |err| F1 70 F2 23 c; calib F1 1.00 F2 0.73; folds F2>F3 0.1 % F1>F2 0.0 %; attractor 11.77 holes 31.9 %; stripes F1 +0.174 F2 +0.068; sonorant 99 %
+  reverb_0.4 L 15.6 f0 300: slope F1 0.741 F2 0.938; |err| F1 136 F2 36 c; calib F1 1.19 F2 0.86; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 12.97 holes 48.6 %; stripes F1 +0.121 F2 +0.265; sonorant 100 %
+  reverb_0.4 L 15.6 f0 400: slope F1 0.666 F2 0.940; |err| F1 161 F2 53 c; calib F1 1.16 F2 0.92; folds F2>F3 1.0 % F1>F2 1.5 %; attractor 11.03 holes 45.5 %; stripes F1 +0.151 F2 +0.236; sonorant 100 %
+  reverb_0.4 L 13.0 f0 100: slope F1 0.933 F2 0.990; |err| F1 30 F2 14 c; calib F1 0.81 F2 0.48; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 7.00 holes 14.8 %; stripes F1 -0.039 F2 +0.014; sonorant 100 %
+  reverb_0.4 L 13.0 f0 200: slope F1 0.793 F2 0.978; |err| F1 68 F2 28 c; calib F1 1.15 F2 0.98; folds F2>F3 1.5 % F1>F2 0.0 %; attractor 15.11 holes 32.4 %; stripes F1 +0.169 F2 +0.034; sonorant 99 %
+  reverb_0.4 L 13.0 f0 300: slope F1 0.765 F2 0.965; |err| F1 125 F2 33 c; calib F1 1.33 F2 0.91; folds F2>F3 0.9 % F1>F2 0.0 %; attractor 14.76 holes 47.5 %; stripes F1 -0.004 F2 +0.212; sonorant 100 %
+  reverb_0.4 L 13.0 f0 400: slope F1 0.687 F2 0.942; |err| F1 149 F2 43 c; calib F1 1.14 F2 0.82; folds F2>F3 0.0 % F1>F2 0.1 %; attractor 10.73 holes 44.2 %; stripes F1 +0.213 F2 +0.229; sonorant 100 %
+  reverb_0.4 lag (ms, + = behind): lag_ms_slow +1.7; lag_ms_fast -1.2
+  reverb_0.4 interleaved |err| first 300 ms vs rest: F1 85 vs 71 c, F2 18 vs 15 c
+  reverb_0.8 L 17.5 f0 100: slope F1 0.871 F2 0.976; |err| F1 47 F2 17 c; calib F1 0.81 F2 0.53; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 9.49 holes 21.9 %; stripes F1 -0.004 F2 -0.023; sonorant 99 %
+  reverb_0.8 L 17.5 f0 200: slope F1 0.770 F2 0.946; |err| F1 87 F2 29 c; calib F1 1.10 F2 0.82; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 9.12 holes 30.1 %; stripes F1 +0.091 F2 +0.174; sonorant 99 %
+  reverb_0.8 L 17.5 f0 300: slope F1 0.705 F2 0.902; |err| F1 164 F2 52 c; calib F1 1.23 F2 1.04; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 12.51 holes 54.0 %; stripes F1 +0.262 F2 +0.225; sonorant 100 %
+  reverb_0.8 L 17.5 f0 400: slope F1 0.692 F2 0.896; |err| F1 182 F2 63 c; calib F1 1.02 F2 0.99; folds F2>F3 0.1 % F1>F2 2.1 %; attractor 13.16 holes 48.7 %; stripes F1 +0.137 F2 +0.359; sonorant 99 %
+  reverb_0.8 L 15.6 f0 100: slope F1 0.863 F2 0.969; |err| F1 38 F2 17 c; calib F1 0.73 F2 0.50; folds F2>F3 0.1 % F1>F2 0.0 %; attractor 10.49 holes 23.4 %; stripes F1 +0.050 F2 +0.006; sonorant 99 %
+  reverb_0.8 L 15.6 f0 200: slope F1 0.772 F2 0.955; |err| F1 92 F2 31 c; calib F1 1.26 F2 0.80; folds F2>F3 0.3 % F1>F2 0.0 %; attractor 11.35 holes 32.3 %; stripes F1 +0.141 F2 +0.081; sonorant 99 %
+  reverb_0.8 L 15.6 f0 300: slope F1 0.734 F2 0.909; |err| F1 154 F2 45 c; calib F1 1.29 F2 0.93; folds F2>F3 0.2 % F1>F2 0.0 %; attractor 12.91 holes 50.9 %; stripes F1 +0.131 F2 +0.277; sonorant 100 %
+  reverb_0.8 L 15.6 f0 400: slope F1 0.681 F2 0.916; |err| F1 173 F2 49 c; calib F1 1.15 F2 0.76; folds F2>F3 0.7 % F1>F2 0.8 %; attractor 11.81 holes 45.2 %; stripes F1 +0.178 F2 +0.220; sonorant 99 %
+  reverb_0.8 L 13.0 f0 100: slope F1 0.911 F2 0.980; |err| F1 31 F2 15 c; calib F1 0.72 F2 0.45; folds F2>F3 0.1 % F1>F2 0.0 %; attractor 7.90 holes 16.9 %; stripes F1 -0.061 F2 -0.008; sonorant 100 %
+  reverb_0.8 L 13.0 f0 200: slope F1 0.780 F2 0.966; |err| F1 75 F2 28 c; calib F1 1.18 F2 0.83; folds F2>F3 0.1 % F1>F2 0.0 %; attractor 13.01 holes 34.6 %; stripes F1 +0.184 F2 +0.083; sonorant 100 %
+  reverb_0.8 L 13.0 f0 300: slope F1 0.753 F2 0.947; |err| F1 147 F2 43 c; calib F1 1.48 F2 1.01; folds F2>F3 0.8 % F1>F2 0.0 %; attractor 14.14 holes 49.2 %; stripes F1 +0.006 F2 +0.245; sonorant 100 %
+  reverb_0.8 L 13.0 f0 400: slope F1 0.689 F2 0.892; |err| F1 161 F2 58 c; calib F1 1.20 F2 1.07; folds F2>F3 0.3 % F1>F2 0.0 %; attractor 11.96 holes 48.7 %; stripes F1 +0.257 F2 +0.306; sonorant 99 %
+  reverb_0.8 lag (ms, + = behind): lag_ms_slow +5.7; lag_ms_fast -0.9
+  reverb_0.8 interleaved |err| first 300 ms vs rest: F1 98 vs 73 c, F2 24 vs 22 c
+
+== L0 (d128_L0_s0, d128_L0_s1)
+  clean      L 17.5 f0 100: slope F1 0.914 F2 0.992; |err| F1 29 F2 16 c; calib F1 0.54 F2 0.48; folds F2>F3 0.0 % F1>F2 0.1 %; attractor 8.74 holes 18.2 %; stripes F1 +0.035 F2 +0.043; sonorant 100 %
+  clean      L 17.5 f0 200: slope F1 0.709 F2 0.977; |err| F1 91 F2 25 c; calib F1 1.04 F2 0.69; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 11.12 holes 42.0 %; stripes F1 +0.274 F2 +0.266; sonorant 100 %
+  clean      L 17.5 f0 300: slope F1 0.678 F2 0.885; |err| F1 203 F2 39 c; calib F1 1.49 F2 0.76; folds F2>F3 0.9 % F1>F2 2.0 %; attractor 14.20 holes 62.0 %; stripes F1 +0.402 F2 +0.325; sonorant 100 %
+  clean      L 17.5 f0 400: slope F1 0.518 F2 0.856; |err| F1 193 F2 52 c; calib F1 0.93 F2 0.70; folds F2>F3 3.5 % F1>F2 7.6 %; attractor 14.24 holes 56.8 %; stripes F1 +0.211 F2 +0.386; sonorant 100 %
+  clean      L 15.6 f0 100: slope F1 0.919 F2 0.988; |err| F1 28 F2 15 c; calib F1 0.55 F2 0.39; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 8.62 holes 19.2 %; stripes F1 +0.103 F2 +0.049; sonorant 100 %
+  clean      L 15.6 f0 200: slope F1 0.731 F2 0.975; |err| F1 77 F2 26 c; calib F1 0.98 F2 0.64; folds F2>F3 0.2 % F1>F2 0.0 %; attractor 12.00 holes 40.0 %; stripes F1 +0.296 F2 +0.184; sonorant 100 %
+  clean      L 15.6 f0 300: slope F1 0.722 F2 0.943; |err| F1 173 F2 33 c; calib F1 1.44 F2 0.64; folds F2>F3 0.1 % F1>F2 0.2 %; attractor 12.23 holes 59.0 %; stripes F1 +0.240 F2 +0.373; sonorant 100 %
+  clean      L 15.6 f0 400: slope F1 0.565 F2 0.874; |err| F1 178 F2 44 c; calib F1 1.19 F2 0.62; folds F2>F3 2.2 % F1>F2 4.1 %; attractor 10.41 holes 51.2 %; stripes F1 +0.214 F2 +0.264; sonorant 100 %
+  clean      L 13.0 f0 100: slope F1 0.955 F2 0.988; |err| F1 27 F2 12 c; calib F1 0.66 F2 0.31; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 7.40 holes 13.6 %; stripes F1 +0.028 F2 +0.020; sonorant 100 %
+  clean      L 13.0 f0 200: slope F1 0.770 F2 0.984; |err| F1 66 F2 23 c; calib F1 0.94 F2 0.60; folds F2>F3 0.2 % F1>F2 0.0 %; attractor 14.50 holes 41.7 %; stripes F1 +0.331 F2 +0.140; sonorant 100 %
+  clean      L 13.0 f0 300: slope F1 0.726 F2 0.978; |err| F1 177 F2 30 c; calib F1 1.61 F2 0.62; folds F2>F3 0.5 % F1>F2 0.0 %; attractor 15.91 holes 58.0 %; stripes F1 +0.102 F2 +0.330; sonorant 100 %
+  clean      L 13.0 f0 400: slope F1 0.604 F2 0.917; |err| F1 175 F2 45 c; calib F1 1.24 F2 0.68; folds F2>F3 2.1 % F1>F2 0.9 %; attractor 15.00 holes 56.5 %; stripes F1 +0.248 F2 +0.356; sonorant 100 %
+  clean      lag (ms, + = behind): lag_ms_slow -5.2; lag_ms_fast -4.7
+  clean      interleaved |err| first 300 ms vs rest: F1 55 vs 53 c, F2 18 vs 18 c
+  reverb_0.4 L 17.5 f0 100: slope F1 0.885 F2 0.984; |err| F1 46 F2 19 c; calib F1 0.68 F2 0.52; folds F2>F3 0.5 % F1>F2 0.2 %; attractor 9.89 holes 20.5 %; stripes F1 +0.018 F2 +0.037; sonorant 100 %
+  reverb_0.4 L 17.5 f0 200: slope F1 0.697 F2 0.950; |err| F1 117 F2 27 c; calib F1 1.24 F2 0.66; folds F2>F3 0.3 % F1>F2 0.2 %; attractor 10.61 holes 42.3 %; stripes F1 +0.277 F2 +0.252; sonorant 100 %
+  reverb_0.4 L 17.5 f0 300: slope F1 0.645 F2 0.852; |err| F1 216 F2 52 c; calib F1 1.38 F2 0.93; folds F2>F3 1.2 % F1>F2 1.9 %; attractor 14.29 holes 59.9 %; stripes F1 +0.344 F2 +0.299; sonorant 100 %
+  reverb_0.4 L 17.5 f0 400: slope F1 0.485 F2 0.841; |err| F1 247 F2 67 c; calib F1 1.06 F2 0.80; folds F2>F3 4.0 % F1>F2 8.6 %; attractor 13.16 holes 56.6 %; stripes F1 +0.171 F2 +0.390; sonorant 99 %
+  reverb_0.4 L 15.6 f0 100: slope F1 0.894 F2 0.980; |err| F1 38 F2 21 c; calib F1 0.58 F2 0.48; folds F2>F3 0.1 % F1>F2 0.0 %; attractor 8.41 holes 22.9 %; stripes F1 +0.023 F2 +0.050; sonorant 100 %
+  reverb_0.4 L 15.6 f0 200: slope F1 0.702 F2 0.967; |err| F1 101 F2 29 c; calib F1 1.15 F2 0.66; folds F2>F3 0.1 % F1>F2 0.1 %; attractor 11.96 holes 43.0 %; stripes F1 +0.353 F2 +0.148; sonorant 100 %
+  reverb_0.4 L 15.6 f0 300: slope F1 0.659 F2 0.932; |err| F1 225 F2 43 c; calib F1 1.66 F2 0.75; folds F2>F3 0.1 % F1>F2 0.7 %; attractor 11.57 holes 57.2 %; stripes F1 +0.204 F2 +0.331; sonorant 100 %
+  reverb_0.4 L 15.6 f0 400: slope F1 0.529 F2 0.892; |err| F1 224 F2 68 c; calib F1 1.32 F2 0.94; folds F2>F3 1.8 % F1>F2 4.4 %; attractor 12.43 holes 52.0 %; stripes F1 +0.155 F2 +0.334; sonorant 100 %
+  reverb_0.4 L 13.0 f0 100: slope F1 0.937 F2 0.984; |err| F1 34 F2 17 c; calib F1 0.66 F2 0.43; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 8.03 holes 16.6 %; stripes F1 -0.034 F2 +0.034; sonorant 100 %
+  reverb_0.4 L 13.0 f0 200: slope F1 0.761 F2 0.974; |err| F1 94 F2 35 c; calib F1 1.20 F2 0.83; folds F2>F3 1.6 % F1>F2 0.0 %; attractor 17.38 holes 42.2 %; stripes F1 +0.318 F2 +0.084; sonorant 100 %
+  reverb_0.4 L 13.0 f0 300: slope F1 0.690 F2 0.968; |err| F1 207 F2 41 c; calib F1 1.75 F2 0.75; folds F2>F3 1.2 % F1>F2 0.0 %; attractor 17.51 holes 55.9 %; stripes F1 +0.087 F2 +0.279; sonorant 100 %
+  reverb_0.4 L 13.0 f0 400: slope F1 0.593 F2 0.930; |err| F1 214 F2 55 c; calib F1 1.31 F2 0.74; folds F2>F3 0.3 % F1>F2 0.5 %; attractor 14.42 holes 54.1 %; stripes F1 +0.227 F2 +0.344; sonorant 100 %
+  reverb_0.4 lag (ms, + = behind): lag_ms_slow +4.8; lag_ms_fast +0.8
+  reverb_0.4 interleaved |err| first 300 ms vs rest: F1 98 vs 78 c, F2 24 vs 20 c
+  reverb_0.8 L 17.5 f0 100: slope F1 0.878 F2 0.973; |err| F1 63 F2 24 c; calib F1 0.86 F2 0.54; folds F2>F3 0.0 % F1>F2 0.1 %; attractor 10.74 holes 26.2 %; stripes F1 +0.043 F2 +0.037; sonorant 100 %
+  reverb_0.8 L 17.5 f0 200: slope F1 0.708 F2 0.939; |err| F1 116 F2 34 c; calib F1 1.15 F2 0.71; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 10.79 holes 42.7 %; stripes F1 +0.298 F2 +0.232; sonorant 100 %
+  reverb_0.8 L 17.5 f0 300: slope F1 0.622 F2 0.867; |err| F1 239 F2 61 c; calib F1 1.50 F2 0.93; folds F2>F3 0.5 % F1>F2 1.9 %; attractor 13.62 holes 62.0 %; stripes F1 +0.350 F2 +0.283; sonorant 100 %
+  reverb_0.8 L 17.5 f0 400: slope F1 0.425 F2 0.828; |err| F1 248 F2 80 c; calib F1 1.06 F2 0.91; folds F2>F3 2.7 % F1>F2 10.2 %; attractor 13.00 holes 54.0 %; stripes F1 +0.142 F2 +0.384; sonorant 100 %
+  reverb_0.8 L 15.6 f0 100: slope F1 0.892 F2 0.958; |err| F1 47 F2 22 c; calib F1 0.67 F2 0.51; folds F2>F3 0.3 % F1>F2 0.0 %; attractor 10.18 holes 23.9 %; stripes F1 +0.051 F2 +0.039; sonorant 100 %
+  reverb_0.8 L 15.6 f0 200: slope F1 0.717 F2 0.948; |err| F1 109 F2 37 c; calib F1 1.18 F2 0.71; folds F2>F3 0.3 % F1>F2 0.1 %; attractor 12.22 holes 40.2 %; stripes F1 +0.286 F2 +0.149; sonorant 100 %
+  reverb_0.8 L 15.6 f0 300: slope F1 0.693 F2 0.903; |err| F1 208 F2 53 c; calib F1 1.45 F2 0.80; folds F2>F3 0.3 % F1>F2 0.4 %; attractor 12.31 holes 57.5 %; stripes F1 +0.191 F2 +0.335; sonorant 100 %
+  reverb_0.8 L 15.6 f0 400: slope F1 0.532 F2 0.870; |err| F1 234 F2 62 c; calib F1 1.33 F2 0.76; folds F2>F3 1.6 % F1>F2 4.3 %; attractor 10.83 holes 51.6 %; stripes F1 +0.139 F2 +0.269; sonorant 99 %
+  reverb_0.8 L 13.0 f0 100: slope F1 0.917 F2 0.969; |err| F1 39 F2 21 c; calib F1 0.68 F2 0.49; folds F2>F3 0.1 % F1>F2 0.0 %; attractor 8.73 holes 18.1 %; stripes F1 -0.055 F2 +0.003; sonorant 100 %
+  reverb_0.8 L 13.0 f0 200: slope F1 0.751 F2 0.959; |err| F1 97 F2 35 c; calib F1 1.17 F2 0.71; folds F2>F3 0.2 % F1>F2 0.0 %; attractor 14.63 holes 43.2 %; stripes F1 +0.320 F2 +0.114; sonorant 100 %
+  reverb_0.8 L 13.0 f0 300: slope F1 0.683 F2 0.948; |err| F1 220 F2 52 c; calib F1 1.85 F2 0.84; folds F2>F3 0.7 % F1>F2 0.0 %; attractor 15.75 holes 56.1 %; stripes F1 +0.096 F2 +0.290; sonorant 100 %
+  reverb_0.8 L 13.0 f0 400: slope F1 0.575 F2 0.860; |err| F1 232 F2 75 c; calib F1 1.43 F2 0.99; folds F2>F3 1.3 % F1>F2 0.8 %; attractor 12.98 holes 56.3 %; stripes F1 +0.212 F2 +0.398; sonorant 100 %
+  reverb_0.8 lag (ms, + = behind): lag_ms_slow +9.8; lag_ms_fast +1.5
+  reverb_0.8 interleaved |err| first 300 ms vs rest: F1 107 vs 78 c, F2 31 vs 31 c
+
+== L2 (d128_L2_s0, d128_L2_s1)
+  clean      L 17.5 f0 100: slope F1 0.913 F2 0.995; |err| F1 29 F2 16 c; calib F1 0.58 F2 0.52; folds F2>F3 0.0 % F1>F2 0.1 %; attractor 8.66 holes 18.4 %; stripes F1 +0.001 F2 +0.048; sonorant 99 %
+  clean      L 17.5 f0 200: slope F1 0.686 F2 0.975; |err| F1 89 F2 24 c; calib F1 1.09 F2 0.78; folds F2>F3 0.0 % F1>F2 0.1 %; attractor 11.26 holes 39.9 %; stripes F1 +0.266 F2 +0.241; sonorant 99 %
+  clean      L 17.5 f0 300: slope F1 0.680 F2 0.893; |err| F1 186 F2 34 c; calib F1 1.41 F2 0.72; folds F2>F3 0.7 % F1>F2 2.0 %; attractor 14.16 holes 60.0 %; stripes F1 +0.366 F2 +0.272; sonorant 99 %
+  clean      L 17.5 f0 400: slope F1 0.534 F2 0.872; |err| F1 181 F2 46 c; calib F1 0.90 F2 0.66; folds F2>F3 3.2 % F1>F2 7.8 %; attractor 12.71 holes 54.1 %; stripes F1 +0.187 F2 +0.358; sonorant 99 %
+  clean      L 15.6 f0 100: slope F1 0.911 F2 0.992; |err| F1 27 F2 13 c; calib F1 0.58 F2 0.38; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 8.47 holes 19.0 %; stripes F1 +0.086 F2 +0.054; sonorant 99 %
+  clean      L 15.6 f0 200: slope F1 0.720 F2 0.975; |err| F1 76 F2 25 c; calib F1 1.02 F2 0.74; folds F2>F3 0.2 % F1>F2 0.0 %; attractor 11.89 holes 37.1 %; stripes F1 +0.273 F2 +0.170; sonorant 99 %
+  clean      L 15.6 f0 300: slope F1 0.729 F2 0.948; |err| F1 155 F2 29 c; calib F1 1.35 F2 0.62; folds F2>F3 0.0 % F1>F2 0.2 %; attractor 11.75 holes 57.6 %; stripes F1 +0.216 F2 +0.327; sonorant 99 %
+  clean      L 15.6 f0 400: slope F1 0.590 F2 0.932; |err| F1 164 F2 39 c; calib F1 1.10 F2 0.60; folds F2>F3 1.0 % F1>F2 3.7 %; attractor 10.87 holes 49.8 %; stripes F1 +0.213 F2 +0.247; sonorant 99 %
+  clean      L 13.0 f0 100: slope F1 0.947 F2 0.993; |err| F1 25 F2 11 c; calib F1 0.65 F2 0.29; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 7.42 holes 14.1 %; stripes F1 +0.010 F2 +0.005; sonorant 99 %
+  clean      L 13.0 f0 200: slope F1 0.764 F2 0.988; |err| F1 63 F2 23 c; calib F1 0.95 F2 0.69; folds F2>F3 0.5 % F1>F2 0.0 %; attractor 14.10 holes 38.6 %; stripes F1 +0.297 F2 +0.128; sonorant 99 %
+  clean      L 13.0 f0 300: slope F1 0.734 F2 0.977; |err| F1 158 F2 28 c; calib F1 1.51 F2 0.65; folds F2>F3 0.4 % F1>F2 0.0 %; attractor 15.51 holes 55.7 %; stripes F1 +0.070 F2 +0.277; sonorant 99 %
+  clean      L 13.0 f0 400: slope F1 0.629 F2 0.933; |err| F1 155 F2 40 c; calib F1 1.14 F2 0.68; folds F2>F3 1.8 % F1>F2 0.7 %; attractor 15.28 holes 52.8 %; stripes F1 +0.252 F2 +0.311; sonorant 99 %
+  clean      lag (ms, + = behind): lag_ms_slow -5.4; lag_ms_fast -4.9
+  clean      interleaved |err| first 300 ms vs rest: F1 55 vs 49 c, F2 18 vs 16 c
+  reverb_0.4 L 17.5 f0 100: slope F1 0.888 F2 0.987; |err| F1 43 F2 17 c; calib F1 0.68 F2 0.52; folds F2>F3 0.5 % F1>F2 0.2 %; attractor 9.56 holes 20.0 %; stripes F1 -0.003 F2 +0.016; sonorant 99 %
+  reverb_0.4 L 17.5 f0 200: slope F1 0.669 F2 0.946; |err| F1 116 F2 24 c; calib F1 1.29 F2 0.64; folds F2>F3 0.4 % F1>F2 0.2 %; attractor 11.21 holes 41.3 %; stripes F1 +0.279 F2 +0.227; sonorant 99 %
+  reverb_0.4 L 17.5 f0 300: slope F1 0.656 F2 0.855; |err| F1 206 F2 49 c; calib F1 1.36 F2 0.95; folds F2>F3 1.2 % F1>F2 1.2 %; attractor 14.51 holes 59.0 %; stripes F1 +0.319 F2 +0.273; sonorant 99 %
+  reverb_0.4 L 17.5 f0 400: slope F1 0.492 F2 0.860; |err| F1 240 F2 60 c; calib F1 1.05 F2 0.73; folds F2>F3 3.6 % F1>F2 8.6 %; attractor 13.01 holes 54.7 %; stripes F1 +0.160 F2 +0.372; sonorant 99 %
+  reverb_0.4 L 15.6 f0 100: slope F1 0.892 F2 0.983; |err| F1 36 F2 18 c; calib F1 0.59 F2 0.46; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 8.27 holes 22.6 %; stripes F1 +0.034 F2 +0.044; sonorant 99 %
+  reverb_0.4 L 15.6 f0 200: slope F1 0.693 F2 0.968; |err| F1 97 F2 26 c; calib F1 1.15 F2 0.66; folds F2>F3 0.1 % F1>F2 0.1 %; attractor 11.88 holes 41.0 %; stripes F1 +0.335 F2 +0.126; sonorant 99 %
+  reverb_0.4 L 15.6 f0 300: slope F1 0.675 F2 0.938; |err| F1 206 F2 39 c; calib F1 1.59 F2 0.74; folds F2>F3 0.0 % F1>F2 0.7 %; attractor 12.02 holes 56.0 %; stripes F1 +0.182 F2 +0.299; sonorant 99 %
+  reverb_0.4 L 15.6 f0 400: slope F1 0.546 F2 0.917; |err| F1 204 F2 62 c; calib F1 1.21 F2 0.92; folds F2>F3 1.3 % F1>F2 4.1 %; attractor 11.95 holes 49.4 %; stripes F1 +0.159 F2 +0.327; sonorant 99 %
+  reverb_0.4 L 13.0 f0 100: slope F1 0.925 F2 0.989; |err| F1 33 F2 16 c; calib F1 0.66 F2 0.45; folds F2>F3 0.0 % F1>F2 0.1 %; attractor 8.37 holes 17.7 %; stripes F1 -0.069 F2 +0.018; sonorant 99 %
+  reverb_0.4 L 13.0 f0 200: slope F1 0.755 F2 0.980; |err| F1 88 F2 32 c; calib F1 1.18 F2 0.86; folds F2>F3 2.0 % F1>F2 0.0 %; attractor 17.38 holes 40.8 %; stripes F1 +0.308 F2 +0.072; sonorant 99 %
+  reverb_0.4 L 13.0 f0 300: slope F1 0.703 F2 0.971; |err| F1 186 F2 36 c; calib F1 1.66 F2 0.77; folds F2>F3 1.0 % F1>F2 0.0 %; attractor 16.03 holes 53.9 %; stripes F1 +0.058 F2 +0.249; sonorant 99 %
+  reverb_0.4 L 13.0 f0 400: slope F1 0.612 F2 0.939; |err| F1 201 F2 51 c; calib F1 1.26 F2 0.74; folds F2>F3 0.2 % F1>F2 0.3 %; attractor 13.98 holes 52.3 %; stripes F1 +0.240 F2 +0.328; sonorant 99 %
+  reverb_0.4 lag (ms, + = behind): lag_ms_slow +4.6; lag_ms_fast +0.2
+  reverb_0.4 interleaved |err| first 300 ms vs rest: F1 100 vs 77 c, F2 23 vs 16 c
+  reverb_0.8 L 17.5 f0 100: slope F1 0.869 F2 0.977; |err| F1 60 F2 21 c; calib F1 0.85 F2 0.53; folds F2>F3 0.0 % F1>F2 0.2 %; attractor 10.32 holes 25.7 %; stripes F1 +0.027 F2 +0.013; sonorant 99 %
+  reverb_0.8 L 17.5 f0 200: slope F1 0.665 F2 0.944; |err| F1 113 F2 30 c; calib F1 1.15 F2 0.69; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 10.99 holes 43.5 %; stripes F1 +0.325 F2 +0.208; sonorant 99 %
+  reverb_0.8 L 17.5 f0 300: slope F1 0.619 F2 0.878; |err| F1 227 F2 56 c; calib F1 1.48 F2 0.90; folds F2>F3 0.3 % F1>F2 1.7 %; attractor 14.29 holes 61.5 %; stripes F1 +0.325 F2 +0.268; sonorant 99 %
+  reverb_0.8 L 17.5 f0 400: slope F1 0.429 F2 0.837; |err| F1 248 F2 74 c; calib F1 1.08 F2 0.88; folds F2>F3 2.9 % F1>F2 10.2 %; attractor 14.23 holes 53.4 %; stripes F1 +0.128 F2 +0.381; sonorant 99 %
+  reverb_0.8 L 15.6 f0 100: slope F1 0.887 F2 0.963; |err| F1 43 F2 19 c; calib F1 0.65 F2 0.50; folds F2>F3 0.3 % F1>F2 0.0 %; attractor 10.07 holes 23.3 %; stripes F1 +0.046 F2 +0.033; sonorant 99 %
+  reverb_0.8 L 15.6 f0 200: slope F1 0.698 F2 0.950; |err| F1 109 F2 34 c; calib F1 1.23 F2 0.71; folds F2>F3 0.3 % F1>F2 0.1 %; attractor 11.98 holes 39.1 %; stripes F1 +0.283 F2 +0.127; sonorant 99 %
+  reverb_0.8 L 15.6 f0 300: slope F1 0.697 F2 0.907; |err| F1 200 F2 50 c; calib F1 1.43 F2 0.81; folds F2>F3 0.3 % F1>F2 0.5 %; attractor 12.60 holes 57.0 %; stripes F1 +0.174 F2 +0.313; sonorant 99 %
+  reverb_0.8 L 15.6 f0 400: slope F1 0.549 F2 0.905; |err| F1 221 F2 58 c; calib F1 1.26 F2 0.77; folds F2>F3 1.0 % F1>F2 4.0 %; attractor 10.53 holes 50.0 %; stripes F1 +0.144 F2 +0.274; sonorant 99 %
+  reverb_0.8 L 13.0 f0 100: slope F1 0.909 F2 0.974; |err| F1 36 F2 18 c; calib F1 0.66 F2 0.46; folds F2>F3 0.0 % F1>F2 0.0 %; attractor 8.66 holes 18.5 %; stripes F1 -0.091 F2 -0.006; sonorant 99 %
+  reverb_0.8 L 13.0 f0 200: slope F1 0.745 F2 0.961; |err| F1 94 F2 32 c; calib F1 1.19 F2 0.73; folds F2>F3 0.2 % F1>F2 0.0 %; attractor 14.76 holes 41.6 %; stripes F1 +0.307 F2 +0.097; sonorant 99 %
+  reverb_0.8 L 13.0 f0 300: slope F1 0.692 F2 0.951; |err| F1 207 F2 47 c; calib F1 1.85 F2 0.86; folds F2>F3 0.7 % F1>F2 0.0 %; attractor 15.54 holes 54.6 %; stripes F1 +0.075 F2 +0.270; sonorant 99 %
+  reverb_0.8 L 13.0 f0 400: slope F1 0.596 F2 0.873; |err| F1 216 F2 69 c; calib F1 1.39 F2 1.00; folds F2>F3 1.1 % F1>F2 0.6 %; attractor 12.93 holes 54.4 %; stripes F1 +0.239 F2 +0.386; sonorant 99 %
+  reverb_0.8 lag (ms, + = behind): lag_ms_slow +9.5; lag_ms_fast +0.4
+  reverb_0.8 interleaved |err| first 300 ms vs rest: F1 106 vs 79 c, F2 29 vs 28 c
+
+Student minus teacher (seed means), clean:
+  L0 L 17.5: |err| change F1 +36.2 c, F2 +7.1 c (mean over f0)
+  L0 L 15.6: |err| change F1 +28.1 c, F2 +5.2 c (mean over f0)
+  L0 L 13.0: |err| change F1 +36.7 c, F2 +6.3 c (mean over f0)
+  L2 L 17.5: |err| change F1 +28.7 c, F2 +4.0 c (mean over f0)
+  L2 L 15.6: |err| change F1 +19.7 c, F2 +2.5 c (mean over f0)
+  L2 L 13.0: |err| change F1 +25.9 c, F2 +4.1 c (mean over f0)

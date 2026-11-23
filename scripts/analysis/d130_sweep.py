@@ -475,8 +475,35 @@ def cmd_analyse(teachers: list[str], groups: list[tuple[str, list[str]]]) -> Non
     print(f"written {OUT}")
 
 
+def cmd_maps_by_f0(models: list[tuple[str, str]], cond: str = "clean") -> None:
+    """Extra (descriptive, added after the registered maps were seen): the error field per f0, one row per model
+    (label=name), pooled over lengths, lips, directions and speeds; frames whose true F1 is below f0 (no harmonic
+    can show it) drawn grey."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    meta = json.loads((CACHE / "meta.json").read_text())
+    fig, axes = plt.subplots(len(models), len(F0S), figsize=(4.2 * len(F0S), 3.8 * len(models)), squeeze=False)
+    for r, (label, name) in enumerate(models):
+        raw = _load([name])
+        for c, f0 in enumerate(F0S):
+            T, Ms, _, Ps, _ = _frames(meta, raw, cond, lambda it: it["f0"] == f0)
+            seen = T[:, 0] >= f0
+            ax = axes[r, c]
+            error_map(ax, T[seen], Ms[0][seen], Ps[0][seen], f"{label}, f0 {f0:g} Hz, {cond}")
+            ax.axhline(np.log2(f0), color="#999999", linewidth=1, linestyle="--")
+    fig.savefig(OUT / f"maps_by_f0_{cond}.png", dpi=100, bbox_inches="tight")
+    plt.close(fig)
+    print(f"written {OUT / f'maps_by_f0_{cond}.png'}")
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1]
+    if cmd == "maps_by_f0":
+        cmd_maps_by_f0([(a.split("=")[0], a.split("=")[1]) for a in sys.argv[2:]])
+        raise SystemExit
     if cmd == "render":
         cmd_render("--quick" in sys.argv)
     elif cmd == "score":
