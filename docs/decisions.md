@@ -4696,7 +4696,7 @@ USC-TIMIT (Narayanan et al. 2014; 10 speakers, real-time MRI with audio, CC BY 4
 
 ## D-132 (2026-11-25, Hannah: "I think that the synthetic test will be the easiest"; seen beforehand: on a private recording (inference only, nothing of it kept here), teacher v3.1's tract-length head reads about 1.2 cm longer on the low-pitched half than the high-pitched half while F3 (models' and Praat's alike) moves slightly the other way; Hannah notes her larynx is not fully neutral as pitch rises; nothing of this probe): does the tract-length head read pitch as length?
 
-*Status*: **draft, for Hannah to read before registration**. Descriptive, with a reading fixed now.
+*Status*: **registered 2026-11-25** (Hannah: "Yes please to D-132"). Descriptive, with a reading fixed now. Seen before registration: a smoke test of the script on one clip (Story's /A/ at 15.6 cm, f0 110 and 280 Hz): teacher seed 2 15.59 / 15.79 cm, student L2_s0 15.43 / 15.70 cm, F1-F3 within 10 Hz of the labels. Change from the draft: these models have no instantaneous length head (`vtl_inst_log2cm` is absent), so only the anatomical one is read.
 
 - *Why*: half of train_v2's clips draw the tract length from f0 (`sampler._coupled_length`: mean 17.5 - 2.5 log2(f0 / 110) cm, SD 1.5, capped at 350 Hz; D-020: `p_length_from_f0 = 0.5`), so f0 is evidence of length in the training data and a head can learn to use it. For the long-term aim (voice-surgery outcomes) that matters directly: a pitch change with an unchanged tract would read as a length change. A real voice can't hold the larynx still across pitch, so the test is synthetic: the length is fixed exactly and only f0 moves.
 - *Stimuli* (`scripts/analysis/d132_length_f0.py`; all synthetic, the cascade render path as D-130):
