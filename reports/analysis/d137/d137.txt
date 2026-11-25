@@ -1,0 +1,34 @@
+D-137: uniform 3 cm^2 tube, one region's area varied; F1 / F2 / F3 in Hz from tube.poles, and KL and CHIMERA minus tube.poles in cents
+
+17.5 cm, lips area varied:
+   0.15 cm^2: tube   296 /  1160 /  2223 Hz; kl - tube  -44 /   +9 /   +4 c; chimera - tube +245 /   -6 /   -8 c
+   0.30 cm^2: tube   348 /  1196 /  2240 Hz; kl - tube  +11 /  +10 /   +4 c; chimera - tube +194 /   +4 /   -4 c
+   0.60 cm^2: tube   408 /  1254 /  2270 Hz; kl - tube  +16 /   +7 /   +4 c; chimera - tube +135 /  +12 /   +2 c
+   1.20 cm^2: tube   464 /  1333 /  2316 Hz; kl - tube   +0 /   +4 /   +3 c; chimera - tube  +83 /  +12 /   +9 c
+   3.00 cm^2: tube   519 /  1445 /  2398 Hz; kl - tube   -1 /   +1 /   +1 c; chimera - tube  +39 /   +2 /  +15 c
+   6.00 cm^2: tube   545 /  1514 /  2463 Hz; kl - tube   +0 /   +2 /   +2 c; chimera - tube  +25 /   -3 /  +20 c
+
+17.5 cm, epilarynx area varied:
+   0.15 cm^2: tube   560 /  1573 /  2612 Hz; kl - tube   +2 /   +2 /   +2 c; chimera - tube  +28 /  -22 /  -31 c
+   0.30 cm^2: tube   558 /  1565 /  2597 Hz; kl - tube   +1 /   +2 /   +3 c; chimera - tube  +29 /  -21 /  -27 c
+   0.60 cm^2: tube   554 /  1550 /  2568 Hz; kl - tube   +1 /   +2 /   +3 c; chimera - tube  +31 /  -18 /  -20 c
+   1.20 cm^2: tube   545 /  1521 /  2515 Hz; kl - tube   -0 /   +1 /   +2 c; chimera - tube  +33 /  -12 /   -7 c
+   3.00 cm^2: tube   519 /  1445 /  2398 Hz; kl - tube   -1 /   +1 /   +1 c; chimera - tube  +39 /   +2 /  +15 c
+   6.00 cm^2: tube   481 /  1355 /  2294 Hz; kl - tube   -3 /   +2 /   +2 c; chimera - tube  +48 /  +20 /  +29 c
+
+15.6 cm, lips area varied:
+   0.15 cm^2: tube   314 /  1296 /  2491 Hz; kl - tube  -67 /   +6 /   +3 c; chimera - tube +221 /   -9 /   -5 c
+   0.30 cm^2: tube   375 /  1336 /  2510 Hz; kl - tube  -18 /   +7 /   +3 c; chimera - tube +171 /   -0 /   -1 c
+   0.60 cm^2: tube   443 /  1400 /  2542 Hz; kl - tube   -6 /   +7 /   +3 c; chimera - tube +119 /   +9 /   +4 c
+   1.20 cm^2: tube   507 /  1486 /  2591 Hz; kl - tube   +3 /   +5 /   +4 c; chimera - tube  +75 /  +13 /  +12 c
+   3.00 cm^2: tube   570 /  1610 /  2677 Hz; kl - tube   +2 /   +2 /   +3 c; chimera - tube  +34 /   +8 /  +21 c
+   6.00 cm^2: tube   600 /  1687 /  2746 Hz; kl - tube   +4 /   +3 /   +4 c; chimera - tube  +16 /   +0 /  +27 c
+
+15.6 cm, epilarynx area varied:
+   0.15 cm^2: tube   616 /  1752 /  2915 Hz; kl - tube   +5 /   +2 /   +3 c; chimera - tube  +30 /  -10 /  -14 c
+   0.30 cm^2: tube   614 /  1743 /  2898 Hz; kl - tube   +5 /   +2 /   +3 c; chimera - tube  +31 /   -8 /  -11 c
+   0.60 cm^2: tube   609 /  1726 /  2866 Hz; kl - tube   +4 /   +2 /   +3 c; chimera - tube  +31 /   -6 /   -5 c
+   1.20 cm^2: tube   599 /  1694 /  2807 Hz; kl - tube   +3 /   +2 /   +4 c; chimera - tube  +32 /   -2 /   +4 c
+   3.00 cm^2: tube   570 /  1610 /  2677 Hz; kl - tube   +2 /   +2 /   +3 c; chimera - tube  +34 /   +8 /  +21 c
+   6.00 cm^2: tube   528 /  1509 /  2561 Hz; kl - tube   +1 /   +3 /   +5 c; chimera - tube  +37 /  +20 /  +27 c
+
