@@ -1,9 +1,9 @@
 """D-132: does the tract-length head read pitch as length? Story's ten vowels at five fixed tract lengths, rendered at
 seven f0s (90-350 Hz) with D-131's speech-like source; each model's length heads and F1-F3 per clip.
 
-    python scripts/analysis/d132_length_f0.py render             -> data/probes/length_f0_v1/
-    python scripts/analysis/d132_length_f0.py score NAME CKPT    -> reports/probes/length_f0/NAME.npz ($VA_DEVICE)
-    python scripts/analysis/d132_length_f0.py analyse            -> reports/analysis/d132/d132.txt
+    python scripts/analysis/d132_length_f0.py render             -> data/probes/length_f0_v2/ (v1: before the 2026-11-25 file-name fix)
+    python scripts/analysis/d132_length_f0.py score NAME CKPT    -> reports/probes/length_f0_v2/NAME.npz ($VA_DEVICE)
+    python scripts/analysis/d132_length_f0.py analyse            -> reports/analysis/d132/d132_v2.txt (d132.txt: the v1 run)
 """
 
 from __future__ import annotations
@@ -18,8 +18,8 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-CACHE = ROOT / "data/probes/length_f0_v1"
-RAW = ROOT / "reports/probes/length_f0"
+CACHE = ROOT / "data/probes/length_f0_v2"  # v2: names safe on case-insensitive disks
+RAW = ROOT / "reports/probes/length_f0_v2"
 OUT = ROOT / "reports/analysis/d132"
 LENGTHS = (13.0, 14.5, 15.6, 17.0, 18.5)
 F0S = (90.0, 110.0, 140.0, 180.0, 220.0, 280.0, 350.0)
@@ -54,7 +54,8 @@ def cmd_render() -> None:
             F[:, :k], Bw[:, :k] = f[:k], bw[:k]
             for f0 in F0S:
                 for seed in SEEDS:
-                    name = f"L{L:g}_{v}_f{f0:g}_s{seed}"
+                    tag = "".join(c + "^" if c.isupper() else c for c in v)  # Windows names ignore case: I and i would share
+                    name = f"L{L:g}_{tag}_f{f0:g}_s{seed}"
                     y, tf, lab = d131.render_jit(F, Bw, np.array([0.0, DUR]), f0, zlib.crc32(name.encode()))
                     np.savez_compressed(CACHE / f"{name}.npz", times=tf, formants=lab,
                                         audio=np.round(y / (np.abs(y).max() + 1e-12) * 16000).astype(np.int16))
@@ -159,7 +160,7 @@ def cmd_analyse() -> None:
                 row.append(np.mean([np.median(2 ** est[n][r, 0]) for n in TEACHERS]))
             lines.append(f"  {Lv:5.1f}: " + "  ".join(f"{f0:g} Hz {v:5.2f}" for f0, v in zip(F0S, row)))
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "d132.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (OUT / "d132_v2.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
 
 

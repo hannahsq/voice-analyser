@@ -3,7 +3,7 @@ by vowel; arm B renders the same shapes through the KL waveguide.
 
     python scripts/analysis/d134_vowel_length.py render             -> data/probes/vowel_length_kl_v1/
     python scripts/analysis/d134_vowel_length.py score NAME CKPT    -> reports/probes/vowel_length_kl/NAME.npz ($VA_DEVICE)
-    python scripts/analysis/d134_vowel_length.py analyse            -> reports/analysis/d134/d134.txt
+    python scripts/analysis/d134_vowel_length.py analyse            -> reports/analysis/d134/d134_v2.txt (d134.txt: arm A on D-132's v1 clips)
 """
 
 from __future__ import annotations
@@ -19,8 +19,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 CACHE = ROOT / "data/probes/vowel_length_kl_v1"
 RAW = ROOT / "reports/probes/vowel_length_kl"
-D132_CACHE = ROOT / "data/probes/length_f0_v1"
-D132_RAW = ROOT / "reports/probes/length_f0"
+D132_CACHE = ROOT / "data/probes/length_f0_v2"
+D132_RAW = ROOT / "reports/probes/length_f0_v2"
 OUT = ROOT / "reports/analysis/d134"
 LENGTHS = (13.0, 14.5, 15.6, 17.0, 18.5)
 F0S = (110.0, 180.0, 280.0)
@@ -183,7 +183,7 @@ def cmd_analyse() -> None:
             parts.append(f"length {dif[0]:+.2f}, F1 {dif[1]:+4.0f}, F2 {dif[2]:+4.0f}, F3 {dif[3]:+4.0f}")
         lines.append(f"  {v:3s} " + " / ".join(parts))
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "d134.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (OUT / "d134_v2.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
 
 
