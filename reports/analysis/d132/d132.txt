@@ -1,0 +1,33 @@
+D-132: pitch slope within (true length, vowel) cells; length heads in cm per octave of f0 (estimate in cm), formants in cents per octave; [95 % bootstrap over cells]; shuffle null = 97.5th percentile of |slope| with f0 permuted within cells
+
+vtl:
+  d040_5b_s1_b20k          +0.025 cm/oct [+0.002, +0.045]; null 0.012; by length 13: +0.03, 14.5: +0.08, 15.6: +0.02, 17: -0.03, 18.5: +0.03; median estimate - truth (cm) +0.08, +0.13, -0.07, -0.17, -0.23
+  d040_5b_s2_b20k          +0.005 cm/oct [-0.019, +0.028]; null 0.010; by length 13: +0.00, 14.5: +0.04, 15.6: -0.02, 17: +0.00, 18.5: -0.01; median estimate - truth (cm) +0.16, +0.02, +0.03, -0.13, -0.51
+  teacher (seed mean)      +0.015 cm/oct [-0.004, +0.033]; null 0.009; by length 13: +0.01, 14.5: +0.06, 15.6: +0.00, 17: -0.01, 18.5: +0.01; median estimate - truth (cm) +0.12, +0.07, -0.02, -0.15, -0.37
+  students (mean of four)  -0.015 cm/oct [-0.038, +0.008]; null 0.012; by length 13: -0.00, 14.5: +0.00, 15.6: -0.02, 17: -0.04, 18.5: -0.02; median estimate - truth (cm) +0.16, -0.01, -0.03, -0.21, -0.54
+
+vtl_inst: not output by these models
+F1:
+  d040_5b_s1_b20k          +32.836 c/oct [+20.402, +47.356]; null 6.280; by length 13: +21.37, 14.5: +28.14, 15.6: +34.41, 17: +37.24, 18.5: +43.02
+  d040_5b_s2_b20k          +33.165 c/oct [+20.670, +45.829]; null 5.868; by length 13: +23.20, 14.5: +26.00, 15.6: +28.55, 17: +40.26, 18.5: +47.81
+  teacher (seed mean)      +33.001 c/oct [+20.031, +45.809]; null 6.949; by length 13: +22.29, 14.5: +27.07, 15.6: +31.48, 17: +38.75, 18.5: +45.41
+  students (mean of four)  +46.286 c/oct [+29.193, +65.181]; null 8.087; by length 13: +25.72, 14.5: +31.60, 15.6: +38.00, 17: +50.18, 18.5: +85.93
+
+F2:
+  d040_5b_s1_b20k          -1.983 c/oct [-2.739, -1.219]; null 0.788; by length 13: -1.25, 14.5: -1.91, 15.6: -1.25, 17: -5.57, 18.5: +0.07
+  d040_5b_s2_b20k          +0.747 c/oct [-0.100, +1.714]; null 0.578; by length 13: -1.13, 14.5: +0.40, 15.6: +1.72, 17: -0.67, 18.5: +3.42
+  teacher (seed mean)      -0.618 c/oct [-1.195, +0.005]; null 0.512; by length 13: -1.19, 14.5: -0.76, 15.6: +0.23, 17: -3.12, 18.5: +1.74
+  students (mean of four)  +0.733 c/oct [-0.470, +1.997]; null 0.779; by length 13: -1.13, 14.5: +0.29, 15.6: +2.24, 17: -1.45, 18.5: +3.71
+
+F3:
+  d040_5b_s1_b20k          +0.150 c/oct [-0.400, +0.771]; null 0.404; by length 13: +0.91, 14.5: -0.23, 15.6: +0.80, 17: -1.08, 18.5: +0.35
+  d040_5b_s2_b20k          +0.242 c/oct [-0.482, +0.898]; null 0.427; by length 13: +1.34, 14.5: -1.34, 15.6: +0.40, 17: -1.15, 18.5: +1.96
+  teacher (seed mean)      +0.196 c/oct [-0.365, +0.758]; null 0.397; by length 13: +1.13, 14.5: -0.79, 15.6: +0.60, 17: -1.11, 18.5: +1.16
+  students (mean of four)  -0.053 c/oct [-0.647, +0.549]; null 0.426; by length 13: +0.43, 14.5: -0.59, 15.6: +0.04, 17: -1.78, 18.5: +1.63
+
+Teacher (seed mean) length estimate (cm) by f0, averaged over vowels, per true length:
+   13.0: 90 Hz 13.13  110 Hz 13.12  140 Hz 13.14  180 Hz 13.13  220 Hz 13.11  280 Hz 13.14  350 Hz 13.08
+   14.5: 90 Hz 14.49  110 Hz 14.53  140 Hz 14.54  180 Hz 14.60  220 Hz 14.63  280 Hz 14.56  350 Hz 14.58
+   15.6: 90 Hz 15.54  110 Hz 15.54  140 Hz 15.55  180 Hz 15.59  220 Hz 15.62  280 Hz 15.61  350 Hz 15.61
+   17.0: 90 Hz 16.90  110 Hz 16.85  140 Hz 16.89  180 Hz 16.82  220 Hz 16.84  280 Hz 16.83  350 Hz 16.82
+   18.5: 90 Hz 18.05  110 Hz 18.09  140 Hz 18.09  180 Hz 18.15  220 Hz 18.16  280 Hz 18.14  350 Hz 18.15
