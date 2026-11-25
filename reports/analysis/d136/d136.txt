@@ -1,0 +1,113 @@
+D-136: Story's ten shapes at 13.0-18.5 cm (five lengths); differences in cents, median over lengths, F1 / F2 / F3
+tube = tube.poles (the training labels); kl = the waveguide's measured closed-glottis resonances (walls on); chimera = CHIMERA's linearised network (48 kHz, 16 + 17 sections); tube33 = tube.poles of the shape resampled to those sections; _clamp = every area raised to at least 0.5 cm^2; _epi = only sections 1-4
+
+1. kl - tube:
+  i     -35 /    +1 /    +2
+  I      +0 /    -0 /    +4
+  E      +1 /    +1 /    +4
+  ae     +2 /    +3 /    +9
+  V      +3 /    +6 /    +5
+  A      +2 /    +9 /   +11
+  O      +5 /    +8 /    +5
+  U     +14 /   +10 /    +5
+  o     +10 /   +17 /    +4
+  u     -34 /   +32 /    +2
+  all    +1 /    +5 /    +5   (median |x|: 9 / 7 / 7)
+   kl without walls - tube:
+  i    -403 /    -8 /    -5
+  I    -158 /   -11 /    -3
+  E    -118 /   -11 /    -3
+  ae    -85 /   -16 /    +1
+  V     -90 /   -32 /    -2
+  A     -68 /   -39 /    +3
+  O     -95 /   -43 /    -2
+  U    -153 /   -37 /    -2
+  o    -277 /   -36 /    -3
+  u    -388 /   -16 /    -4
+  all  -133 /   -27 /    -3   (median |x|: 133 / 27 / 3)
+2. chimera - tube:
+  i    +130 /  -146 /   +52
+  I     +35 /   -72 /   -83
+  E     +11 /  -113 /   -93
+  ae    -17 /  -259 /   -45
+  V     -15 /  -153 /   -59
+  A     -70 /  -307 /   +21
+  O      -3 /  -148 /   -37
+  U    +115 /   -23 /   -89
+  o    +241 /   +53 /  -112
+  u    +166 /  +200 /  -144
+  all   +22 /  -126 /   -75   (median |x|: 58 / 146 / 75)
+3. tube33 - tube (resolution alone):
+  i      +8 /   -23 /   +20
+  I      -6 /   -18 /   +11
+  E     -11 /    -9 /    +8
+  ae    -20 /   +13 /   +14
+  V     -19 /   +12 /    +1
+  A     -28 /   +30 /   +11
+  O     -18 /   +18 /    -5
+  U      +2 /    +6 /   +11
+  o     +27 /    +2 /   +25
+  u     +16 /    -6 /   +34
+  all    -8 /    +4 /   +11   (median |x|: 18 / 12 / 11)
+4. chimera - tube33 (beyond resolution):
+  i    +122 /  -127 /   +32
+  I     +41 /   -54 /   -93
+  E     +22 /  -104 /  -100
+  ae     +3 /  -271 /   -60
+  V      +4 /  -164 /   -60
+  A     -42 /  -337 /   +10
+  O     +15 /  -166 /   -33
+  U    +113 /   -29 /  -100
+  o    +214 /   +52 /  -136
+  u    +151 /  +206 /  -177
+  all   +30 /  -109 /   -86   (median |x|: 42 / 148 / 86)
+5. chimera_clamp - tube_clamp (narrow passages removed):
+  i     +87 /  -111 /   +29
+  I     +37 /   -79 /   -31
+  E     +12 /  -105 /   -40
+  ae    -18 /  -201 /   -15
+  V     -17 /  -107 /   -32
+  A     -70 /  -170 /    -4
+  O      -8 /   -99 /   -22
+  U    +103 /    -9 /   -67
+  o     +86 /   +66 /   -93
+  u     +98 /  +114 /  -120
+  all   +24 /   -99 /   -36   (median |x|: 59 / 106 / 37)
+   chimera_epi - tube_epi (epilarynx widened only):
+  i    +131 /  -149 /   +97
+  I     +36 /   -76 /   -25
+  E     +11 /  -102 /   -23
+  ae    -17 /  -179 /   +58
+  V     -16 /  -112 /   -14
+  A     -84 /  -175 /   +82
+  O      -7 /  -103 /    -6
+  U    +115 /   -12 /   -65
+  o    +241 /   +57 /   -94
+  u    +167 /  +200 /  -127
+  all   +23 /  -103 /   -21   (median |x|: 63 / 110 / 61)
+   kl_clamp - tube_clamp:
+  i      -7 /    +1 /    +4
+  I      +0 /    +0 /    +4
+  E      +1 /    +2 /    +4
+  ae     +1 /    +4 /    +3
+  V      +2 /    +6 /    +4
+  A      +2 /    +6 /    +3
+  O      +4 /    +8 /    +5
+  U     +13 /   +11 /    +5
+  o      +4 /   +14 /    +5
+  u      -5 /   +13 /    +3
+  all    +0 /    +4 /    +4   (median |x|: 6 / 7 / 6)
+
+Per vowel areas (cm^2): i min 0.15 epi 0.26 lip 1.73; I min 0.24 epi 0.25 lip 2.04; E min 0.20 epi 0.24 lip 2.46; ae min 0.11 epi 0.21 lip 3.73; V min 0.18 epi 0.25 lip 1.78; A min 0.09 epi 0.22 lip 3.08; O min 0.19 epi 0.26 lip 1.39; U min 0.26 epi 0.30 lip 0.47; o min 0.13 epi 0.33 lip 0.16; u min 0.15 epi 0.34 lip 0.20
+  chimera - tube F1: correlation over vowels with log area: min_area +0.15, epi_area +0.87, lip_area -0.88
+  chimera - tube F2: correlation over vowels with log area: min_area +0.39, epi_area +0.90, lip_area -0.89
+  chimera - tube F3: correlation over vowels with log area: min_area -0.42, epi_area -0.57, lip_area +0.63
+  kl - tube F1: correlation over vowels with log area: min_area +0.18, epi_area -0.19, lip_area +0.11
+  kl - tube F2: correlation over vowels with log area: min_area -0.15, epi_area +0.77, lip_area -0.81
+  kl - tube F3: correlation over vowels with log area: min_area -0.59, epi_area -0.61, lip_area +0.49
+
+6. The models' readings (D-134 KL clips; D-135 arm 1 CHIMERA clips) against each engine's resonances and against tube.poles: median signed error (cents) F1 / F2 / F3, and median |error|, teacher seed mean / students
+  KL clips against tube.poles       teacher  +63 /  +25 /  +19 (|e| 63 / 25 / 20); students  +54 /  +25 /  +17 (|e| 54 / 25 / 18)
+  KL clips against the engine's own teacher  +64 /  +16 /  +14 (|e| 64 / 17 / 14); students  +53 /  +16 /  +13 (|e| 53 / 18 / 13)
+  CHIMERA clips against tube.poles       teacher +100 /  -72 /  -65 (|e| 100 / 100 / 68); students +106 /  -76 /  -65 (|e| 106 / 101 / 67)
+  CHIMERA clips against the engine's own teacher  +78 /  +36 /  +16 (|e| 78 / 36 / 16); students  +71 /  +34 /  +16 (|e| 71 / 34 / 16)
