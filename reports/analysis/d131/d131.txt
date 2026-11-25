@@ -1,0 +1,13 @@
+D-131: median signed F1 error (cents), frames inside Story's box, clean, slow; teacher = mean of the two seeds' medians, student = mean of four; G = teacher - student; [95 % bootstrap over clips]
+
+f0 100 Hz (24 clips per arm)
+  baseline (D-130 clips, 400-frame windows): teacher +18.0, students  +1.2, G0 +16.8 [+13.0, +21.0]
+  W: teacher in 100-frame windows    teacher  +8.9 ( -9.1), students  +1.2 ( +0.0), G  +7.7; change from G0  -9.1 [-10.2,  -8.1]
+  B: box only, no extension          teacher +16.8 ( -1.2), students  -0.0 ( -1.3), G +16.8; change from G0  +0.0 [ -5.6,  +4.9] (unpaired)
+  J: jitter, shimmer, f0 wander      teacher  +9.6 ( -8.4), students  +5.2 ( +4.0), G  +4.4; change from G0 -12.4 [-15.1, -10.2]
+
+f0 200 Hz (24 clips per arm)
+  baseline (D-130 clips, 400-frame windows): teacher +24.5, students +14.1, G0 +10.5 [ +5.8, +15.4]
+  W: teacher in 100-frame windows    teacher +19.0 ( -5.5), students +14.1 ( +0.0), G  +4.9; change from G0  -5.5 [ -7.3,  -3.6]
+  B: box only, no extension          teacher +20.3 ( -4.3), students  +3.3 (-10.8), G +16.9; change from G0  +6.5 [ +0.4, +12.9] (unpaired)
+  J: jitter, shimmer, f0 wander      teacher +13.4 (-11.1), students +15.4 ( +1.3), G  -2.0; change from G0 -12.5 [-16.0,  -9.4]

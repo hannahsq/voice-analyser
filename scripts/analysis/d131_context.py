@@ -183,7 +183,7 @@ def cmd_analyse() -> None:
     for arm in ("box", "jit"):
         items = json.loads((CACHE / arm / "meta.json").read_text())["items"]
         raw = {n: np.load(RAW / f"{n}_{arm}_raw.npz") for n in TEACHERS + STUDENTS}
-        g = lambda n: lambda it: (raw[n][f"{it['name']}|F"], raw[n][f"{it['name']}|son"])  # noqa: E731
+        g = lambda n, raw=raw: lambda it: (raw[n][f"{it['name']}|F"], raw[n][f"{it['name']}|son"])  # noqa: E731
         arms[arm] = (items, CACHE / arm, {n: g(n) for n in TEACHERS + STUDENTS})
     raw_w = {n: np.load(RAW / f"{n}_w100_raw.npz") for n in TEACHERS}
     gw = {n: (lambda n: lambda it: (raw_w[n][f"{it['name']}|F"], raw_w[n][f"{it['name']}|son"]))(n) for n in TEACHERS}
