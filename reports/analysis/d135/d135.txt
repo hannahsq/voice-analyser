@@ -1,0 +1,29 @@
+D-135: CHIMERA renders; length bias = median estimate - CHIMERA's length (cm); F1-F3 error in cents against CHIMERA's closed-glottis resonances
+
+Arm 1, Story's ten shapes through CHIMERA: 150 clips
+  d040_5b_s1_b20k          mean -0.51; range 1.02 cm; back - others +0.45 [+0.24, +0.64]; by vowel i -0.56, I -0.63, E -0.75, ae -0.68, V -0.46, A -1.07, O -0.61, U -0.06, o -0.10, u -0.19
+  d040_5b_s2_b20k          mean -0.39; range 1.25 cm; back - others +0.46 [+0.31, +0.63]; by vowel i -0.61, I -0.52, E -0.42, ae -0.52, V -0.38, A -1.00, O -0.64, U -0.02, o +0.24, u -0.05
+  teacher (seed mean)      mean -0.45; range 1.11 cm; back - others +0.45 [+0.29, +0.64]; by vowel i -0.58, I -0.58, E -0.58, ae -0.60, V -0.42, A -1.04, O -0.62, U -0.04, o +0.07, u -0.12
+  students (mean of four)  mean -0.43; range 1.09 cm; back - others +0.33 [+0.16, +0.54]; by vowel i -0.59, I -0.49, E -0.37, ae -0.50, V -0.37, A -1.06, O -0.59, U -0.09, o +0.03, u -0.28
+  F1-F3 median error (cents), teacher seed mean / students, by vowel:
+    i   F1  +173 /  +170 F2   +25 /   +27 F3   +11 /   +17
+    I   F1   +65 /   +61 F2   +26 /   +22 F3    +3 /    +7
+    E   F1   +66 /   +62 F2   +33 /   +28 F3   +11 /   +13
+    ae  F1   +58 /   +55 F2   +51 /   +46 F3   +14 /   +14
+    V   F1   +64 /   +59 F2   +65 /   +52 F3   +11 /   +10
+    A   F1   +61 /   +66 F2  +109 /   +92 F3   +21 /   +23
+    O   F1   +78 /   +74 F2   +81 /   +76 F3   +15 /   +15
+    U   F1   +83 /   +77 F2   +55 /   +43 F3   +19 /   +20
+    o   F1   +91 /   +66 F2   +38 /   +36 F3   +20 /   +28
+    u   F1  +112 /   +97 F2    +1 /    -1 F3   +25 /   +32
+
+Arm 2, CHIMERA's own postures: 212 of 300 open (narrowest area >= 0.1 cm^2); lengths 13.6-19.7 cm
+  d040_5b_s1_b20k          mean bias -0.11 cm; per cm of true length -0.02; change in bias from the 10th to 90th percentile of each articulator [95 % bootstrap]:
+    tbX +0.22 [+0.01, +0.44]; tbY -0.16 [-0.35, +0.00]; jaw +0.20 [+0.05, +0.38]; lipAp -0.47 [-0.64, -0.30]; lipProt -0.06 [-0.28, +0.15]; lipWidth -0.36 [-0.51, -0.21]; root +0.09 [-0.07, +0.26]; larynx -0.05 [-0.29, +0.20]; curl -0.03 [-0.16, +0.11]
+  d040_5b_s2_b20k          mean bias -0.15 cm; per cm of true length -0.03; change in bias from the 10th to 90th percentile of each articulator [95 % bootstrap]:
+    tbX +0.34 [+0.14, +0.54]; tbY -0.50 [-0.70, -0.30]; jaw +0.14 [-0.01, +0.31]; lipAp -0.40 [-0.56, -0.26]; lipProt -0.02 [-0.25, +0.19]; lipWidth -0.25 [-0.41, -0.10]; root +0.09 [-0.06, +0.25]; larynx -0.01 [-0.22, +0.19]; curl -0.14 [-0.32, +0.04]
+  teacher (seed mean)      mean bias -0.13 cm; per cm of true length -0.02; change in bias from the 10th to 90th percentile of each articulator [95 % bootstrap]:
+    tbX +0.28 [+0.10, +0.47]; tbY -0.33 [-0.51, -0.18]; jaw +0.17 [+0.03, +0.32]; lipAp -0.43 [-0.58, -0.29]; lipProt -0.04 [-0.23, +0.17]; lipWidth -0.30 [-0.44, -0.17]; root +0.09 [-0.06, +0.25]; larynx -0.03 [-0.22, +0.16]; curl -0.09 [-0.23, +0.06]
+  students (mean of four)  mean bias -0.05 cm; per cm of true length -0.03; change in bias from the 10th to 90th percentile of each articulator [95 % bootstrap]:
+    tbX +0.37 [+0.21, +0.53]; tbY -0.43 [-0.61, -0.27]; jaw +0.10 [-0.04, +0.23]; lipAp -0.43 [-0.56, -0.31]; lipProt -0.10 [-0.27, +0.09]; lipWidth -0.26 [-0.39, -0.12]; root +0.09 [-0.04, +0.21]; larynx -0.00 [-0.18, +0.16]; curl -0.09 [-0.22, +0.06]
+  F1-F3 median error (cents), teacher / students: F1 +42 / +37, F2 +19 / +18, F3 +13 / +14
