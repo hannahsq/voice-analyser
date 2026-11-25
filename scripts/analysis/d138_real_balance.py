@@ -79,7 +79,7 @@ def _load(rec: Path, files: list[str]):
     from scipy.signal import resample_poly
 
     man = [r for r in csv.DictReader(open(rec / "manifest.csv", encoding="utf-8-sig"))
-           if r["file"] in files and r["kind"] == "sustained vowel" and r["usable"] == "yes"]
+           if r["file"] in files and r["kind"] == "sustained vowel" and r["usable"] == "yes" and r["f0_median_hz"]]  # voiced takes only
     audio = {}
     for f in files:
         y, sr = sf.read(rec / f, dtype="float64", always_2d=True)

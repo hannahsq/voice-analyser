@@ -1,0 +1,6 @@
+D-138 training reference: train_v2, 3000 random clips (seed 138), up to 20 voiced sonorant frames each; level differences (dB) at the label formants, largest magnitude within 1/6 octave of each (64 ms Hann)
+
+f0 90-140 Hz, all frames (n = 12782): L1-L2 -1.6 / +9.5 / +14.8 / +20.9 / +35.9; L2-L3 -8.9 / +1.2 / +7.9 / +16.2 / +33.7  (2.5/25/50/75/97.5th)
+f0 90-140 Hz, cell F1 350-600, F2/F1 < 2.2 (n = 1205): L1-L2 -0.4 / +7.6 / +11.0 / +14.8 / +27.5; L2-L3 +0.5 / +14.8 / +21.6 / +28.1 / +45.2  (2.5/25/50/75/97.5th)
+f0 180-270 Hz, all frames (n = 16158): L1-L2 -19.5 / +3.5 / +12.4 / +19.3 / +32.8; L2-L3 -6.8 / +2.1 / +9.0 / +17.4 / +35.8  (2.5/25/50/75/97.5th)
+f0 180-270 Hz, cell F1 350-600, F2/F1 < 2.2 (n = 914): L1-L2 -27.3 / +0.4 / +10.7 / +16.2 / +28.5; L2-L3 +5.4 / +16.2 / +22.7 / +29.8 / +43.6  (2.5/25/50/75/97.5th)
