@@ -1,0 +1,47 @@
+D-134: tract-length bias (median estimate - truth, cm) by vowel, averaged over lengths and f0; back rounded (o, u, U, O) minus the other six [95 % bootstrap over (length, f0, seed) cells]; F1-F3 median error (cents)
+
+arm A, cascade (D-132 clips): 700 clips
+  d040_5b_s1_b20k          range 0.93 cm; back - others +0.18 [+0.15, +0.20]; by vowel i -0.62, I -0.08, E -0.11, ae +0.06, V +0.06, A -0.06, O +0.11, U +0.31, o +0.26, u -0.46
+  d040_5b_s2_b20k          range 0.62 cm; back - others +0.10 [+0.07, +0.14]; by vowel i -0.48, I -0.09, E -0.15, ae -0.09, V -0.05, A -0.03, O -0.09, U +0.12, o +0.13, u -0.35
+  teacher (seed mean)      range 0.77 cm; back - others +0.14 [+0.12, +0.16]; by vowel i -0.55, I -0.09, E -0.13, ae -0.01, V +0.00, A -0.05, O +0.01, U +0.22, o +0.19, u -0.41
+  students (mean of four)  range 0.47 cm; back - others +0.07 [+0.05, +0.10]; by vowel i -0.29, I -0.14, E -0.20, ae -0.12, V -0.10, A -0.09, O -0.09, U +0.02, o +0.10, u -0.37
+  F1-F3 median error (cents), teacher seed mean / students, by vowel:
+    i   F1  +134 /  +131 F2    -1 /    -2 F3    +3 /    +5
+    I   F1    +1 /    +1 F2    +0 /    -1 F3    -1 /    -0
+    E   F1    -5 /    +2 F2    -1 /    +0 F3    +1 /    +2
+    ae  F1    -5 /    -3 F2    -1 /    +0 F3    -1 /    -2
+    V   F1    -3 /    -2 F2    -1 /    +0 F3    +1 /    +0
+    A   F1    -9 /    -7 F2    -2 /    -1 F3    +0 /    +0
+    O   F1    -4 /    -1 F2    +3 /    +3 F3    -0 /    -2
+    U   F1    +2 /    +5 F2    -0 /    +2 F3    -0 /    -1
+    o   F1   +11 /   +14 F2    +5 /    +7 F3    -1 /    +0
+    u   F1   +31 /   +37 F2    -1 /    +1 F3    +3 /    +2
+
+arm B, KL: 300 clips
+  d040_5b_s1_b20k          range 1.64 cm; back - others -0.09 [-0.32, +0.09]; by vowel i -0.74, I -0.24, E -0.33, ae -0.47, V -0.45, A -1.88, O -0.71, U -0.54, o -0.93, u -0.93
+  d040_5b_s2_b20k          range 0.96 cm; back - others -0.00 [-0.19, +0.14]; by vowel i -0.21, I -0.16, E -0.28, ae -0.36, V -0.40, A -1.03, O -0.63, U -0.26, o -0.08, u -0.69
+  teacher (seed mean)      range 1.25 cm; back - others -0.05 [-0.22, +0.09]; by vowel i -0.47, I -0.20, E -0.31, ae -0.42, V -0.42, A -1.46, O -0.67, U -0.40, o -0.50, u -0.81
+  students (mean of four)  range 0.95 cm; back - others +0.08 [-0.02, +0.17]; by vowel i -0.16, I -0.11, E -0.23, ae -0.41, V -0.38, A -0.98, O -0.49, U -0.16, o -0.02, u -0.53
+  F1-F3 median error (cents), teacher seed mean / students, by vowel:
+    i   F1  +200 /  +180 F2    -0 /    -4 F3   +14 /   +11
+    I   F1   +54 /   +36 F2   +12 /   +12 F3   +14 /   +11
+    E   F1   +24 /   +29 F2   +26 /   +26 F3   +20 /   +18
+    ae  F1   +41 /   +43 F2   +41 /   +34 F3   +13 /   +10
+    V   F1   +63 /   +57 F2   +29 /   +28 F3   +23 /   +20
+    A   F1   +43 /   +40 F2   +10 /   +13 F3   +14 /   +10
+    O   F1   +63 /   +68 F2   +35 /   +37 F3   +23 /   +19
+    U   F1   +42 /   +38 F2   +46 /   +40 F3   +18 /   +19
+    o   F1  +108 /   +85 F2   +34 /   +32 F3   +13 /   +16
+    u   F1  +145 /   +94 F2   +11 /   +11 F3   +11 /   +11
+
+KL - cascade, paired by (length, vowel), f0 110-280 Hz: length bias (cm) and F1-F3 (cents), teacher seed mean / students
+  i   length +0.08, F1  +79, F2   -2, F3   +8 / length +0.12, F1  +69, F2   -3, F3   +8
+  I   length -0.11, F1  +49, F2  +11, F3  +18 / length +0.03, F1  +25, F2  +11, F3  +15
+  E   length -0.18, F1  +39, F2  +21, F3  +21 / length -0.03, F1  +27, F2  +22, F3  +19
+  ae  length -0.40, F1  +50, F2  +47, F3  +37 / length -0.29, F1  +45, F2  +40, F3  +33
+  V   length -0.43, F1  +68, F2  +46, F3  +24 / length -0.28, F1  +63, F2  +41, F3  +24
+  A   length -1.41, F1  +55, F2 +220, F3 +173 / length -0.90, F1  +47, F2 +103, F3  +99
+  O   length -0.69, F1  +72, F2 +113, F3  +46 / length -0.40, F1  +68, F2  +70, F3  +33
+  U   length -0.62, F1  +71, F2 +109, F3  +41 / length -0.18, F1  +54, F2  +82, F3  +19
+  o   length -0.70, F1 +208, F2 +163, F3  +66 / length -0.14, F1 +100, F2  +35, F3  +35
+  u   length -0.41, F1 +231, F2  +30, F3  +24 / length -0.19, F1 +105, F2  +29, F3  +12
