@@ -1,0 +1,17 @@
+D-142: flags A (spectrum consistency), B (recording-level plausibility), C (physical prior); AUC failing vs not failing [95 % bootstrap]; false flags = share above the 95th percentile of not-failing grid clips
+
+d040_5b_s2_b20k (deciding):
+  synthetic grid: 21 failing, 99 not; Story's vowels: 0 of 20 failing
+  private takes: 7 failing, 34 not
+  A: synthetic AUC 1.00 [0.99, 1.00]; private AUC 0.45 [0.16, 0.74]; false flags: Story 15%, private not-failing takes 85% -> not accepted
+  B: synthetic AUC 1.00 [0.99, 1.00]; private AUC 0.99 [0.96, 1.00]; false flags: Story 0%, private not-failing takes 15% -> ACCEPTED
+  C: synthetic AUC 0.76 [0.61, 0.91]; private AUC 0.91 [0.80, 0.99]; false flags: Story 0%, private not-failing takes 9% -> not accepted
+
+d040_5b_s1_b20k:
+  synthetic grid: 26 failing, 92 not; Story's vowels: 0 of 20 failing
+  private takes: 8 failing, 32 not
+  A: synthetic AUC 0.99 [0.98, 1.00]; private AUC 0.37 [0.14, 0.62]; false flags: Story 20%, private not-failing takes 88%
+  B: synthetic AUC 0.95 [0.91, 0.99]; private AUC 0.91 [0.80, 0.99]; false flags: Story 0%, private not-failing takes 3%
+  C: synthetic AUC 0.71 [0.56, 0.84]; private AUC 0.90 [0.77, 0.98]; false flags: Story 0%, private not-failing takes 0%
+
+Accepted (deciding model): B
