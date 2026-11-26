@@ -94,7 +94,7 @@ def cmd_run() -> None:
             res[m]["grid_keys"] = [it[0] for it in sets["grid"]]
             path.write_text(json.dumps(res), encoding="utf-8")
             print(m, flush=True)
-    cmd_report(res)
+    cmd_report()  # from the saved json, whose clip keys are strings
 
 
 def cmd_report(res=None) -> None:

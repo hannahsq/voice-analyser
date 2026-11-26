@@ -1,0 +1,23 @@
+D-147: own-head failure in 5b's decay branches (all from d040_5b_s{1,2}/ckpt_016000.pt, 4000 steps)
+  grid: the tipping grid (D-142, seeds 20-22), mean failure share in the primary cells (f0 110-140, B1 250-500) and over the whole grid
+  test: share of D-145's fixed set (144 test clips 5b fails) still failing (>= 0.5) with the run's heads
+
+  deciding: no data change, F1-F4 heads as 5b's
+    d040_5b          s1: grid 0.34 (all 0.23), test 82%   s2: grid 0.17 (all 0.17), test 83%
+    d090_f5          s1: grid 0.27 (all 0.21), test 75%   s2: grid 0.17 (all 0.16), test 78%
+    d090_f57         s1: grid 0.44 (all 0.29), test 84%   s2: grid 0.16 (all 0.12), test 69%
+  deciding: the coupled set (D-080)
+    d080_a0          s1: grid 0.26 (all 0.23), test 82%   s2: grid 0.08 (all 0.05), test 42%
+    d080_a1          s1: grid 0.18 (all 0.21), test 76%   s2: grid 0.08 (all 0.05), test 47%
+  reported only: other branches without the coupled set
+    d056             s1: grid 0.28 (all 0.21), test 83%   s2: grid 0.16 (all 0.16), test 72%
+    d072_factorised  s1: grid 0.37 (all 0.24), test 85%   s2: grid 0.17 (all 0.18), test 84%
+    d072_retrieve    s1: grid 0.33 (all 0.22), test 81%   s2: grid 0.17 (all 0.18), test 84%
+    d086_std         s1: grid 0.36 (all 0.23), test 83%   s2: grid 0.17 (all 0.17), test 84%
+    d086_ramp        s1: grid 0.39 (all 0.24), test 85%   s2: grid 0.17 (all 0.18), test 83%
+    d109             s1: grid 0.30 (all 0.17), test 75%   s2: grid 0.18 (all 0.14), test 78%
+    d114             s1: grid 0.47 (all 0.27), test 78%   s2: grid 0.18 (all 0.18), test 64%
+
+  seed 1: primary-cell failure, null branches 0.27-0.44, coupled 0.18-0.26 -> below
+  seed 2: primary-cell failure, null branches 0.16-0.17, coupled 0.08-0.08 -> below
+Reading (registered): COUPLED SET: A0 and A1 fail less than every null branch on both seeds (chance under exchangeability 1 %)
