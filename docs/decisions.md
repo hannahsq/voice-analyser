@@ -5167,3 +5167,22 @@ Synthetic and training only; descriptive.
     - The heads arm is low at every step, though. Its synthetic effect belongs to the run.
   - (2) On the private recording the two arms read the same 1 of the 6 failing takes, and neither fails on any of the 31 takes 5b reads. On the failing takes, both still drop the formant on most frames.
   - *Reading*: the heads arm's synthetic gain doesn't reach this voice. Whatever the acoustic task or the length link teach, it fixes the tipping grid's cascade renders, not the failing takes. The GPU decomposition has a weaker case, and isn't registered. On present evidence the tipping grid is not a reliable stand-in for the real failure. D-141 stage 1 and every arm since were judged partly on it, so the real takes should be a deciding measure in any arm aimed at this failure.
+
+## D-150 (2026-11-27, Hannah: "Yes please, that seems like the best check to run next"; seen beforehand: D-149's result; Hillenbrand dev-tier counts (996 tokens, 83 speakers; 55 tokens from 23 speakers in D-141's cell at f0 <= 150 Hz, by group 68 / 48 / 19 / 8 in the cell at any f0); a function check of the reading on one synthetic clip and that every dev token loads; nothing of any model on these tokens for this measure): is the dropped formant there on other real voices?
+
+*Status*: registered. `scripts/analysis/d150_dev_dropped.py` (`run`, `report`). CPU, inference only, dev tier only.
+
+- *Why*: everything known about the dropped formant on real audio comes from one private recording (D-138 to D-149). D-149 found the tipping grid isn't a reliable stand-in for it. No entry has looked for the failure on the dev tiers' voices. If it's there, it gives a real-voice deciding measure with many speakers. If it isn't, the failure may be specific to this voice or this recording, which changes how much weight it should carry.
+- *Data*: Hillenbrand's dev tier, every token. Its references are hand-checked F1-F3 at the steady state and at 20, 50 and 80 % of the vowel. They were LPC tracks corrected by hand, so a dropped formant in LPC would have been corrected. A token's f0 is its steady-state reference f0. The cell is D-141's: reference steady-state F1 350-650 Hz, F2 / F1 < 2.2.
+- *Reading per frame*: each model's F1-F3 at the labelled time, the median over voiced frames within +-20 ms (at least 2). A frame **fails** if the model's F2 is nearer (log frequency) the reference F3 than the reference F2, D-138's measure. The kind is reported: dropped F1 (F1 read nearer the reference F2 than its F1) or skipped F2 (F1 right). A token fails if half or more of its labelled frames fail.
+- *Models*: deciding, 5b (both seeds, seed mean of each token's failure share). Reported: D-098's base and heads arms, which give a real-voice read of D-149's grid effect.
+- *Rule*, on the primary block (in the cell, f0 <= 150 Hz):
+  - **PRESENT** if 5b's failing tokens are at least 10 % and come from at least 3 speakers. The failure is on other voices, and this block becomes a dev-tier deciding measure for arms aimed at it.
+  - **RARE** if at most one token fails.
+  - SOME otherwise: reported, Hannah decides.
+- *Reported*: the same counts in the cell at f0 150-200 and above 200 Hz, and outside the cell at f0 <= 150 and above. The primary block by group and vowel.
+- *Caveats*:
+  - Hillenbrand's vowels are isolated hVd words from 1995 recordings. The voices are untrained, and phonation is likely modal, with F1 bandwidths perhaps narrower than the private recording's open vowels. So RARE would say "not on these voices", not "not on real voices".
+  - 55 tokens from 23 speakers is modest. The 10 % bar is about 6 tokens.
+  - Per-speaker results stay out of the report; counts only.
+- Report: `reports/analysis/d150/d150.{txt,json}`.
