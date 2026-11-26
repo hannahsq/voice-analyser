@@ -4945,3 +4945,39 @@ Synthetic and training only; descriptive.
   - **B, recording-level plausibility**: synthetic 1.00 [0.99, 1.00], private 0.99 [0.96, 1.00]; false flags 0 % on Story's vowels, 15 % on the takes that don't fail. Seed 1 agrees (0.95 / 0.91).
   - **C, physical prior at the frame's own length**: synthetic 0.76 [0.61, 0.91], private 0.91 [0.80, 0.99]: below the bar on synthetic clips. Seed 1: 0.71 / 0.90.
   - *Reading*: the misread formants are implausible for the speaker's length but much less so for the frame's own length reading. That fits the frame's length absorbing part of the misreading (as D-134 found the length head following the vowel), while the recording's length, pooled over the other clips, doesn't. B joins D-141 as a reported measure. A would need the residual compared within the recording (or against real-voice statistics) before it could mean anything on real audio, which is a later entry if wanted.
+
+## D-143 (2026-11-26, Hannah: "Yes please", to a cheap test before D-141 stage 1; seen beforehand: D-141 stage 0's result, D-054's (heads on h saturated; bandwidths the same under every read-out), the heads' failing-clip count on a 20-clip feasibility sample (4 failing, 16 not; a different draw from stage A's test set); a one-clip function check of stage C (finite output only); nothing of any probe): is a wide F1 at low f0 still in 5b's frozen frame vector?
+
+*Status*: **registered** (stages A and C); stage B is a draft that is registered only if stage A finds the evidence.
+
+- *Why*: Hannah asked whether better training data is enough. D-141 stage 0 showed that D-065's decoupled widening doesn't help, and D-054 showed that the heads on h are saturated and that a bigger or position-gathered bandwidth head changes nothing. If h, the 128-d per-frame vector every formant head reads, still carries a wide F1 at low f0, then data and a head retrain can work (stage B, then D-141 stage 1). If it doesn't, the trunk has lost the evidence, and data alone won't fix it. The structural routes come first then: a reconstruction loss (M4), or length made explicit (Hannah's length decomposition; a recording-level length, D-142).
+- *Stage A (CPU, inference only): a linear probe on frozen h.* `scripts/analysis/d143_probe.py run`.
+  - *Models*: `d040_5b_s1_b20k`, `d040_5b_s2_b20k`. h is captured at the bandwidth head's input; frames are D-142's (voiced, the middle 60 %).
+  - *Clips*: 3 s cascade vowels from D-142's generator, with F1 U(350, 650), F2 = F1 x U(1.3, 2.2) (at least 650), F3 U(2300, 3000), F4 = F3 + U(500, 1000), B2-B4 = 90 / 120 / 150 x U-log(0.7, 1.4), Rd U(0.6, 1.8) (so the source's slope varies, the confound with a broad F1).
+    - Training: 800 clips, f0 U-log(100, 230), B1 U-log(60, 700).
+    - Test: 400 clips, f0 U-log(100, 150), B1 U-log(250, 700), from separate seeds.
+    - Also reported: D-142's tipping grid at seeds 20-22 (120 clips).
+  - *Probes*: ridge regression for log2 F1, alpha chosen by 5-fold cross-validation over clips.
+    - **h**: on standardised h.
+    - **control**: on the model's own decoded log2 F1-F4 and log2 B1-B4. This is what the heads already expose.
+    - **null**: on h, with each training clip given another clip's F1.
+  - *Measure*: on test clips the heads fail (failure share at least 0.5, as D-142), the median over clips of each clip's median |F1 error| in cents. Not-failing clips (below 0.2) are reported alongside, against the heads' own error.
+  - *Rule, per model*:
+    - (1) on failing clips the h probe's error is at most 100 cents, and at most half the control's and half the null's;
+    - (2) sanity: on not-failing clips the h probe's error is at most the heads' plus 50 cents.
+  - *Reading*:
+    - If (2) fails for either model: **inconclusive** (the probe is a poor read-out).
+    - Otherwise, (1) on both models: **the evidence is in h**, and stage B gets registered.
+    - (1) on neither: **not linearly in h**. There is no stage B, and the structural routes come first.
+    - A split between seeds is reported, and Hannah decides.
+  - 100 cents is 6 %, against a misread of about 1000 cents (F1 read at F2). The heads' synthetic F1 error is about 20-30 cents (D-054).
+  - *Limits*: clean cascade clips with no channel or noise, and a linear probe, which is the heads' own form (they are linear in h). Readable by a linear probe trained on such data isn't the same as learnt by the heads on the full mix; stage B is for that.
+- *Stage C (CPU, inference only; reported, deciding nothing): does M4's loss see the dropped formant?* `d143_probe.py recon`.
+  - On the grid at seeds 20-22, per frame: D-109's reconstruction loss (`recon_loss_fb`: LF source by Rd search, level profiled, F5-F8 from F4, harmonics to 4000 Hz, D-104's 10 dB SNR gate) of the model's own F1-F4 / B1-B4 against the true ones (B2-B4 90 / 120 / 150).
+  - Reported for failing and not-failing clips: the median loss of each, the reading's excess over the truth (bootstrap over clips), and the share of frames where the truth scores lower.
+  - If the truth doesn't score clearly lower on failing clips, a reconstruction loss would not push against the dropped formant, which bears on the structural routes. It gets a row in `docs/recon_loss_register.md`.
+- *Stage B (draft; registered after stage A, and only if the evidence is in h)*: D-054's frozen-trunk recipe on `d040_5b_s2_b20k` (8000 steps, 5b's mix and channel, formant and bandwidth heads reinitialised).
+  - The control is D-054's existing `d054_flat_s1`/`s2` (the same recipe and seeds), so nothing is retrained for it.
+  - The arm adds a targeted wide-F1 set through `synth_extra`, rendered from train_v2's settings with D-141 stage 1's widening (that render option gets built here and is shared with D-141).
+  - Measures as D-141 stage 0 (the grid at seeds 20-22, primary cell f0 110-140, B1 250-500), plus D-054's guards (synthetic F1-F4 MAE, Hillenbrand dev F1-F3); the private recording is reported as aggregates.
+  - About 1 h CPU render, 1 h GPU per seed, and 1 h scoring.
