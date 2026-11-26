@@ -70,25 +70,32 @@ def cmd_private(rec: Path, out: Path, files: list[str]) -> None:
     (out / "d141_stage0_private.json").write_text(json.dumps(res, indent=1), encoding="utf-8")
 
 
-def _b1_distribution():
-    """train_v2's B1 in the cell (F1 350-650, F2/F1 < 2.2), and train_bw_v1's approximated (stage 0's note)."""
-    from vocal_analysis.synth import tract
-
-    d = ROOT / "data/synth/train_v2/flat"
+def _cell(d, step=37):
+    """F1 bandwidth labels in the cell (sonorant, F1 350-650 Hz, F2/F1 < 2.2), every `step`th frame of a flat label set."""
     fo = np.load(d / "frame_offsets.npy")
     tube = np.repeat(np.load(d / "clip_tube.npy"), np.diff(fo))
-    idx = np.arange(0, len(tube), 37)
+    idx = np.arange(0, len(tube), step)
     F = np.asarray(np.load(d / "label_formants.npy", mmap_mode="r")[idx, :2])
     Bw = np.asarray(np.load(d / "label_bandwidths.npy", mmap_mode="r")[idx, 0])
     f0 = np.asarray(np.load(d / "label_f0.npy", mmap_mode="r")[idx])
     son = np.asarray(np.load(d / "label_sonorant.npy", mmap_mode="r")[idx]) > 0.5
     m = son & np.isfinite(Bw) & np.isfinite(f0) & (F[:, 0] >= 350) & (F[:, 0] <= 650) & (F[:, 1] / F[:, 0] < 2.2)
+    return tube[idx][m], F[m], Bw[m], f0[m]
+
+
+def _b1_distribution():
+    """train_v2's B1 in the cell, train_bw_v1's own (stage 0's amendment) and its approximation from train_v2 (a check)."""
+    from vocal_analysis.synth import tract
+
+    t, F, Bw, f0 = _cell(ROOT / "data/synth/train_v2/flat")
     rng = np.random.default_rng(1410)
-    fac = np.exp(rng.uniform(np.log(0.4), np.log(2.5), m.sum()))
-    t = tube[idx][m]
-    bw = np.where(t, Bw[m] * fac, tract.bandwidth_prior(F[m, 0], f0[m]) * fac)
+    fac = np.exp(rng.uniform(np.log(0.4), np.log(2.5), len(Bw)))
+    sets = [("train_v2", Bw), ("train_bw_v1 (approx.)", np.where(t, Bw * fac, tract.bandwidth_prior(F[:, 0], f0) * fac))]
+    d = ROOT / "data/probes/d141_bw_labels"
+    if (d / "label_bandwidths.npy").exists():
+        sets.insert(1, ("train_bw_v1", _cell(d)[2]))
     out = []
-    for name, x in (("train_v2", Bw[m]), ("train_bw_v1 (approx.)", bw)):
+    for name, x in sets:
         out.append(f"  {name:22s} n {len(x)}: median {np.median(x):.0f}, 90th {np.percentile(x, 90):.0f}, 99th "
                    f"{np.percentile(x, 99):.0f} Hz; above 250 Hz {np.mean(x > 250):.2%}, above 360 Hz {np.mean(x > 360):.2%}")
     return out
