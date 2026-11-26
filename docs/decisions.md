@@ -5117,7 +5117,7 @@ Synthetic and training only; descriptive.
 
 ## D-148 (2026-11-27, Hannah: "Yes please", to scoring D-098's base on the tipping grid; seen beforehand: D-147's result (every score below the bars); D-098's result and pilot; a function check that the four checkpoints below load and run on one clip outside every set here (run time only); nothing of these runs on these clips): does D-098's base, which has the coupled share, fail less than 5b on the dropped formant?
 
-*Status*: registered. `scripts/analysis/d148_base_grid.py` (`run`, `report`). CPU, inference only, about 10 minutes.
+*Status*: **done 2026-11-27: unclear** (see Result). `scripts/analysis/d148_base_grid.py` (`run`, `report`). CPU, inference only, about 10 minutes.
 
 - *Why*: D-147 found that D-080's coupled set lowers the dropped-formant failure beyond the spread among 5b's branches. D-098's base trained from scratch with a coupled share. It has `train_v2ku`, which is `train_v2kb` with the coupling strength drawn per clip, at 42 % of items. D-098 found base a candidate for a seed confirmation, and the pilot traced most of base's glottal-slope gain to the coupled share. That confirmation (D-099) was parked on 2026-11-12. If base also fails less here, the dropped formant is a further reason to take D-099 up again.
 - *Run (deciding)*: `d098_base_b20k`, seed 1, the only seed. Against 5b it differs in more than the coupled share: width 192 against 128, long crops in 20 % of batches, an iVTL head, and 16k + 4k steps on that mix from scratch. So a difference belongs to the bundle, not to coupling.
@@ -5133,3 +5133,11 @@ Synthetic and training only; descriptive.
   - UNCLEAR: one seed can't place it.
 - *Caveats*: D-147's null is branch-to-branch variation from one checkpoint. A from-scratch seed varies more: 5b's two seeds are 0.17 and 0.34. That is why the bars sit outside both seeds' ranges, not at one seed's.
 - Report: `reports/analysis/d148/d148.{txt,json}`.
+- *Result (2026-11-27; `reports/analysis/d148/d148.txt`)*: **UNCLEAR**, as registered. Base's primary-cell failure is 0.22: below 5b seed 1's 0.34, above seed 2's 0.17, and between the bars (0.159 and 0.270).
+  - Reported:
+    - On D-145's 144 fixed test clips, 54 % still fail with base. That is below all 18 runs without the coupled set (64-85 %), and above D-080's seed-2 arms (42 and 47 %) and seed-1 arms (82 and 76 %).
+    - Base's whole grid is 0.18, against 0.12-0.29 for those runs.
+    - D-098's heads arm reaches 0.04 on the primary cells (whole grid 0.09) but 62 % on the test clips.
+    - D-085's arms, whose trunks the length losses took over, are 0.33 and 0.29.
+  - *Reading*: one seed of base doesn't separate from 5b's seed spread on the deciding measure. It leans the coupled set's way on the test clips, which is a reported measure. Base's second seed (D-099) would settle it.
+  - The heads arm's 0.04 is the lowest of any run so far. It isn't interpretable here: it changes the formant labels to acoustic ones, adds the VTL link and F5-F7, and has one seed. The grid's clips are uncoupled, so there its acoustic and closed labels coincide, and the comparison on the grid itself isn't biased by the label change. Whether its read-out or its data does this is open.

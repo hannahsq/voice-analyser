@@ -1,0 +1,14 @@
+D-148: own-head failure of D-098's base (one seed) against 5b's decay branches (D-147)
+  grid: primary cells (f0 110-140, B1 250-500) and whole grid, tipping grid seeds 20-22; test: share of D-145's fixed set (144 clips 5b fails) still failing (>= 0.5)
+
+  D-147, branches without the coupled set (18 runs): grid 0.16-0.47; 5b seed 1 0.34, seed 2 0.17
+  D-147, coupled: d080_a0_s1 0.26, d080_a0_s2 0.08, d080_a1_s1 0.18, d080_a1_s2 0.08
+
+  deciding
+    d098_base_b20k     grid 0.22 (all 0.18), test 54% of 144
+  reported only
+    d098_heads_b20k    grid 0.04 (all 0.09), test 62% of 144
+    d085_base_b20k     grid 0.33 (all 0.20), test 78% of 144
+    d085_heads_b20k    grid 0.29 (all 0.16), test 71% of 144
+
+Reading (registered; base 0.22, bars < 0.159 and >= 0.270): UNCLEAR: within the spread between 5b's two seeds
