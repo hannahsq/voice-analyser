@@ -5076,7 +5076,7 @@ Synthetic and training only; descriptive.
 
 ## D-146 (2026-11-26, Hannah: "would you be able to measure the bandwidths for train_v2kb?"; seen beforehand: D-145's result, including train_v2kb's closed-glottis B1 labels in the cell; a function check that three regenerated clips outside the sample reproduce the stored labels (match and run time only); nothing of the acoustic bandwidths): F1's acoustic bandwidth in D-080's coupled set at low f0
 
-*Status*: **registered**. `scripts/analysis/d146_coupled_bw.py` (1,500 clips). Descriptive, CPU, no training.
+*Status*: **done 2026-11-26: none** (see Result). `scripts/analysis/d146_coupled_bw.py` (1,500 clips). Descriptive, CPU, no training.
 
 - *Why*: in D-145, D-080's A0 and A1 fail less than 5b with their own heads on both seeds, and what they share is the coupled set train_v2kb (42 % of D-080's synthetic items). Its closed-glottis B1 labels are narrow, but the audio is rendered with coupling: each coupled pole's bandwidth follows B (1 + (bm - 1) a(t)) through the cycle (`voice._coupled_tract`), bm being the tube's open-glottis ratio at peak opening. train_v2kb predates D-081's acoustic bandwidth label.
 - *Method*: 1,500 of its 20,000 clips, drawn at random (seed 1460), regenerated with its own config and seed (`d078_render.config()`, 78). Clips whose regenerated closed labels differ from the stored ones are dropped and counted. In D-141's cell (F1 350-650 Hz, F2/F1 < 2.2) at f0 150 Hz or below: B1's closed label, its cycle mean (D-081's `bandwidths_acoustic`) and its peak-opening value (B x bm). For each: median, 90th and 99th percentiles, and the share above 250 and 360 Hz.
@@ -5085,3 +5085,8 @@ Synthetic and training only; descriptive.
   - **none** if under 0.36 % (twice train_bw_v1's): A0's lower failure is then more likely the branch or seed spread.
   - **some** in between.
   - The peak-opening values are reported for context: the spectrum integrates a time-varying bandwidth, so neither number alone is what a listener or the model hears.
+- *Result (2026-11-26; `reports/analysis/d146/d146.{txt,json}`)*: **no wide-F1 coverage.** All 1,500 regenerated clips matched their stored labels; 15,418 cell frames at f0 150 Hz or below; median glottal opening 0.60.
+  - B1's closed label: median 83 Hz, 99th percentile 174, none above 250.
+  - **Cycle mean: median 127, 99th 237; 0.30 % above 250, none above 360** (bar 1 %; train_bw_v1 0.18 %).
+  - At peak opening: median 161, 99th 297; 4.64 % above 250, 0.12 % above 360.
+  - **Reading**: coupling at full strength widens F1 by about 1.5 x through the cycle, but not into the 250-500 Hz range where the models fail. So it doesn't explain A0's and A1's lower failure in D-145. The remaining candidates are the branch's extra training or seed spread, and D-090's F5 arm (`d090_f5_s{1,2}`: a 5b branch with an F5 head and no gain, used as the null branch since) is the control for that. The tube's open-glottis model never makes the B1 that a private recording shows at low f0 (D-139). So whatever widens F1 there, the cascade's coupling as built isn't a source of such training examples; D-141 stage 1's direct widening stays the training option.

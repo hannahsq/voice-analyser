@@ -1,0 +1,7 @@
+D-146: F1 bandwidth in train_v2kb's coupled renders, D-141's cell (F1 350-650 Hz, F2/F1 < 2.2) at f0 <= 150 Hz
+  1500 clips regenerated (seed 78); 0 did not match the stored labels and were dropped; 15418 cell frames; median glottal opening <a> 0.60
+  closed-glottis label           median 83, 90th 126, 99th 174 Hz; above 250 Hz 0.00%, above 360 Hz 0.00%
+  cycle mean (acoustic, D-081)   median 127, 90th 183, 99th 237 Hz; above 250 Hz 0.30%, above 360 Hz 0.00%
+  at peak opening                median 161, 90th 227, 99th 297 Hz; above 250 Hz 4.64%, above 360 Hz 0.12%
+  for comparison (D-141 stage 0, the same cell at f0 <= 150): train_v2 0.00 % / 0.00 %, train_bw_v1 1.68 % / 0.18 % above 250 / 360 Hz
+Reading (registered): NO WIDE-F1 COVERAGE beyond what train_bw_v1 had
