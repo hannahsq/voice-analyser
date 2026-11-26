@@ -1,0 +1,17 @@
+D-143 stage A: wide F1 from 5b's frozen h by a linear (ridge) probe; median |F1 error| in cents, median over clips
+
+d040_5b_s1_b20k (alpha h 0.01, control 0.01, null 100.0; frames train 144000, test 72000)
+  test failing (n 134): h 130 [107, 159], control 201, null 229, heads 754
+  test not failing (n 256): h 68 [61, 81], control 163, null 274, heads 131
+  grid failing (n 27): h 103 [92, 122], control 307, null 175, heads 994
+  grid not failing (n 91): h 53 [39, 78], control 130, null 207, heads 118
+  (1) failing clips read by h: not met; (2) probe sanity on not-failing clips: met
+
+d040_5b_s2_b20k (alpha h 0.01, control 0.01, null 10.0; frames train 144000, test 72000)
+  test failing (n 134): h 124 [107, 151], control 237, null 221, heads 877
+  test not failing (n 258): h 78 [64, 86], control 165, null 286, heads 169
+  grid failing (n 21): h 82 [52, 119], control 249, null 176, heads 979
+  grid not failing (n 99): h 43 [36, 60], control 105, null 218, heads 176
+  (1) failing clips read by h: not met; (2) probe sanity on not-failing clips: met
+
+Reading (registered rule): NOT IN h (linearly): no stage B; the structural routes come first

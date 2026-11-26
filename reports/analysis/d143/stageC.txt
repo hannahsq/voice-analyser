@@ -1,0 +1,6 @@
+D-143 stage C (reported, deciding nothing): D-109's reconstruction loss per frame (Huber, dB) of the model's reading against the true F1-F4 / B1-B4, on D-142's grid at seeds 20-22; medians over frames per clip
+
+  d040_5b_s1_b20k failing (>= 0.5) (n 27): loss reading 26.70, truth 5.39; reading - truth +20.54 [+18.57, +32.13]; frames where the truth is lower 99%
+  d040_5b_s1_b20k not failing (< 0.2) (n 91): loss reading 5.14, truth 8.52; reading - truth -3.30 [-4.62, -2.28]; frames where the truth is lower 33%
+  d040_5b_s2_b20k failing (>= 0.5) (n 21): loss reading 35.37, truth 4.92; reading - truth +32.79 [+18.43, +48.77]; frames where the truth is lower 100%
+  d040_5b_s2_b20k not failing (< 0.2) (n 99): loss reading 5.18, truth 8.18; reading - truth -2.70 [-4.10, -2.30]; frames where the truth is lower 34%

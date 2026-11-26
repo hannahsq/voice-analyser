@@ -4948,7 +4948,7 @@ Synthetic and training only; descriptive.
 
 ## D-143 (2026-11-26, Hannah: "Yes please", to a cheap test before D-141 stage 1; seen beforehand: D-141 stage 0's result, D-054's (heads on h saturated; bandwidths the same under every read-out), the heads' failing-clip count on a 20-clip feasibility sample (4 failing, 16 not; a different draw from stage A's test set); a one-clip function check of stage C (finite output only); nothing of any probe): is a wide F1 at low f0 still in 5b's frozen frame vector?
 
-*Status*: **registered** (stages A and C); stage B is a draft that is registered only if stage A finds the evidence.
+*Status*: **done 2026-11-26** (stages A and C; see Result); stage B not registered (stage A's rule not met).
 
 - *Why*: Hannah asked whether better training data is enough. D-141 stage 0 showed that D-065's decoupled widening doesn't help, and D-054 showed that the heads on h are saturated and that a bigger or position-gathered bandwidth head changes nothing. If h, the 128-d per-frame vector every formant head reads, still carries a wide F1 at low f0, then data and a head retrain can work (stage B, then D-141 stage 1). If it doesn't, the trunk has lost the evidence, and data alone won't fix it. The structural routes come first then: a reconstruction loss (M4), or length made explicit (Hannah's length decomposition; a recording-level length, D-142).
 - *Stage A (CPU, inference only): a linear probe on frozen h.* `scripts/analysis/d143_probe.py run`.
@@ -4981,3 +4981,15 @@ Synthetic and training only; descriptive.
   - The arm adds a targeted wide-F1 set through `synth_extra`, rendered from train_v2's settings with D-141 stage 1's widening (that render option gets built here and is shared with D-141).
   - Measures as D-141 stage 0 (the grid at seeds 20-22, primary cell f0 110-140, B1 250-500), plus D-054's guards (synthetic F1-F4 MAE, Hillenbrand dev F1-F3); the private recording is reported as aggregates.
   - About 1 h CPU render, 1 h GPU per seed, and 1 h scoring.
+- *Result (2026-11-26; `reports/analysis/d143/stageA.{txt,json}`, `stageC.{txt,json}`)*: **stage A: not in h by the registered rule, a near miss on every criterion; stage C: the loss sees the dropped formant clearly.**
+  - *Stage A*, median |F1 error| in cents on the test clips the heads fail (134 per model), seeds 1 / 2:
+    - h probe 130 [107, 159] / 124 [107, 151]; control 201 / 237; null 229 / 221; heads 754 / 877.
+    - (1) fails on both models: the error is above 100 cents, and 0.65 / 0.52 of the control's and 0.57 / 0.56 of the null's, against a bar of 0.5.
+    - (2) passes: on not-failing test clips the h probe reads 68 / 78 against the heads' 131 / 169. Those clips have wide B1 too, so the heads are poor there as well.
+    - Grid, failing clips (27 / 21): h 103 / 82, control 307 / 249, null 175 / 176, heads 994 / 979.
+    - **Reading**: by the rule, *not linearly in h*, so stage B isn't registered on this evidence. Descriptively, it's partial. A linear probe on frozen h places a wide F1 six to seven times closer than the heads do, but only about 45 % closer than knowing nothing (the null) and not within 100 cents. h keeps the F1 region but not a precise position. So whether data and a head retrain would be enough remains open; this test doesn't support it strongly enough to bet stage B on. Any stage B now would be a new decision made with this result seen.
+  - *Stage C* (reported), per-frame Huber (dB) of D-109's loss, seeds 1 / 2:
+    - Failing clips: reading 26.7 / 35.4 against the truth's 5.4 / 4.9; excess +20.5 [+18.6, +32.1] / +32.8 [+18.4, +48.8]; the truth scores lower on 99 % / 100 % of frames.
+    - Not-failing clips: the reading scores *lower* than the truth (-3.3 / -2.7), with the truth lower on only a third of frames. That is the renderer's source model at work: the reading's bandwidths absorb the mismatch, as in D-102.
+    - **Reading**: the reconstruction loss pushes hard against the dropped formant, by roughly seven times its real-audio misfit (about 3 dB per harmonic, D-109). This supports the structural route through M4's loss.
+    - Caveats: these are clean synthetic clips, the renderer's own family. D-142's flag A (an LPC-envelope consistency check) worked on synthetic clips and failed on real voices.
