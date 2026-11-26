@@ -5007,3 +5007,34 @@ Synthetic and training only; descriptive.
     - Against Praat F with Hawks & Miller bandwidths, on failing takes: -0.9 [-5.6, +3.6] / -0.4 [-5.7, +4.6], with the reference lower on 46 % of frames. With narrow bandwidths, the right F1 position fits no better than the misreading. On not-failing takes this reference is worse than the reading (-3.5 / -4.1), so the models' own bandwidths beat the prior on real voices generally.
     - The excess is about a third of the synthetic clips' (+20 to +33).
     - **Reading**: on real audio the loss prefers the true F1 only jointly with a wide B1. From the misread state, moving F1 down at a narrow bandwidth gains nothing, so a gradient step on F alone has no slope towards the truth. The reconstruction route needs a bandwidth head that can reach 250-500 Hz at low f0, which is what D-054 found it doesn't track (it mostly returns the prior). M4's loss and the bandwidth's range go together, not one instead of the other.
+
+## D-144 (2026-11-26, Hannah: "Would you be able to register it?", having chosen the parts: a grid scan, the flag B gate, the source-model check and the harmonic check; forcing F1 through the chain dropped given D-086; seen beforehand: D-143's results; a one-clip function check (an ordinary clip at a seed outside every set below; run time and finite output only); nothing of the search on any clip below): a joint search at inference for the dropped formant
+
+*Status*: **registered**. `scripts/analysis/d144_search.py` (`synth`, `private REC OUT FILES`, `report [OUT]`).
+
+- *Why*: D-143 stage C found that on a private recording, D-109's reconstruction loss prefers the true F1 over the dropped-formant reading only when B1 may be wide. The trunk doesn't place a wide F1 well (D-143 stage A), so the fix is tried after the network: two explanations of each take are fitted to the loss, and the better one is kept. No training.
+- *Hypotheses*, per clip or take, with the free values held constant over the take (D-142's frames; the model's own f0; stage C's loss, harmonics to 4000 Hz, F5-F8 from F4):
+  - **A, the model is right**: the model's F1-F4 and B1-B4 per frame, with its F1 scaled by 0.85-1.15 (7 steps, kept below 0.95 F2) and B1 free.
+  - **B, the model skipped F1**: a new F1 at 300-700 Hz (25 Hz steps, below 0.9 x the model's median F1) with B1 free; the model's F1-F3 and B1-B3 move up one slot, and its F4 is dropped.
+  - B1 takes 12 log steps over 50-700 Hz in both. Both hypotheses have two free values, so B gets no extra freedom. B's best point is refined at 5 Hz steps within ±20 Hz and the neighbouring B1 steps.
+- *Decision*: B if A's loss minus B's exceeds a margin.
+  - The margin is fixed on the synthetic clips before the private run: the 95th percentile of A - B over normal synthetic clips (grid clips with failure share below 0.2, and Story's vowels the models read correctly), so the false-fix share there is 5 %. It is set per model and source profile.
+  - *Gate* (the primary version): B only where flag B (D-142) fires, at the 95th percentile of the model's not-failing grid clips, as D-141 stage 0. The ungated version is reported.
+- *Data*:
+  - D-142's grid at seeds 30-32 (120 clips) and Story's ten vowels at 15.6 cm, f0 110 and 220 Hz (render seeds 1440+, not D-142's).
+  - The private recording's 42 takes (D-138; per-take numbers in OUT outside the repo, aggregates only in the repo). Failing: 5b's seed-mean failure share at least 0.5 (6 takes); not failing: below 0.2.
+  - The models are `d040_5b_s1_b20k` and `s2`.
+- *Measures*:
+  - A hit is B chosen with the inserted F1 within 100 cents of the true F1 (synthetic) or 150 cents of Praat's (private; Praat's own error on real audio).
+  - A false fix is B chosen on a normal clip or a not-failing take.
+- *Rule* (gated, the loss's default source profile; both models): **works** if all three hold:
+  - (S) synthetic hits on at least 80 % of failing grid clips;
+  - (P) private: hits on at least 5 of the 6 failing takes and false fixes on at most 2 of the not-failing takes;
+  - (R) the source check: the gated decisions agree with those under the tilt profile (`profile="tilt"`, a free spectral slope per frame; its own margin) on at least 90 % of synthetic clips and of private takes.
+  - Otherwise: **not shown**, with each part reported. Six failing takes is a small test: a pass is evidence for one voice and one chain, not a general result.
+- *Reported, deciding nothing*:
+  - the ungated version;
+  - the harmonic check (for B choices, the inserted F1 / f0's distance from the nearest integer: 0.25 if unrelated, under 0.15 would suggest the loss is fitting harmonics, as D-119);
+  - on the failing takes, the inserted F1 against the same vowel's correctly read takes at f0 at least 1.5 times higher (median |cents|);
+  - the models as candidates: on takes where the two seeds' failure shares differ by at least 0.3, how often A's refit loss picks the less-failing seed.
+- *If it works*: an entry on putting it behind flag B in `va`'s output, and on other voices. *If not*: the reconstruction route needs the bandwidth's range in training (D-141 stage 1 or M4 with it), as D-143 concluded.
