@@ -5141,3 +5141,23 @@ Synthetic and training only; descriptive.
     - D-085's arms, whose trunks the length losses took over, are 0.33 and 0.29.
   - *Reading*: one seed of base doesn't separate from 5b's seed spread on the deciding measure. It leans the coupled set's way on the test clips, which is a reported measure. Base's second seed (D-099) would settle it.
   - The heads arm's 0.04 is the lowest of any run so far. It isn't interpretable here: it changes the formant labels to acoustic ones, adds the VTL link and F5-F7, and has one seed. The grid's clips are uncoupled, so there its acoustic and closed labels coincide, and the comparison on the grid itself isn't biased by the label change. Whether its read-out or its data does this is open.
+
+## D-149 (2026-11-27, Hannah: "Yes please", to two CPU checks of D-098's heads arm before any GPU work; seen beforehand: D-148's result (heads 0.04, base 0.22 on the grid's primary cells, final checkpoints); the private takes' group counts by 5b (6 failing, 31 read, 5 between; D-138's levels); a function check that the 16 checkpoints below load and run on one clip outside every set here; nothing of these checkpoints on the grid, nor of either D-098 arm on the private takes): is the heads arm's low failure stable, and does it hold on real takes?
+
+*Status*: registered. `scripts/analysis/d149_heads_check.py` (`grid`, `private REC OUT FILES`, `report [OUT]`). CPU, inference only.
+
+- *Why*: D-098's heads arm fails 0.04 on the tipping grid's primary cells against base's 0.22. The two share a seed, data, recipe and width, and differ in the heads arm's tasks: the acoustic formant set, the iVTL -> aVTL link, and F5-F7 heads. D-090 shows F5-F7 heads do nothing for this in 5b's branches. That leaves the acoustic task or the length link. Before branching arms on the GPU to separate them, two cheap questions: is 0.04 a property of the run or of one checkpoint, and does it carry to a real voice?
+- *(1) Checkpoint stability*: D-148's grid measure (primary cells, own heads) at steps 17000, 18000, 19000 and 20000 of both D-098 arms, with 5b's two seeds at the same steps for scale. These are decay-branch checkpoints, so earlier ones are less annealed.
+  - **STABLE** if every heads checkpoint is below every base checkpoint and below D-148's LOWER bar (0.159).
+  - **UNSTABLE** if any heads checkpoint fails as much as base's at the same step or more.
+  - PARTLY otherwise.
+- *(2) A private recording*: D-138's takes, with D-138's Praat reference F (`levels.json`). Groups are 5b's seed-mean failure: failing >= 0.5 (6 takes), read < 0.2 (31). Each D-098 arm's per-take failure share is D-138's `_read`: F2 nearer Praat's F3 than its F2, over the middle 60 %'s voiced frames. Per-take numbers stay in the private run folder; the repo gets counts only.
+  - **HOLDS** if the heads arm reads at least 3 of the 6 failing takes (< 0.2), more than base does, with at most one new failure (>= 0.5) among the 31 read takes.
+  - **DOES NOT HOLD** if it reads at most one.
+  - PARTLY otherwise.
+  - Caveats: D-144 found that two of the six failing takes skip F2 rather than drop F1. This measure counts both kinds as failures, and Praat's F is a reference, not the truth.
+- *Reading*:
+  - Both hold: a GPU decomposition (two 4000-step branches from `d098_base/ckpt_016000.pt`, the length link alone and the acoustic task alone) is registered next.
+  - (1) unstable: the 0.04 is a checkpoint fluctuation, and nothing follows.
+  - (1) stable, (2) does not hold: the effect is real on synthetic clips but doesn't reach this voice. The decomposition then has a weaker case, and Hannah decides.
+- Reports: `reports/analysis/d149/grid.json` and `d149.txt` (private part as counts).
