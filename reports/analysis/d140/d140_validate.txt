@@ -1,0 +1,12 @@
+D-140 validation: cascade at f0 110 Hz (D-131 jitter, 0.3 st f0 wander), three seeds per case; with or without a pole-zero pair (zero 580 Hz / 60, pole 640 Hz / 80); deepest harmonic-residual bin in 450-750 Hz (mean over seeds)
+
+  i-like B1  60 pair no : deepest  750 Hz  +0.5 dB -> pass; residual 400-800 Hz: +nan +1 +nan +2 +nan +1 +1 +0 +0
+  i-like B1  60 pair yes: deepest  575 Hz  -6.0 dB -> pass; residual 400-800 Hz: +nan -2 +nan -5 +nan +7 +6 +4 +3
+  i-like B1 250 pair no : deepest  450 Hz  -1.0 dB -> pass; residual 400-800 Hz: +nan -1 +nan +1 +nan +2 +nan +1 +nan
+  i-like B1 250 pair yes: deepest  575 Hz  -8.5 dB -> pass; residual 400-800 Hz: +nan -4 +nan -8 +nan +5 +nan +3 +3
+  O-like B1  60 pair no : deepest  650 Hz  +0.8 dB -> pass; residual 400-800 Hz: +nan +5 +nan +4 +nan +1 +3 +2 +10
+  O-like B1  60 pair yes: deepest  575 Hz  -5.9 dB -> pass; residual 400-800 Hz: +nan +3 +nan -4 +nan +6 +4 -0 +2
+  O-like B1 250 pair no : deepest  450 Hz  -0.4 dB -> pass; residual 400-800 Hz: +nan -0 +nan +1 +nan +1 +nan +1 +nan
+  O-like B1 250 pair yes: deepest  575 Hz  -4.5 dB -> pass; residual 400-800 Hz: +nan +2 +nan -2 +nan +8 +nan -0 +3
+
+Validation passed
