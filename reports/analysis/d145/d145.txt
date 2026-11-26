@@ -1,0 +1,30 @@
+D-145: the source in the frame vector, and a wide F1 from it; D-080's A1 (opening head) against A0, paired by seed; 5b for reference
+
+(1) The source from h (ridge probe, test clips; R2, and a clip-shuffled null's):
+  d040_5b_s1_b20k    log Rd 0.43 (null -0.02); source H1-H2 0.42 (null -0.02)
+  d040_5b_s2_b20k    log Rd 0.42 (null -0.02); source H1-H2 0.42 (null -0.02)
+  d080_a0_s1         log Rd 0.45 (null -0.03); source H1-H2 0.45 (null -0.02)
+  d080_a0_s2         log Rd 0.46 (null -0.02); source H1-H2 0.46 (null -0.02)
+  d080_a1_s1         log Rd 0.75 (null -0.02); source H1-H2 0.75 (null -0.02)
+  d080_a1_s2         log Rd 0.74 (null -0.02); source H1-H2 0.74 (null -0.02)
+
+(2) A wide F1 from h on the 144 test clips 5b fails (the same clips for every model): median over clips of the probe's median |F1 error| (cents); the model's own heads' error and failure share there
+  d040_5b_s1_b20k    probe  109; heads  782, failing (own heads) 82%
+  d040_5b_s2_b20k    probe  119; heads  830, failing (own heads) 83%
+  d080_a0_s1         probe  131; heads  749, failing (own heads) 82%
+  d080_a0_s2         probe  127; heads  712, failing (own heads) 42%
+  d080_a1_s1         probe  123; heads  670, failing (own heads) 76%
+  d080_a1_s2         probe  111; heads  633, failing (own heads) 47%
+  A1 against A0, paired by seed (per-clip difference of the probe's error, median [95 % bootstrap over clips]):
+    d080_a1_s1 - d080_a0_s1: -11 [-25, +0] c; ratio of medians 0.94
+    d080_a1_s2 - d080_a0_s2: -16 [-26, -5] c; ratio of medians 0.88
+    noise floor, A0 seed 2 - seed 1: -7 [-15, +4] c; ratio 0.97
+  Reading (registered): PARTLY or SPLIT between seeds: reported, Hannah decides
+
+(3) The tipping grid (seeds 20-22) with each model's own heads: mean failure share in the primary cells (f0 110-140, B1 250-500) and overall
+  d040_5b_s1_b20k    primary 0.34; all 0.23
+  d040_5b_s2_b20k    primary 0.17; all 0.17
+  d080_a0_s1         primary 0.26; all 0.23
+  d080_a0_s2         primary 0.08; all 0.05
+  d080_a1_s1         primary 0.18; all 0.21
+  d080_a1_s2         primary 0.08; all 0.05
