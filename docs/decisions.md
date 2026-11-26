@@ -5050,3 +5050,20 @@ Synthetic and training only; descriptive.
     - the same vowel's correctly read higher-pitched takes: 479 / 1128 cents from the inserted F1 (n 2);
     - models as candidates: on the 5 takes where the seeds' failure shares differ by at least 0.3, A's refit loss picks the less-failing seed on 4.
   - **Reading**: the reconstruction loss can rank a wide F1 against a dropped one when everything else is fixed (D-143 stage C). Given freedom to place a pole, though, it uses a wide one to fix the spectral slope, because the source's slope is not pinned. Analysis by synthesis alone won't recover the formant. It would need the source's slope from elsewhere (glottal inverse filtering, or the source labels the synthetic data has), or a prior on where F1 can be (D-142's plausibility at the recording's length). Either is a new entry, as is a hypothesis for the skipped F2. The models-as-candidates result (4 of 5) fits the loss being useful for arbitrating whole readings rather than for placing a single pole.
+
+## D-145 (2026-11-26, Hannah: "Yes please", after pointing to D-080's trunk as the complement of a source probe on 5b; seen beforehand: D-143 and D-144's results, including D-143 stage A's results for 5b on these same clips; D-080's results; a function check on 20 / 10 clips of one A1 seed (finite output only); nothing of A0 or A1 on these clips): does a trunk that keeps the source place a wide F1 better?
+
+*Status*: **registered**. `scripts/analysis/d145_source_probe.py` (`run`, `report`). CPU, inference only.
+
+- *Why*: D-144 found that a wide F1 and the source's spectral slope trade off when the slope is free, and D-143 that 5b's frame vector h places a wide F1 only loosely. D-080's A1 (A0 plus an opening head on the trunk, which learned an Rd proxy: R² 0.66, nothing beyond Rd) was "learned, not used" for the closed-glottis F1. Whether a trunk that keeps the source places a *wide* F1 better hasn't been asked. A0 and A1 differ in that head alone (both with D-080's coupled set), both seeds, so the test is paired and changes one thing.
+- *Models*: `d080_a1_s{1,2}` against `d080_a0_s{1,2}`, paired by seed; `d040_5b_s{1,2}_b20k` for reference (5b against A0 is not a clean comparison: the mix differs).
+- *Clips*: D-143 stage A's exactly (the same draws and seeds: 800 training clips, 400 test clips, the grid at seeds 20-22), with each clip's Rd (U(0.6, 1.8); the grid's is 1.0).
+- *Parts*:
+  1. *Reported*: the source in h. A ridge probe (D-143's) for log Rd and for the source's H1-H2 (from Rd); test-clip R² against a clip-shuffled null.
+  2. *Decision*: a wide F1 from h. D-143 stage A's F1 probe, on a fixed clip set: the test clips 5b fails (5b's seed-mean failure share at least 0.5), among those every model scored. The measure is the median over clips of the probe's per-clip median |F1 error| (cents), A1 against A0 per seed (the paired per-clip difference, with a bootstrap over clips). The noise floor is A0 seed 2 against seed 1 on the same clips. Each model's own heads' error and failure share on those clips are reported.
+  3. *Reported*: the tipping grid with each model's own heads. The mean failure share in D-141's primary cells (f0 110-140, B1 250-500) and overall.
+- *Rule* (part 2):
+  - **helps** if on both seeds A1's median is at most 0.75 x A0's and the bootstrap interval of the paired difference lies below 0. A source head is then worth a training arm (a source-head entry, then the predicted source in the reconstruction loss or the source-shaped comb).
+  - **no help** if on neither seed A1's median is at most 0.9 x A0's with the interval below 0.
+  - **partly** otherwise, reported for Hannah to decide.
+- *Caveats*: A1 learned the glottal opening, near Rd but not the slope itself; a probe readable on clean cascade clips isn't the heads using it (D-080's lesson); D-080's runs are branches of 5b's training, so their trunks may keep only what the branch added.
