@@ -1,0 +1,35 @@
+D-150: the dropped formant on Hillenbrand's dev tier (hand-checked F1-F3 at steady state and 20 / 50 / 80 %)
+  a frame fails if the model's F2 is nearer the reference F3 than the reference F2; a token fails if half or more of its labelled frames do
+  cell: D-141's (reference steady-state F1 350-650 Hz, F2 / F1 < 2.2); f0 is the token's steady-state reference f0
+
+  primary: in the cell, f0 <= 150 Hz: 55 tokens, 23 speakers
+    d040_5b_s1_b20k    failing tokens   0 of 55 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d040_5b_s2_b20k    failing tokens   0 of 55 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d098_base_b20k     failing tokens   0 of 55 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d098_heads_b20k    failing tokens   0 of 55 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+  in the cell, f0 150-200 Hz: 18 tokens, 13 speakers
+    d040_5b_s1_b20k    failing tokens   0 of 18 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d040_5b_s2_b20k    failing tokens   0 of 18 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d098_base_b20k     failing tokens   0 of 18 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d098_heads_b20k    failing tokens   0 of 18 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+  in the cell, f0 above 200 Hz: 70 tokens, 46 speakers
+    d040_5b_s1_b20k    failing tokens   0 of 70 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d040_5b_s2_b20k    failing tokens   0 of 70 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d098_base_b20k     failing tokens   0 of 70 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d098_heads_b20k    failing tokens   0 of 70 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+  outside the cell, f0 <= 150 Hz: 195 tokens, 25 speakers
+    d040_5b_s1_b20k    failing tokens   0 of 192 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d040_5b_s2_b20k    failing tokens   0 of 192 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d098_base_b20k     failing tokens   0 of 192 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d098_heads_b20k    failing tokens   0 of 192 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+  outside the cell, f0 above 150 Hz: 658 tokens, 69 speakers
+    d040_5b_s1_b20k    failing tokens   0 of 642 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+    d040_5b_s2_b20k    failing tokens   1 of 642 (0%), from 1 speakers; failing frames 0.1% (dropped F1 0.0%, skipped F2 0.1%)
+    d098_base_b20k     failing tokens   1 of 642 (0%), from 1 speakers; failing frames 0.1% (dropped F1 0.0%, skipped F2 0.1%)
+    d098_heads_b20k    failing tokens   0 of 642 (0%), from 0 speakers; failing frames 0.0% (dropped F1 0.0%, skipped F2 0.0%)
+
+  by group and vowel, primary block (5b's seed mean of the token failure share >= 0.5):
+    group: m 0/55
+    vowel: aw 0/14, oa 0/22, oo 0/1, uh 0/17, uw 0/1
+
+Reading (registered; 5b seed mean, primary block): 0 of 55 tokens (0%) from 0 speakers -> RARE: at most one dev token fails; the failure isn't a common pattern on these voices

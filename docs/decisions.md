@@ -5170,7 +5170,7 @@ Synthetic and training only; descriptive.
 
 ## D-150 (2026-11-27, Hannah: "Yes please, that seems like the best check to run next"; seen beforehand: D-149's result; Hillenbrand dev-tier counts (996 tokens, 83 speakers; 55 tokens from 23 speakers in D-141's cell at f0 <= 150 Hz, by group 68 / 48 / 19 / 8 in the cell at any f0); a function check of the reading on one synthetic clip and that every dev token loads; nothing of any model on these tokens for this measure): is the dropped formant there on other real voices?
 
-*Status*: registered. `scripts/analysis/d150_dev_dropped.py` (`run`, `report`). CPU, inference only, dev tier only.
+*Status*: **done 2026-11-27: rare; Hillenbrand's dev voices lack the failure's conditions** (see Result). `scripts/analysis/d150_dev_dropped.py` (`run`, `report`). CPU, inference only, dev tier only.
 
 - *Why*: everything known about the dropped formant on real audio comes from one private recording (D-138 to D-149). D-149 found the tipping grid isn't a reliable stand-in for it. No entry has looked for the failure on the dev tiers' voices. If it's there, it gives a real-voice deciding measure with many speakers. If it isn't, the failure may be specific to this voice or this recording, which changes how much weight it should carry.
 - *Data*: Hillenbrand's dev tier, every token. Its references are hand-checked F1-F3 at the steady state and at 20, 50 and 80 % of the vowel. They were LPC tracks corrected by hand, so a dropped formant in LPC would have been corrected. A token's f0 is its steady-state reference f0. The cell is D-141's: reference steady-state F1 350-650 Hz, F2 / F1 < 2.2.
@@ -5186,3 +5186,9 @@ Synthetic and training only; descriptive.
   - 55 tokens from 23 speakers is modest. The 10 % bar is about 6 tokens.
   - Per-speaker results stay out of the report; counts only.
 - Report: `reports/analysis/d150/d150.{txt,json}`.
+- *Result (2026-11-27; `reports/analysis/d150/d150.txt`)*: **RARE**, as registered. No token of the primary block fails, for either 5b seed: 0 of 55, from 23 speakers. D-098's arms also fail none. Over the whole dev tier, one token of 642 fails, outside the cell at f0 above 150, as a skipped F2. The measure works: on the primary block's frames, 5b's median |F1| and |F2| errors are 58 and 59 cents.
+  - *Post hoc (after the result; deciding nothing)*:
+    - Only 14 primary tokens have the close, low pair (reference F2 < 900 Hz, the /ɔ/-like set's region; vowels /ɔ/, /o/, /u/), and 3 have F1 < 500 with F2 < 850.
+    - Praat Burg B1 at the labelled times (ceiling 5000 Hz, `scripts/analysis/d150_b1_posthoc.py`) has a median of 56 Hz on the primary tokens, a 90th percentile of 116, and none above 250.
+    - So Hillenbrand's dev voices never combine a wide F1 with low f0, and almost never with a close pair. They can't show the failure. RARE says these voices don't produce its conditions, not that the models handle those conditions.
+  - *Reading*: Hillenbrand isn't a real-voice measure for this failure. A real-voice deciding measure needs voices with wide F1 at low f0 (breathy or lax phonation, held open-back vowels). None of the current dev gold sets has been shown to have them.
