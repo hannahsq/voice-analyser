@@ -1,0 +1,13 @@
+D-143 stage C on a private recording (aggregates only): D-109's loss of the model's reading minus a reference's, median over frames per take; mean over takes [95 % bootstrap over takes]; mean share of frames where the reference scores lower
+
+  d040_5b_s1_b20k failing takes (n 6) vs praat: excess +8.62 [+3.42, +14.48]; reference lower on 81% of frames
+  d040_5b_s1_b20k failing takes (n 6) vs praat_hm: excess -0.93 [-5.62, +3.57]; reference lower on 46% of frames
+  d040_5b_s1_b20k not-failing takes (n 31) vs praat: excess -0.28 [-1.60, +1.09]; reference lower on 45% of frames
+  d040_5b_s1_b20k not-failing takes (n 31) vs praat_hm: excess -3.50 [-5.04, -1.86]; reference lower on 19% of frames
+
+  d040_5b_s2_b20k failing takes (n 6) vs praat: excess +8.75 [+4.13, +13.05]; reference lower on 85% of frames
+  d040_5b_s2_b20k failing takes (n 6) vs praat_hm: excess -0.39 [-5.66, +4.57]; reference lower on 46% of frames
+  d040_5b_s2_b20k not-failing takes (n 31) vs praat: excess -0.88 [-1.82, +0.08]; reference lower on 41% of frames
+  d040_5b_s2_b20k not-failing takes (n 31) vs praat_hm: excess -4.13 [-5.47, -2.79]; reference lower on 18% of frames
+
+Reading (registered): the loss SEES the dropped formant on real audio (per model: [np.True_, np.True_])
