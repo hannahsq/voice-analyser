@@ -5192,3 +5192,27 @@ Synthetic and training only; descriptive.
     - Praat Burg B1 at the labelled times (ceiling 5000 Hz, `scripts/analysis/d150_b1_posthoc.py`) has a median of 56 Hz on the primary tokens, a 90th percentile of 116, and none above 250.
     - So Hillenbrand's dev voices never combine a wide F1 with low f0, and almost never with a close pair. They can't show the failure. RARE says these voices don't produce its conditions, not that the models handle those conditions.
   - *Reading*: Hillenbrand isn't a real-voice measure for this failure. A real-voice deciding measure needs voices with wide F1 at low f0 (breathy or lax phonation, held open-back vowels). None of the current dev gold sets has been shown to have them.
+
+## D-151 (2026-11-27, Hannah: "would you be able to run a sweep over PTDB-TUG to see if the flag picks up anything?"; seen beforehand: D-142 to D-150's results; PTDB-TUG's dev-tier counts (2830 utterances, 12 speakers, 6 women and 6 men); a function check of the thresholds (read from D-142's scores) and of the run detection on a toy mask; nothing of flag B on any PTDB-TUG audio): where does flag B fire on read speech?
+
+*Status*: registered. `scripts/analysis/d151_ptdb_flag.py` (`run`, `report`). CPU, inference only, dev tier only.
+
+- *Why*: flag B (D-142, accepted) was validated on the tipping grid and on a private recording's held vowels. D-150 found that Hillenbrand's dev voices never produce the failure's conditions. Two things are unknown: how often flag B fires on ordinary read speech, which matters for any live use, and whether what it flags there looks like the dropped formant.
+- *Data*: PTDB-TUG's dev tier, every utterance. There are no formant references, so Praat Burg (ceiling 5000 Hz for men, 5500 for women) stands in for one.
+- *Flag B as D-142 built it*: the kNN distance (10th neighbour) of the model's F1-F4 plus the recording's length to train_v2's tube frames. The recording is the speaker, and the length is the median of the speaker's other utterances' median readings. D-142's threshold, the 95th percentile of the not-failing grid clips, is read from its scores: 0.61 for seed 2, 0.89 for seed 1.
+  - It is applied two ways. Per utterance, as D-142's unit (median score over voiced frames), and per frame. A **flagged run** is at least 5 consecutive voiced frames (50 ms) above the threshold, so that a brief misreading in connected speech isn't averaged away.
+- *Models*: 5b seed 2 deciding (D-142's), seed 1 reported.
+- *Measures*, by sex:
+  - the share of utterances flagged, and the share of voiced frames in flagged runs;
+  - in flagged-run frames against the other voiced frames: the share showing the dropped pattern against Praat (the model's F2 nearer Praat's F3 than its F2), median f0, Praat's B1, and |F1 - Praat F1|.
+- *Rule* (5b seed 2, all speakers):
+  - **NOTHING FLAGGED** if under 0.1 % of voiced frames are in flagged runs.
+  - **PICKS UP DROPPED FORMANTS** if at least 20 % of flagged-run frames show the dropped pattern against Praat, and at least 5 times the unflagged share.
+  - **FLAGS SOMETHING ELSE** if under 2 times the unflagged share.
+  - PARTLY otherwise.
+- *Caveats*:
+  - Praat is a weak reference in connected speech, and can itself merge a close F1-F2 pair. Agreement with it neither proves a misreading nor rules one out.
+  - D-142's threshold was set on clip medians of held material; frame scores spread more, which the run length partly offsets.
+  - A speaker's length pooled over all their sentences is steadier than over a round of held vowels.
+  - Per-speaker results stay out of the report.
+- Reports: `reports/analysis/d151/d151.{txt,json}`. Per-frame values in `cache/d151/`, not committed.
