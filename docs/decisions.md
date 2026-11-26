@@ -4849,3 +4849,9 @@ On a private recording (inference only, nothing of it kept here), teacher v3.1 a
   - If E8 removes it, the recording chain's modest shaping (a few dB near F1) is enough to tip these takes.
   - If only Eo removes it, a correction of about 13 dB near F1 does, which is mostly the phone's roll-off and so says how far the balance must move, not that the chain caused it.
   - If neither does, the chain is not the explanation. That fits Hannah seeing the same errors through a different microphone, and leaves her tract (including damping of F1 by the glottis or the nose, which an LPC envelope carries as a wide F1) as the source of the envelope D-138 found.
+- *Result (2026-11-26; per-take numbers outside the repo)*: **neither correction removes the failure.** Mean failure share over D-138's 6 failing takes, teacher seed mean [bootstrap] (students):
+  - O 0.93 [0.84, 1.00] (0.98);
+  - E8 0.83 [0.50, 1.00] (0.76), with the one /ə/ take repaired (E8 cuts 2-5 kHz by 7-12 dB, as D-138's band cuts of F3-F4 did);
+  - Eo 0.99 [0.96, 1.00] (0.86).
+  - The failing takes' median L1 - L2 rises from +3.8 to +7.3 dB (E8) and +16.6 dB (Eo), above train_v2's median for the cell, so F1 is no longer weak, and they still fail. Controls: E8 0.00, Eo 0.20 (one take at 1.00), under the 0.3 bar.
+  - *Reading*: the chain is not the explanation, in line with Hannah seeing the same errors through another microphone. It also qualifies D-138's part 1: F1's level relative to F2 is not what tips these takes, since raising it by about 13 dB leaves them failing. What remains is the shape of the envelope beyond the formant frequencies and levels (D-138's arm C, the same frequencies with narrow standard bandwidths, is read correctly), for instance F1's width (Praat reads 190-260 Hz) or an extra pole or zero near F1-F2. That is testable by replacing one LPC pole's bandwidth at a time in D-138's arm B.
