@@ -1,0 +1,13 @@
+D-149: D-098's heads arm, two checks before GPU work
+
+(1) Checkpoint stability: tipping grid (seeds 20-22), primary-cell failure (f0 110-140, B1 250-500); whole grid in ()
+  d098_base_b20k     17k 0.17 (0.15)  18k 0.24 (0.26)  19k 0.20 (0.17)  20k 0.22 (0.18)
+  d098_heads_b20k    17k 0.06 (0.04)  18k 0.00 (0.01)  19k 0.00 (0.05)  20k 0.04 (0.09)
+  d040_5b_s1_b20k    17k 0.59 (0.55)  18k 0.59 (0.47)  19k 0.33 (0.23)  20k 0.34 (0.23)
+  d040_5b_s2_b20k    17k 0.10 (0.10)  18k 0.09 (0.09)  19k 0.18 (0.20)  20k 0.17 (0.17)
+  Reading (registered): STABLE: every heads checkpoint below every base checkpoint and below D-148's bar
+
+(2) A private recording: 6 takes 5b fails (seed mean >= 0.5), 31 it reads (< 0.2); failure = F2 nearer Praat's F3 than its F2
+  d098_base_b20k     failing takes read (< 0.2) 1 of 6, still failing 5; newly failing among the read takes 0 of 31
+  d098_heads_b20k    failing takes read (< 0.2) 1 of 6, still failing 5; newly failing among the read takes 0 of 31
+  Reading (registered): DOES NOT HOLD: the heads arm reads at most one failing take; the grid effect is synthetic-only so far

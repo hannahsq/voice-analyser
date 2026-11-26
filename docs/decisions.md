@@ -5144,7 +5144,7 @@ Synthetic and training only; descriptive.
 
 ## D-149 (2026-11-27, Hannah: "Yes please", to two CPU checks of D-098's heads arm before any GPU work; seen beforehand: D-148's result (heads 0.04, base 0.22 on the grid's primary cells, final checkpoints); the private takes' group counts by 5b (6 failing, 31 read, 5 between; D-138's levels); a function check that the 16 checkpoints below load and run on one clip outside every set here; nothing of these checkpoints on the grid, nor of either D-098 arm on the private takes): is the heads arm's low failure stable, and does it hold on real takes?
 
-*Status*: registered. `scripts/analysis/d149_heads_check.py` (`grid`, `private REC OUT FILES`, `report [OUT]`). CPU, inference only.
+*Status*: **done 2026-11-27: stable on the grid; does not hold on the private takes** (see Result). `scripts/analysis/d149_heads_check.py` (`grid`, `private REC OUT FILES`, `report [OUT]`). CPU, inference only.
 
 - *Why*: D-098's heads arm fails 0.04 on the tipping grid's primary cells against base's 0.22. The two share a seed, data, recipe and width, and differ in the heads arm's tasks: the acoustic formant set, the iVTL -> aVTL link, and F5-F7 heads. D-090 shows F5-F7 heads do nothing for this in 5b's branches. That leaves the acoustic task or the length link. Before branching arms on the GPU to separate them, two cheap questions: is 0.04 a property of the run or of one checkpoint, and does it carry to a real voice?
 - *(1) Checkpoint stability*: D-148's grid measure (primary cells, own heads) at steps 17000, 18000, 19000 and 20000 of both D-098 arms, with 5b's two seeds at the same steps for scale. These are decay-branch checkpoints, so earlier ones are less annealed.
@@ -5161,3 +5161,9 @@ Synthetic and training only; descriptive.
   - (1) unstable: the 0.04 is a checkpoint fluctuation, and nothing follows.
   - (1) stable, (2) does not hold: the effect is real on synthetic clips but doesn't reach this voice. The decomposition then has a weaker case, and Hannah decides.
 - Reports: `reports/analysis/d149/grid.json` and `d149.txt` (private part as counts).
+- *Result (2026-11-27; `reports/analysis/d149/d149.txt`)*: **(1) STABLE; (2) DOES NOT HOLD**, both as registered.
+  - (1) On the grid's primary cells, the heads arm's checkpoints score 0.06, 0.00, 0.00 and 0.04, and base's 0.17, 0.24, 0.20 and 0.22.
+    - 5b's own checkpoints move a lot through the decay: seed 1 goes 0.59, 0.59, 0.33, 0.34, and seed 2 0.10, 0.09, 0.18, 0.17. So one final checkpoint is a noisy summary of a run.
+    - The heads arm is low at every step, though. Its synthetic effect belongs to the run.
+  - (2) On the private recording the two arms read the same 1 of the 6 failing takes, and neither fails on any of the 31 takes 5b reads. On the failing takes, both still drop the formant on most frames.
+  - *Reading*: the heads arm's synthetic gain doesn't reach this voice. Whatever the acoustic task or the length link teach, it fixes the tipping grid's cascade renders, not the failing takes. The GPU decomposition has a weaker case, and isn't registered. On present evidence the tipping grid is not a reliable stand-in for the real failure. D-141 stage 1 and every arm since were judged partly on it, so the real takes should be a deciding measure in any arm aimed at this failure.
