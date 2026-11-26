@@ -5010,7 +5010,7 @@ Synthetic and training only; descriptive.
 
 ## D-144 (2026-11-26, Hannah: "Would you be able to register it?", having chosen the parts: a grid scan, the flag B gate, the source-model check and the harmonic check; forcing F1 through the chain dropped given D-086; seen beforehand: D-143's results; a one-clip function check (an ordinary clip at a seed outside every set below; run time and finite output only); nothing of the search on any clip below): a joint search at inference for the dropped formant
 
-*Status*: **registered**. `scripts/analysis/d144_search.py` (`synth`, `private REC OUT FILES`, `report [OUT]`).
+*Status*: **done 2026-11-26: not shown** (see Result). `scripts/analysis/d144_search.py` (`synth`, `private REC OUT FILES`, `report [OUT]`).
 
 - *Why*: D-143 stage C found that on a private recording, D-109's reconstruction loss prefers the true F1 over the dropped-formant reading only when B1 may be wide. The trunk doesn't place a wide F1 well (D-143 stage A), so the fix is tried after the network: two explanations of each take are fitted to the loss, and the better one is kept. No training.
 - *Hypotheses*, per clip or take, with the free values held constant over the take (D-142's frames; the model's own f0; stage C's loss, harmonics to 4000 Hz, F5-F8 from F4):
@@ -5038,3 +5038,15 @@ Synthetic and training only; descriptive.
   - on the failing takes, the inserted F1 against the same vowel's correctly read takes at f0 at least 1.5 times higher (median |cents|);
   - the models as candidates: on takes where the two seeds' failure shares differ by at least 0.3, how often A's refit loss picks the less-failing seed.
 - *If it works*: an entry on putting it behind flag B in `va`'s output, and on other voices. *If not*: the reconstruction route needs the bandwidth's range in training (D-141 stage 1 or M4 with it), as D-143 concluded.
+- *Result (2026-11-26; `reports/analysis/d144/d144.txt`, `synth.json`; private per-take numbers in OUT)*: **not shown.** (S) and (P) fail on both models; (R) passes, but that is vacuous (see below).
+  - *Synthetic* (gated, default profile; seeds 1 / 2): hits on 54 % / 62 % of failing grid clips (bar 80 %), with no fixes on normal clips. B wins clearly on failing clips (median A - B +18.5 / +19.5 against margins of 0.41 / 1.36), so the choice is right, but the inserted F1 is placed loosely: median error 90 cents, and seed 1's is biased high (+75 cents).
+  - *Private* (gated): hits on 0 / 2 of the 6 failing takes; no false fixes on the 31 not-failing takes. Ungated: 1 / 2 hits.
+  - *Diagnosis (descriptive, after the result)*:
+    - On the private takes where B wins, the inserted F1 mostly sits at an edge of its search range (about 300 Hz, or the upper bound below the model's F1), and B1 at the 700 Hz cap. The inserted pole is being used as a broad slope correction, not placed as a formant.
+    - The tilt profile (a free spectral slope per frame) agrees: under it B wins on 0 % / 24 % of the failing synthetic clips, so most of B's gain is the slope that a free source term also provides. The source-slope confound that D-143 stage C's fixed references hid is real for a search. (R)'s 100 % / 95 % agreement just reflects few B choices under either profile.
+    - Two of the six failing takes are a different failure: the model's F1 is near Praat's F1 and its F2 sits at Praat's F3 (F2 skipped, not F1). D-138's failure share counts both, and hypothesis B doesn't model the second.
+  - *Reported*:
+    - harmonic check: the inserted F1 / f0 is 0.27 / 0.23 from an integer, so no locking;
+    - the same vowel's correctly read higher-pitched takes: 479 / 1128 cents from the inserted F1 (n 2);
+    - models as candidates: on the 5 takes where the seeds' failure shares differ by at least 0.3, A's refit loss picks the less-failing seed on 4.
+  - **Reading**: the reconstruction loss can rank a wide F1 against a dropped one when everything else is fixed (D-143 stage C). Given freedom to place a pole, though, it uses a wide one to fix the spectral slope, because the source's slope is not pinned. Analysis by synthesis alone won't recover the formant. It would need the source's slope from elsewhere (glottal inverse filtering, or the source labels the synthetic data has), or a prior on where F1 can be (D-142's plausibility at the recording's length). Either is a new entry, as is a hypothesis for the skipped F2. The models-as-candidates result (4 of 5) fits the loss being useful for arbitrating whole readings rather than for placing a single pole.

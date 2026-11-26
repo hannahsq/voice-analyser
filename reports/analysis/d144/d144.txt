@@ -1,0 +1,26 @@
+D-144: joint search for the dropped formant (B: an F1 inserted below the model's; A: the model's reading), per clip or take; B chosen when A's loss exceeds B's by more than the margin
+
+d040_5b_s1_b20k: flag B threshold 0.86 (95th percentile of not-failing grid clips)
+  profile offset: margin 0.41 (synthetic false-fix share 5% on 108 normal clips)
+    gated by flag B: synthetic hits 54% of 28 failing (within 100 c), fixes on normal 0%; private hits 0 of 6 (within 150 c of Praat), false fixes 0 of 31
+    ungated: synthetic hits 64% of 28 failing (within 100 c), fixes on normal 6%; private hits 1 of 6 (within 150 c of Praat), false fixes 0 of 31
+    harmonic check (ungated B choices, n 40): mean distance of the inserted F1 / f0 from an integer 0.27 (0.25 if unrelated; under 0.15 would suggest locking)
+  profile tilt: margin 0.00 (synthetic false-fix share 5% on 108 normal clips)
+    gated by flag B: synthetic hits 0% of 28 failing (within 100 c), fixes on normal 0%; private hits 0 of 6 (within 150 c of Praat), false fixes 0 of 31
+    ungated: synthetic hits 0% of 28 failing (within 100 c), fixes on normal 2%; private hits 0 of 6 (within 150 c of Praat), false fixes 2 of 31
+  source check: gated decisions agree between profiles on 100% of synthetic clips, 100% of private takes
+  higher-pitched same-vowel takes: median |inserted F1 - their F1| 479 c (n 2)
+
+d040_5b_s2_b20k: flag B threshold 0.51 (95th percentile of not-failing grid clips)
+  profile offset: margin 1.36 (synthetic false-fix share 5% on 118 normal clips)
+    gated by flag B: synthetic hits 62% of 21 failing (within 100 c), fixes on normal 0%; private hits 2 of 6 (within 150 c of Praat), false fixes 0 of 31
+    ungated: synthetic hits 62% of 21 failing (within 100 c), fixes on normal 5%; private hits 2 of 6 (within 150 c of Praat), false fixes 0 of 31
+    harmonic check (ungated B choices, n 33): mean distance of the inserted F1 / f0 from an integer 0.23 (0.25 if unrelated; under 0.15 would suggest locking)
+  profile tilt: margin 0.00 (synthetic false-fix share 5% on 118 normal clips)
+    gated by flag B: synthetic hits 24% of 21 failing (within 100 c), fixes on normal 0%; private hits 2 of 6 (within 150 c of Praat), false fixes 0 of 31
+    ungated: synthetic hits 24% of 21 failing (within 100 c), fixes on normal 3%; private hits 2 of 6 (within 150 c of Praat), false fixes 2 of 31
+  source check: gated decisions agree between profiles on 100% of synthetic clips, 95% of private takes
+  higher-pitched same-vowel takes: median |inserted F1 - their F1| 1128 c (n 2)
+
+Models as candidates (reported): takes where the seeds' failure shares differ by >= 0.3: 5; the loss (A, refit) picks the less-failing seed on 4
+Reading (registered; gated, offset profile, both models): NOT SHOWN ({'d040_5b_s1_b20k': {'S': np.False_, 'P': np.False_, 'R': np.True_}, 'd040_5b_s2_b20k': {'S': np.False_, 'P': np.False_, 'R': np.True_}})
