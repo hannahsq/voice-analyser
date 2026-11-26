@@ -4993,3 +4993,12 @@ Synthetic and training only; descriptive.
     - Not-failing clips: the reading scores *lower* than the truth (-3.3 / -2.7), with the truth lower on only a third of frames. That is the renderer's source model at work: the reading's bandwidths absorb the mismatch, as in D-102.
     - **Reading**: the reconstruction loss pushes hard against the dropped formant, by roughly seven times its real-audio misfit (about 3 dB per harmonic, D-109). This supports the structural route through M4's loss.
     - Caveats: these are clean synthetic clips, the renderer's own family. D-142's flag A (an LPC-envelope consistency check) worked on synthetic clips and failed on real voices.
+- *Stage C on a private recording (registered 2026-11-26 after stage A and C's results; Hannah: "Could you run stage C on my takes?"; seen beforehand: stage C's synthetic result, and D-138 to D-142's per-take readings and Praat references; nothing of the loss on these takes)*: `d143_probe.py recon_private REC OUT FILES`. Inference only. Per-take numbers stay in OUT, outside the repo; `reports/analysis/d143/stageC_private.txt` holds aggregates only.
+  - *Takes*: D-138's 42 takes. Failing: the 5b teachers' seed-mean failure share at least 0.5, as D-138 (6 takes). Not failing: below 0.2.
+  - *Arms*, per frame (D-142's frames, the models' own f0):
+    - **reading**: the model's F1-F4 and B1-B4;
+    - **Praat**: the take's Praat medians of F1-F4 and B1-B4 (D-138's reference, held constant over the take);
+    - **Praat + HM** (sensitivity): Praat's F1-F4 with Hawks & Miller bandwidths at the frame's f0.
+    - The models are `d040_5b_s1_b20k` and `s2`; the loss is stage C's (D-109's).
+  - *Measures*: per take, the median over frames of the reading's loss minus each reference's, and the share of frames where the reference scores lower; summarised over takes with a bootstrap, per group and model.
+  - *Reading, fixed now (reported, deciding nothing)*: the loss **sees the dropped formant on real audio** if, on failing takes, for both models, the Praat reference scores lower on at least 80 % of frames and the bootstrap lower bound of the reading's excess over Praat is above 0; *and* on not-failing takes the excess is at most a third of the failing takes' (so the result isn't a constant reference beating a moving one). Otherwise: not shown on real audio. Praat's bandwidths are themselves uncertain at low f0, which is why the HM arm is there; if the two references disagree, that is reported as it falls.

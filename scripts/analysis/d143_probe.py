@@ -285,9 +285,83 @@ def report_c(res=None) -> None:
     print("\n".join(lines))
 
 
+def cmd_recon_private(rec: Path, out: Path, files: list[str]) -> None:
+    """Stage C on a private recording: the reading against the take's Praat medians (F and B) and Praat F with Hawks &
+    Miller bandwidths. Per-take numbers to OUT (outside the repo); aggregates to reports/analysis/d143/stageC_private.txt."""
+    import torch
+
+    from vocal_analysis.models.infer import analyse
+    from vocal_analysis.synth import tract
+    from vocal_analysis.train.reconstruction import harmonic_targets, recon_loss_fb
+
+    d138 = _d142()._mod("d138", "scripts/analysis/d138_real_balance.py")
+    lv = {t["take"]: t for t in json.loads((out / "levels.json").read_text(encoding="utf-8"))}
+    dev, models = _models()
+    t = lambda a, dt=torch.float32: torch.from_numpy(np.ascontiguousarray(a)).to(dt)[None]
+    res = {}
+    for name, _, y in d138._load(rec, files):
+        if name not in lv:
+            continue
+        P, Pb = np.array(lv[name]["F"][:4], float), np.array(lv[name]["Bw"][:4], float)
+        g = float(np.mean([lv[name]["read"][m]["fail"] for m in d138.TEACHERS]))
+        row = {"group": "fail" if g >= 0.5 else "ok" if g < 0.2 else "mid"}
+        for m, mod in models.items():
+            r = analyse(mod, y.astype(np.float32), dev)
+            n = len(r["voiced_p"])
+            f0 = r["f0"].astype(np.float64)
+            sel = np.zeros(n, bool)
+            for i in range(int(0.2 * n), int(0.8 * n)):
+                sel[i] = (r["voiced_p"][i] > 0.5 and np.isfinite(f0[i]) and i * 160 >= 512 and i * 160 + 512 <= len(y)
+                          and np.all(np.isfinite(r["formants"][i, :4])) and np.all(np.isfinite(r["bandwidths"][i, :4])))
+            amp, ok = harmonic_targets(y, np.where(sel, f0, np.nan), sel, snr_min_db=10.0)
+            f0f = np.where(sel, f0, 100.0)
+            lab = {"db": t(amp), "ok": t(ok, torch.bool), "f0": t(f0f), "mask": t(sel, torch.bool)}
+            Fr = np.where(sel[:, None], r["formants"][:, :4], 1000.0)
+            Br = np.where(sel[:, None], r["bandwidths"][:, :4], 100.0)
+            Fp = np.tile(P, (n, 1))
+            hm = np.stack([tract.bandwidth_prior(np.full(n, P[k]), f0f) for k in range(4)], 1)
+            arms = {"reading": (Fr, Br), "praat": (Fp, np.tile(Pb, (n, 1))), "praat_hm": (Fp, hm)}
+            with torch.no_grad():
+                L = {a: recon_loss_fb(t(F), t(Bw), lab, fmax=4000.0, hpc=True, per_frame=True)[0].numpy() for a, (F, Bw) in arms.items()}
+            k = sel & np.all([np.isfinite(v) for v in L.values()], 0)
+            row[m] = {"n": int(k.sum())}
+            for a in ("praat", "praat_hm"):
+                row[m][a] = {"excess": float(np.median(L["reading"][k] - L[a][k])) if k.any() else float("nan"),
+                             "ref_lower": float(np.mean(L[a][k] < L["reading"][k])) if k.any() else float("nan")}
+        res[name] = row
+        print(".", end="", flush=True)
+    (out / "d143_stageC_private.json").write_text(json.dumps(res, indent=1), encoding="utf-8")
+    rng = np.random.default_rng(1434)
+    lines = ["D-143 stage C on a private recording (aggregates only): D-109's loss of the model's reading minus a reference's, "
+             "median over frames per take; mean over takes [95 % bootstrap over takes]; mean share of frames where the "
+             "reference scores lower", ""]
+    verdict = []
+    for m in MODELS:
+        ex = {}
+        for grp, label in (("fail", "failing takes"), ("ok", "not-failing takes")):
+            rs = [v for v in res.values() if v["group"] == grp and v[m]["n"] > 0]
+            for a in ("praat", "praat_hm"):
+                d = np.array([v[m][a]["excess"] for v in rs])
+                bs = [d[rng.integers(0, len(d), len(d))].mean() for _ in range(B)]
+                lo = np.percentile(bs, 2.5)
+                ex[(grp, a)] = (d.mean(), lo, np.mean([v[m][a]["ref_lower"] for v in rs]))
+                lines.append(f"  {m} {label} (n {len(rs)}) vs {a}: excess {d.mean():+.2f} [{lo:+.2f}, "
+                             f"{np.percentile(bs, 97.5):+.2f}]; reference lower on {ex[(grp, a)][2]:.0%} of frames")
+        f, o = ex[("fail", "praat")], ex[("ok", "praat")]
+        verdict.append(f[2] >= 0.8 and f[1] > 0 and o[0] <= f[0] / 3)
+        lines.append("")
+    lines.append("Reading (registered): " + ("the loss SEES the dropped formant on real audio" if all(verdict)
+                                             else "NOT SHOWN on real audio") + f" (per model: {verdict})")
+    REP.mkdir(parents=True, exist_ok=True)
+    (REP / "stageC_private.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("\n" + "\n".join(lines))
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1]
-    if cmd == "recon":
+    if cmd == "recon_private":
+        cmd_recon_private(Path(sys.argv[2]), Path(sys.argv[3]), sys.argv[4].split(","))
+    elif cmd == "recon":
         cmd_recon()
     elif cmd == "smoke":
         cmd_smoke()
