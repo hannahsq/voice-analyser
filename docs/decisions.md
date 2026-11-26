@@ -4835,3 +4835,17 @@ On a private recording (inference only, nothing of it kept here), teacher v3.1 a
     - C, fully synthetic at her formant frequencies: 0.00 (0.00).
     No control fails in any arm (at most 0.02), so the swaps don't break good takes.
   - *Reading*: B keeps the failure and A doesn't, so it comes with the spectral envelope (the tract as it sounds through this room and microphone), not the voice source. C not failing means the formant frequencies alone, with the cascade's bandwidths and source, are read correctly: the trigger is the envelope's shape around them (here a weak F1 relative to F2, and for /ə/ a strong F3), which training covers only in its tail. This entry can't split the tract from the recording chain; a room/microphone correction from the session's sweeps, or the same vowels through another microphone, would.
+
+## D-139 (2026-11-26, Hannah: "could we try correcting with with some/all of the chirp profiles? (Accepting that they likely won't be perfect matches)", noting she saw the same errors live through a different microphone; seen beforehand: D-138's result; the chain responses below, deconvolved from the session's room-reference sweeps before registering): does equalising the recording chain with the session's sweeps remove the dropped formant?
+
+*Status*: **registered 2026-11-26**. Inference only on the private recording, as D-138 (same takes, same failing and control sets, same failure measure; per-take numbers outside the repo).
+
+- *Chain responses*: impulse responses from the room-reference sweeps (regularised spectral division by the played sweep; direct sound plus 300 ms), third-octave levels 200-5080 Hz re 1 kHz. The sweeps were played from Hannah's phone, so each response includes the phone's loudspeaker, whose low-frequency roll-off dominates below about 600 Hz.
+  - **E8**: the one reference in the recording's own figure-8 pattern: -2.5 / -3.5 dB at 400 / 504 Hz, +0.7 at 800 Hz.
+  - **Eo**: the mean of the three omni-pattern references (phone near the lips): about -14 / -12 dB at 400 / 504, -0.6 at 800.
+- *Correction*: the inverse of each response, interpolated in log frequency between third-octave centres, held constant outside 200-5080 Hz, applied as a zero-phase gain to the whole take (D-138's middle 60 % and measures afterwards). `scripts/analysis/d139_chain_eq.py`.
+- *Measures*: mean failure share over D-138's failing takes and its controls per arm (O, E8, Eo), teacher seed mean with the students beside it, bootstrap over takes; and L1 - L2 after correction.
+- *Reading, fixed now*: a correction *removes* the failure if the failing takes' mean falls below half of O's while the controls stay below 0.3.
+  - If E8 removes it, the recording chain's modest shaping (a few dB near F1) is enough to tip these takes.
+  - If only Eo removes it, a correction of about 13 dB near F1 does, which is mostly the phone's roll-off and so says how far the balance must move, not that the chain caused it.
+  - If neither does, the chain is not the explanation. That fits Hannah seeing the same errors through a different microphone, and leaves her tract (including damping of F1 by the glottis or the nose, which an LPC envelope carries as a wide F1) as the source of the envelope D-138 found.
