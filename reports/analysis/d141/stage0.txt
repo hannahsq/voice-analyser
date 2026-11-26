@@ -1,0 +1,60 @@
+D-141 stage 0: D-065's bw arm against 5b on D-142's tipping grid (seeds 10-12) and flag B
+
+F1 bandwidth labels in the cell (F1 350-650 Hz, F2/F1 < 2.2), every 37th sonorant frame:
+  train_v2               n 65366: median 76, 90th 127, 99th 185 Hz; above 250 Hz 0.03%, above 360 Hz 0.00%
+  train_bw_v1            n 65366: median 72, 90th 177, 99th 299 Hz; above 250 Hz 2.64%, above 360 Hz 0.24%
+  train_bw_v1 (approx.)  n 65366: median 72, 90th 183, 99th 310 Hz; above 250 Hz 3.07%, above 360 Hz 0.36%
+
+Failure share (F2 nearer the true F3 than the true F2), mean over clips, by f0 (rows) and B1 (columns):
+  d040_5b_s1_b20k:
+    O-like f0 110: B1 150   0%  B1 250  75%  B1 360 100%  B1 500 100%  B1 700 100%
+    O-like f0 140: B1 150   0%  B1 250   0%  B1 360   0%  B1 500  91%  B1 700 100%
+    O-like f0 180: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700 100%
+    O-like f0 220: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+    6-like f0 110: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700 100%
+    6-like f0 140: B1 150   0%  B1 250   0%  B1 360   0%  B1 500  13%  B1 700 100%
+    6-like f0 180: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+    6-like f0 220: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+  d040_5b_s2_b20k:
+    O-like f0 110: B1 150   0%  B1 250   0%  B1 360  99%  B1 500 100%  B1 700 100%
+    O-like f0 140: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700  74%
+    O-like f0 180: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   4%  B1 700 100%
+    O-like f0 220: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+    6-like f0 110: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700 100%
+    6-like f0 140: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700 100%
+    6-like f0 180: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+    6-like f0 220: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+  d065_bw_s1_b20k:
+    O-like f0 110: B1 150  92%  B1 250 100%  B1 360 100%  B1 500 100%  B1 700 100%
+    O-like f0 140: B1 150  31%  B1 250 100%  B1 360 100%  B1 500 100%  B1 700 100%
+    O-like f0 180: B1 150  79%  B1 250 100%  B1 360 100%  B1 500 100%  B1 700 100%
+    O-like f0 220: B1 150   0%  B1 250   0%  B1 360   1%  B1 500  86%  B1 700 100%
+    6-like f0 110: B1 150   0%  B1 250   0%  B1 360   0%  B1 500 100%  B1 700 100%
+    6-like f0 140: B1 150   0%  B1 250   0%  B1 360  70%  B1 500 100%  B1 700 100%
+    6-like f0 180: B1 150   0%  B1 250   0%  B1 360   0%  B1 500  19%  B1 700  89%
+    6-like f0 220: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+  d065_bw_s2_b20k:
+    O-like f0 110: B1 150   0%  B1 250   0%  B1 360   2%  B1 500 100%  B1 700 100%
+    O-like f0 140: B1 150   0%  B1 250   0%  B1 360  16%  B1 500 100%  B1 700 100%
+    O-like f0 180: B1 150   3%  B1 250  99%  B1 360 100%  B1 500 100%  B1 700 100%
+    O-like f0 220: B1 150   0%  B1 250   1%  B1 360  52%  B1 500   9%  B1 700  19%
+    6-like f0 110: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+    6-like f0 140: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700  40%
+    6-like f0 180: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+    6-like f0 220: B1 150   0%  B1 250   0%  B1 360   0%  B1 500   0%  B1 700   0%
+
+Primary cells (f0 110-140, B1 250-500; 36 clips), seed means: 5b 0.24, bw 0.45; ratio 1.88 [1.33, 3.11]
+  by seed: d040_5b_s1_b20k 0.32, d040_5b_s2_b20k 0.17, d065_bw_s1_b20k 0.73, d065_bw_s2_b20k 0.18
+  -> the bw arm does not help by the registered reading (ratio <= 0.5)
+
+Flag B (D-142): share of grid clips flagged (above the 95th percentile of the model's not-failing clips), and AUC against failing (>= 0.5) vs not (< 0.2):
+  d040_5b_s1_b20k: 19% flagged; failing clips 26; AUC 0.94
+  d040_5b_s2_b20k: 22% flagged; failing clips 21; AUC 1.00
+  d065_bw_s1_b20k: 8% flagged; failing clips 65; AUC 0.83
+  d065_bw_s2_b20k: 22% flagged; failing clips 27; AUC 0.94
+
+Private recording (aggregates only): D-138's failing takes (teacher seed mean >= 0.5 on 5b) - mean failure share per model; and how many of all takes fail
+  d040_5b_s1_b20k: failing takes 0.91 (n 6); all takes failing (>= 0.5): 8 of 42
+  d040_5b_s2_b20k: failing takes 0.96 (n 6); all takes failing (>= 0.5): 7 of 42
+  d065_bw_s1_b20k: failing takes 0.91 (n 6); all takes failing (>= 0.5): 6 of 42
+  d065_bw_s2_b20k: failing takes 0.83 (n 6); all takes failing (>= 0.5): 7 of 42
