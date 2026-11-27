@@ -5345,3 +5345,29 @@ Synthetic and training only; descriptive.
     - Either way it points at a gap neither grid covers. D-142's grid fixes B2 at 90 Hz, and the cascade's training B2 is Hawks & Miller times 0.6-1.6 (`sampler.bw_factor`). The tube clips use the tube's own bandwidths, whose range near these vowels hasn't been measured.
     - The failing files also have wider B1 (D-152), so the real failure may need wide B1 and B2 together.
     - A check that can hold: whether 5b fails on the tipping grid as B2 widens, and how much of train_v2's mass sits at B2 above 150 Hz near these vowels. That needs its own entry.
+
+## D-155 (2026-11-27, Hannah: "would you be able to register and run the expanded tipping grid?"; seen beforehand: D-142 to D-154's results, including D-154's post hoc on B2; the synthesiser's bandwidth sampling code (cascade: Hawks & Miller times `bw_factor` 0.6-1.6; tube: the tube's own); train_v2's label file list; nothing of any grid clip with B2 other than 90 Hz, and nothing of train_v2's bandwidth labels): does a wide B2 tip the dropped formant, and does training cover it?
+
+*Status*: registered. `scripts/analysis/d155_b2_grid.py` (`render`, `run`, `coverage`, `report`). CPU, inference only.
+
+- *Why*: D-154's post hoc found that through our own resonators, 5b skips F2 once B2 is wide. Correct files resynthesised with B2 under 150 Hz didn't fail; those at or above 150 Hz failed at a third of their frames. D-142's grid fixes B2 at 90 Hz, which may be why fixes that work on it don't reach VocalSet (D-153).
+- *Part 1, the grid with B2 steps*: D-142's grid clips (`_grid_audio`: cascade, uncoupled, Rd 1.0, 3 s; B3 120 Hz and B4 150 as before) with B2 at 90, 150, 250 and 400 Hz.
+  - Every other cell is as D-147's: both sets, f0 110 / 140 / 180 / 220, B1 150 / 250 / 360 / 500 / 700, seeds 20-22, so 480 clips.
+  - B2 doesn't enter the clip's random seed, so the 90 Hz clips are D-147's own. Their 5b scores must match D-147's (seed 1 0.34, seed 2 0.17 in the primary cells), which checks the render.
+  - Frames and failure as D-142 / D-147: middle 60 %, voiced, F2 nearer the true F3 than the true F2.
+- *Measure (deciding)*: 5b's seed mean of the failure share over the low-f0 cells (f0 110 and 140, all five B1 steps, both sets; 30 clips per B2 step).
+  - Reported: tables by set, B1 and B2, at low and higher f0; the B1 = 150 Hz row (does B2 alone tip it?).
+- *Rule*, with Δ = the failure at B2 = 400 minus the failure at B2 = 90:
+  - **B2 MATTERS** if Δ is at least 0.2 on the seed mean and at least 0.1 on each seed, and B2 = 250 fails at least as much as 90.
+  - **NO B2 EFFECT** if Δ is below 0.05.
+  - **PARTLY** otherwise: reported, Hannah decides.
+- *Reported only, the arms*: D-153's ten runs scored on the same clips. For each run, the low-f0 failure at B2 = 90 and at B2 of 250 and 400 together.
+  - Also the Spearman correlation across the twelve runs between each of those and D-153's VocalSet measure. Twelve runs from two seeds make this coarse; it decides nothing.
+- *Part 2, coverage*: train_v2's sonorant, voiced frames (every 10th) near the failing vowels: label f0 ≤ 150 Hz, F1 400-600, F2 700-1100.
+  - Reported: the share with B2 above 150, 250 and 400 Hz; with B1 and B2 both above 250; by tube and cascade clips; and the same shares over all sonorant frames for context.
+  - *Rule*: **B2 GAP** if under 2 % of those frames have B2 above 250 Hz; **COVERED** at 10 % or more; **THIN** in between.
+- *Caveats*:
+  - D-154's B2s are Praat's, which may overestimate them. Whether real F2s are that wide is outside this entry.
+  - The grid's F2 is wide but otherwise the cascade's; real weak F2s might also come from zeros or coupling.
+  - train_v2 is 5b's synthetic set; the resynthesised share (Hawks & Miller times 0.6-1.6) isn't counted.
+- Reports: `reports/analysis/d155/d155.{txt,json}`. Clips and per-clip scores in `cache/d155/`, not committed.
