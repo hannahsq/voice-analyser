@@ -24,6 +24,7 @@ A reading of every entry below against the changed direction (D-091: the F1 leve
 - On D-096: a source output (Rd or open quotient) as the closure measure beside F1 (D-091 decision 6), only if H1*-H2* and CPP from the back end are not repeatable enough. This is the "Source heads" entry with a different purpose: an output for outcomes, not a way to help F1.
 - On M5: *Linear attention or gated DeltaNet* (constant memory for a streaming student).
 - On the technique-label check: the synthesis part of *Laryngeal mechanisms M0-M3*.
+- On the bandwidth arm (after D-155 to D-157) and D-158: *A source-sloped f0 comb* (Added 2026-11-27).
 
 **Answered or closed since they were written** (kept below as the record): the read-out items under *Trunk structure* (D-054, D-056, D-072, D-073; closed as a line by D-091); *A whole-cycle effective F1 head* (D-078; the acoustic F1 is now the output); *Source heads and source inputs* as a way to help F1 (D-080, D-081); *Energy in the F1-F2 valley* (D-055, D-057); *Widen the bandwidth prior* (D-065); *Cascade order between the VTL head and the formant heads* (D-037, D-038); *Band periodic fraction* (D-048); *Discriminator probes* (D-045's follow-ups); the KL port (done, D-058 to D-060); *Leaky closure* (overtaken by the KL work); *Reallocating Saarbrücken* (now D-095; allocated 2026-11-21 in its amendment 1, with a reserve for a later training share); *Try more truth combs*' formant chain (D-086).
 
@@ -107,6 +108,17 @@ A reading of every entry below against the changed direction (D-091: the F1 leve
 ## Added 2026-11-22
 
 - **Side branches of the lower tract are missing from synthesis** (Hannah and Claude, from vtl-mri's 2D wave solutions, D-067 2026-11-22). None of our synthesisers has the piriform sinuses or the vallecula: KL has only the subglottal system and the nasal branch (`synth/branches.py`), and the cascade and tube none. In vtl-mri's 2D solutions a vallecula-sized pocket is about +3 mm of acoustic effect and a deep pocket ignored shifts F1-F3 by 4-12 %; the piriform sinuses are known to add antiresonances and pull the upper formants down (`voice-analyser-mk2-plan.md`, calibration). Under Hannah's principle, anything the renderer needs is predicted or justified, so if KL gains these branches, their sizes become outputs or are argued away. Sketch: closed side branches at the larynx in KL's junction scheme (as the port's), sizes from the literature (Dang & Honda on the piriform sinuses), never from evaluation sets or MRI audio; MRI's per-frame pocket geometry (D-067) could give ranges image-side, dev speakers only and only by a decision.
+
+## Added 2026-11-27
+
+- **A source-sloped f0 comb** (Hannah, after D-152 to D-158; first named in D-145's reading). Today's comb gives the trunk the harmonics' positions at equal height (40 harmonics, σ 20 cents, times the voicing probability; `docs/architectures.md`). A sloped comb would also give their amplitudes as the source alone would make them, so where the spectrum falls short of the comb the shortfall is the tract's.
+  - *Why*: D-144 found that, with the source's slope free, a reconstruction search uses a wide pole to fix the slope instead of placing a formant. D-145 found that a trunk keeping the source places a wide F1 only 6-12 % better, so the source has to be used structurally: in the reconstruction renderer, or in the comb. This is the input-side version.
+  - *Order*: after the bandwidth arm (D-155 to D-157: training's low-f0 bandwidths are narrow for every formant, because Hawks & Miller's scale with f0). Until training holds wide formants at low f0, there is nothing for a sloped comb to help separate, and a null result couldn't be read. Before M4, or as its first source step, since the same source head can drive both the comb and M4's renderer (*Every renderer input is predicted*, under Heads).
+  - *What slopes it*: D-158 decides. If sources off Fant's Rd line matter, one Rd isn't enough, and the comb needs at least the high-frequency tilt (Ra) and H1-H2 (Rg) separately. Otherwise Rd.
+  - *Where the slope comes from*: the f0 comb's own pattern (*Try more truth combs*, under Training techniques): from the true source parameters early, ramping to a predicted source head. D-080's A1 learned an Rd proxy on the trunk (R² 0.66), so a source head is learnable.
+  - *A cheap first arm*: a fixed generic slope (for example -12 dB per octave) against the flat comb. It asks whether amplitudes in the comb help at all before a source head is built.
+  - *Measures*: the VocalSet dropped-formant measure (D-152, D-153), deciding, with the B2 and B4 grids (D-155, D-156) and the Rd and off-line grids (D-157, D-158) reported, plus the usual guards.
+  - *Risks*: the comb's amplitude is a strong cue, so a wrong predicted slope could pull formant readings (a closed-loop error the flat comb can't make); the truth ramp must reach 0, as for the f0 comb. Aspiration and real sources' departures from LF aren't in a parametric slope.
 
 ## Models
 
