@@ -5448,3 +5448,28 @@ Synthetic and training only; descriptive.
   - *The slope's own effect runs the other way to breathiness*: at B2 = 90 the failure is 0.18 / 0.13 / 0.07 / 0.08. Nearly all of it is the O-like vowel with B1 = 360, which fails 0.74 at Rd 0.6 against 0.51, 0.28 and 0.33. A pressed source (low Rd) makes the wide-B1 failure worse, and a breathy one makes it milder.
   - *Coverage*: Rd itself is covered at low f0 (5th / 50th / 95th percentiles 0.37 / 1.50 / 2.62; 37.5 % at Rd ≥ 1.8, 12.8 % at ≥ 2.4, the same for tube and cascade). Breathy sources with wide bandwidths aren't: of the low-f0 frames at Rd ≥ 1.8, 0.0 % have B1 above 250 Hz and 4.3 % B2 above 150 (none near back vowels, D-155).
   - *Reading*: on the grid, source slope and bandwidth act roughly additively. A bandwidth arm doesn't need to tie Rd to the bandwidths. It does need its wide bandwidths drawn across the whole Rd range (independently of Rd), which also covers breathy voices' wide-bandwidth combinations. Leaving the Rd line (an independent return phase or open quotient; Hannah's question, 2026-11-27) isn't tested here.
+
+## D-158 (2026-11-27, Hannah: "How hard do you think it would be to see how the model performs on voices with LF sources where the three LF parameters stray from the line? Interactions with bandwidth would be of particular interest here", then, on the design: "you tested Rd down to 0.6 before and that showed the most failures when combined a wide F1 so we should probably go at least that far down?"; seen beforehand: D-155 to D-157's results; LF timing validity for each step below (arithmetic only); a function check that the free-parameter source reproduces the harmonic table at Rd 0.6 and 1.0 (relative difference about 1e-12) and D-157's clips (about 1e-13, float rounding), and that one off-line clip renders (length and finiteness); nothing of any model on any off-line clip): does an LF source off Fant's Rd line change the readings, alone or with wide bandwidths?
+
+*Status*: registered. `scripts/analysis/d158_lf_offline.py` (`run`, `report`). CPU, inference only.
+
+- *Why*: every training set behind 5b and the arms draws LF on Fant's (1995) Rd regression, so the return phase (Ra: high-frequency tilt), the glottal formant (Rg: open quotient, H1-H2) and the asymmetry (Rk) always move together. Real voices scatter around that line. D-157 found that moving along it changes the wide-B1 failure (worst at Rd 0.6) but barely the wide-B2 effect. This asks the same off the line.
+- *Sources*: three anchors on the line, Rd 0.6 (pressed), 1.0 and 2.0 (breathy). From each, one parameter at a time: Ra × 0.5 / 2 / 3, Rg × 0.8 / 1.25, Rk × 0.7 / 1.4.
+  - Steps that break LF's timing are skipped: at Rd 2.0, Ra × 3 (the return phase outlasts the period) and Rg × 0.8 (closure after the period's end). That leaves 22 sources.
+  - *Rendering*: LF solved for the free (Ra, Rk, Rg) with `glottal.lf_params`'s own arithmetic after the regression. Its harmonic coefficients come by FFT (8192 points, as `harmonic_table`) and replace the Rd lookup inside the script only. Nothing in `synth/` changes.
+  - The on-line anchors at Rd 0.6 and 1.0 sit on the harmonic table's grid, so they must reproduce D-157's clips. Their scores are checked per clip; the renders agree to float rounding, so an occasional tiny per-clip difference is possible and is reported, not treated as a failure.
+- *Clips*: D-157's (cascade, uncoupled, 3 s; B3 120, B4 150), with B1 at 150 and 360 Hz crossed with B2 at 90 and 250. Both sets, f0 110 / 140 / 180 / 220, seeds 20-22: 96 clips per source, 2112 in all. Scored by 5b's two seeds, frames as D-155.
+- *Measures*, at low f0 (110 and 140), per anchor and parameter, over its steps including the anchor itself:
+  - the **source effect**: the range of the failure at B2 = 90 (both B1);
+  - the **B2 effect**: the failure at B2 = 250 minus 90 (both B1), and its range;
+  - the **B1 effect**: the failure at B1 = 360 minus 150 (both B2), and its range.
+  - Reported: higher f0 the same way; the median F1 and F2 errors (cents); and the model's B1 and B2 against the truth (median log2 ratio), as a check on bandwidth underestimation.
+- *Rule* (5b's seed mean):
+  - **JOINT** if for some anchor and parameter the B2 or B1 effect's range is at least 0.15, and at least 0.10 on each seed: leaving the line changes how a wide bandwidth reads, so a bandwidth arm should leave it too.
+  - **NONE** if every such range is under 0.05 and every source effect under 0.10.
+  - **PARTLY** otherwise: reported, Hannah decides.
+- *Caveats*:
+  - There are 18 chances (3 anchors × 3 parameters × 2 effects) for a range to reach 0.15. Requiring both seeds guards a little, not fully.
+  - The steps are within Fant's ranges, but how far real voices stray isn't measured here (that would need glottal inverse-filtering fits on recordings).
+  - No aspiration noise; cascade path only.
+- Reports: `reports/analysis/d158/d158.{txt,json}`. Per-clip scores in `cache/d158/`, not committed.
