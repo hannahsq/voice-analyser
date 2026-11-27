@@ -28,19 +28,29 @@ class LFParams:
     e0: float
 
 
+def rd_line(rd: float) -> tuple[float, float, float]:
+    """Fant's (1995) regression: Rd -> (Ra, Rk, Rg)."""
+    ra = (-1.0 + 4.8 * rd) / 100.0
+    rk = (22.4 + 11.8 * rd) / 100.0
+    rg = rk * (0.5 + 1.2 * rk) / (0.44 * rd - 4.0 * ra * (0.5 + 1.2 * rk))
+    return ra, rk, rg
+
+
 def lf_params(rd: float) -> LFParams:
     """Fant (1995) Rd regression -> (Ra, Rk, Rg), then the LF constants for Ee = 1, T0 = 1."""
     if not RD_MIN - 1e-9 <= rd <= RD_MAX + 1e-9:
         raise ValueError(f"Rd {rd} outside [{RD_MIN}, {RD_MAX}]")
-    ra = (-1.0 + 4.8 * rd) / 100.0
-    rk = (22.4 + 11.8 * rd) / 100.0
-    rg = rk * (0.5 + 1.2 * rk) / (0.44 * rd - 4.0 * ra * (0.5 + 1.2 * rk))
+    return lf_constants(*rd_line(rd), label=f"Rd {rd}")
+
+
+def lf_constants(ra: float, rk: float, rg: float, label: str = "") -> LFParams:
+    """The LF constants for free (Ra, Rk, Rg), Ee = 1, T0 = 1 (D-158 / D-160: sources off Fant's line)."""
     tp = 1.0 / (2.0 * rg)
     te = tp * (1.0 + rk)
     ta = ra
     tb = 1.0 - te
     if not (0 < tp < te < 1 and 0 < ta < tb):
-        raise ValueError(f"inconsistent LF timing for Rd {rd}: tp={tp}, te={te}, ta={ta}")
+        raise ValueError(f"inconsistent LF timing for {label or (ra, rk, rg)}: tp={tp}, te={te}, ta={ta}")
 
     # Return phase: epsilon * ta = 1 - exp(-epsilon * (1 - te)).
     eps = brentq(lambda e: e * ta - 1.0 + np.exp(-e * tb), 1e-6 / ta, 1e3 / ta)
@@ -59,7 +69,21 @@ def lf_params(rd: float) -> LFParams:
 
 def lf_waveform(rd: float, n: int) -> np.ndarray:
     """One period of the flow derivative, n samples at t = i / n, Ee = 1."""
-    p = lf_params(rd)
+    return _waveform(lf_params(rd), n)
+
+
+def ra_scaled(rd: float, ra_factor: float) -> tuple[float, float, float]:
+    """(Ra, Rk, Rg) at Rd with Ra multiplied by ra_factor (D-160), clipped to RA_MAX_OF_CLOSED of the closed time
+    1 - te so LF's timing stays valid. Rk and Rg stay on Fant's line."""
+    ra, rk, rg = rd_line(rd)
+    te = (1.0 + rk) / (2.0 * rg)
+    return min(ra * ra_factor, RA_MAX_OF_CLOSED * (1.0 - te)), rk, rg
+
+
+RA_MAX_OF_CLOSED = 0.9
+
+
+def _waveform(p: LFParams, n: int) -> np.ndarray:
     t = np.arange(n) / n
     out = np.empty(n)
     op = t <= p.te
@@ -99,12 +123,25 @@ def harmonic_table() -> tuple[np.ndarray, np.ndarray]:
     return logmag, phase
 
 
-def source_coefficients(rd: np.ndarray, k_max: int = N_HARMONICS) -> np.ndarray:
+@functools.lru_cache(maxsize=4)
+def harmonic_table_ra(ra_factor: float) -> tuple[np.ndarray, np.ndarray]:
+    """As `harmonic_table`, with Ra multiplied by ra_factor at every Rd (`ra_scaled`; D-160). One table per clip's
+    factor: about 0.3 s, cached for the last few factors."""
+    n = 8192
+    coefs = np.array([np.fft.rfft(_waveform(lf_constants(*ra_scaled(rd, ra_factor)), n))[1 : N_HARMONICS + 1] / n
+                      for rd in RD_GRID])
+    logmag = np.log(np.abs(coefs))
+    phase = np.unwrap(np.unwrap(np.angle(coefs), axis=0), axis=1)
+    return logmag, phase
+
+
+def source_coefficients(rd: np.ndarray, k_max: int = N_HARMONICS, ra_factor: float | None = None) -> np.ndarray:
     """Complex c_k for k = 1..k_max at each Rd (shape rd.shape + (k_max,)), interpolated on RD_GRID.
 
-    Log magnitude and phase are interpolated linearly in Rd; grid spacing is 0.01.
+    Log magnitude and phase are interpolated linearly in Rd; grid spacing is 0.01. ra_factor (D-160): Ra off Fant's
+    line by that factor (None: on the line, the original table).
     """
-    logmag, phase = harmonic_table()
+    logmag, phase = harmonic_table() if ra_factor is None else harmonic_table_ra(float(ra_factor))
     rd = np.clip(np.asarray(rd, float), RD_MIN, RD_MAX)
     pos = (rd - RD_MIN) / 0.01
     i0 = np.clip(np.floor(pos).astype(int), 0, len(RD_GRID) - 2)
@@ -114,6 +151,6 @@ def source_coefficients(rd: np.ndarray, k_max: int = N_HARMONICS) -> np.ndarray:
     return np.exp(lm + 1j * ph)
 
 
-def source_h_db(rd: np.ndarray, k_max: int = 8) -> np.ndarray:
+def source_h_db(rd: np.ndarray, k_max: int = 8, ra_factor: float | None = None) -> np.ndarray:
     """Source harmonic amplitudes 20 log10 |c_k| (dB re Ee = 1), k = 1..k_max."""
-    return 20.0 * np.log10(np.abs(source_coefficients(rd, k_max)))
+    return 20.0 * np.log10(np.abs(source_coefficients(rd, k_max, ra_factor)))

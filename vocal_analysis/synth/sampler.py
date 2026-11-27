@@ -76,6 +76,15 @@ class SynthConfig:
     # drawn from a generator of its own, so every other draw stays the clip's
     bw_factor: tuple[float, float] = (0.6, 1.6)
     tube_bw_factor: tuple[float, float] | None = None
+    # D-160: with this probability per clip (cascade and tube), each of B1-B4 is redrawn log-uniform between its usual
+    # value and wide_bw_caps (Hz; widen only), one position per formant for the whole clip. Training's low-f0 bandwidths
+    # are narrow for every formant (D-155, D-156). Own generator, so every other draw stays the clip's; 0 draws nothing
+    p_wide_bw: float = 0.0
+    wide_bw_caps: tuple[float, float, float, float] = (700.0, 450.0, 650.0, 800.0)
+    # D-160: with this probability per clip, LF's return phase Ra is multiplied by a log-uniform factor in ra_factor
+    # (Rk and Rg stay on Fant's line; clipped to valid timing, `glottal.ra_scaled`). Own generator; 0 draws nothing
+    p_ra_offline: float = 0.0
+    ra_factor: tuple[float, float] = (0.5, 3.0)
     # cascade clips with centre f0 in f1_band_f0_hz: per target, F1 = f0 x log-uniform(f1_band_ratio) with this probability
     p_f1_band: float = 0.3
     f1_band_f0_hz: tuple[float, float] = (150.0, 350.0)
@@ -630,6 +639,17 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
     else:
         bw_f0 = centre if cfg.bandwidth_f0_hz is None else cfg.bandwidth_f0_hz
         bw_targets = np.stack([tract.sample_bandwidths(rng, np.exp(targets[i]), bw_f0, cfg.bw_factor) for i in range(len(tt))])
+    wide_bw = False
+    if cfg.p_wide_bw > 0:  # D-160: own generator, so with it off (or not drawn) the clip is unchanged
+        g = np.random.default_rng([seed, index, 160, 1])
+        if g.random() < cfg.p_wide_bw:
+            wide_bw = True
+            pos = g.uniform(size=4)
+            bw_targets = bw_targets.copy()
+            for k, cap in enumerate(cfg.wide_bw_caps):
+                b = bw_targets[:, k]
+                widen = np.isfinite(b) & (b < cap)
+                bw_targets[widen, k] = np.exp(np.log(b[widen]) + pos[k] * (np.log(cap) - np.log(b[widen])))
     logb = np.stack([_raised_cosine_steps(n, np.array(tt[1:]), np.log(np.nan_to_num(bw_targets[:, k], nan=100.0)), widths)
                      for k in range(tract.N_POLES)], 1)
     bws = np.where(np.isfinite(formants), np.exp(logb), np.nan)
@@ -642,6 +662,11 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
         extras = {k: v[:keep] for k, v in extras.items()}
     n_ep, n_ez = len(extras["extra_pole_f"]), len(extras["extra_zero_f"])
 
+    ra_factor = None
+    if cfg.p_ra_offline > 0 and not interactive:  # D-160: own generator; the interactive source isn't LF
+        g = np.random.default_rng([seed, index, 160, 2])
+        if g.random() < cfg.p_ra_offline:
+            ra_factor = float(np.exp(g.uniform(*np.log(cfg.ra_factor))))
     traj = Trajectories(
         f0=f0, rd=rd, voice_amp=voice_env * loud,
         whisper_amp=(whisper * loud * rng.uniform(0.3, 1.5)
@@ -650,6 +675,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
         poles_b=np.concatenate([bws, np.tile(extras["extra_pole_b"], (n, 1))], 1),
         zeros_f=np.tile(extras["extra_zero_f"], (n, 1)).reshape(n, n_ez),
         zeros_b=np.tile(extras["extra_zero_b"], (n, 1)).reshape(n, n_ez),
+        ra_factor=ra_factor,
     )
     coupled = None
     if glottis is not None and not interactive:  # per-target open-glottis shifts, with the same transitions as the formants
@@ -694,7 +720,7 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
         "rd": rd[fi],
         # LF harmonics; an interactive clip's source is not LF (and is shaped by the tract), so unknown there
         "source_h_db": (np.full((len(fi), N_SOURCE_HARMONICS), np.nan) if interactive
-                        else source_h_db(rd[fi], N_SOURCE_HARMONICS)),
+                        else source_h_db(rd[fi], N_SOURCE_HARMONICS, ra_factor)),
         "length_cm": np.full(len(fi), length),
         # D-051: the tube's length at each target (anatomical + larynx + lips), with the formants' transitions
         "length_inst_cm": (_raised_cosine_steps(n, np.array(tt[1:]), np.array([d[2]["length_cm"] for d in drawn]), widths)[fi]
@@ -727,4 +753,6 @@ def generate(index: int, cfg: SynthConfig | None = None, seed: int = 0, keep_com
         "extras": {k: v.tolist() for k, v in extras.items()}, "n_extra_poles": n_ep, "n_extra_zeros": n_ez,
         "config": asdict(cfg),
     }
+    if cfg.p_wide_bw > 0 or cfg.p_ra_offline > 0:  # D-160 (only when on, so earlier sets' meta is unchanged)
+        meta["d160"] = {"wide_bw": wide_bw, "ra_factor": ra_factor}
     return SynthClip(audio.astype(np.float32), labels, meta, comps if keep_components else None)

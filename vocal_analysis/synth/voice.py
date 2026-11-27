@@ -51,6 +51,7 @@ class Trajectories:
     poles_b: np.ndarray
     zeros_f: np.ndarray  # (C, Z)
     zeros_b: np.ndarray
+    ra_factor: float | None = None  # D-160: LF's return phase off Fant's line by this factor (None: on it)
 
     @property
     def n_samples(self) -> int:
@@ -94,6 +95,14 @@ def _additive(cycles, mag, phs, kmax, ctrl):
     return y
 
 
+def _coefs(traj: Trajectories, k_max: int) -> np.ndarray:
+    """The LF source's harmonics at the trajectory's Rd; off Fant's line in Ra when traj.ra_factor is set (D-160).
+    The call without the factor is the original one, so scripts that substitute `source_coefficients` still work."""
+    if traj.ra_factor is None:
+        return source_coefficients(traj.rd, k_max)
+    return source_coefficients(traj.rd, k_max, ra_factor=traj.ra_factor)
+
+
 def harmonic_amplitudes(traj: Trajectories, k_max: int, fs: float = FS) -> np.ndarray:
     """Complex amplitude of harmonics 1..k_max at each control point: c_k(Rd) H(k f0) * taper."""
     k = np.arange(1, k_max + 1)
@@ -101,7 +110,7 @@ def harmonic_amplitudes(traj: Trajectories, k_max: int, fs: float = FS) -> np.nd
     h = filters.response(fk, traj.poles_f[:, None, :], traj.poles_b[:, None, :], fs,
                          traj.zeros_f[:, None, :], traj.zeros_b[:, None, :])
     taper = np.clip((NYQ_TAPER_HZ[1] - fk) / (NYQ_TAPER_HZ[1] - NYQ_TAPER_HZ[0]), 0.0, 1.0)
-    return source_coefficients(traj.rd, k_max) * h * taper
+    return _coefs(traj, k_max) * h * taper
 
 
 def _per_sample(ctrl_values: np.ndarray) -> np.ndarray:
@@ -153,7 +162,7 @@ def _voiced_coupled(traj: Trajectories, cycles: np.ndarray, coupling: dict, k_ma
     k = np.arange(1, k_max + 1)
     fk = traj.f0[:, None] * k[None, :]
     taper = np.clip((NYQ_TAPER_HZ[1] - fk) / (NYQ_TAPER_HZ[1] - NYQ_TAPER_HZ[0]), 0.0, 1.0)
-    amp = source_coefficients(traj.rd, k_max) * taper
+    amp = _coefs(traj, k_max) * taper
     kmax = np.minimum(np.ceil(NYQ_TAPER_HZ[1] / traj.f0).astype(np.int64), k_max)
     src = _additive(cycles, np.abs(amp) * traj.voice_amp[:, None], np.unwrap(np.angle(amp), axis=0), kmax, CTRL)
     f, b, z = _coupled_tract(traj, cycles, coupling)

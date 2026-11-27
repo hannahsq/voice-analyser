@@ -272,6 +272,9 @@ IGNORED_FIELDS = {
                "and the /h/ level draw has its own case", "glottal_peak_area_cm2", "glottal_gap_offset",
                "coupling_scale", "coupling_full_poles", "interactive_coupled", "p_interactive_coupled",
                "interactive_closure", "interactive_sub_gain"),
+    **_ignored("D-160: off by default (every case unchanged), each from a generator of its own; test_synth_d160 checks "
+               "that off reproduces the clip and that on changes only the bandwidths or the source",
+               "p_wide_bw", "wide_bw_caps", "p_ra_offline", "ra_factor"),
     **_ignored("KL-only draws and the sustained-articulation timing: values only, `kl_*` and "
                "`tube_articulation` cover their branches", "p_lf_pulse", "artic_hold_s", "artic_transition_s",
                "artic_pg_cm", "artic_pm_cm"),
