@@ -5598,3 +5598,17 @@ Synthetic and training only; descriptive.
   - two branch runs at about 1.6 h each on the GPU;
   - scoring about 1 h, the grids and VocalSet on the CPU.
   - Before the GPU chain starts, the vtl-mri session is told (the agreed rule), and the GPU is checked to be free.
+- *Before training (2026-11-28; no model trained on train_v2w yet; `d160_score.py coverage`, `cache/d160/coverage.json`)*:
+  - The render: 100,000 clips, the same length, f0 and tube draws as train_v2 (tube 0.598, length from f0 0.501).
+  - Coverage near the failing vowels (57,033 sampled frames; f0 ≤ 150, F1 400-600, F2 700-1100), train_v2 → train_v2w:
+    - B1 above 250 Hz 0.0 → 15.2 %, above 360 0.0 → 10.1 %;
+    - B2 above 150 0.02 → 17.0 %, above 250 0.0 → 9.2 %;
+    - B3 above 400 0.02 → 7.2 %;
+    - B4 above 300 1.1 → 17.5 %.
+  - The registration's estimates were 16 / 10 / 17 / 9 / 11 / 27 %. B3 and B4 come out lower because their usual values near these vowels are narrower than the approximations used.
+  - Low-f0 label percentiles (50th / 90th / 99th, Hz), train_v2 → train_v2w:
+    - B1 at F1 450-650: 67 / 118 / 164 → 87 / 367 / 662;
+    - B2 at F2 700-1100: 46 / 73 / 104 → 56 / 238 / 419;
+    - B3 at F3 2500-3000: 82 / 153 / 340 → 106 / 388 / 619;
+    - B4 at F4 3500-4000: 118 / 224 / 310 → 154 / 486 / 759.
+  - The medians move only 20-30 %, so the prior's centre stays close, and the tails reach the grids' failure ranges.
