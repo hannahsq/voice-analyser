@@ -5419,3 +5419,26 @@ Synthetic and training only; descriptive.
     - B2 at 700-1100 Hz has 90th / 99th percentiles of 73 / 104 Hz, B3 115-197 / 225-370, B4 183-280 / 244-397. Over all f0 the B4 99th percentiles are 708-1236.
     - That follows from the prior: Hawks & Miller's bandwidths grow with f0 (`tract.bandwidth_prior`), and the cascade multiplies them by only 0.6-1.6. Low-f0 voices with wide bandwidths (breathy, or men with open or leaky glottises) are outside training for every formant at once. That is a single cause shared by D-141's B1 gap, D-155's B2 gap and the B4 sensitivity here.
   - *Reading*: B4 at 300 Hz and above is beyond training at low f0, and 5b loses F4 there and skips more F2s. B3 is read well to 400 Hz, which training's low-f0 tail nearly reaches. One change would cover B1, B2 and B4 together: a wider bandwidth range at low f0, at least partly decoupled from f0. It needs its own entry, decided on the VocalSet measure with the B2 grid (D-155) and B4 steps reported.
+
+## D-157 (2026-11-27, Hannah: "Could you register and run the joint probe?"; seen beforehand: D-141 to D-156's results, including D-155's per-clip grid scores at Rd 1.0; the sampler's Rd draw (`cfg.rd`, a wander and an optional step, clipped to 0.3-2.7); a function check of one Rd 2.7 render (length and finiteness only); nothing of any grid clip at Rd other than 1.0, and nothing of train_v2's Rd labels): does the source's slope change the wide-bandwidth failure, and does training cover the two together at low f0?
+
+*Status*: registered. `scripts/analysis/d157_rd_bw.py` (`run`, `coverage`, `report`). CPU, inference only.
+
+- *Why*: D-155 and D-156 found that training's bandwidths at low f0 are narrow for every formant, and that a wide B2 alone tips the dropped formant. A wide formant and a steep source slope both take energy out of the spectrum (D-144's trade-off), and in real voices they go together (breathy phonation). Before a bandwidth arm is designed, this asks whether it must vary the source slope as well.
+- *Part A, the grid*: D-155's clips (cascade, uncoupled, 3 s, B3 120 Hz, B4 150) with Rd at 0.6, 1.0, 1.8 and 2.7, crossed with B2 at 90 and 250 Hz and B1 at 150 and 360. Both sets, f0 110 / 140 / 180 / 220, seeds 20-22: 384 clips.
+  - Rd doesn't enter the clip's random seed, so the Rd 1.0 clips are D-155's. Their 5b scores must match D-155's per clip, which checks the render.
+  - Frames and failure as D-155. Scored by 5b's two seeds.
+- *Measure (deciding)*: 5b's seed-mean failure share at low f0 (110 and 140), both B1 steps, both sets.
+  - The **B2 effect** at each Rd is the failure at B2 = 250 minus the failure at 90. Its **range** is the largest B2 effect over the four Rd steps minus the smallest.
+  - The **slope effect** is the range over Rd of the failure at B2 = 90.
+- *Rule*:
+  - **JOINT** if the B2 effect's range is at least 0.15 on the seed mean and at least 0.10 on each seed: the source slope changes how a wide bandwidth reads, so a bandwidth arm should vary them together.
+  - **SEPARATE** if that range is under 0.05 and the slope effect under 0.10.
+  - **PARTLY** otherwise: reported, Hannah decides. This includes a slope effect without an interaction.
+- *Part B, coverage* (reported, deciding nothing): train_v2's sonorant, voiced frames at label f0 ≤ 150 Hz (every 10th).
+  - The Rd label's 5th / 50th / 95th percentiles; the shares at Rd ≥ 1.8 and ≥ 2.4; and, among frames at Rd ≥ 1.8, the shares with B1 > 250 Hz and with B2 > 150. By tube and cascade, and over all f0 for context.
+- *Caveats*:
+  - The grid's source is LF without aspiration noise. Real breathy voices add noise and glottal leakage, which this doesn't model.
+  - The Rd 2.7 clips may be outside training's range; part B says how far.
+  - The grid's F2 is the cascade's (D-155's caveat).
+- Reports: `reports/analysis/d157/d157.{txt,json}`. Per-clip scores in `cache/d157/`, not committed.
