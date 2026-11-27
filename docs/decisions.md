@@ -5518,3 +5518,83 @@ Synthetic and training only; descriptive.
   - *Read-out*: bw underestimates a little less. At B1 150 / B2 90, B1's log2 ratio is -1.12 / -0.92 against 5b's -1.19 / -1.15. At B1 360 / B2 90, B2 is +0.06 / -0.12 against -0.37 / -0.59. gain moves B2 there the same way on seed 1, so part of that is run-to-run.
   - *Reading*: from-scratch runs with an unrelated change move the VocalSet measure by 0.02-0.08 against 5b of the same seed (gain), which is as large as bw's effect. So this dose can't be told from run-to-run variation on real voices. With the grid not moving either, the registered reading guide's last case fits best: 0.4-2.5 is too small a dose to say anything.
     - For the D-160 draft: from-scratch variation on this measure is several times the seed-2 branch spread (0.19-0.20, D-153), which favours the branch design and its branch nulls. A real-voice effect must clear about 0.05-0.08 to be seen against a from-scratch null.
+
+## D-160 (2026-11-27, Hannah: "Could you draft Option A for now?", then "Could you update the draft with the points you outlined?", then "Looks good to me, can probably run on more threads (at least 16, up to 29) since the cpu and gpu are both idle"; seen beforehand: D-147 to D-159's results; D-065's design and result; D-080's branch chain; the sampler's bandwidth and Rd code; `tube.poles` at three perimeter factors (considering.md, 2026-11-27); nothing of any model trained on the data below): wider low-f0 bandwidths and an off-line return phase, as one data arm
+
+*Status*: registered. Render  (24 CPU workers, Hannah's 16-29); chain ; scoring and decision .
+
+- *Why*:
+  - D-155 and D-156 found that training's bandwidths at low f0 are narrow for every formant. Hawks & Miller's values scale with f0, and the cascade multiplies them by only 0.6-1.6. Near back vowels no B2 is above 150 Hz, and a wide B2 alone tips the dropped formant.
+  - 5b reads B1 at about 0.43 of the truth and B2 at about 0.63 (D-158).
+  - D-158 found that the return phase (Ra), off Fant's line, changes the wide-B1 failure. Rd, Rg and Rk act mostly additively (D-157, D-158).
+  - D-153 found that fixes judged on the grid don't carry over to VocalSet, so this arm is decided on VocalSet.
+  - D-159 found D-065's partial widening (0.4-2.5) too small a dose to read. It also showed that from-scratch runs move the VocalSet measure by 0.02-0.08 against 5b of the same seed, several times the seed-2 branch spread (0.19-0.20), so this arm uses branches and branch nulls.
+  - Option A trains the two changes together because D-158 found that they interact. A gain then belongs to the pair; splitting it would be a later entry, if wanted.
+- *Design: 5b's final stage, re-run with new data* (D-080's pattern). Each arm is a decay branch from `d040_5b_s{1,2}/ckpt_016000.pt`: 4000 steps to step 20000, 5b's command and optimiser, branch seeds 1 and 2.
+  - The reference is 5b's own b20k. The null spread is D-153's: 5b, D-090's F5 and F5-F7 branches, which on the VocalSet measure spread 0.169-0.258 on seed 1 and 0.192-0.204 on seed 2.
+  - A 4000-step branch starts from a trunk trained on narrow bandwidths and may not move far. The manipulation check below tells "not learned" from "learned, no gain on real voices". A from-scratch run (about 8.7 h per seed, D-065's cost) would be the follow-up if it isn't learned.
+- *Data*: `train_v2w`, which is train_v2 re-rendered at its own seed and settings with two changes. It replaces train_v2 in the mix (D-065's `synth_extra_replace`), so the resynthesised share and every other draw stay 5b's. train_v2 remains the synthetic validation set, so validation is comparable.
+  1. **Wide bandwidths.** Per clip, with probability **p_wide = 0.35**, each formant k = 1-4 independently gets its bandwidth redrawn log-uniform between its usual value and a cap. The redraw only widens.
+     - It applies to cascade clips (the drawn bandwidths) and tube clips (the tube's own bandwidths, as D-065's tube factor did), at every f0. Where a bandwidth is already near its cap, as at high f0, little changes, so in effect it fills the low-f0 gap.
+     - Labels are the drawn values, exact as now. Independence per formant gives the "wide B2, narrow B1" cases D-155 found tip it.
+  2. **Off-line return phase.** Per clip, with probability **p_ra = 0.5**, Ra is multiplied by a factor log-uniform in **0.5-3**, relative to Fant's value at the clip's Rd. The factor is constant per clip, while Rd wanders as now. Where the product would break LF's timing (Ra at least 0.9 times the closed time), it is clipped there.
+     - Rg and Rk stay on the line (D-158). Rd stays the label, and Ra isn't one; no head reads the source. The Ra draw is independent of the bandwidth draw.
+  - Both draws come from generators of their own (`default_rng([seed, index, 160, k])`), so with both off the render is train_v2's byte for byte. That is checked on six clips (cascade and tube) before rendering, as D-065 did.
+- *The caps and their rationale*: **B1 700, B2 450, B3 650, B4 800 Hz.**
+  - *Shape*: two kinds of loss pull in opposite directions. Glottal (open-phase) damping falls with frequency: it widens B1 most (Fant: from about 50 Hz to several hundred within the open phase), a low F2 less, and F3 and F4 hardly. Radiation, wall and boundary-layer losses rise with frequency (Hawks & Miller grow from F2 up). Their sum is U-shaped in hertz, widest at B1, lowest near B2, and rising through B3 and B4.
+  - In Q (F / B) at typical back-vowel frequencies, the caps are about 0.6 (B1 at 450 Hz), 2 (B2 at 900), 4.3 (B3 at 2800) and 4.4 (B4 at 3500).
+  - *B1 700*: the grid's widest B1 step, where 5b fails almost always at low f0. Real voices' Praat B1 reaches about 430 Hz at the 90th percentile on VocalSet (D-156), and D-154's failing files had a median of 318. Praat inflates, so 700 is generous. A 700 Hz B1 is barely a peak, which is a risk the guards watch (see the resolvability measures).
+  - *B2 450*: just above the grid's widest step (400), so all of D-155's grid lies inside training. D-154's failing files had a Praat B2 median of 359. B2's real-voice evidence is the weakest of the four: Praat's B2 is inflated, partly by merging close F1-F2 pairs (D-156), so the cap rests mainly on the grid.
+  - *B3 650*: matches B4's Q, and brings D-156's 600 Hz step, where 5b lost F3 (373 cents), inside training. D-156's "B3 needs no change" rested on a blunt instrument, and a leaky glottis widens every bandwidth together. The first draft's 500 Hz broke the U's rising half.
+  - *B4 800*: D-156's widest step. 5b loses F4 from 300 Hz. At all pitches training already reaches about 900-1200 Hz at its 99th percentile, so this brings low-f0 clips to where high-f0 clips already are.
+  - *Coverage this gives* near the failing vowels at low f0 (f0 ≤ 150, F1 400-600, F2 700-1100), from approximate usual values (D-155 and D-156's label columns), each wide clip log-uniform between the usual value and the cap:
+    - B1, usual about 70 Hz: about 10 % above 360 Hz (16 % above 250);
+    - B2, usual 47 Hz: about 9 % above 250 Hz (17 % above 150), against 0 % now, just under D-155's 10 % "covered" mark;
+    - B3, usual about 150 Hz: about 11 % above 400 Hz;
+    - B4, usual about 220 Hz: about 27 % above 300 Hz.
+    - B4's share is the highest because its usual value is already close to the failure range, which is why 0.35 is treated as the upper end for p_wide.
+    - The rendered set's actual coverage is counted before training (part A below) and recorded.
+- *Why log-uniform*: a bandwidth's peak height falls as 1/B, so log-uniform bandwidths are uniform in peak level. Ra is a time ratio whose return phase acts as a one-pole low-pass at about 1 / (2π Ta), so a log-uniform factor is uniform in the corner's octave. For coverage, flat in log is what's wanted. Real scatter around Fant's line is probably closer to log-normal; the on-line half of the clips stands in for that centre. The factor's range is exactly D-158's tested range, asymmetric because at Rd 0.6 ×0.5 is already an almost instantaneous closure, and real leaky and breathy voices stretch the return phase.
+- *Code* (defaults off, so the golden synthesiser tests stay identical; cascade and tube are a frozen contract):
+  - `SynthConfig`: `p_wide_bw`, `wide_bw_caps`, `p_ra_offline`, `ra_factor`.
+  - `glottal`: LF for free (Ra, Rk, Rg), factored out of `lf_params` with the regression kept in front (D-158's script has the arithmetic). A second harmonic table over (Rd, Ra factor) is used only when a factor is set; `source_coefficients` gets an optional factor argument.
+  - `voice.Trajectories`: an optional per-clip Ra factor.
+  - Tests: golden unchanged; a unit test that a factor of 1 equals today's coefficients; the six-clip reproduction.
+- *Before training* (reported, deciding nothing): **part A of D-156 on the new set's labels**, the label percentiles per formant and frequency band, train_v2w against train_v2. Also the near-vowel shares above, as rendered.
+- *Measures*:
+  - **Deciding, real voices**: D-153's VocalSet measure (D-152's 188 files from the three held-out men, f0 ≤ 150 Hz, D-153's fixed frames, the mean frame failure share), each arm against 5b of its seed, with a paired bootstrap over files.
+  - **Manipulation check, synthetic**: D-155's B2 grid, the low-f0 failure at B2 250-400, arm against 5b.
+  - **Reported**:
+    - D-155's B2 = 90 cells;
+    - **part B of D-156** on the arm's models: the B3 and B4 step grids, the dropped-formant failure and the F3 and F4 errors. Is F3 still lost at 600 Hz, and F4 from 300?
+    - D-157's Rd grid, and D-158's off-line grid with the bandwidth read-out ratios (does the underestimate shrink?);
+    - **resolvability**: synthetic validation (train_v2 and train_v2w's held-out clips), with each adjacent pair's frames split by the labels into resolvable and unresolvable. Unresolvable means the spacing is less than the mean of the pair's bandwidths, or less than f0. For each part: formant accuracy, arm against 5b, and the arm's `formant_sigma_cents`. We want the spread to rise on unresolvable frames, and accuracy to hold on resolvable ones.
+    - **front vowels**: F2 and F3 errors on front-vowel frames (label F2 above 1800 Hz) in synthetic validation, and on Hillenbrand dev's front vowels, arm against 5b. These are where wide B2 and B3 merge close F2-F3 pairs.
+    - VocalSet's failing-file counts by vowel; flag B's AUC on VocalSet (D-152);
+    - the private recording's failing takes, as counts only, with per-take numbers outside the repo (D-149's form).
+- *Labels at unresolvable pairs*: kept exact. The formant heads are heat maps trained with cross-entropy against a Gaussian target, so where an input can't separate a pair, the loss's optimum is a broad or two-humped heat map, not a pull to a midpoint. Moving both labels to the midpoint, or masking the frames, was considered and not taken:
+  - the midpoint changes what the label means and biases every pair near the threshold;
+  - masking leaves the model unguided exactly at the new range's extremes.
+  - If the resolvability measures show a cost on resolvable frames, a follow-up arm down-weights the pair's terms by a label-computed resolvability score.
+- *Rule*:
+  - *Learned* if the manipulation check falls by at least 0.2 on the seed mean and 0.1 on each seed. Otherwise **NOT LEARNED**: the VocalSet result is reported but read as uninformative.
+  - If learned, VocalSet: **LOWER ON REAL VOICES** if on both seeds the arm fails less than every null run of that seed and the paired interval against 5b lies below 0. **NOT LOWER** if on either seed some null run fails as little or less. **MIXED** otherwise: reported, Hannah decides.
+- *Guards*, for joining the recipe, separate from the scientific reading: D-051's, as D-065 used them.
+  - Synthetic F1-F4 within +2 SE and RPA at least -0.1.
+  - Hillenbrand F1 at most +4, F2 +9, F3 +20 Hz; PTDB-TUG RPA at least -1.0.
+  - Women's closed-phase F1 |error| at most +5 Hz.
+  - Hillenbrand length reliability lower bound above -0.02, with w/m 0.85-0.92.
+  - The f0 probe's excess at most 10 cents per octave.
+  - D-065's note applies: 5b's two seeds differ on length reliability by about 0.03, so a guard failure carried by one seed is reported as such.
+- *Caveats*:
+  - The caps and probabilities are judgement, not fitted. Real voices' bandwidths are known here only through Praat, which inflates them (D-156); B2's are the least certain.
+  - Widening may cost accuracy where bandwidths are narrow: the prior's centre moves for 35 % of clips. The guards and the resolvability measures watch for that.
+  - Three VocalSet singers.
+- *Not in this entry, noted for later*:
+  - training draws Rd uniform in 0.3-2.7, so in log terms pressed voices are under-represented (0.3-0.6, one octave, gets 12.5 % of clips; 1.35-2.7 gets 56 %), and D-157 and D-158 found pressed voices and short return phases the worst case. A log-uniform Rd would be its own change.
+  - a per-section perimeter factor and a kinematic glottis (considering.md, 2026-11-27).
+- *Cost*:
+  - render about 2 h on 12 CPU workers (D-065's figure for 100,000 clips);
+  - two branch runs at about 1.6 h each on the GPU;
+  - scoring about 1 h, the grids and VocalSet on the CPU.
+  - Before the GPU chain starts, the vtl-mri session is told (the agreed rule), and the GPU is checked to be free.
