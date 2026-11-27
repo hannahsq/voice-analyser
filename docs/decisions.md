@@ -5226,3 +5226,35 @@ Synthetic and training only; descriptive.
     - They read low F1, F2 and F3 together. For women the median is 395 / 1390 / 2312 Hz against 510 / 1752 / 2883; for men, 344 / 1182 / 2171 against 427 / 1444 / 2448.
     - That looks like liquids, glides, rhotic or rounded sounds (a low F3 is /r/'s mark). Those sonorants are probably sparse among the tube frames, which are vowel-like. PTDB-TUG has no phone alignment, so this is an inference from the formant values, not a label.
   - *Reading*: flag B as built is a recording-level check for held vowels. On running speech it stays quiet per utterance. Per frame it marks out-of-prior consonant-like stretches, not misread vowels, so a frame-level live use would need the prior to cover those sounds (or a phone gate) first. Nothing here changes D-142's acceptance for its own unit.
+
+## D-152 (2026-11-27, Hannah: "Yes please" to running the flag check on VocalSet, "since it was actually predominantly sung held vowels"; seen beforehand: D-142 to D-151's results; the held-out singers' file counts by task, vowel and technique from the manifest (879 files, 2.15 h, without the excerpts; 491 from the three men, without lip trills); no audio and no reading of any VocalSet file in this check): the dropped formant and flag B on VocalSet's held-out singers
+
+*Status*: registered. `scripts/analysis/d152_vocalset_flag.py` (`run`, `report`). CPU, inference only.
+
+- *Why*: D-150 found that Hillenbrand's dev voices don't produce the failure's conditions, and D-151 that read speech doesn't either. VocalSet's held-out singers are the first other voices we have that sing held vowels, including /o/ and /a/ at low f0 from three men. Two questions: does the dropped formant appear on them, and does flag B (D-142) pick out the files where it does?
+- *Data*: VocalSet's `val` singers (female2, female8, male3, male5, male10; D-015). They are never trained on, but their resynthesised clips have served as training-pool validation (D-025 onwards).
+  - Scales, arpeggios and long tones on the five vowels. Excerpts are left out (sung text, not held vowels), and so are lip trills (no vowel-like tract, D-016).
+  - Each file is one unit. Audio is resampled to 16 kHz.
+- *Reference*: Praat Burg every 10 ms (ceiling 5000 Hz for men, 5500 for women), as in D-151; VocalSet has no formant labels.
+- *Frames*: voiced (5b seed 2's voicing above 0.5), in D-141's cell by Praat (F1 350-650 Hz, F2/F1 < 2.2), with f0 read by 5b seed 2.
+  - A frame **fails** if the model's F2 is nearer Praat's F3 than Praat's F2.
+  - A file counts if it has at least 10 such frames in the block. It **fails** at a failure share of 0.5 or more on the 5b seed mean, and is **OK** below 0.2.
+- *Primary block*: the men's files, frames at f0 ≤ 150 Hz.
+- *Reported blocks*: the men at f0 150-250 Hz; the women at f0 ≤ 300; everyone above 300 (Praat is unreliable there).
+  - For the primary block, also reported: by vowel, task and technique; Praat B1 (median, and the share of frames above 250 Hz); and the frame failure share by Praat B1 band (under 150, 150-250, 250-400, over 400 Hz). The B1 figures are reported, deciding nothing.
+- *Flag B* (5b seed 2, D-142's threshold 0.61): the file's median score over voiced frames. The length is the median of the same singer's other files' median readings (leave-one-out, as D-151).
+  - The false-flag share is reported, by sex: all files above the threshold, and OK files above it.
+- *Rule, failure* (5b seed mean, primary block):
+  - **PRESENT** if at least 10 % of files fail, from at least 2 of the 3 men.
+  - **RARE** if at most one file fails.
+  - **SOME** otherwise.
+- *Rule, flag* (seed 2, primary block): testable only with at least 5 failing and 5 OK files.
+  - **HOLDS** with D-142's bar: the AUC of the file score separating failing from OK files is at least 0.8, and its bootstrap lower bound (1000 resamples over files) is above 0.5.
+  - **DOESN'T HOLD** otherwise.
+  - **NOT TESTABLE** if there are too few files.
+- *Caveats*:
+  - Praat is the reference. Male classical singers cluster F3-F5 (the singer's formant), which can blur Praat's F3, and vibrato moves the harmonics under the formants.
+  - Scales and arpeggios pass through pitches quickly, so the primary block mixes long tones with brief low notes.
+  - There are three men. A singer-level effect can't be told from a vowel-level one with that few.
+  - Per-file results stay out of the report.
+- Reports: `reports/analysis/d152/d152.{txt,json}`. Per-frame values in `cache/d152/`, not committed.
