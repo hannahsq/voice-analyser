@@ -1,0 +1,69 @@
+D-160: wide low-f0 bandwidths and an off-line return phase (train_v2w in train_v2's place), decay branches from 5b
+
+  Manipulation check: D-155's B2 grid, low f0 (110, 140), failure at B2 250-400 (and at B2 90)
+    d040_5b_s1_b20k    0.809 (0.401)
+    d160_s1            0.223 (0.106)
+    d040_5b_s2_b20k    0.598 (0.297)
+    d160_s2            0.381 (0.106)
+    fall: seed 1 +0.586, seed 2 +0.216, mean +0.401 -> LEARNED
+
+  VocalSet (D-153's measure, 188 files): mean failure share; null runs; arm minus 5b [95 %]
+    seed 1: nulls d040_5b_s1_b20k 0.169, d090_f5_s1 0.208, d090_f57_s1 0.258; arm 0.139 (27 failing files), minus 5b -0.029 [-0.059, -0.001] -> lower
+      failing files by vowel, 5b / arm: o 15/11, u 12/16, a 3/0
+      flag B AUC (arm's own failing / OK files): 0.88 (27 / 152)
+    seed 2: nulls d040_5b_s2_b20k 0.204, d090_f5_s2 0.192, d090_f57_s2 0.199; arm 0.202 (37 failing files), minus 5b -0.002 [-0.031, +0.022] -> within
+      failing files by vowel, 5b / arm: o 18/21, u 17/14, a 2/2
+      flag B AUC (arm's own failing / OK files): 0.82 (37 / 141)
+
+  D-156 part B (B2 90; B1 150 and 360; all f0): failure / F3 or F4 error (c) by step, 5b -> arm
+    d040_5b_s1_b20k    B3 120: 0.06/6  B3 250: 0.05/5  B3 400: 0.01/10  B3 600: 0.06/372  B4 150: 0.06/53  B4 300: 0.20/225  B4 500: 0.30/305  B4 800: 0.31/327
+    d160_s1            B3 120: 0.00/10  B3 250: 0.00/6  B3 400: 0.00/10  B3 600: 0.00/343  B4 150: 0.00/50  B4 300: 0.00/235  B4 500: 0.00/324  B4 800: 0.00/367
+    d040_5b_s2_b20k    B3 120: 0.06/5  B3 250: 0.00/6  B3 400: 0.00/14  B3 600: 0.03/368  B4 150: 0.06/47  B4 300: 0.10/261  B4 500: 0.16/308  B4 800: 0.16/325
+    d160_s2            B3 120: 0.00/6  B3 250: 0.00/11  B3 400: 0.00/23  B3 600: 0.00/348  B4 150: 0.00/71  B4 300: 0.05/282  B4 500: 0.10/325  B4 800: 0.10/360
+
+  bandwidth read-out, low-f0 grid clips: median log2(model / true) B1 / B2 at (B1, B2)
+    d040_5b_s1_b20k    (150,90) -1.19/-0.64  (150,250) -1.05/-1.76  (360,90) -2.33/-0.37  (360,250) -2.14/-1.42
+    d160_s1            (150,90) -0.40/-0.23  (150,250) +0.16/-0.75  (360,90) -0.66/+0.11  (360,250) +0.20/-0.40
+    d040_5b_s2_b20k    (150,90) -1.15/-0.70  (150,250) -1.07/-1.75  (360,90) -2.36/-0.59  (360,250) -2.24/-1.42
+    d160_s2            (150,90) -0.62/-0.39  (150,250) -0.29/-0.57  (360,90) -0.63/-0.04  (360,250) -0.31/-0.32
+
+  synthetic validation (512 clips, clean): pair (Fk, Fk+1) unresolvable if spacing < mean bandwidth or < f0;
+  median |error| of the pair's two formants (c) and median spread (c); front vowels (label F2 > 1800): F2 / F3 |error| (c)
+    v2  d040_5b_s1_b20k    F1F2 res 13c/31c, unres (10.8%) 29c/59c; F2F3 res 8c/20c, unres (7.8%) 15c/33c; F3F4 res 7c/17c, unres (8.4%) 16c/33c; front F2 10c F3 8c
+    v2  d160_s1            F1F2 res 14c/33c, unres (10.8%) 30c/62c; F2F3 res 8c/21c, unres (7.8%) 16c/34c; F3F4 res 7c/18c, unres (8.4%) 16c/32c; front F2 10c F3 8c
+    v2  d040_5b_s2_b20k    F1F2 res 14c/32c, unres (10.8%) 30c/63c; F2F3 res 8c/21c, unres (7.8%) 16c/34c; F3F4 res 7c/18c, unres (8.4%) 16c/34c; front F2 10c F3 8c
+    v2  d160_s2            F1F2 res 14c/32c, unres (10.8%) 30c/63c; F2F3 res 8c/21c, unres (7.8%) 16c/33c; F3F4 res 7c/17c, unres (8.4%) 16c/33c; front F2 10c F3 8c
+    v2w d040_5b_s1_b20k    F1F2 res 17c/36c, unres (11.2%) 39c/76c; F2F3 res 10c/24c, unres (7.9%) 18c/37c; F3F4 res 8c/20c, unres (9.2%) 18c/40c; front F2 11c F3 9c
+    v2w d160_s1            F1F2 res 17c/39c, unres (11.2%) 38c/80c; F2F3 res 10c/24c, unres (7.9%) 18c/38c; F3F4 res 8c/20c, unres (9.2%) 18c/38c; front F2 11c F3 9c
+    v2w d040_5b_s2_b20k    F1F2 res 17c/38c, unres (11.2%) 40c/82c; F2F3 res 10c/24c, unres (7.9%) 18c/39c; F3F4 res 8c/21c, unres (9.2%) 18c/39c; front F2 11c F3 9c
+    v2w d160_s2            F1F2 res 17c/39c, unres (11.2%) 40c/84c; F2F3 res 10c/24c, unres (7.9%) 17c/38c; F3F4 res 8c/20c, unres (9.2%) 17c/38c; front F2 11c F3 9c
+
+  Hillenbrand dev front vowels (iy ih ei eh ae): median |F2| / |F3| error against the hand-checked values (c)
+    d040_5b_s1_b20k    F2 19 c, F3 21 c (n 1594)
+    d160_s1            F2 18 c, F3 20 c (n 1594)
+    d040_5b_s2_b20k    F2 19 c, F3 21 c (n 1594)
+    d160_s2            F2 18 c, F3 21 c (n 1594)
+
+  coverage near the failing vowels (f0 <= 150, F1 400-600, F2 700-1100; labels, every 10th frame):
+    v2  57033 frames: B1 > 250 0.0%, > 360 0.0%; B2 > 150 0.0%, > 250 0.0%; B3 > 400 0.0%; B4 > 300 1.1%
+    v2w 57033 frames: B1 > 250 15.2%, > 360 10.1%; B2 > 150 17.0%, > 250 9.2%; B3 > 400 7.2%; B4 > 300 17.5%
+
+  a private recording: 6 takes 5b fails, 31 it reads; counts by arm (fails < 0.5 / new failures >= 0.5):
+    d160_s1: reads 3 of 6 failing takes; 0 new failures
+    d160_s2: reads 1 of 6 failing takes; 0 new failures
+
+  guards (D-051's, D-065's script; its primary line is D-065's bw criterion, reported only):
+    D-065 arm bw: against 5b, seeds paired
+      d160_s1 vs d040_5b_s1_b20k: (P) arm C w_label 0.335 -> 0.339 (0.24 0.35 0.43 0.33); probe 7 slope 0.574 -> 0.593 (0.52 0.59 0.64 0.62)
+        synthetic F1-F4 +1.2 -0.2 -0.1 -0.2 SE, RPA +0.01 | dev Hillenbrand F1/F2/F3 +1.8/-0.4/-4.8  RPA -0.3  cp women F1 |error| -2.1 (signed bias +4.3 -> +7.9 Hz) | length (s1): [-0.004, +0.031], w/m 0.889, probe excess -1.0 c/oct
+        criteria P/1/2/3 ['no', 'yes', 'yes', 'yes']
+      d160_s2 vs d040_5b_s2_b20k: (P) arm C w_label 0.317 -> 0.330 (0.25 0.37 0.39 0.31); probe 7 slope 0.571 -> 0.595 (0.53 0.59 0.66 0.60)
+        synthetic F1-F4 +0.7 +0.6 +0.3 +0.6 SE, RPA +0.02 | dev Hillenbrand F1/F2/F3 +2.8/-1.6/+0.7  RPA -0.0  cp women F1 |error| -0.7 (signed bias +4.1 -> +9.9 Hz) | length (s2): [-0.005, +0.032], w/m 0.865, probe excess +0.7 c/oct
+        criteria P/1/2/3 ['no', 'yes', 'yes', 'yes']
+    Seed means: (P) w_label +0.008, probe7 slope +0.022 | synthetic F1-F4 +0.9 +0.2 +0.1 +0.2 SE, RPA +0.01 | dev Hillenbrand F1/F2/F3 +2.3/-1.0/-2.0  RPA -0.1  cp women F1 |error| -1.4 | length (d160-5b): [-0.000, +0.027], w/m 0.877, probe excess -0.2 c/oct
+    (P) primary: NO; (1) no formant cost: yes; (2) length not worse: yes; (3) f0 guard: yes
+      reported: d160_s1 eval_extra:train_v2w (last eval): F1_mae_hz 27.23, F2_mae_hz 45.72, F3_mae_hz 68.21, F4_mae_hz 101.4
+      reported: d160_s2 eval_extra:train_v2w (last eval): F1_mae_hz 28.4, F2_mae_hz 47.85, F3_mae_hz 67.09, F4_mae_hz 99.99
+    DECISION: arm bw does not join; 5b's recipe stays
+
+Reading (registered): NOT LOWER

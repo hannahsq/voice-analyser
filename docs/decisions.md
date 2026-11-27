@@ -5521,7 +5521,24 @@ Synthetic and training only; descriptive.
 
 ## D-160 (2026-11-27, Hannah: "Could you draft Option A for now?", then "Could you update the draft with the points you outlined?", then "Looks good to me, can probably run on more threads (at least 16, up to 29) since the cpu and gpu are both idle"; seen beforehand: D-147 to D-159's results; D-065's design and result; D-080's branch chain; the sampler's bandwidth and Rd code; `tube.poles` at three perimeter factors (considering.md, 2026-11-27); nothing of any model trained on the data below): wider low-f0 bandwidths and an off-line return phase, as one data arm
 
-*Status*: registered. Render `scripts/analysis/d160_make_set.py` (24 CPU workers, Hannah's 16-29); chain `scripts/analysis/chains/d160.sh`; scoring and decision `scripts/analysis/d160_score.py`.
+*Status*: **done (2026-11-28): LEARNED, then NOT LOWER** on the registered rule. Render `scripts/analysis/d160_make_set.py` (24 CPU workers, Hannah's 16-29); chain `scripts/analysis/chains/d160.sh`; scoring and decision `scripts/analysis/d160_score.py`. Report `reports/analysis/d160/d160.{txt,json}`, guards `reports/analysis/d160/decide_guards.txt`.
+- *Manipulation check*: D-155's low-f0 failure at B2 250-400 fell from 0.809 to 0.223 (seed 1) and from 0.598 to 0.381 (seed 2): falls +0.586 and +0.216, mean +0.401, so **learned**. At B2 90 it fell too (0.401 to 0.106, 0.297 to 0.106).
+- *VocalSet (deciding)*:
+  - Seed 1: the arm reads 0.139 against nulls of 0.169 (5b), 0.208 and 0.258. That is below every null, and below 5b by -0.029 [-0.059, -0.001].
+  - Seed 2: the arm reads 0.202 against nulls of 0.204 (5b), 0.192 and 0.199. That is within the nulls, at -0.002 [-0.031, +0.022] against 5b.
+  - Seed 2 has a null run that fails less (D-090's F5 branch), so the reading is **NOT LOWER**.
+  - Failing files by vowel, 5b to arm: seed 1 /o/ 15 to 11, /u/ 12 to 16, /a/ 3 to 0; seed 2 /o/ 18 to 21, /u/ 17 to 14, /a/ 2 to 2. Flag B's AUC on the arm's own failures is 0.88 and 0.82 (5b's 0.89, D-152).
+- *Reported*:
+  - Bandwidth read-out (median log2 model / true, B1 / B2): the underestimate mostly goes. At (B1 360, B2 250), 5b reads -2.14 / -1.42 and -2.24 / -1.42; the arm reads +0.20 / -0.40 and -0.31 / -0.32. At (150, 90), 5b reads about -1.17 / -0.67; the arm reads -0.40 / -0.23 and -0.62 / -0.39.
+  - D-156 part B (B2 90): the dropped-formant failure on the B3 and B4 steps falls to 0 on seed 1 (5b up to 0.31) and to at most 0.10 on seed 2 (5b up to 0.16). But F3 at B3 600 is still lost (343 and 348 c, against 372 and 368), and F4's error from B4 300 is no smaller (235-367 c against 225-327).
+  - Resolvability (synthetic validation, 512 clips of each set): no cost on resolvable pairs (median |error| within 1 c of 5b on every pair and set). The spread on unresolvable pairs rises by 0-4 c, only slightly.
+  - Front vowels: no cost (synthetic F2 / F3 identical; Hillenbrand dev F2 19 to 18 c, F3 21 to 20-21 c).
+  - The private recording (counts only): 5b fails 6 takes; the arm reads 3 of them on seed 1 and 1 on seed 2, with no new failures.
+- *Guards*:
+  - D-051's all pass on both seeds: synthetic F1-F4 within +1.2 SE, RPA +0.01 and +0.02; Hillenbrand dev F1 +1.8 / +2.8 Hz, F2 -0.4 / -1.6, F3 -4.8 / +0.7; PTDB-TUG RPA -0.3 / -0.0; closed-phase women's F1 |error| -2.1 / -0.7 Hz; length reliability's lower bound -0.004 / -0.005, w/m 0.889 / 0.865; probe excess -1.0 / +0.7 c per octave.
+  - The script's "does not join" line is D-065's own bw criterion (P), reported only here, as registered.
+  - Noted, deciding nothing: the closed-phase women's signed F1 bias rises from +4.3 to +7.9 Hz (seed 1) and from +4.1 to +9.9 Hz (seed 2), while |error| falls.
+- *Reading*: the arm teaches the model wide bandwidths. The grids and the read-out move a lot, at no cost on synthetic data, front vowels or the guards. On real voices, seed 1 improves beyond the null spread, while seed 2 doesn't move. The registered reading is NOT LOWER, and 5b's recipe stays. What the data change doesn't fix: F3 lost at B3 600, F4 at wide B4, and half the real-voice failures on the better seed.
 
 - *Why*:
   - D-155 and D-156 found that training's bandwidths at low f0 are narrow for every formant. Hawks & Miller's values scale with f0, and the cascade multiplies them by only 0.6-1.6. Near back vowels no B2 is above 150 Hz, and a wide B2 alone tips the dropped formant.

@@ -1,0 +1,11 @@
+Time reversal across a speaker change (D-050, probe 5): d160_s1
+median |forward - reversed| (cents) by distance from the join (frames); cross-speaker, same-speaker, difference
+  F1  0-10: 40/39/+0  10-25: 46/42/+4  25-50: 57/46/+11  50-100: 48/58/-9  100-200: 44/58/-14  200-end: 47/57/-10
+  F2  0-10: 21/21/+0  10-25: 19/24/-5  25-50: 32/22/+10  50-100: 20/20/-0  100-200: 22/23/-2  200-end: 21/22/-2
+  F3  0-10: 11/9/+2  10-25: 10/10/-1  25-50: 11/9/+2  50-100: 10/10/+0  100-200: 10/10/+1  200-end: 10/10/-0
+  VTL 0-10: 17/10/+6  10-25: 15/10/+5  25-50: 14/11/+3  50-100: 14/11/+4  100-200: 16/11/+5  200-end: 16/11/+5
+direction arm (amendment 3): probe 1's reference resynthesis, |error| against exact labels (cents, median over items)
+  F1  forward 30  reversed 43  reversed - forward +12.8 [+9.5, +17.5]  |forward - reversed| 29  (60 items)
+  F2  forward 11  reversed 14  reversed - forward +1.0 [+0.3, +2.3]  |forward - reversed| 9  (60 items)
+  F3  forward 8  reversed 8  reversed - forward -0.1 [-0.2, +0.2]  |forward - reversed| 4  (60 items)
+  F4  forward 8  reversed 8  reversed - forward -0.0 [-0.2, +0.2]  |forward - reversed| 4  (60 items)

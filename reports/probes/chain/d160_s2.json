@@ -1,0 +1,682 @@
+{
+ "gain/change/F1": {
+  "point": -0.00030061737372921726,
+  "low": -0.0018739214295271367,
+  "high": 0.0011926954328478345,
+  "ideal": 0.0
+ },
+ "gain/change/F2": {
+  "point": 0.0024415000113160445,
+  "low": 0.0010300424398232756,
+  "high": 0.006190205017913897,
+  "ideal": 0.0
+ },
+ "gain/change/F3": {
+  "point": 0.001225838233389176,
+  "low": 0.00035303650780171836,
+  "high": 0.002050406033337282,
+  "ideal": 0.0
+ },
+ "gain/change/F4": {
+  "point": 0.0015070914452568474,
+  "low": 0.0005563185774388302,
+  "high": 0.0036023242442659864,
+  "ideal": 0.0
+ },
+ "gain/change/B1": {
+  "point": -0.018999338150024414,
+  "low": -0.030427932739257812,
+  "high": -0.004439830780029297,
+  "ideal": 0.0
+ },
+ "gain/change/B2": {
+  "point": -0.012532472610473633,
+  "low": -0.029629230499267578,
+  "high": 0.0005335807800292969,
+  "ideal": 0.0
+ },
+ "gain/change/B3": {
+  "point": -0.010907649993896484,
+  "low": -0.05636310577392578,
+  "high": 0.01654529571533203,
+  "ideal": 0.0
+ },
+ "gain/change/B4": {
+  "point": -0.016157150268554688,
+  "low": -0.036426544189453125,
+  "high": 0.02072763442993164,
+  "ideal": 0.0
+ },
+ "gain/change/VTL": {
+  "point": 0.0008460283279418945,
+  "low": -0.0015501976013183594,
+  "high": 0.002667069435119629,
+  "ideal": 0.0
+ },
+ "gain/change/f0": {
+  "point": 0.0002767488681341135,
+  "low": 2.119093377572767e-05,
+  "high": 0.0007860539910845079,
+  "ideal": 0.0
+ },
+ "gain/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   -0.0003765344528308568,
+   -0.0050606416534373835,
+   0.0027634335413689744
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.1
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.5
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     2.0
+    ]
+   }
+  ]
+ },
+ "gain/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   -0.03175441252956225,
+   -0.015569095706131537,
+   0.008815523499831546
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.1
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.5
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     2.0
+    ]
+   }
+  ]
+ },
+ "gain/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   -0.009523520768486704,
+   -0.009681782488514794,
+   0.006296497737237837
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.1
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.5
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     2.0
+    ]
+   }
+  ]
+ },
+ "gain/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   -0.024893973750073344,
+   -0.007493550392429781,
+   0.0026068938308581495
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.1
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.5
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     2.0
+    ]
+   }
+  ]
+ },
+ "gain/sigma_growth/VTL": {
+  "per_condition_median": [
+   0.0,
+   -0.041296123818067146,
+   -0.010253859223566832,
+   0.01044596881499299
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.1
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     0.5
+    ]
+   },
+   {
+    "arm": "gain",
+    "chain": [
+     "gain",
+     2.0
+    ]
+   }
+  ]
+ },
+ "dc/change/F1": {
+  "point": 0.00016441606451778057,
+  "low": 3.120098656861359e-05,
+  "high": 0.0004454038584800202,
+  "ideal": 0.0
+ },
+ "dc/change/F2": {
+  "point": 6.98530311256107e-05,
+  "low": -9.442031927682226e-05,
+  "high": 0.0002444723733026066,
+  "ideal": 0.0
+ },
+ "dc/change/F3": {
+  "point": -0.0001547866668838438,
+  "low": -0.0005170594805381512,
+  "high": 4.6707594886896686e-05,
+  "ideal": 0.0
+ },
+ "dc/change/F4": {
+  "point": -0.00022929821236239434,
+  "low": -0.00041800689894522236,
+  "high": -6.0026238796417886e-05,
+  "ideal": 0.0
+ },
+ "dc/change/B1": {
+  "point": -0.02121138572692871,
+  "low": -0.04242110252380371,
+  "high": -0.016106128692626953,
+  "ideal": 0.0
+ },
+ "dc/change/B2": {
+  "point": -0.02106189727783203,
+  "low": -0.044794321060180664,
+  "high": -0.01482509970664981,
+  "ideal": 0.0
+ },
+ "dc/change/B3": {
+  "point": -0.01455068588256836,
+  "low": -0.021628379821777344,
+  "high": -0.011505126953125,
+  "ideal": 0.0
+ },
+ "dc/change/B4": {
+  "point": -0.013036727905273438,
+  "low": -0.020473957061767578,
+  "high": -0.008031368255615234,
+  "ideal": 0.0
+ },
+ "dc/change/VTL": {
+  "point": 0.0008853673934936523,
+  "low": 0.0002918243408203125,
+  "high": 0.0014766454696655254,
+  "ideal": 0.0
+ },
+ "dc/change/f0": {
+  "point": -1.5182417388626135e-05,
+  "low": -0.00012334907121314131,
+  "high": 5.1007718078643904e-05,
+  "ideal": 0.0
+ },
+ "dc/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   -0.008590906508937853
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "dc",
+    "chain": [
+     "dc",
+     0.05
+    ]
+   }
+  ]
+ },
+ "dc/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   0.021124020759320093
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "dc",
+    "chain": [
+     "dc",
+     0.05
+    ]
+   }
+  ]
+ },
+ "dc/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.022464259303562686
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "dc",
+    "chain": [
+     "dc",
+     0.05
+    ]
+   }
+  ]
+ },
+ "dc/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.032652015200281416
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "dc",
+    "chain": [
+     "dc",
+     0.05
+    ]
+   }
+  ]
+ },
+ "dc/sigma_growth/VTL": {
+  "per_condition_median": [
+   0.0,
+   0.021432222565602357
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "dc",
+    "chain": [
+     "dc",
+     0.05
+    ]
+   }
+  ]
+ },
+ "clip/change/F1": {
+  "point": 0.00017473415165270012,
+  "low": -0.00023748335219320182,
+  "high": 0.00101989990827267,
+  "ideal": 0.0
+ },
+ "clip/change/F2": {
+  "point": -0.0002707544961726427,
+  "low": -0.0013684436779781706,
+  "high": 0.0001507030878489246,
+  "ideal": 0.0
+ },
+ "clip/change/F3": {
+  "point": -0.00036843587830581725,
+  "low": -0.0015034101403088584,
+  "high": 0.0004858757564818461,
+  "ideal": 0.0
+ },
+ "clip/change/F4": {
+  "point": -0.0005245553808963521,
+  "low": -0.0014428986781895858,
+  "high": -2.7943773437399955e-05,
+  "ideal": 0.0
+ },
+ "clip/change/B1": {
+  "point": 0.02522587776184082,
+  "low": 0.00353240966796875,
+  "high": 0.04398488998413086,
+  "ideal": 0.0
+ },
+ "clip/change/B2": {
+  "point": 0.01188802719116211,
+  "low": -0.0063495635986328125,
+  "high": 0.04206085205078125,
+  "ideal": 0.0
+ },
+ "clip/change/B3": {
+  "point": 0.012500286102294922,
+  "low": -0.005467414855957031,
+  "high": 0.0321958065032959,
+  "ideal": 0.0
+ },
+ "clip/change/B4": {
+  "point": 0.04070425033569336,
+  "low": 0.010091781616210938,
+  "high": 0.05018949508666992,
+  "ideal": 0.0
+ },
+ "clip/change/VTL": {
+  "point": 0.0008195638656616211,
+  "low": -0.0004132211208343503,
+  "high": 0.004793643951416016,
+  "ideal": 0.0
+ },
+ "clip/change/f0": {
+  "point": 2.9078826881523412e-05,
+  "low": -5.0931626046413214e-05,
+  "high": 0.00014098393976968993,
+  "ideal": 0.0
+ },
+ "clip/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   0.036661361759401184
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "clip",
+    "chain": [
+     "clip",
+     0.5
+    ]
+   }
+  ]
+ },
+ "clip/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   0.11409913135057281
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "clip",
+    "chain": [
+     "clip",
+     0.5
+    ]
+   }
+  ]
+ },
+ "clip/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.0777598355285444
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "clip",
+    "chain": [
+     "clip",
+     0.5
+    ]
+   }
+  ]
+ },
+ "clip/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.05482261249377858
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "clip",
+    "chain": [
+     "clip",
+     0.5
+    ]
+   }
+  ]
+ },
+ "clip/sigma_growth/VTL": {
+  "per_condition_median": [
+   0.0,
+   0.04917182175076717
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "clip",
+    "chain": [
+     "clip",
+     0.5
+    ]
+   }
+  ]
+ },
+ "resample/change/F1": {
+  "point": 1.444531436423091e-05,
+  "low": -6.41885277374854e-07,
+  "high": 3.521117691018816e-05,
+  "ideal": 0.0
+ },
+ "resample/change/F2": {
+  "point": 1.7641749643360072e-05,
+  "low": -2.4065031304587592e-05,
+  "high": 5.1127648932336456e-05,
+  "ideal": 0.0
+ },
+ "resample/change/F3": {
+  "point": -1.930268916527922e-05,
+  "low": -6.866860683452103e-05,
+  "high": 6.303060329315713e-05,
+  "ideal": 0.0
+ },
+ "resample/change/F4": {
+  "point": -0.00011314329294798142,
+  "low": -0.00020094672338690777,
+  "high": -2.4799231268524125e-05,
+  "ideal": 0.0
+ },
+ "resample/change/B1": {
+  "point": 0.0006022453308105469,
+  "low": 3.3855438232421875e-05,
+  "high": 0.0019040107727050781,
+  "ideal": 0.0
+ },
+ "resample/change/B2": {
+  "point": -0.0010411739349365234,
+  "low": -0.0022521018981933594,
+  "high": 0.00010561943054199219,
+  "ideal": 0.0
+ },
+ "resample/change/B3": {
+  "point": 0.001373291015625,
+  "low": 0.000667572021484375,
+  "high": 0.002725362777709961,
+  "ideal": 0.0
+ },
+ "resample/change/B4": {
+  "point": 0.0008082389831542969,
+  "low": 0.00045490264892578125,
+  "high": 0.0012264251708984375,
+  "ideal": 0.0
+ },
+ "resample/change/VTL": {
+  "point": 9.942054748535156e-05,
+  "low": 1.6570091247558594e-05,
+  "high": 0.00019359588623046875,
+  "ideal": 0.0
+ },
+ "resample/change/f0": {
+  "point": 1.8558098675569568e-06,
+  "low": -9.050961402579105e-08,
+  "high": 5.345022164426894e-06,
+  "ideal": 0.0
+ },
+ "resample/sigma_growth/F1": {
+  "per_condition_median": [
+   0.0,
+   0.001011513144828465
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "resample",
+    "chain": [
+     "resample",
+     44100
+    ]
+   }
+  ]
+ },
+ "resample/sigma_growth/F2": {
+  "per_condition_median": [
+   0.0,
+   0.0010735961135118776
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "resample",
+    "chain": [
+     "resample",
+     44100
+    ]
+   }
+  ]
+ },
+ "resample/sigma_growth/F3": {
+  "per_condition_median": [
+   0.0,
+   0.0009602196518857113
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "resample",
+    "chain": [
+     "resample",
+     44100
+    ]
+   }
+  ]
+ },
+ "resample/sigma_growth/F4": {
+  "per_condition_median": [
+   0.0,
+   0.0004813584040842182
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "resample",
+    "chain": [
+     "resample",
+     44100
+    ]
+   }
+  ]
+ },
+ "resample/sigma_growth/VTL": {
+  "per_condition_median": [
+   0.0,
+   0.0008073242138597392
+  ],
+  "conditions": [
+   {
+    "arm": "ref"
+   },
+   {
+    "arm": "resample",
+    "chain": [
+     "resample",
+     44100
+    ]
+   }
+  ]
+ }
+}
