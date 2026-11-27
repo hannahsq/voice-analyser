@@ -5306,7 +5306,7 @@ Synthetic and training only; descriptive.
 
 ## D-154 (2026-11-27, Hannah: "Would you be able to register and run the resynth follow-up?"; seen beforehand: D-152 and D-153's results, including 5b's failing and OK files on D-152's fixed frames; the resynthesis and synthesiser code; a function check on one of a held-out woman's files, outside the set (shapes, lengths and finiteness only); nothing of any resynthesised or synthesised VocalSet audio): is the real-voice failure in the source, the tract, or the formant pattern?
 
-*Status*: registered. `scripts/analysis/d154_resynth_decomp.py` (`run`, `report`). CPU, inference only.
+*Status*: done 2026-11-27: **RESYNTHESIS ARTEFACT**. `scripts/analysis/d154_resynth_decomp.py` (`run`, `report`). CPU, inference only, about 15 minutes (three processes).
 
 - *Why*: D-153 found that fixes that work on the tipping grid don't carry over to VocalSet's held-out men. The grid's O-like vowel has nearly the failing /o/'s F1 and F2, so something in real recordings that the grid lacks carries the failure. Replacing the real recording's parts one at a time with ours shows which.
 - *Files and frames*: D-152's primary files, with D-153's fixed frames (188 files). They are split by 5b's seed mean on the original audio: 36 failing (at least 0.5), 137 OK (below 0.2), and 15 in between, which are reported only.
@@ -5332,3 +5332,16 @@ Synthetic and training only; descriptive.
   - Smoothing removes formant movement faster than about 5 Hz.
   - Three singers, and 36 failing files.
 - Reports: `reports/analysis/d154/d154.{txt,json}`. Per-file values in `cache/d154/`, not committed.
+- *Result (2026-11-27; `reports/analysis/d154/d154.txt`)*: **RESYNTHESIS ARTEFACT**, as registered.
+  - On the 137 OK files the conversion creates failures: O 0.015, R 0.257, S 0.292 (35 and 39 files fail). So R and S can't locate the real failure.
+  - Reported, for the record: on the 36 failing files, O 0.778 (0.748 against the smoothed tract), R 0.361, S 0.506. IAIF's tract left is small (median 0.10 on failing files, 0.00 on OK).
+  - *Post hoc, not registered* (`scripts/analysis/d154_posthoc.py`, `reports/analysis/d154/d154_posthoc.txt`): the artefact follows the tract's B2, which is Praat's.
+    - On OK files, R's and S's failure shares correlate with B2 (Spearman +0.52 and +0.73) more than with B1 (+0.19, +0.33).
+    - The 29 OK files with B2 under 150 Hz don't fail in R or S at all (0.00 and 0.02). The 108 with B2 at or above 150 Hz fail at 0.33 and 0.37.
+    - The tract's median B2 is 251 Hz on OK files and 359 on failing ones; B1 is 151 and 318.
+  - *Reading*: through our own resonators, 5b skips F2 (F1 near 550 Hz, F2 near 1000) once B2 is wide. Two readings, which this can't separate:
+    - Praat overestimates B2 for close F1-F2 pairs, so the resynthesis has a weaker F2 than the real voice.
+    - Or real back vowels at low f0 do have a weak, wide F2.
+    - Either way it points at a gap neither grid covers. D-142's grid fixes B2 at 90 Hz, and the cascade's training B2 is Hawks & Miller times 0.6-1.6 (`sampler.bw_factor`). The tube clips use the tube's own bandwidths, whose range near these vowels hasn't been measured.
+    - The failing files also have wider B1 (D-152), so the real failure may need wide B1 and B2 together.
+    - A check that can hold: whether 5b fails on the tipping grid as B2 widens, and how much of train_v2's mass sits at B2 above 150 Hz near these vowels. That needs its own entry.

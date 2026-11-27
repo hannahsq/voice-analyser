@@ -1,0 +1,36 @@
+{
+ "failing": {
+  "O": 0.7784948257877599,
+  "Os": 0.7476518450775377,
+  "R": 0.3613448264789938,
+  "S": 0.5064219482500769,
+  "O_fail_files": 36,
+  "R_fail_files": 13,
+  "S_fail_files": 18,
+  "files": 36,
+  "tract_left": 0.09871050003731063
+ },
+ "ok": {
+  "O": 0.015105563367355138,
+  "Os": 0.014556039262947258,
+  "R": 0.2574398260111398,
+  "S": 0.29188239826365814,
+  "O_fail_files": 0,
+  "R_fail_files": 35,
+  "S_fail_files": 39,
+  "files": 137,
+  "tract_left": 0.0002310381915288354
+ },
+ "between": {
+  "O": 0.32694041814273855,
+  "Os": 0.3122563522086726,
+  "R": 0.3069371323449441,
+  "S": 0.4385880545162045,
+  "O_fail_files": 0,
+  "R_fail_files": 4,
+  "S_fail_files": 6,
+  "files": 15,
+  "tract_left": -0.004228044890432732
+ },
+ "reading": "RESYNTHESIS ARTEFACT: the conversion itself creates failures on OK files"
+}

@@ -1,0 +1,15 @@
+D-154: the VocalSet failure decomposed (D-152's primary files, D-153's fixed frames; 5b seed mean)
+  O original vs Praat; Os original vs the smoothed tract; R the IAIF source through our resonators at that tract; S the synthesiser's source through the same tract
+
+  failing   36 files: mean failure O 0.778 (Os 0.748), R 0.361, S 0.506; files failing O 36, R 13, S 18; IAIF tract left median 0.10
+      d040_5b_s1_b20k: O 0.754, R 0.396, S 0.484
+      d040_5b_s2_b20k: O 0.803, R 0.327, S 0.529
+  ok       137 files: mean failure O 0.015 (Os 0.015), R 0.257, S 0.292; files failing O 0, R 35, S 39; IAIF tract left median 0.00
+      d040_5b_s1_b20k: O 0.011, R 0.269, S 0.290
+      d040_5b_s2_b20k: O 0.019, R 0.246, S 0.294
+  between   15 files: mean failure O 0.327 (Os 0.312), R 0.307, S 0.439; files failing O 0, R 4, S 6; IAIF tract left median -0.00
+      d040_5b_s1_b20k: O 0.203, R 0.382, S 0.440
+      d040_5b_s2_b20k: O 0.451, R 0.232, S 0.437
+  failing files by vowel (mean R / S): a 3 files 0.46 / 0.71, o 17 files 0.50 / 0.53, u 16 files 0.19 / 0.44
+
+Reading (registered): RESYNTHESIS ARTEFACT: the conversion itself creates failures on OK files

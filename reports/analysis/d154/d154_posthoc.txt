@@ -1,0 +1,8 @@
+ok files (137): tract median B1 151, B2 251, B3 146 Hz; F1 555, F2 998
+  R: Spearman with B1 +0.19, B2 +0.52, F2 -0.46, F2-F1 -0.38
+  S: Spearman with B1 +0.33, B2 +0.73, F2 -0.44, F2-F1 -0.36
+  files with B2 < 150 Hz: 29, mean R 0.00, S 0.02; B2 >= 150: 108, R 0.33, S 0.37
+failing files (36): tract median B1 318, B2 359, B3 93 Hz; F1 520, F2 885
+  R: Spearman with B1 -0.51, B2 +0.32, F2 -0.14, F2-F1 -0.30
+  S: Spearman with B1 -0.43, B2 +0.57, F2 -0.24, F2-F1 -0.27
+  files with B2 < 150 Hz: 2, mean R 0.16, S 0.16; B2 >= 150: 34, R 0.37, S 0.53
