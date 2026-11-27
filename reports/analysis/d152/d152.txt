@@ -1,0 +1,21 @@
+D-152: the dropped formant and flag B on VocalSet's held-out singers (scales, arpeggios, long tones; no lip trills)
+  reference Praat Burg; frames voiced, in D-141's cell by Praat, f0 by 5b seed 2; a file counts with >= 10 such frames, fails at >= 0.5 (5b seed mean), OK below 0.2
+
+  primary: men, f0 <= 150 Hz: 188 files from 3 singers; failing 36 (19%) from 3 singers; OK 137; mean failure share 18.6%; files' median Praat B1 169 Hz
+  men, f0 150-250 Hz: 234 files from 3 singers; failing 31 (13%) from 3 singers; OK 179; mean failure share 15.9%; files' median Praat B1 148 Hz
+  women, f0 <= 300 Hz: 102 files from 2 singers; failing 6 (6%) from 2 singers; OK 87; mean failure share 10.3%; files' median Praat B1 207 Hz
+  everyone, f0 above 300 Hz (Praat unreliable): 300 files from 5 singers; failing 27 (9%) from 4 singers; OK 255; mean failure share 11.8%; files' median Praat B1 143 Hz
+
+  primary block, by vowel / task / technique (failing of counted files):
+    vowel: a 3/67, o 17/73, piano 0/1, u 16/47
+    task: arpeggios 8/64, long_tones 15/53, scales 13/71
+    tech: belt 2/13, breathy 0/14, fast_forte 2/15, fast_piano 3/15, forte 2/9, inhaled 0/4, messa 3/8, pp 3/8, slow_forte 2/17, slow_piano 5/16, straight 5/22, trill 3/8, trillo 3/8, vibrato 2/15, vocal_fry 1/16
+  primary frames: 34387; Praat B1 median 141 Hz, above 250 Hz 23%
+    frame failure share by Praat B1: 0-150 Hz 8% (n 18571); 150-250 Hz 13% (n 8054); 250-400 Hz 18% (n 3409); 400-inf Hz 30% (n 4353)
+
+  flag B (5b seed 2, threshold 0.61), file median score:
+    women: files above 6% of 336; OK files (any block below 300 Hz) above 7% of 87
+    men  : files above 25% of 491; OK files (any block below 300 Hz) above 11% of 316
+    primary: AUC failing (36) against OK (137) 0.89 [0.81, 0.95]
+
+Reading (registered): failure PRESENT: the dropped formant appears on other singers' held vowels; flag B HOLDS

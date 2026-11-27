@@ -1,0 +1,150 @@
+{
+ "threshold": 0.6136034839388932,
+ "blocks": {
+  "primary": {
+   "files": 188,
+   "singers": 3,
+   "failing": 36,
+   "failing_singers": 3,
+   "ok": 137,
+   "mean_fail": 0.1861669264990856,
+   "b1_median": 168.78892276135366
+  },
+  "men_150_250": {
+   "files": 234,
+   "singers": 3,
+   "failing": 31,
+   "failing_singers": 3,
+   "ok": 179,
+   "mean_fail": 0.15856874860469192,
+   "b1_median": 147.57954113717585
+  },
+  "women_le300": {
+   "files": 102,
+   "singers": 2,
+   "failing": 6,
+   "failing_singers": 2,
+   "ok": 87,
+   "mean_fail": 0.10344363256598811,
+   "b1_median": 206.9277512790412
+  },
+  "all_gt300": {
+   "files": 300,
+   "singers": 5,
+   "failing": 27,
+   "failing_singers": 4,
+   "ok": 255,
+   "mean_fail": 0.11760350821232386,
+   "b1_median": 143.01160066876184
+  },
+  "primary_by_vowel": {
+   "o": [
+    17,
+    73
+   ],
+   "u": [
+    16,
+    47
+   ],
+   "a": [
+    3,
+    67
+   ],
+   "piano": [
+    0,
+    1
+   ]
+  },
+  "primary_by_task": {
+   "arpeggios": [
+    8,
+    64
+   ],
+   "long_tones": [
+    15,
+    53
+   ],
+   "scales": [
+    13,
+    71
+   ]
+  },
+  "primary_by_tech": {
+   "belt": [
+    2,
+    13
+   ],
+   "breathy": [
+    0,
+    14
+   ],
+   "fast_forte": [
+    2,
+    15
+   ],
+   "fast_piano": [
+    3,
+    15
+   ],
+   "slow_forte": [
+    2,
+    17
+   ],
+   "slow_piano": [
+    5,
+    16
+   ],
+   "straight": [
+    5,
+    22
+   ],
+   "vibrato": [
+    2,
+    15
+   ],
+   "vocal_fry": [
+    1,
+    16
+   ],
+   "forte": [
+    2,
+    9
+   ],
+   "messa": [
+    3,
+    8
+   ],
+   "pp": [
+    3,
+    8
+   ],
+   "trill": [
+    3,
+    8
+   ],
+   "trillo": [
+    3,
+    8
+   ],
+   "inhaled": [
+    0,
+    4
+   ]
+  },
+  "primary_frames_by_b1": [
+   "0-150 Hz 8% (n 18571)",
+   "150-250 Hz 13% (n 8054)",
+   "250-400 Hz 18% (n 3409)",
+   "400-inf Hz 30% (n 4353)"
+  ]
+ },
+ "flag_auc": [
+  0.885036496350365,
+  0.8057583130575832,
+  0.9458688158961882
+ ],
+ "reading": {
+  "failure": "PRESENT: the dropped formant appears on other singers' held vowels",
+  "flag": "HOLDS"
+ }
+}

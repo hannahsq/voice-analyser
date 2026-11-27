@@ -1,0 +1,4 @@
+men, f0 <= 150, cell frames, both seeds pooled
+  fail n 9004: Praat F1/F2/F3 median [ 474.  798. 2413.]; model F1/F2/F3 [ 445. 2360. 2678.]; Praat B1 213
+       dropped F1 (model F1 nearer Praat F2) 7%; Praat F3 below 1800 Hz 0%; Praat F3 quartiles [2345. 2413. 2582.]; model F2 quartiles [2312. 2360. 2505.]
+  ok   n 59770: Praat F1/F2/F3 median [ 531.  987. 2575.]; model F1/F2/F3 [ 515.  972. 2511.]; Praat B1 135

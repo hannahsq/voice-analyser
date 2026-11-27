@@ -5229,7 +5229,7 @@ Synthetic and training only; descriptive.
 
 ## D-152 (2026-11-27, Hannah: "Yes please" to running the flag check on VocalSet, "since it was actually predominantly sung held vowels"; seen beforehand: D-142 to D-151's results; the held-out singers' file counts by task, vowel and technique from the manifest (879 files, 2.15 h, without the excerpts; 491 from the three men, without lip trills); no audio and no reading of any VocalSet file in this check): the dropped formant and flag B on VocalSet's held-out singers
 
-*Status*: registered. `scripts/analysis/d152_vocalset_flag.py` (`run`, `report`). CPU, inference only.
+*Status*: done 2026-11-27: failure **PRESENT**, flag B **HOLDS**. `scripts/analysis/d152_vocalset_flag.py` (`run`, `report`). CPU, inference only.
 
 - *Why*: D-150 found that Hillenbrand's dev voices don't produce the failure's conditions, and D-151 that read speech doesn't either. VocalSet's held-out singers are the first other voices we have that sing held vowels, including /o/ and /a/ at low f0 from three men. Two questions: does the dropped formant appear on them, and does flag B (D-142) pick out the files where it does?
 - *Data*: VocalSet's `val` singers (female2, female8, male3, male5, male10; D-015). They are never trained on, but their resynthesised clips have served as training-pool validation (D-025 onwards).
@@ -5258,3 +5258,15 @@ Synthetic and training only; descriptive.
   - There are three men. A singer-level effect can't be told from a vowel-level one with that few.
   - Per-file results stay out of the report.
 - Reports: `reports/analysis/d152/d152.{txt,json}`. Per-frame values in `cache/d152/`, not committed.
+- *Result (2026-11-27; `reports/analysis/d152/d152.txt`)*: failure **PRESENT**; flag B **HOLDS**.
+  - *Primary block* (men, f0 ≤ 150 Hz): 36 of 188 files fail (19 %), from all 3 men; 137 are OK. By vowel, /o/ 17 of 73 and /u/ 16 of 47 fail, against /a/ 3 of 67. The failures are spread over tasks (long tones 15 of 53, scales 13 of 71, arpeggios 8 of 64) and over most techniques.
+  - *Reported blocks*: men at 150-250 Hz 31 of 234 (13 %); women at f0 ≤ 300 6 of 102 (6 %); everyone above 300 Hz 27 of 300 (9 %, where Praat is unreliable).
+  - *Praat B1*: on the primary block's frames the median is 141 Hz, and 23 % are above 250 Hz. The frame failure share rises with B1: 8 % under 150 Hz, 13 % at 150-250, 18 % at 250-400, 30 % above 400. Wide F1 is involved, but not required: narrow-F1 frames fail too, at a lower rate.
+  - *Flag B* (seed 2): it separates failing from OK primary files with an AUC of 0.89 [0.81, 0.95], which meets D-142's bar.
+    - The file-level false-flag share, at D-142's threshold, is 7 % of OK women's files and 11 % of OK men's (files above it: 6 % of the women's, 25 % of the men's).
+  - *Post hoc, not registered* (`scripts/analysis/d152_posthoc.py`, `reports/analysis/d152/d152_posthoc.txt`; both seeds pooled): the failing frames read correctly at F1 and skip F2.
+    - Praat's median there is 474 / 798 / 2413 Hz, and the model's F1 / F2 / F3 is 445 / 2360 / 2678. Only 7 % are the dropped-F1 kind. Praat's F3 is never below 1800 Hz, so this isn't a spurious Praat formant between F1 and F2.
+    - Praat's B1 is 213 Hz on failing frames against 135 on the rest. The OK frames read 531 / 987 / 2575 Hz by Praat.
+  - *Reading*: the failure isn't peculiar to one voice. Back rounded vowels (F1 near 450-500 Hz, F2 near 800) at low f0 are where it happens, from all three men. It is more likely the wider F1 is, but it starts at ordinary bandwidths. Flag B picks out the failing files on singers it was never tuned on.
+    - This is D-150's missing condition, a vowel with F2 below about 850 Hz. Hillenbrand had only 3 primary tokens like that.
+    - It gives the dropped formant its first real-voice measure that isn't private: held-out singers, Praat as reference, so weaker than hand labels. Any use as a deciding measure for an arm needs its own entry, with its noise floor estimated first (a shuffle or seed null).
