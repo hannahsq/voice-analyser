@@ -5273,7 +5273,7 @@ Synthetic and training only; descriptive.
 
 ## D-153 (2026-11-27, Hannah: "Would you be able to rerun the A0, A1 and D-098 arms?" on D-152's measure; seen beforehand: D-147 to D-152's results, including 5b's two seeds on D-152's frames; the primary file set's size (188 files, 29 minutes of audio); timing with 5b seed 2 on one VocalSet file, run time only (inference 0.64 s per model for 7.5 s of audio, Praat 0.06 s, kNN 0.01 s); a check that the ten checkpoints below exist; nothing of these ten runs on any VocalSet file): do the coupled arms and D-098's arms fail less on held-out singers' sung vowels?
 
-*Status*: registered. `scripts/analysis/d153_vocalset_arms.py` (`run`, `report`). CPU, inference only.
+*Status*: done 2026-11-27: coupled **NOT LOWER**, D-098 heads **NOT LOWER**. `scripts/analysis/d153_vocalset_arms.py` (`run`, `report`). CPU, inference only, about 12 minutes (three processes).
 
 - *Why*: D-152 found the dropped formant on VocalSet's three held-out men (36 of 188 files at f0 ≤ 150 Hz, F1 right and F2 skipped to F3), and so a real-voice measure that isn't private. The candidate fixes so far were tested on synthetic clips: D-080's coupled arms (D-147: below the branch spread on the grid, on both seeds) and D-098's heads arm (D-148, D-149: lowest on the grid, but no gain on a private recording). This tests them on D-152's measure.
 - *Frames, fixed for every run*: D-152's primary block. These are the men's files with at least 10 frames voiced by 5b seed 2, in D-141's cell by Praat, at f0 ≤ 150 Hz by 5b seed 2 (188 files from 3 singers). Each run reads its own F2 on the same frames, so comparisons are paired. A frame fails if the run's F2 is nearer Praat's F3 than Praat's F2.
@@ -5295,3 +5295,11 @@ Synthetic and training only; descriptive.
   - Praat is the reference (D-152's caveats).
   - Only the primary block is scored, to keep the run short (about 3 minutes a model). D-152's other blocks aren't repeated.
 - Reports: `reports/analysis/d153/d153.{txt,json}`. Per-frame readings in `cache/d153/`, not committed.
+- *Result (2026-11-27; `reports/analysis/d153/d153.txt`)*: coupled **NOT LOWER**; D-098 heads **NOT LOWER**.
+  - *Null runs* (mean failure share over the 188 files): seed 1 0.169-0.258 (5b 0.169, F5 0.208, F5-F7 0.258); seed 2 0.192-0.204.
+  - *Coupled*: seed 1 A0 0.279, A1 0.191 (within); seed 2 A0 0.211, A1 0.179 (mixed: A1 below every null, A0 not).
+    - Against 5b of the same seed: A0 +0.111 [+0.077, +0.148] on seed 1, +0.008 [-0.019, +0.034] on seed 2; A1 +0.023 [-0.003, +0.051] and -0.024 [-0.049, +0.001].
+  - *D-098*: base 0.220 and heads 0.276, both within the seed-1 null. Heads minus base is +0.056 [+0.021, +0.095]: the heads arm fails more, not less.
+  - Failing files follow the same pattern for every run: /o/ and /u/ carry nearly all of them, /a/ at most 9 of 67.
+  - *Reading*: neither candidate fix carries over from the tipping grid to held-out singers. D-147's coupled gain (below the branch spread on the grid, on both seeds) and D-148 and D-149's heads gain (lowest on the grid at every checkpoint) don't appear here. This agrees with D-149's private result. The grid is not a good stand-in for the real failure, so an arm aiming at it should be decided on this measure (or a successor), with the grid reported.
+    - The seed-1 null spread is wide (0.17-0.26) and seed 2's narrow (0.19-0.20), so a single branch's difference of a few points is within run-to-run variation.

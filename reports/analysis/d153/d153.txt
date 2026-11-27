@@ -1,0 +1,22 @@
+D-153: coupled and D-098 arms on D-152's measure (VocalSet held-out men, f0 <= 150 Hz, D-141's cell by Praat)
+  188 files from 3 singers; frames fixed (D-152's: 5b seed 2's voicing and f0); a frame fails if the run's F2 is nearer Praat's F3 than its F2
+
+  run                    mean share  failing files  /o/   /u/   /a/    minus 5b same seed [95 %]
+  d040_5b_s1_b20k            0.169      30 of 188  15/73 12/47 3/67   
+  d040_5b_s2_b20k            0.204      37 of 188  18/73 17/47 2/67   
+  d090_f5_s1                 0.208      39 of 188  19/73 17/47 3/67   +0.039 [+0.024, +0.057]
+  d090_f5_s2                 0.192      35 of 188  15/73 19/47 1/67   -0.012 [-0.024, -0.000]
+  d090_f57_s1                0.258      47 of 188  24/73 20/47 3/67   +0.089 [+0.062, +0.121]
+  d090_f57_s2                0.199      34 of 188  15/73 18/47 1/67   -0.005 [-0.024, +0.013]
+  d080_a0_s1                 0.279      52 of 188  24/73 19/47 9/67   +0.111 [+0.077, +0.148]
+  d080_a0_s2                 0.211      38 of 188  19/73 16/47 3/67   +0.008 [-0.019, +0.034]
+  d080_a1_s1                 0.191      34 of 188  12/73 20/47 2/67   +0.023 [-0.003, +0.051]
+  d080_a1_s2                 0.179      32 of 188  14/73 16/47 2/67   -0.024 [-0.049, +0.001]
+  d098_base_b20k             0.220      40 of 188  16/73 24/47 0/67   +0.051 [+0.012, +0.093]
+  d098_heads_b20k            0.276      54 of 188  22/73 27/47 4/67   +0.107 [+0.068, +0.154]
+
+  seed 1: null 0.169-0.258; A0 0.279, A1 0.191 -> within
+  seed 2: null 0.192-0.204; A0 0.211, A1 0.179 -> mixed
+  D-098 (seed-1 null from 0.169): base 0.220 within; heads 0.276 within; heads minus base +0.056 [+0.021, +0.095]
+
+Reading (registered): coupled NOT LOWER; D-098 heads NOT LOWER
