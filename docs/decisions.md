@@ -5451,7 +5451,7 @@ Synthetic and training only; descriptive.
 
 ## D-158 (2026-11-27, Hannah: "How hard do you think it would be to see how the model performs on voices with LF sources where the three LF parameters stray from the line? Interactions with bandwidth would be of particular interest here", then, on the design: "you tested Rd down to 0.6 before and that showed the most failures when combined a wide F1 so we should probably go at least that far down?"; seen beforehand: D-155 to D-157's results; LF timing validity for each step below (arithmetic only); a function check that the free-parameter source reproduces the harmonic table at Rd 0.6 and 1.0 (relative difference about 1e-12) and D-157's clips (about 1e-13, float rounding), and that one off-line clip renders (length and finiteness); nothing of any model on any off-line clip): does an LF source off Fant's Rd line change the readings, alone or with wide bandwidths?
 
-*Status*: registered. `scripts/analysis/d158_lf_offline.py` (`run`, `report`). CPU, inference only.
+*Status*: done 2026-11-27: **JOINT** (Ra, the B1 effect, at Rd 0.6 and 1.0). `scripts/analysis/d158_lf_offline.py` (`run`, `report`). CPU, inference only, about 25 minutes.
 
 - *Why*: every training set behind 5b and the arms draws LF on Fant's (1995) Rd regression, so the return phase (Ra: high-frequency tilt), the glottal formant (Rg: open quotient, H1-H2) and the asymmetry (Rk) always move together. Real voices scatter around that line. D-157 found that moving along it changes the wide-B1 failure (worst at Rd 0.6) but barely the wide-B2 effect. This asks the same off the line.
 - *Sources*: three anchors on the line, Rd 0.6 (pressed), 1.0 and 2.0 (breathy). From each, one parameter at a time: Ra × 0.5 / 2 / 3, Rg × 0.8 / 1.25, Rk × 0.7 / 1.4.
@@ -5473,3 +5473,13 @@ Synthetic and training only; descriptive.
   - The steps are within Fant's ranges, but how far real voices stray isn't measured here (that would need glottal inverse-filtering fits on recordings).
   - No aspiration noise; cascade path only.
 - Reports: `reports/analysis/d158/d158.{txt,json}`. Per-clip scores in `cache/d158/`, not committed.
+- *Result (2026-11-27; `reports/analysis/d158/d158.txt`)*: **JOINT**, through the return phase (Ra) and the B1 effect, at Rd 0.6 and 1.0.
+  - *Render check*: the on-line Rd 0.6 and 1.0 anchors match D-157's scores on all 384 clips.
+  - *Ra* (low f0; the failure at B2 = 90, and the wide-B1 effect, for Ra × 0.5 / anchor / × 2 / × 3):
+    - at Rd 0.6, failure 0.28 / 0.18 / 0.09 / 0.06 and B1 effect +0.41 / +0.43 / +0.32 / +0.18. Range 0.25 (seed 1 0.28, seed 2 0.23).
+    - at Rd 1.0, failure 0.19 / 0.13 / 0.09 / 0.10 and B1 effect +0.39 / +0.31 / +0.17 / +0.17. Range 0.22 (seeds 0.28, 0.20).
+    - A short return phase (an abrupt closure, more high-frequency energy) makes the failure and the wide-B1 effect larger, and a long one smaller. At Rd 2.0, whose Ra is already long, the range is 0.05. D-157's "pressed is worse" is mostly this dimension.
+  - *Rg and Rk*: no range reaches 0.15 on the seed mean with both seeds at 0.10. Rk at Rd 2.0 changes the B2 effect by 0.39 on seed 1 but 0.06 on seed 2.
+  - *The model's bandwidths (reported)*: on every source, at the narrow cell (B1 150, B2 90), 5b reads B1 at about 2^-1.2, about 0.43 of the truth (log2 ratio -1.07 to -1.39 at low f0, -1.35 to -1.50 higher). It reads B2 at about 0.63 (-0.62 to -0.78; -0.35 to -0.62 higher). That is a large, consistent underestimate that doesn't depend on the source, as Hannah recalled from earlier work. It fits training's narrow low-f0 bandwidths (D-155, D-156): B1 = 150 Hz is already near the top of training's range there.
+  - *Caveat*: 18 chances for a range to reach 0.15. The two that do agree in parameter, effect and direction, at two anchors, which makes chance less likely.
+  - *Reading*: the bandwidth arm should leave the line in Ra: draw the return phase independently around Fant's value, not only Rd. Rg and Rk can stay on the line. For the sloped comb (considering.md, 2026-11-27), the tilt (Ra) is the parameter it needs beyond Rd.

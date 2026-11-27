@@ -1,0 +1,63 @@
+D-158: LF off Fant's Rd line (one parameter at a time from Rd 0.6 / 1.0 / 2.0) x B1 / B2 on D-157's grid; 5b
+  render check (on-line Rd 0.6 and 1.0 against D-157, per clip): 0 of 384 differ
+
+  low f0 (110, 140); per source: failure at B2 90 (both B1); B2 effect (250 - 90); B1 effect (360 - 150); F1 / F2 error (c); model B1 / B2 vs truth (log2, narrow cell B1 150 B2 90)
+    Rd 0.6  - x1    fail 0.18  B2 eff +0.19  B1 eff +0.43  F1  284 c  F2  619 c  B1 -1.24  B2 -0.71
+    Rd 0.6 Ra x0.5  fail 0.28  B2 eff +0.21  B1 eff +0.41  F1  357 c  F2  837 c  B1 -1.26  B2 -0.64
+    Rd 0.6 Ra x2    fail 0.09  B2 eff +0.27  B1 eff +0.32  F1  187 c  F2  509 c  B1 -1.23  B2 -0.73
+    Rd 0.6 Ra x3    fail 0.06  B2 eff +0.18  B1 eff +0.18  F1  168 c  F2  338 c  B1 -1.23  B2 -0.73
+    Rd 0.6 Rg x0.8  fail 0.22  B2 eff +0.17  B1 eff +0.43  F1  317 c  F2  673 c  B1 -1.20  B2 -0.65
+    Rd 0.6 Rg x1.25 fail 0.18  B2 eff +0.25  B1 eff +0.37  F1  246 c  F2  685 c  B1 -1.21  B2 -0.68
+    Rd 0.6 Rk x0.7  fail 0.19  B2 eff +0.19  B1 eff +0.44  F1  267 c  F2  617 c  B1 -1.24  B2 -0.70
+    Rd 0.6 Rk x1.4  fail 0.20  B2 eff +0.25  B1 eff +0.36  F1  309 c  F2  689 c  B1 -1.25  B2 -0.71
+    Rd 1.0  - x1    fail 0.13  B2 eff +0.21  B1 eff +0.31  F1  241 c  F2  515 c  B1 -1.15  B2 -0.67
+    Rd 1.0 Ra x0.5  fail 0.19  B2 eff +0.22  B1 eff +0.39  F1  318 c  F2  662 c  B1 -1.19  B2 -0.63
+    Rd 1.0 Ra x2    fail 0.09  B2 eff +0.22  B1 eff +0.17  F1  230 c  F2  430 c  B1 -1.09  B2 -0.65
+    Rd 1.0 Ra x3    fail 0.10  B2 eff +0.31  B1 eff +0.17  F1  275 c  F2  534 c  B1 -1.09  B2 -0.64
+    Rd 1.0 Rg x0.8  fail 0.14  B2 eff +0.11  B1 eff +0.26  F1  193 c  F2  429 c  B1 -1.07  B2 -0.62
+    Rd 1.0 Rg x1.25 fail 0.09  B2 eff +0.25  B1 eff +0.30  F1  190 c  F2  502 c  B1 -1.24  B2 -0.73
+    Rd 1.0 Rk x0.7  fail 0.06  B2 eff +0.27  B1 eff +0.27  F1  157 c  F2  442 c  B1 -1.27  B2 -0.74
+    Rd 1.0 Rk x1.4  fail 0.13  B2 eff +0.12  B1 eff +0.25  F1  252 c  F2  434 c  B1 -1.20  B2 -0.68
+    Rd 2.0  - x1    fail 0.07  B2 eff +0.18  B1 eff +0.19  F1  129 c  F2  383 c  B1 -1.20  B2 -0.69
+    Rd 2.0 Ra x0.5  fail 0.11  B2 eff +0.17  B1 eff +0.25  F1  178 c  F2  426 c  B1 -1.25  B2 -0.69
+    Rd 2.0 Ra x2    fail 0.07  B2 eff +0.27  B1 eff +0.24  F1  218 c  F2  439 c  B1 -1.15  B2 -0.69
+    Rd 2.0 Rg x1.25 fail 0.03  B2 eff +0.26  B1 eff +0.11  F1  252 c  F2  374 c  B1 -1.33  B2 -0.68
+    Rd 2.0 Rk x0.7  fail 0.10  B2 eff +0.12  B1 eff +0.18  F1  244 c  F2  368 c  B1 -1.20  B2 -0.71
+    Rd 2.0 Rk x1.4  fail 0.07  B2 eff +0.34  B1 eff +0.24  F1  204 c  F2  525 c  B1 -1.39  B2 -0.78
+
+  f0 180-220, the same (reported)
+    Rd 0.6  - x1    fail 0.09  B2 eff +0.11  B1 eff +0.23  F1  216 c  F2  397 c  B1 -1.38  B2 -0.44
+    Rd 0.6 Ra x0.5  fail 0.13  B2 eff +0.20  B1 eff +0.16  F1  236 c  F2  555 c  B1 -1.36  B2 -0.35
+    Rd 0.6 Ra x2    fail 0.02  B2 eff +0.07  B1 eff +0.05  F1  164 c  F2  181 c  B1 -1.42  B2 -0.51
+    Rd 0.6 Ra x3    fail 0.00  B2 eff +0.03  B1 eff +0.01  F1  164 c  F2   70 c  B1 -1.44  B2 -0.54
+    Rd 0.6 Rg x0.8  fail 0.08  B2 eff +0.20  B1 eff +0.24  F1  184 c  F2  425 c  B1 -1.35  B2 -0.41
+    Rd 0.6 Rg x1.25 fail 0.06  B2 eff +0.11  B1 eff +0.18  F1  253 c  F2  355 c  B1 -1.38  B2 -0.41
+    Rd 0.6 Rk x0.7  fail 0.04  B2 eff +0.15  B1 eff +0.19  F1  305 c  F2  281 c  B1 -1.37  B2 -0.41
+    Rd 0.6 Rk x1.4  fail 0.09  B2 eff +0.07  B1 eff +0.17  F1  182 c  F2  322 c  B1 -1.38  B2 -0.45
+    Rd 1.0  - x1    fail 0.00  B2 eff +0.03  B1 eff -0.01  F1  155 c  F2   59 c  B1 -1.41  B2 -0.49
+    Rd 1.0 Ra x0.5  fail 0.02  B2 eff +0.27  B1 eff +0.16  F1  163 c  F2  400 c  B1 -1.36  B2 -0.42
+    Rd 1.0 Ra x2    fail 0.00  B2 eff +0.09  B1 eff -0.01  F1  150 c  F2  182 c  B1 -1.46  B2 -0.52
+    Rd 1.0 Ra x3    fail 0.00  B2 eff +0.12  B1 eff -0.00  F1  139 c  F2  191 c  B1 -1.46  B2 -0.53
+    Rd 1.0 Rg x0.8  fail 0.00  B2 eff +0.06  B1 eff +0.04  F1  153 c  F2   87 c  B1 -1.46  B2 -0.50
+    Rd 1.0 Rg x1.25 fail 0.02  B2 eff +0.06  B1 eff +0.06  F1  156 c  F2  159 c  B1 -1.42  B2 -0.51
+    Rd 1.0 Rk x0.7  fail 0.00  B2 eff +0.06  B1 eff -0.00  F1  169 c  F2  152 c  B1 -1.38  B2 -0.48
+    Rd 1.0 Rk x1.4  fail 0.02  B2 eff +0.21  B1 eff +0.11  F1  161 c  F2  290 c  B1 -1.37  B2 -0.42
+    Rd 2.0  - x1    fail 0.00  B2 eff +0.05  B1 eff +0.06  F1  139 c  F2  110 c  B1 -1.49  B2 -0.60
+    Rd 2.0 Ra x0.5  fail 0.00  B2 eff +0.06  B1 eff +0.06  F1  153 c  F2  118 c  B1 -1.45  B2 -0.54
+    Rd 2.0 Ra x2    fail 0.00  B2 eff -0.00  B1 eff +0.00  F1  126 c  F2   48 c  B1 -1.50  B2 -0.62
+    Rd 2.0 Rg x1.25 fail 0.09  B2 eff +0.11  B1 eff +0.05  F1  169 c  F2  385 c  B1 -1.41  B2 -0.62
+    Rd 2.0 Rk x0.7  fail 0.00  B2 eff +0.07  B1 eff +0.05  F1  147 c  F2   91 c  B1 -1.43  B2 -0.54
+    Rd 2.0 Rk x1.4  fail 0.01  B2 eff +0.00  B1 eff -0.00  F1  160 c  F2   26 c  B1 -1.48  B2 -0.58
+
+  ranges over each parameter's steps (anchor included), low f0: source effect / B2 effect / B1 effect
+    Rd 0.6 Ra: 0.22 / 0.09 / 0.25   (seeds: 0.13, 0.28, 0.06, 0.23)
+    Rd 0.6 Rg: 0.04 / 0.08 / 0.06   (seeds: 0.02, 0.06, 0.16, 0.16)
+    Rd 0.6 Rk: 0.01 / 0.06 / 0.08   (seeds: 0.04, 0.07, 0.08, 0.08)
+    Rd 1.0 Ra: 0.10 / 0.11 / 0.22   (seeds: 0.10, 0.28, 0.17, 0.20)
+    Rd 1.0 Rg: 0.05 / 0.14 / 0.05   (seeds: 0.10, 0.06, 0.18, 0.10)
+    Rd 1.0 Rk: 0.06 / 0.15 / 0.06   (seeds: 0.05, 0.05, 0.25, 0.10)
+    Rd 2.0 Ra: 0.04 / 0.09 / 0.05   (seeds: 0.04, 0.03, 0.15, 0.11)
+    Rd 2.0 Rg: 0.05 / 0.08 / 0.08   (seeds: 0.16, 0.16, 0.00, 0.00)
+    Rd 2.0 Rk: 0.02 / 0.22 / 0.06   (seeds: 0.39, 0.21, 0.06, 0.09)
+
+Reading (registered; largest effect range 0.25, largest source effect 0.22): JOINT: leaving the line changes how a wide bandwidth reads (Rd 0.6|Ra B1 effect, Rd 1.0|Ra B1 effect)
