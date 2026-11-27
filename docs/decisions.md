@@ -5384,3 +5384,28 @@ Synthetic and training only; descriptive.
     - It fits D-154's artefact (resynthesis at Praat's B2 failed in step with B2) and the real failing files' wider Praat B2.
     - Whether real F2s are that wide is still open, since Praat may overestimate B2 when F1 and F2 are close. The model fails at B2 = 250 either way.
     - A training arm widening B2 near these vowels, decided on D-152 / D-153's VocalSet measure with the grid reported, is the natural next entry.
+
+## D-156 (2026-11-27, Hannah: "could we check if the bandwidth distributions extend wide enough for F3 and F4?"; seen beforehand: D-155's result, including train_v2's B2 near the failing vowels and over all sonorant frames; the cascade's bandwidth sampling (Hawks & Miller times 0.6-1.6); train_v2's audio layout (100,000 clips of 2.5 s); a function check of the Praat step on one train_v2 clip and of one grid render (shapes and timing only); nothing of any B3 or B4, from labels, Praat or a model): do training's B3 and B4 reach as wide as real voices', and does the model care?
+
+*Status*: registered. `scripts/analysis/d156_upper_bw.py` (`praat`, `grid`, `report`). CPU; Praat, plus inference for part B.
+
+- *Why*: D-155 found a complete B2 gap near back vowels, and that B2 alone tips the dropped formant. Before changing training, Hannah asked whether F3 and F4's bandwidths have the same problem. Coverage matters only if the model is sensitive, so this also measures that.
+- *Part A, coverage, measured with one instrument*: Praat Burg (5 formants, ceiling 5000 Hz for men and the grid, 5500 for women; for train_v2 by the clip's label length, 5000 at 16 cm or more and 5500 below), every 10 ms, on frames Praat's own pitch tracker calls voiced.
+  - The same instrument runs on real voices and on training clips, so its bias in bandwidth largely cancels. Praat is known to overestimate weak, close formants' bandwidths, which affects both sides, though not necessarily equally.
+  - *Real*: PTDB-TUG dev (2830 utterances), VocalSet's held-out singers (D-152's 879 files), Hillenbrand dev.
+  - *Training*: 2000 train_v2 clips, evenly spaced through the set (tube and cascade as they fall).
+  - *Measure*: per formant k = 1-4 and band of Praat's Fk, the 50th, 90th and 99th percentiles of Praat's Bk. The bands are F1 300-450 / 450-650 / 650-900; F2 700-1100 / 1100-1700 / 1700-2500; F3 2000-2500 / 2500-3000 / 3000-3500; F4 3000-3500 / 3500-4000 / 4000-4500.
+    - Reported for all voiced frames and for f0 ≤ 150 Hz (Praat's f0), and with train_v2's label bandwidths' percentiles (every 10th frame, label F in the same band) for context.
+  - *Rule*, per real set, formant and band, with at least 500 real frames: **GAP** if the real 90th percentile is above training's 99th; **COVERED** if it is at or below training's 90th; **THIN** otherwise.
+    - Per formant: **GAP** if any band holding at least 10 % of a set's frames is a gap; COVERED if every such band is covered; otherwise THIN.
+    - B1 and B2 are reported with the same rule, as context for D-141 and D-155.
+- *Part B, sensitivity*: D-155's grid clips with B2 at 90 Hz, and B3 stepped (120, 250, 400, 600 Hz, with B4 at 150) or B4 stepped (150, 300, 500, 800, with B3 at 120), one at a time.
+  - Both sets, f0 110 / 140 / 180 / 220, B1 150 and 360, seeds 20-22: 192 clips per formant. Scored by 5b's two seeds, frames as D-155.
+  - *Measures*: the dropped-formant failure share, and the median absolute F3 and F4 error (cents).
+  - *Rule*, per formant on the seed mean, from the narrowest to the widest step: **MATTERS** if the failure rises by at least 0.2, or the stepped formant's median error rises by at least 100 cents and at least doubles; **NO EFFECT** if the failure rises less than 0.05 and the error less than 25 cents; **PARTLY** otherwise.
+- *Reading*: a formant needs a training change only if it is a GAP or THIN in part A and MATTERS in part B.
+- *Caveats*:
+  - Praat's upper bandwidths are noisy: a formant it barely finds gets a huge bandwidth. The 99th percentiles mostly measure that.
+  - train_v2 is 5b's synthetic set only, without the resynthesised share.
+  - The grid holds F3 and F4 fixed at each set's values.
+- Reports: `reports/analysis/d156/d156.{txt,json}`. Per-frame values in `cache/d156/`, not committed.
