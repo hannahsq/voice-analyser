@@ -140,6 +140,13 @@ A reading of every entry below against the changed direction (D-091: the F1 leve
     - A stiff per-sample model, slow to render.
     - Labels: with a gap that never closes there is no closed-glottis tract, so the acoustic-domain labels (D-078 onwards) are the only consistent choice.
   - *Middle ground*: a kinematic fold model (Titze's surface kinematics, as in Story's later TubeTalker work). The fold shapes are prescribed, with parameters for adduction (the posterior gap), bulging and the lower-to-upper margin phase lag. It gives realistic, convergent or divergent area waveforms at a controlled f0, and could replace the Rosenberg pulse in `interactive.area_pulse` without self-oscillation.
+  - *Level 1 and level 2* (Hannah's question, 2026-11-27: can acoustic back-pressure change a kinematic glottis's area?). In a purely kinematic model it can't: the fold surfaces follow prescribed trajectories, so the area is fixed in advance. The flow is still solved against the tract's and subglottal system's pressure, so level-1 interaction stays: flow skew, formant ripple and open-phase damping (the wider effective B1 and B2).
+    - Level 2, the folds responding to the sound, is missing. That covers f0 jumps or instability when f0 crosses F1, load-assisted register breaks, the inertive tract's help to oscillation, and a load-dependent mucosal wave and closure (semi-occluded phonation, lip trills).
+    - In-between options, cheapest first:
+      1. kinematic area plus a compliance term, A(t) = A_kin(t) + C × (intraglottal acoustic pressure), a one-line level-2 approximation with f0 still controlled;
+      2. a low-order oscillator driven around the kinematic trajectory by the acoustic pressure;
+      3. a self-oscillating model (Ishizaka-Flanagan, Story-Titze), with a controller for f0.
+    - For formants and bandwidths, most of the effect is level 1 plus a realistic area shape. Level 2 matters mainly for f0 phenomena and heavy loading (singers near formant tuning, unstable or post-surgery voices). Option 1 is the cheap test of whether level 2 moves the readings at all.
   - *Order*: after the cascade's bandwidth arm (the D-160 draft), which fills the gap directly. This is the principled way to get realistic bandwidth-source combinations later, and it bears on the outcomes aim (closure and leakage change with voice surgery).
 
 ## Models
