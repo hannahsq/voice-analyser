@@ -1,0 +1,51 @@
+D-156: bandwidth coverage by one instrument (Praat Burg on Praat-voiced frames), real voices against train_v2
+  per formant and band of Praat's Fk: n frames, Praat Bk 50th / 90th / 99th percentile (Hz); train_v2 labels for context
+  GAP: real 90th above Praat-on-train 99th; COVERED: real 90th at or below Praat-on-train 90th; THIN between
+
+  all voiced frames
+    B1  300- 450: train  59845   79/ 300/ 1606 (labels  162/ 222); ptdb 190757   99/ 270/  664 COVERED; vocalset 144744  128/ 428/ 1313 THIN; hillenbrand   8961   51/ 175/  534 COVERED
+    B1  450- 650: train 130139   84/ 326/ 1599 (labels  134/ 191); ptdb 157260  111/ 281/  771 COVERED; vocalset 269871  132/ 396/ 1239 THIN; hillenbrand  18013   53/ 146/  608 COVERED
+    B1  650- 900: train 123898   73/ 364/ 1640 (labels  116/ 191); ptdb  59664  144/ 415/ 1247 THIN; vocalset 143576  123/ 422/ 1307 THIN; hillenbrand   7930  106/ 236/ 1225 COVERED
+    B2  700-1100: train  49507  164/1030/ 2753 (labels  104/ 199); ptdb  55258  121/ 580/ 2386 COVERED; vocalset 190519  193/ 789/ 1929 COVERED; hillenbrand   3847   99/ 460/ 3490 COVERED
+    B2 1100-1700: train 180108  181/ 957/ 2909 (labels  116/ 218); ptdb 224406  186/ 673/ 2068 COVERED; vocalset 240984  170/ 760/ 2484 COVERED; hillenbrand  12761  196/ 597/ 3393 COVERED
+    B2 1700-2500: train 152022  183/ 940/ 2926 (labels  172/ 325); ptdb 164882  257/ 756/ 2165 COVERED; vocalset 162554  164/ 884/ 2914 COVERED; hillenbrand  16265  191/ 649/ 3241 COVERED
+    B3 2000-2500: train  80250  268/1134/ 3378 (labels  184/ 374); ptdb 155023  290/ 820/ 2644 COVERED; vocalset 265986  150/ 653/ 2443 COVERED; hillenbrand   5389  219/1068/ 3725 COVERED
+    B3 2500-3000: train 159141  256/1008/ 3089 (labels  268/ 528); ptdb 200433  334/ 828/ 2532 COVERED; vocalset 239858  229/ 888/ 2825 COVERED; hillenbrand  17011  245/ 714/ 2947 COVERED
+    B3 3000-3500: train 113728  220/ 991/ 2906 (labels  371/ 725); ptdb  75866  367/ 848/ 2378 COVERED; vocalset  90454  221/ 844/ 2887 COVERED; hillenbrand  10681  355/ 823/ 2321 COVERED
+    B4 3000-3500: train  65637  316/ 931/ 2877 (labels  331/ 708); ptdb 127109  369/1211/ 3331 THIN; vocalset 263205  175/ 748/ 2554 COVERED; hillenbrand   6792  400/1433/ 3715 THIN
+    B4 3500-4000: train 152346  309/ 964/ 2759 (labels  412/ 914); ptdb 173800  439/1159/ 3111 THIN; vocalset 167465  255/1047/ 3129 THIN; hillenbrand  10931  430/1238/ 3545 THIN
+    B4 4000-4500: train 121365  299/ 997/ 2746 (labels  618/1236); ptdb 127412  369/ 931/ 2658 COVERED; vocalset  43027  297/1178/ 3254 THIN; hillenbrand  12415  451/1109/ 2589 THIN
+
+  f0 <= 150 Hz
+    B1  300- 450: train  20016   94/ 345/ 1321 (labels  150/ 202); ptdb 101346   98/ 273/  633 COVERED; vocalset  33427  144/ 431/ 1427 THIN; hillenbrand   3301   48/ 145/  314 COVERED
+    B1  450- 650: train  28007   95/ 372/ 1417 (labels  118/ 164); ptdb  68613  113/ 283/  772 COVERED; vocalset  43599  151/ 451/ 1358 THIN; hillenbrand   3471   43/  99/  335 COVERED
+    B1  650- 900: train  18396   99/ 414/ 1542 (labels   99/ 135); ptdb  18414  157/ 484/ 1163 THIN; vocalset  12706  154/ 392/ 1651 COVERED; hillenbrand   1000   83/ 151/  479 COVERED
+    B2  700-1100: train  14460  137/ 575/ 2252 (labels   73/ 104); ptdb  34721  119/ 490/ 1763 COVERED; vocalset  40756  273/ 897/ 1829 THIN; hillenbrand   1194   84/ 206/  984 COVERED
+    B2 1100-1700: train  32962  169/ 745/ 2819 (labels   88/ 122); ptdb 119472  175/ 662/ 1760 COVERED; vocalset  32118  153/ 675/ 2560 COVERED; hillenbrand   3485  164/ 378/ 1809 COVERED
+    B2 1700-2500: train  26677  182/ 731/ 2771 (labels  133/ 205); ptdb  61722  215/ 720/ 1983 COVERED; vocalset  27032  159/1187/ 3303 THIN; hillenbrand   3215  145/ 402/ 1847 COVERED
+    B3 2000-2500: train  17858  254/ 756/ 2492 (labels  115/ 225); ptdb 105586  277/ 769/ 2154 THIN; vocalset  61101  139/ 448/ 1196 COVERED; hillenbrand   2551  212/ 943/ 3401 THIN
+    B3 2500-3000: train  30185  225/ 708/ 2457 (labels  153/ 340); ptdb  83323  320/ 802/ 2150 THIN; vocalset  38573  186/ 534/ 2063 COVERED; hillenbrand   4445  194/ 609/ 2087 COVERED
+    B3 3000-3500: train  19212  205/ 864/ 2751 (labels  197/ 370); ptdb  11963  401/ 937/ 2318 THIN; vocalset   2257  297/ 905/ 2648 THIN; hillenbrand    321  351/ 846/ 1755 few
+    B4 3000-3500: train  13959  324/ 811/ 2300 (labels  183/ 244); ptdb  97907  347/1090/ 2791 THIN; vocalset  53789  167/ 620/ 1846 COVERED; hillenbrand   3469  352/1251/ 2934 THIN
+    B4 3500-4000: train  29959  299/ 754/ 2319 (labels  224/ 310); ptdb  78795  427/1111/ 2673 THIN; vocalset   8966  371/1081/ 2983 THIN; hillenbrand   3116  355/ 928/ 2549 THIN
+    B4 4000-4500: train  21982  255/ 816/ 2492 (labels  280/ 397); ptdb  23478  436/1103/ 2695 THIN; vocalset   1876  517/1487/ 3731 THIN; hillenbrand    536  541/1134/ 2553 THIN
+
+  per formant (bands with >= 10 % of a set's frames and >= 500 frames):
+    all     B1: ptdb THIN, vocalset THIN, hillenbrand COVERED
+    all     B2: ptdb COVERED, vocalset COVERED, hillenbrand COVERED
+    all     B3: ptdb COVERED, vocalset COVERED, hillenbrand COVERED
+    all     B4: ptdb THIN, vocalset THIN, hillenbrand THIN
+    f0<=150 B1: ptdb COVERED, vocalset THIN, hillenbrand COVERED
+    f0<=150 B2: ptdb COVERED, vocalset THIN, hillenbrand COVERED
+    f0<=150 B3: ptdb THIN, vocalset COVERED, hillenbrand THIN
+    f0<=150 B4: ptdb THIN, vocalset COVERED, hillenbrand THIN
+
+  part B: D-155's grid (B2 90) with B3 or B4 stepped; 5b seed mean, all f0, B1 150 and 360
+    B3: 120: fail 0.06 (f0<=140 0.13), F3 err 7 c, F4 err 91 c  250: fail 0.02 (f0<=140 0.05), F3 err 7 c, F4 err 45 c  400: fail 0.01 (f0<=140 0.01), F3 err 14 c, F4 err 56 c  600: fail 0.05 (f0<=140 0.09), F3 err 373 c, F4 err 312 c
+        widest minus narrowest: failure -0.02, F3 error +367 c (x55.8) -> MATTERS
+    B4: 150: fail 0.06 (f0<=140 0.13), F3 err 7 c, F4 err 91 c  300: fail 0.15 (f0<=140 0.23), F3 err 55 c, F4 err 302 c  500: fail 0.23 (f0<=140 0.28), F3 err 55 c, F4 err 394 c  800: fail 0.23 (f0<=140 0.28), F3 err 55 c, F4 err 430 c
+        widest minus narrowest: failure +0.17, F4 error +340 c (x4.8) -> MATTERS
+
+Reading (registered): a formant needs a training change only if it is a gap or thin in part A and matters in part B
+  B3: part A ptdb COVERED, vocalset COVERED, hillenbrand COVERED; part B MATTERS
+  B4: part A ptdb THIN, vocalset THIN, hillenbrand THIN; part B MATTERS

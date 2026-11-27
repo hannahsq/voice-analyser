@@ -5387,7 +5387,7 @@ Synthetic and training only; descriptive.
 
 ## D-156 (2026-11-27, Hannah: "could we check if the bandwidth distributions extend wide enough for F3 and F4?"; seen beforehand: D-155's result, including train_v2's B2 near the failing vowels and over all sonorant frames; the cascade's bandwidth sampling (Hawks & Miller times 0.6-1.6); train_v2's audio layout (100,000 clips of 2.5 s); a function check of the Praat step on one train_v2 clip and of one grid render (shapes and timing only); nothing of any B3 or B4, from labels, Praat or a model): do training's B3 and B4 reach as wide as real voices', and does the model care?
 
-*Status*: registered. `scripts/analysis/d156_upper_bw.py` (`praat`, `grid`, `report`). CPU; Praat, plus inference for part B.
+*Status*: done 2026-11-27: **B3 covered and read to 400 Hz; B4 thin and matters** (part A's instrument too blunt; see Result). `scripts/analysis/d156_upper_bw.py` (`praat`, `grid`, `report`). CPU, about 20 minutes.
 
 - *Why*: D-155 found a complete B2 gap near back vowels, and that B2 alone tips the dropped formant. Before changing training, Hannah asked whether F3 and F4's bandwidths have the same problem. Coverage matters only if the model is sensitive, so this also measures that.
 - *Part A, coverage, measured with one instrument*: Praat Burg (5 formants, ceiling 5000 Hz for men and the grid, 5500 for women; for train_v2 by the clip's label length, 5000 at 16 cm or more and 5500 below), every 10 ms, on frames Praat's own pitch tracker calls voiced.
@@ -5409,3 +5409,13 @@ Synthetic and training only; descriptive.
   - train_v2 is 5b's synthetic set only, without the resynthesised share.
   - The grid holds F3 and F4 fixed at each set's values.
 - Reports: `reports/analysis/d156/d156.{txt,json}`. Per-frame values in `cache/d156/`, not committed.
+- *Result (2026-11-27; `reports/analysis/d156/d156.txt`)*: as registered, **B3 needs no change** (part A covered in all three sets, part B matters) and **B4 does** (part A thin in all three, part B matters). Part A's instrument turned out too blunt, though (below).
+  - *Part A* (all voiced frames, per formant): B1 thin (PTDB-TUG, VocalSet), covered (Hillenbrand); B2 covered; B3 covered; B4 thin in all three. At f0 ≤ 150: B1 and B2 thin for VocalSet only; B3 and B4 thin for PTDB-TUG and Hillenbrand.
+  - *Part B* (5b's seed mean; B2 at 90):
+    - B3 120 / 250 / 400 / 600 Hz: the failure stays at 0.01-0.06. The F3 error is 7 / 7 / 14 / 373 cents, so F3 is read well up to 400 Hz and lost at 600.
+    - B4 150 / 300 / 500 / 800 Hz: the failure is 0.06 / 0.15 / 0.23 / 0.23 (f0 ≤ 140: 0.13 / 0.23 / 0.28 / 0.28). The F4 error is 91 / 302 / 394 / 430 cents, so F4 is lost from 300 Hz, and a wide B4 also tips some F2 skips.
+  - *The instrument is too blunt*: Praat on train_v2's own clips reads B2 at 700-1100 Hz with a 90th percentile of 1030 Hz, against the labels' 199. Part A calls that band covered, yet D-155 found no label B2 above 150 Hz near the failing vowels. So part A can't detect a known gap, and its "covered" verdicts carry little weight. Its "thin" ones still mean real voices read wider than training through the same inflating instrument.
+  - *Post hoc, not registered, from the same report's label columns*: at f0 ≤ 150 Hz, training's label bandwidths are narrow for every formant.
+    - B2 at 700-1100 Hz has 90th / 99th percentiles of 73 / 104 Hz, B3 115-197 / 225-370, B4 183-280 / 244-397. Over all f0 the B4 99th percentiles are 708-1236.
+    - That follows from the prior: Hawks & Miller's bandwidths grow with f0 (`tract.bandwidth_prior`), and the cascade multiplies them by only 0.6-1.6. Low-f0 voices with wide bandwidths (breathy, or men with open or leaky glottises) are outside training for every formant at once. That is a single cause shared by D-141's B1 gap, D-155's B2 gap and the B4 sensitivity here.
+  - *Reading*: B4 at 300 Hz and above is beyond training at low f0, and 5b loses F4 there and skips more F2s. B3 is read well to 400 Hz, which training's low-f0 tail nearly reaches. One change would cover B1, B2 and B4 together: a wider bandwidth range at low f0, at least partly decoupled from f0. It needs its own entry, decided on the VocalSet measure with the B2 grid (D-155) and B4 steps reported.
