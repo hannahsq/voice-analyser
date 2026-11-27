@@ -5348,7 +5348,7 @@ Synthetic and training only; descriptive.
 
 ## D-155 (2026-11-27, Hannah: "would you be able to register and run the expanded tipping grid?"; seen beforehand: D-142 to D-154's results, including D-154's post hoc on B2; the synthesiser's bandwidth sampling code (cascade: Hawks & Miller times `bw_factor` 0.6-1.6; tube: the tube's own); train_v2's label file list; nothing of any grid clip with B2 other than 90 Hz, and nothing of train_v2's bandwidth labels): does a wide B2 tip the dropped formant, and does training cover it?
 
-*Status*: registered. `scripts/analysis/d155_b2_grid.py` (`render`, `run`, `coverage`, `report`). CPU, inference only.
+*Status*: done 2026-11-27: grid **B2 MATTERS**, coverage **B2 GAP**. `scripts/analysis/d155_b2_grid.py` (`render`, `run`, `coverage`, `report`). CPU, inference only, about 15 minutes.
 
 - *Why*: D-154's post hoc found that through our own resonators, 5b skips F2 once B2 is wide. Correct files resynthesised with B2 under 150 Hz didn't fail; those at or above 150 Hz failed at a third of their frames. D-142's grid fixes B2 at 90 Hz, which may be why fixes that work on it don't reach VocalSet (D-153).
 - *Part 1, the grid with B2 steps*: D-142's grid clips (`_grid_audio`: cascade, uncoupled, Rd 1.0, 3 s; B3 120 Hz and B4 150 as before) with B2 at 90, 150, 250 and 400 Hz.
@@ -5371,3 +5371,16 @@ Synthetic and training only; descriptive.
   - The grid's F2 is wide but otherwise the cascade's; real weak F2s might also come from zeros or coupling.
   - train_v2 is 5b's synthetic set; the resynthesised share (Hawks & Miller times 0.6-1.6) isn't counted.
 - Reports: `reports/analysis/d155/d155.{txt,json}`. Clips and per-clip scores in `cache/d155/`, not committed.
+- *Result (2026-11-27; `reports/analysis/d155/d155.txt`)*: grid **B2 MATTERS**; coverage **B2 GAP**.
+  - *Render check*: at B2 = 90, D-147's primary cells score 0.34 and 0.17, as D-147.
+  - *5b at low f0, by B2* (90 / 150 / 250 / 400 Hz): seed mean 0.35 / 0.36 / 0.52 / 0.89; seed 1 0.40 / 0.42 / 0.62 / 1.00; seed 2 0.30 / 0.31 / 0.41 / 0.78.
+    - Δ is +0.54 (seed 1 +0.60, seed 2 +0.48).
+    - B2 alone tips it: at B1 = 150, O-like fails 0.00 at B2 = 90 and 0.79 at 400, and 6-like 0.00 and 0.51. With wide B1, B2 = 250 is enough: O-like at B1 = 360 fails 0.51 at B2 = 90 and 0.99 at 250.
+    - At f0 180-220, O-like at B2 = 400 also fails (0.72-1.00); 6-like barely does.
+  - *Coverage*: train_v2 has 57,033 sampled frames near the failing vowels (f0 ≤ 150, F1 400-600, F2 700-1100). Their median B2 is 47 Hz (tube 55, cascade 36), and none is above 150 Hz.
+    - Over all sonorant frames, 14.2 % have B2 above 150 and 3.9 % above 250, nearly all where F2 is high. B1 and B2 above 250 together is 0.1 %.
+  - *Arms (reported)*: every run fails more at wide B2 (0.21-0.84 against 0.10-0.47 at 90). The grid's ranking of the twelve runs doesn't follow D-153's VocalSet measure, at either B2 (Spearman +0.06 and +0.01). None of the arms changes B2 coverage, and D-153's spread among them was within the null branches', so there was little VocalSet ranking to follow.
+  - *Reading*: a wide B2 makes the model skip F2 at back-vowel F1-F2 spacings, and training never shows a B2 above about 150 Hz near those vowels. That is a coverage gap like D-141's B1 gap, and stronger: it is complete, and B2 alone is enough to tip it.
+    - It fits D-154's artefact (resynthesis at Praat's B2 failed in step with B2) and the real failing files' wider Praat B2.
+    - Whether real F2s are that wide is still open, since Praat may overestimate B2 when F1 and F2 are close. The model fails at B2 = 250 either way.
+    - A training arm widening B2 near these vowels, decided on D-152 / D-153's VocalSet measure with the grid reported, is the natural next entry.

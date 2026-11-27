@@ -1,0 +1,45 @@
+D-155: the tipping grid with B2 steps (D-142's clips, seeds 20-22; failure = F2 nearer the true F3 than the true F2)
+
+  render check (B2 = 90, D-147's primary cells; D-147: s1 0.34, s2 0.17): d040_5b_s1_b20k 0.34, d040_5b_s2_b20k 0.17
+
+  5b, low f0 (110, 140), all B1, both sets; failure by B2:
+    d040_5b_s1_b20k    B2 90: 0.40  B2 150: 0.42  B2 250: 0.62  B2 400: 1.00
+    d040_5b_s2_b20k    B2 90: 0.30  B2 150: 0.31  B2 250: 0.41  B2 400: 0.78
+    mean               B2 90: 0.35  B2 150: 0.36  B2 250: 0.52  B2 400: 0.89
+
+  5b seed mean by set, B1 and B2 (low f0 | f0 180-220):
+    O-like B1 150: B2 90 0.00|0.00  B2 150 0.03|0.00  B2 250 0.31|0.08  B2 400 0.79|0.72
+    O-like B1 250: B2 90 0.16|0.00  B2 150 0.26|0.00  B2 250 0.55|0.02  B2 400 0.90|0.81
+    O-like B1 360: B2 90 0.51|0.00  B2 150 0.55|0.00  B2 250 0.99|0.04  B2 400 1.00|0.98
+    O-like B1 500: B2 90 0.75|0.01  B2 150 0.91|0.00  B2 250 1.00|0.34  B2 400 1.00|1.00
+    O-like B1 700: B2 90 0.99|0.50  B2 150 1.00|0.42  B2 250 1.00|0.38  B2 400 1.00|0.92
+    6-like B1 150: B2 90 0.00|0.00  B2 150 0.00|0.00  B2 250 0.00|0.00  B2 400 0.51|0.10
+    6-like B1 250: B2 90 0.00|0.00  B2 150 0.00|0.00  B2 250 0.00|0.00  B2 400 0.73|0.00
+    6-like B1 360: B2 90 0.00|0.00  B2 150 0.00|0.00  B2 250 0.03|0.00  B2 400 0.98|0.00
+    6-like B1 500: B2 90 0.09|0.00  B2 150 0.00|0.00  B2 250 0.50|0.00  B2 400 1.00|0.00
+    6-like B1 700: B2 90 1.00|0.00  B2 150 0.89|0.00  B2 250 0.77|0.00  B2 400 1.00|0.00
+
+  arms, low f0 (reported): failure at B2 = 90 and at B2 250-400; D-153's VocalSet measure
+    d040_5b_s1_b20k    B2 90 0.401   B2 250-400 0.809   VocalSet 0.169
+    d040_5b_s2_b20k    B2 90 0.297   B2 250-400 0.598   VocalSet 0.204
+    d090_f5_s1         B2 90 0.362   B2 250-400 0.779   VocalSet 0.208
+    d090_f5_s2         B2 90 0.263   B2 250-400 0.552   VocalSet 0.192
+    d090_f57_s1        B2 90 0.466   B2 250-400 0.841   VocalSet 0.258
+    d090_f57_s2        B2 90 0.192   B2 250-400 0.422   VocalSet 0.199
+    d080_a0_s1         B2 90 0.351   B2 250-400 0.726   VocalSet 0.279
+    d080_a0_s2         B2 90 0.099   B2 250-400 0.208   VocalSet 0.211
+    d080_a1_s1         B2 90 0.239   B2 250-400 0.567   VocalSet 0.191
+    d080_a1_s2         B2 90 0.099   B2 250-400 0.241   VocalSet 0.179
+    d098_base_b20k     B2 90 0.232   B2 250-400 0.371   VocalSet 0.220
+    d098_heads_b20k    B2 90 0.121   B2 250-400 0.248   VocalSet 0.276
+    Spearman with VocalSet across the 12 runs: B2 90 +0.06, B2 250-400 +0.01 (reported only)
+
+  train_v2 coverage (every 10th sonorant voiced frame); near = f0 <= 150, F1 400-600, F2 700-1100:
+    near|all                  57033 frames; B2 median 47; above 150 0.0%, 250 0.0%, 400 0.0%; B1 and B2 above 250 0.0%
+    near|tube                 33482 frames; B2 median 55; above 150 0.0%, 250 0.0%, 400 0.0%; B1 and B2 above 250 0.0%
+    near|cascade              23551 frames; B2 median 36; above 150 0.0%, 250 0.0%, 400 0.0%; B1 and B2 above 250 0.0%
+    all_sonorant|all        2182622 frames; B2 median 81; above 150 14.2%, 250 3.9%, 400 1.0%; B1 and B2 above 250 0.1%
+    all_sonorant|tube       1306610 frames; B2 median 80; above 150 8.4%, 250 1.2%, 400 0.1%; B1 and B2 above 250 0.0%
+    all_sonorant|cascade     876012 frames; B2 median 84; above 150 23.0%, 250 8.0%, 400 2.3%; B1 and B2 above 250 0.2%
+
+Reading (registered): grid B2 MATTERS: a wide B2 tips the dropped formant on the grid (delta B2 400 - 90: seed mean +0.54, d040_5b_s1_b20k +0.60, d040_5b_s2_b20k +0.48); coverage B2 GAP (0.0% of near frames above 250 Hz)
