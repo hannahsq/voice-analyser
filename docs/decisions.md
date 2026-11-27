@@ -5303,3 +5303,32 @@ Synthetic and training only; descriptive.
   - Failing files follow the same pattern for every run: /o/ and /u/ carry nearly all of them, /a/ at most 9 of 67.
   - *Reading*: neither candidate fix carries over from the tipping grid to held-out singers. D-147's coupled gain (below the branch spread on the grid, on both seeds) and D-148 and D-149's heads gain (lowest on the grid at every checkpoint) don't appear here. This agrees with D-149's private result. The grid is not a good stand-in for the real failure, so an arm aiming at it should be decided on this measure (or a successor), with the grid reported.
     - The seed-1 null spread is wide (0.17-0.26) and seed 2's narrow (0.19-0.20), so a single branch's difference of a few points is within run-to-run variation.
+
+## D-154 (2026-11-27, Hannah: "Would you be able to register and run the resynth follow-up?"; seen beforehand: D-152 and D-153's results, including 5b's failing and OK files on D-152's fixed frames; the resynthesis and synthesiser code; a function check on one of a held-out woman's files, outside the set (shapes, lengths and finiteness only); nothing of any resynthesised or synthesised VocalSet audio): is the real-voice failure in the source, the tract, or the formant pattern?
+
+*Status*: registered. `scripts/analysis/d154_resynth_decomp.py` (`run`, `report`). CPU, inference only.
+
+- *Why*: D-153 found that fixes that work on the tipping grid don't carry over to VocalSet's held-out men. The grid's O-like vowel has nearly the failing /o/'s F1 and F2, so something in real recordings that the grid lacks carries the failure. Replacing the real recording's parts one at a time with ours shows which.
+- *Files and frames*: D-152's primary files, with D-153's fixed frames (188 files). They are split by 5b's seed mean on the original audio: 36 failing (at least 0.5), 137 OK (below 0.2), and 15 in between, which are reported only.
+- *The tract used for every resynthesis*: Praat's F1-F4 and B1-B4 (Burg, ceiling 5000 Hz, as D-152), per 10 ms frame.
+  - Gaps are interpolated over time. Formants are smoothed as resynthesis does for singing (`smooth_tracks`: median 9 frames, Gaussian SD 6, on voiced frames). Bandwidths get a median filter of 9 frames and are clipped to 20-1000 Hz.
+  - No poles above F4, as in the grid's clips.
+- *Conditions*:
+  - **O**: the original recording (D-152's numbers).
+  - **R** (real source, our tract): the recording's source from IAIF (`resynth.inverse.iaif`, the method `auto` uses below 250 Hz), refiltered through our resonators at that tract (`resynth.render.refilter`).
+  - **S** (our source, our tract): the synthesiser's source (`synth.voice.synthesize`, as D-142's grid clips: Rd 1.0, jitter 0.01, shimmer 0.5 dB, no aspiration). It follows the recording's f0 track (5b seed 2's, held across unvoiced frames), voiced where 5b seed 2's voicing is above 0.5 (20 ms ramps), through the same tract.
+  - Each is peak-normalised to 0.5.
+- *Measure*: the frame failure share on the fixed frames (the model's F2 nearer the reference F3 than the reference F2), 5b's seed mean, averaged over files. The reference is Praat's raw track for O, and the tract the audio was built with for R and S.
+  - Reported: O scored against the smoothed tract as well, as a check that smoothing doesn't move the measure. Also the IAIF source's tract left (`source_qc`, median over voiced frames), which shows how much of the real tract the source still carries.
+- *Validity condition*: on the OK files, R's and S's failure shares are each below 0.2. Otherwise the reading is **RESYNTHESIS ARTEFACT**: the conversion itself creates failures, so it can't be used to locate them.
+- *Rule* (failing files):
+  - **REAL TRACT** if R is below 0.2: the failure goes once our resonators replace the real tract's response (zeros, F2's real level or shape, coupling: whatever four resonators at Praat's values don't reproduce).
+  - **REAL SOURCE** if R is at least 0.5 and S below 0.2: the failure survives our tract with the real source, and goes with ours.
+  - **FORMANT PATTERN** if R and S are both at least 0.5: our source and tract at the recording's tract values reproduce it. The grid's mismatch would then be in what this tract has and the grid's doesn't (moving formants and bandwidths, F2-F4 bandwidths, the f0 track).
+  - **PARTLY** otherwise: reported, Hannah decides.
+- *Caveats*:
+  - Praat's track is the tract. Where Praat is wrong, R and S get a different vowel, and its bandwidths are noisy.
+  - IAIF at low f0 can leave part of the tract in the source (hence the tract-left report). Where it does, R carries some of the real tract too, which would push towards REAL SOURCE.
+  - Smoothing removes formant movement faster than about 5 Hz.
+  - Three singers, and 36 failing files.
+- Reports: `reports/analysis/d154/d154.{txt,json}`. Per-file values in `cache/d154/`, not committed.
