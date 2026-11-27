@@ -5521,7 +5521,7 @@ Synthetic and training only; descriptive.
 
 ## D-160 (2026-11-27, Hannah: "Could you draft Option A for now?", then "Could you update the draft with the points you outlined?", then "Looks good to me, can probably run on more threads (at least 16, up to 29) since the cpu and gpu are both idle"; seen beforehand: D-147 to D-159's results; D-065's design and result; D-080's branch chain; the sampler's bandwidth and Rd code; `tube.poles` at three perimeter factors (considering.md, 2026-11-27); nothing of any model trained on the data below): wider low-f0 bandwidths and an off-line return phase, as one data arm
 
-*Status*: registered. Render  (24 CPU workers, Hannah's 16-29); chain ; scoring and decision .
+*Status*: registered. Render `scripts/analysis/d160_make_set.py` (24 CPU workers, Hannah's 16-29); chain `scripts/analysis/chains/d160.sh`; scoring and decision `scripts/analysis/d160_score.py`.
 
 - *Why*:
   - D-155 and D-156 found that training's bandwidths at low f0 are narrow for every formant. Hawks & Miller's values scale with f0, and the cascade multiplies them by only 0.6-1.6. Near back vowels no B2 is above 150 Hz, and a wide B2 alone tips the dropped formant.
