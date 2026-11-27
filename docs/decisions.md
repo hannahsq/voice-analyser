@@ -5486,7 +5486,7 @@ Synthetic and training only; descriptive.
 
 ## D-159 (2026-11-27, Hannah: "Would you be able to run the D-065 follow-up test?", after the D-160 draft's step 0; seen beforehand: D-065's design and result (bw failed on probe 7's bar alone); D-152 to D-158's results; nothing of D-065's arms on VocalSet, the B2 grid or the bandwidth read-out): does D-065's partial bandwidth widening already move the dropped formant?
 
-*Status*: registered. `scripts/analysis/d159_d065_bw.py` (`run`, `report`). CPU, inference only.
+*Status*: done 2026-11-27: **MIXED** (see Result; Hannah decides). `scripts/analysis/d159_d065_bw.py` (`run`, `report`). CPU, inference only, about 15 minutes.
 
 - *Why*: the D-160 draft (a data arm with wide low-f0 bandwidths and an off-line return phase) needs GPU time and judgement-set caps. D-065's `bw` arm already trained a partial widening, in full (5b's recipe, 20,000 steps from scratch, seeds 1 and 2). Each formant got a log-uniform factor of 0.4-2.5 on the cascade's Hawks & Miller prior and on the tube's bandwidths, against train_v2's 0.6-1.6 on the cascade only. Near back vowels at low f0 that reaches roughly 100-125 Hz for B2, still short of D-155's 150 Hz. If even that moves the failure, the direction holds on real voices before any new training.
 - *Runs*:
@@ -5509,3 +5509,12 @@ Synthetic and training only; descriptive.
   - One from-scratch null per seed is thin.
   - D-065 also changed the tube's bandwidths, which train_v2 left unscaled, so bw differs from 5b in two places, both bandwidths.
 - Reports: `reports/analysis/d159/d159.{txt,json}`. Per-run readings in `cache/d153/`, `cache/d155/` and `cache/d159/`, not committed.
+- *Result (2026-11-27; `reports/analysis/d159/d159.txt`)*: **MIXED**; Hannah decides.
+  - *VocalSet* (mean failure share; minus 5b of the seed):
+    - seed 1: 5b 0.169, bw 0.228 (+0.059 [+0.019, +0.103]), gain 0.249 (+0.080 [+0.053, +0.112]);
+    - seed 2: 5b 0.204, bw 0.153 (-0.051 [-0.079, -0.021]), gain 0.224 (+0.020 [-0.009, +0.050]).
+    - bw fails less than gain on both seeds (by 0.021 and 0.071), but against 5b it is worse on seed 1 and better on seed 2. Over the two seeds, 5b's mean is 0.187, bw's 0.191 and gain's 0.237.
+  - *The B2 grid* (low f0, B2 250-400): 5b 0.81 / 0.60, bw 0.88 / 0.59, gain 0.95 / 0.53 (seeds 1 / 2). The partial widening doesn't teach the model to read a wide B2, as expected for a dose that stays under 150 Hz near these vowels.
+  - *Read-out*: bw underestimates a little less. At B1 150 / B2 90, B1's log2 ratio is -1.12 / -0.92 against 5b's -1.19 / -1.15. At B1 360 / B2 90, B2 is +0.06 / -0.12 against -0.37 / -0.59. gain moves B2 there the same way on seed 1, so part of that is run-to-run.
+  - *Reading*: from-scratch runs with an unrelated change move the VocalSet measure by 0.02-0.08 against 5b of the same seed (gain), which is as large as bw's effect. So this dose can't be told from run-to-run variation on real voices. With the grid not moving either, the registered reading guide's last case fits best: 0.4-2.5 is too small a dose to say anything.
+    - For the D-160 draft: from-scratch variation on this measure is several times the seed-2 branch spread (0.19-0.20, D-153), which favours the branch design and its branch nulls. A real-voice effect must clear about 0.05-0.08 to be seen against a from-scratch null.
