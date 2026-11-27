@@ -1,0 +1,10 @@
+women
+  within 50 ms of a voicing edge: flagged 34%, unflagged 45%
+  f: median F1-F4 [ 395. 1390. 2312. 3821.], F2/F1 3.11, frame L 16.2
+  u: median F1-F4 [ 510. 1752. 2883. 4037.], F2/F1 3.31, frame L 15.6
+  flagged F1 quartiles [303. 395. 497.] F2 [1130. 1390. 1583.]
+men
+  within 50 ms of a voicing edge: flagged 33%, unflagged 48%
+  f: median F1-F4 [ 344. 1182. 2171. 3179.], F2/F1 3.29, frame L 18.1
+  u: median F1-F4 [ 427. 1444. 2448. 3453.], F2/F1 3.22, frame L 18.2
+  flagged F1 quartiles [263. 344. 412.] F2 [1007. 1182. 1395.]

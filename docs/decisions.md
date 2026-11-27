@@ -5195,7 +5195,7 @@ Synthetic and training only; descriptive.
 
 ## D-151 (2026-11-27, Hannah: "would you be able to run a sweep over PTDB-TUG to see if the flag picks up anything?"; seen beforehand: D-142 to D-150's results; PTDB-TUG's dev-tier counts (2830 utterances, 12 speakers, 6 women and 6 men); a function check of the thresholds (read from D-142's scores) and of the run detection on a toy mask; nothing of flag B on any PTDB-TUG audio): where does flag B fire on read speech?
 
-*Status*: registered. `scripts/analysis/d151_ptdb_flag.py` (`run`, `report`). CPU, inference only, dev tier only.
+*Status*: done 2026-11-27: **FLAGS SOMETHING ELSE**. `scripts/analysis/d151_ptdb_flag.py` (`run`, `report`). CPU, inference only, dev tier only.
 
 - *Why*: flag B (D-142, accepted) was validated on the tipping grid and on a private recording's held vowels. D-150 found that Hillenbrand's dev voices never produce the failure's conditions. Two things are unknown: how often flag B fires on ordinary read speech, which matters for any live use, and whether what it flags there looks like the dropped formant.
 - *Data*: PTDB-TUG's dev tier, every utterance. There are no formant references, so Praat Burg (ceiling 5000 Hz for men, 5500 for women) stands in for one.
@@ -5216,3 +5216,13 @@ Synthetic and training only; descriptive.
   - A speaker's length pooled over all their sentences is steadier than over a round of held vowels.
   - Per-speaker results stay out of the report.
 - Reports: `reports/analysis/d151/d151.{txt,json}`. Per-frame values in `cache/d151/`, not committed.
+- *Result (2026-11-27)*: **FLAGS SOMETHING ELSE** (5b seed 2).
+  - Per utterance, D-142's unit, flag B almost never fires: 0.1 % of utterances for both sexes (seed 1: 0.0 %).
+  - Per frame, 7.8 % of voiced frames are in flagged runs (women 5.3 %, men 10.4 %; seed 1: 2.3 %).
+  - Those frames don't show the dropped pattern against Praat any more often than the rest: 2.6 % flagged against 3.4 % unflagged (seed 1: 2.4 % against 3.0 %).
+  - Their f0 matches the other frames' (women 183 against 194 Hz, men 104 against 105). Praat's B1 is slightly wider (women 127 against 115 Hz, men 120 against 104), and the model's F1 is a little further from Praat's (women 122 against 95 cents, men 100 against 73). None of this is the dropped formant's signature (B1 above 250 Hz, F1 merged into F2).
+  - *Post hoc, not registered* (`scripts/analysis/d151_posthoc.py`, `reports/analysis/d151/d151_posthoc.txt`; seed 2):
+    - The flagged frames are not transitions: fewer of them lie within 50 ms of a voicing edge than the other frames do (women 34 % against 45 %, men 33 % against 48 %).
+    - They read low F1, F2 and F3 together. For women the median is 395 / 1390 / 2312 Hz against 510 / 1752 / 2883; for men, 344 / 1182 / 2171 against 427 / 1444 / 2448.
+    - That looks like liquids, glides, rhotic or rounded sounds (a low F3 is /r/'s mark). Those sonorants are probably sparse among the tube frames, which are vowel-like. PTDB-TUG has no phone alignment, so this is an inference from the formant values, not a label.
+  - *Reading*: flag B as built is a recording-level check for held vowels. On running speech it stays quiet per utterance. Per frame it marks out-of-prior consonant-like stretches, not misread vowels, so a frame-level live use would need the prior to cover those sounds (or a phone gate) first. Nothing here changes D-142's acceptance for its own unit.

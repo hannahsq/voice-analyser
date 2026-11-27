@@ -1,0 +1,18 @@
+D-151: flag B (D-142) over PTDB-TUG's dev tier (12 speakers, read sentences)
+  threshold per model: D-142's (95th percentile of not-failing grid clips): d040_5b_s2_b20k 0.61, d040_5b_s1_b20k 0.89
+  a flagged run: >= 5 consecutive voiced frames above it; 'dropped against Praat': the model's F2 nearer Praat's F3 than its F2 (Praat Burg, ceiling 5000 Hz men, 5500 women)
+
+  d040_5b_s2_b20k
+    women: utterances flagged (median score) 0.1%; frames in flagged runs 5.33% of 239070
+           dropped against Praat: flagged 4.1%, unflagged 4.7%; median f0 183 / 194 Hz; Praat B1 127 / 115 Hz; |F1 - Praat F1| 122 / 95 c
+    men  : utterances flagged (median score) 0.1%; frames in flagged runs 10.37% of 223059
+           dropped against Praat: flagged 1.7%, unflagged 1.9%; median f0 104 / 105 Hz; Praat B1 120 / 104 Hz; |F1 - Praat F1| 100 / 73 c
+    all: frames in flagged runs 7.76%; dropped against Praat 2.6% flagged, 3.4% unflagged
+  d040_5b_s1_b20k
+    women: utterances flagged (median score) 0.0%; frames in flagged runs 1.01% of 233770
+           dropped against Praat: flagged 6.0%, unflagged 4.3%; median f0 175 / 194 Hz; Praat B1 158 / 115 Hz; |F1 - Praat F1| 306 / 99 c
+    men  : utterances flagged (median score) 0.0%; frames in flagged runs 3.71% of 222772
+           dropped against Praat: flagged 1.4%, unflagged 1.6%; median f0 103 / 105 Hz; Praat B1 136 / 104 Hz; |F1 - Praat F1| 184 / 74 c
+    all: frames in flagged runs 2.33%; dropped against Praat 2.4% flagged, 3.0% unflagged
+
+Reading (registered; d040_5b_s2_b20k): FLAGS SOMETHING ELSE: the flagged frames are not the failure's pattern

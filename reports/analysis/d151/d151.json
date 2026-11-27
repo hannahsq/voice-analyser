@@ -1,0 +1,64 @@
+{
+ "threshold": {
+  "d040_5b_s2_b20k": 0.6136034839388932,
+  "d040_5b_s1_b20k": 0.8886140717427259
+ },
+ "speakers": {
+  "d040_5b_s2_b20k": {
+   "F": {
+    "utterances_flagged": 0.0007072135785007072,
+    "frames": 239070,
+    "flagged_share": 0.053260551302965656,
+    "drop_flagged": 0.041316471604744325,
+    "drop_unflagged": 0.04697523991304809,
+    "f0_flagged": 183.3000379380582,
+    "f0_unflagged": 194.2478494076113,
+    "praat_b1_flagged": 127.02844387336035,
+    "praat_b1_unflagged": 114.8550949215846,
+    "f1err_flagged": 122.13880182769299,
+    "f1err_unflagged": 95.3381252269075
+   },
+   "M": {
+    "utterances_flagged": 0.0014124293785310734,
+    "frames": 223059,
+    "flagged_share": 0.10374385252332342,
+    "drop_flagged": 0.017069270990881985,
+    "drop_unflagged": 0.019298008673599543,
+    "f0_flagged": 104.49234155273722,
+    "f0_unflagged": 104.60306568289523,
+    "praat_b1_flagged": 119.73849397537286,
+    "praat_b1_unflagged": 103.65688565206008,
+    "f1err_flagged": 99.65879127387886,
+    "f1err_unflagged": 72.77568994559681
+   }
+  },
+  "d040_5b_s1_b20k": {
+   "F": {
+    "utterances_flagged": 0.0,
+    "frames": 233770,
+    "flagged_share": 0.010091115198699577,
+    "drop_flagged": 0.06019499788045782,
+    "drop_unflagged": 0.04320544843262491,
+    "f0_flagged": 174.94968952665482,
+    "f0_unflagged": 193.80276574170944,
+    "praat_b1_flagged": 158.37112914025303,
+    "praat_b1_unflagged": 114.63195586557934,
+    "f1err_flagged": 305.6878344633261,
+    "f1err_unflagged": 98.58774453232664
+   },
+   "M": {
+    "utterances_flagged": 0.0,
+    "frames": 222772,
+    "flagged_share": 0.037145601781193326,
+    "drop_flagged": 0.014142390910189774,
+    "drop_unflagged": 0.016242651412374066,
+    "f0_flagged": 102.94475665721623,
+    "f0_unflagged": 104.56746460655793,
+    "praat_b1_flagged": 136.42052825211488,
+    "praat_b1_unflagged": 104.41768892169029,
+    "f1err_flagged": 184.06290431064915,
+    "f1err_unflagged": 74.07030283995542
+   }
+  }
+ }
+}
