@@ -5483,3 +5483,29 @@ Synthetic and training only; descriptive.
   - *The model's bandwidths (reported)*: on every source, at the narrow cell (B1 150, B2 90), 5b reads B1 at about 2^-1.2, about 0.43 of the truth (log2 ratio -1.07 to -1.39 at low f0, -1.35 to -1.50 higher). It reads B2 at about 0.63 (-0.62 to -0.78; -0.35 to -0.62 higher). That is a large, consistent underestimate that doesn't depend on the source, as Hannah recalled from earlier work. It fits training's narrow low-f0 bandwidths (D-155, D-156): B1 = 150 Hz is already near the top of training's range there.
   - *Caveat*: 18 chances for a range to reach 0.15. The two that do agree in parameter, effect and direction, at two anchors, which makes chance less likely.
   - *Reading*: the bandwidth arm should leave the line in Ra: draw the return phase independently around Fant's value, not only Rd. Rg and Rk can stay on the line. For the sloped comb (considering.md, 2026-11-27), the tilt (Ra) is the parameter it needs beyond Rd.
+
+## D-159 (2026-11-27, Hannah: "Would you be able to run the D-065 follow-up test?", after the D-160 draft's step 0; seen beforehand: D-065's design and result (bw failed on probe 7's bar alone); D-152 to D-158's results; nothing of D-065's arms on VocalSet, the B2 grid or the bandwidth read-out): does D-065's partial bandwidth widening already move the dropped formant?
+
+*Status*: registered. `scripts/analysis/d159_d065_bw.py` (`run`, `report`). CPU, inference only.
+
+- *Why*: the D-160 draft (a data arm with wide low-f0 bandwidths and an off-line return phase) needs GPU time and judgement-set caps. D-065's `bw` arm already trained a partial widening, in full (5b's recipe, 20,000 steps from scratch, seeds 1 and 2). Each formant got a log-uniform factor of 0.4-2.5 on the cascade's Hawks & Miller prior and on the tube's bandwidths, against train_v2's 0.6-1.6 on the cascade only. Near back vowels at low f0 that reaches roughly 100-125 Hz for B2, still short of D-155's 150 Hz. If even that moves the failure, the direction holds on real voices before any new training.
+- *Runs*:
+  - `d065_bw_s{1,2}_b20k`, against 5b (`d040_5b_s{1,2}_b20k`) of the same seed. Same recipe and seed, one change (paired, as D-065 decided them).
+  - **Reported as the from-scratch null**: `d065_gain_s{1,2}_b20k`, D-065's other arm, the same recipe and seed with an unrelated change (the training level range). It is the only other from-scratch arm per seed, so it shows roughly how far an unrelated change moves these measures.
+- *Measures*:
+  1. **Deciding**: D-153's VocalSet measure. D-152's 188 files, D-153's fixed frames, the mean frame failure share; each run against 5b of its seed, with a paired bootstrap over files (1000 resamples).
+  2. **Reported**: D-155's B2 grid, the low-f0 failure at B2 = 90, at 250-400 together, and per step.
+  3. **Reported**: the bandwidth read-out on D-155's grid clips at low f0: the median log2 ratio of the model's B1 and B2 to the truth, at B2 = 90 and 250, B1 = 150 and 360. Does a partial widening shrink D-158's underestimate?
+- *Rule*, on (1):
+  - **MOVES** if on both seeds bw minus 5b has a paired interval below 0 and bw fails less than gain of the same seed.
+  - **NO MOVE** if on neither seed the interval lies below 0.
+  - **MIXED** otherwise: reported, Hannah decides.
+- *Reading* for the D-160 draft:
+  - MOVES: a partial widening already helps on real voices, so the arm's direction holds, and its caps can be judged against this dose.
+  - NO MOVE with the grid moving: the dose learned on synthetic clips doesn't reach these voices, so D-160's wider caps are the test.
+  - NO MOVE with the grid not moving either: 0.4-2.5 is too small a dose to say anything.
+- *Caveats*:
+  - train_bw_v1 is no longer on disk, so its low-f0 B2 coverage near back vowels is inferred from the factor, not counted.
+  - One from-scratch null per seed is thin.
+  - D-065 also changed the tube's bandwidths, which train_v2 left unscaled, so bw differs from 5b in two places, both bandwidths.
+- Reports: `reports/analysis/d159/d159.{txt,json}`. Per-run readings in `cache/d153/`, `cache/d155/` and `cache/d159/`, not committed.
