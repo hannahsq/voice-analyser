@@ -5422,7 +5422,7 @@ Synthetic and training only; descriptive.
 
 ## D-157 (2026-11-27, Hannah: "Could you register and run the joint probe?"; seen beforehand: D-141 to D-156's results, including D-155's per-clip grid scores at Rd 1.0; the sampler's Rd draw (`cfg.rd`, a wander and an optional step, clipped to 0.3-2.7); a function check of one Rd 2.7 render (length and finiteness only); nothing of any grid clip at Rd other than 1.0, and nothing of train_v2's Rd labels): does the source's slope change the wide-bandwidth failure, and does training cover the two together at low f0?
 
-*Status*: registered. `scripts/analysis/d157_rd_bw.py` (`run`, `coverage`, `report`). CPU, inference only.
+*Status*: done 2026-11-27: **PARTLY** (see Result; Hannah decides). `scripts/analysis/d157_rd_bw.py` (`run`, `coverage`, `report`). CPU, inference only, about 10 minutes.
 
 - *Why*: D-155 and D-156 found that training's bandwidths at low f0 are narrow for every formant, and that a wide B2 alone tips the dropped formant. A wide formant and a steep source slope both take energy out of the spectrum (D-144's trade-off), and in real voices they go together (breathy phonation). Before a bandwidth arm is designed, this asks whether it must vary the source slope as well.
 - *Part A, the grid*: D-155's clips (cascade, uncoupled, 3 s, B3 120 Hz, B4 150) with Rd at 0.6, 1.0, 1.8 and 2.7, crossed with B2 at 90 and 250 Hz and B1 at 150 and 360. Both sets, f0 110 / 140 / 180 / 220, seeds 20-22: 384 clips.
@@ -5442,3 +5442,9 @@ Synthetic and training only; descriptive.
   - The Rd 2.7 clips may be outside training's range; part B says how far.
   - The grid's F2 is the cascade's (D-155's caveat).
 - Reports: `reports/analysis/d157/d157.{txt,json}`. Per-clip scores in `cache/d157/`, not committed.
+- *Result (2026-11-27; `reports/analysis/d157/d157.txt`)*: **PARTLY** (B2-effect range 0.08 on the seed mean, between the bounds; slope effect 0.11, just over 0.10). Hannah decides.
+  - *Render check*: the Rd 1.0 clips' scores match D-155's on all 192 clips.
+  - *The wide-B2 effect hardly depends on Rd*: at low f0, B2 250 minus 90 is +0.19 / +0.21 / +0.20 / +0.27 at Rd 0.6 / 1.0 / 1.8 / 2.7 (seed 1 +0.26 to +0.32, seed 2 +0.12 to +0.22). The breathiest source adds a little, but far less than the 0.15 bar.
+  - *The slope's own effect runs the other way to breathiness*: at B2 = 90 the failure is 0.18 / 0.13 / 0.07 / 0.08. Nearly all of it is the O-like vowel with B1 = 360, which fails 0.74 at Rd 0.6 against 0.51, 0.28 and 0.33. A pressed source (low Rd) makes the wide-B1 failure worse, and a breathy one makes it milder.
+  - *Coverage*: Rd itself is covered at low f0 (5th / 50th / 95th percentiles 0.37 / 1.50 / 2.62; 37.5 % at Rd ≥ 1.8, 12.8 % at ≥ 2.4, the same for tube and cascade). Breathy sources with wide bandwidths aren't: of the low-f0 frames at Rd ≥ 1.8, 0.0 % have B1 above 250 Hz and 4.3 % B2 above 150 (none near back vowels, D-155).
+  - *Reading*: on the grid, source slope and bandwidth act roughly additively. A bandwidth arm doesn't need to tie Rd to the bandwidths. It does need its wide bandwidths drawn across the whole Rd range (independently of Rd), which also covers breathy voices' wide-bandwidth combinations. Leaving the Rd line (an independent return phase or open quotient; Hannah's question, 2026-11-27) isn't tested here.

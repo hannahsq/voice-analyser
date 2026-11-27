@@ -1,0 +1,23 @@
+D-157: Rd (source slope) against the wide-bandwidth failure (D-155's grid; failure = F2 nearer the true F3 than the true F2)
+  render check (Rd 1.0 clips against D-155's scores, per clip): 0 of 192 differ
+
+  low f0 (110, 140), B1 150 and 360, both sets: failure at B2 90 / 250, and the B2 effect
+    d040_5b_s1_b20k    Rd 0.6: 0.24 / 0.50 (+0.26)  Rd 1.0: 0.13 / 0.39 (+0.26)  Rd 1.8: 0.11 / 0.39 (+0.28)  Rd 2.7: 0.13 / 0.45 (+0.32)   B2-effect range 0.07, slope effect 0.13
+    d040_5b_s2_b20k    Rd 0.6: 0.12 / 0.25 (+0.12)  Rd 1.0: 0.12 / 0.27 (+0.15)  Rd 1.8: 0.03 / 0.15 (+0.12)  Rd 2.7: 0.03 / 0.25 (+0.22)   B2-effect range 0.10, slope effect 0.09
+    mean               Rd 0.6: 0.18 / 0.38 (+0.19)  Rd 1.0: 0.13 / 0.33 (+0.21)  Rd 1.8: 0.07 / 0.27 (+0.20)  Rd 2.7: 0.08 / 0.35 (+0.27)   B2-effect range 0.08, slope effect 0.11
+
+  5b seed mean by set and B1 (low f0 | f0 180-220), B2 90 / 250:
+    O-like B1 150: Rd 0.6: 0.00/0.25 | 0.00/0.14   Rd 1.0: 0.00/0.31 | 0.00/0.08   Rd 1.8: 0.01/0.28 | 0.00/0.01   Rd 2.7: 0.00/0.50 | 0.00/0.00
+    O-like B1 360: Rd 0.6: 0.74/1.00 | 0.38/0.66   Rd 1.0: 0.51/0.99 | 0.00/0.04   Rd 1.8: 0.28/0.80 | 0.00/0.15   Rd 2.7: 0.33/0.75 | 0.04/0.15
+    6-like B1 150: Rd 0.6: 0.00/0.00 | 0.00/0.00   Rd 1.0: 0.00/0.00 | 0.00/0.00   Rd 1.8: 0.00/0.00 | 0.00/0.00   Rd 2.7: 0.00/0.12 | 0.00/0.00
+    6-like B1 360: Rd 0.6: 0.00/0.25 | 0.00/0.00   Rd 1.0: 0.00/0.03 | 0.00/0.00   Rd 1.8: 0.00/0.00 | 0.00/0.00   Rd 2.7: 0.00/0.03 | 0.00/0.00
+
+  train_v2 coverage (every 10th sonorant voiced frame; labels):
+    low_f0|all         604565 frames; Rd 5/50/95th 0.37/1.50/2.62; Rd >= 1.8 37.5%, >= 2.4 12.8%; of Rd >= 1.8: B1 > 250 0.0%, B2 > 150 4.3%
+    low_f0|tube        359748 frames; Rd 5/50/95th 0.37/1.50/2.63; Rd >= 1.8 37.4%, >= 2.4 12.9%; of Rd >= 1.8: B1 > 250 0.0%, B2 > 150 6.1%
+    low_f0|cascade     244817 frames; Rd 5/50/95th 0.37/1.50/2.61; Rd >= 1.8 37.7%, >= 2.4 12.6%; of Rd >= 1.8: B1 > 250 0.0%, B2 > 150 1.8%
+    all_f0|all        2182622 frames; Rd 5/50/95th 0.37/1.50/2.62; Rd >= 1.8 37.5%, >= 2.4 12.8%; of Rd >= 1.8: B1 > 250 0.2%, B2 > 150 14.2%
+    all_f0|tube       1306610 frames; Rd 5/50/95th 0.37/1.51/2.63; Rd >= 1.8 37.6%, >= 2.4 12.9%; of Rd >= 1.8: B1 > 250 0.0%, B2 > 150 8.4%
+    all_f0|cascade     876012 frames; Rd 5/50/95th 0.37/1.50/2.62; Rd >= 1.8 37.3%, >= 2.4 12.6%; of Rd >= 1.8: B1 > 250 0.5%, B2 > 150 22.8%
+
+Reading (registered; seed mean B2-effect range 0.08, slope effect 0.11): PARTLY: reported, Hannah decides
