@@ -5270,3 +5270,28 @@ Synthetic and training only; descriptive.
   - *Reading*: the failure isn't peculiar to one voice. Back rounded vowels (F1 near 450-500 Hz, F2 near 800) at low f0 are where it happens, from all three men. It is more likely the wider F1 is, but it starts at ordinary bandwidths. Flag B picks out the failing files on singers it was never tuned on.
     - This is D-150's missing condition, a vowel with F2 below about 850 Hz. Hillenbrand had only 3 primary tokens like that.
     - It gives the dropped formant its first real-voice measure that isn't private: held-out singers, Praat as reference, so weaker than hand labels. Any use as a deciding measure for an arm needs its own entry, with its noise floor estimated first (a shuffle or seed null).
+
+## D-153 (2026-11-27, Hannah: "Would you be able to rerun the A0, A1 and D-098 arms?" on D-152's measure; seen beforehand: D-147 to D-152's results, including 5b's two seeds on D-152's frames; the primary file set's size (188 files, 29 minutes of audio); timing with 5b seed 2 on one VocalSet file, run time only (inference 0.64 s per model for 7.5 s of audio, Praat 0.06 s, kNN 0.01 s); a check that the ten checkpoints below exist; nothing of these ten runs on any VocalSet file): do the coupled arms and D-098's arms fail less on held-out singers' sung vowels?
+
+*Status*: registered. `scripts/analysis/d153_vocalset_arms.py` (`run`, `report`). CPU, inference only.
+
+- *Why*: D-152 found the dropped formant on VocalSet's three held-out men (36 of 188 files at f0 ≤ 150 Hz, F1 right and F2 skipped to F3), and so a real-voice measure that isn't private. The candidate fixes so far were tested on synthetic clips: D-080's coupled arms (D-147: below the branch spread on the grid, on both seeds) and D-098's heads arm (D-148, D-149: lowest on the grid, but no gain on a private recording). This tests them on D-152's measure.
+- *Frames, fixed for every run*: D-152's primary block. These are the men's files with at least 10 frames voiced by 5b seed 2, in D-141's cell by Praat, at f0 ≤ 150 Hz by 5b seed 2 (188 files from 3 singers). Each run reads its own F2 on the same frames, so comparisons are paired. A frame fails if the run's F2 is nearer Praat's F3 than Praat's F2.
+- *Measure (deciding)*: the mean over files of the file's frame failure share, each run's own formant heads.
+  - Reported: failing files (share at least 0.5), by vowel; each arm minus 5b of its seed, with a paired bootstrap 95 % interval over files (1000 resamples).
+- *Runs*:
+  - **Null** (as D-147): 5b's b20k (scored in D-152, reused from its cache), D-090's `d090_f5` and `d090_f57`, seeds 1 and 2.
+  - **Coupled**: `d080_a0`, `d080_a1`, seeds 1 and 2.
+  - **D-098**: `d098_base_b20k` and `d098_heads_b20k`, seed 1 only (D-099 is parked). They are trained from scratch at a different width and mix, so the seed-1 nulls are a context for them, not a matched control.
+- *Rule, coupled* (as D-147's, each seed separately): **below** if both coupled arms fail less than every null run of that seed; **within** if some null run fails as little as (or less than) the better coupled arm; otherwise mixed.
+  - Both seeds below: **COUPLED LOWER ON REAL VOICES**. Under exchangeability of the five runs per seed, the chance of that is 1 %.
+  - Either seed within: **NOT LOWER**.
+  - Otherwise **MIXED**: reported, Hannah decides.
+- *Rule, D-098* (seed 1): each of base and heads is **below the null** if it fails less than all three seed-1 null runs, **within** otherwise.
+  - Heads against base: **HEADS LOWER** if heads is below the null, fails less than base, and the paired interval of heads minus base excludes 0. **NOT LOWER** if heads fails as much as base or more. **UNCLEAR** otherwise.
+- *Caveats*:
+  - The frames are chosen with 5b seed 2's voicing and f0. That could favour 5b seed 2 slightly, and it is shared by every run.
+  - There are three singers. The bootstrap is over files, so it understates the uncertainty about other voices.
+  - Praat is the reference (D-152's caveats).
+  - Only the primary block is scored, to keep the run short (about 3 minutes a model). D-152's other blocks aren't repeated.
+- Reports: `reports/analysis/d153/d153.{txt,json}`. Per-frame readings in `cache/d153/`, not committed.
