@@ -1,0 +1,4 @@
+D-161 re-render verify: data/resynth/vocalset_val_d16k_h40 against data/resynth/vocalset_val_d16k (flat arrays, every clip)
+  source_h_db: 8 -> 40 harmonics
+  3800 clips
+Result: IDENTICAL apart from the added harmonics

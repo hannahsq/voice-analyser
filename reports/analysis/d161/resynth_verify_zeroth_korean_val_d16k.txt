@@ -1,0 +1,4 @@
+D-161 re-render verify: data/resynth/zeroth_korean_val_d16k_h40 against data/resynth/zeroth_korean_val_d16k (flat arrays, every clip)
+  source_h_db: 8 -> 40 harmonics
+  2084 clips
+Result: IDENTICAL apart from the added harmonics
