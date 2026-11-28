@@ -5629,3 +5629,102 @@ Synthetic and training only; descriptive.
     - B3 at F3 2500-3000: 82 / 153 / 340 → 106 / 388 / 619;
     - B4 at F4 3500-4000: 118 / 224 / 310 → 154 / 486 / 759.
   - The medians move only 20-30 %, so the prior's centre stays close, and the tails reach the grids' failure ranges.
+
+## D-161 (2026-11-28, Hannah: "Next up is testing the source comb modification right?", then the warm restart with a truth ramp, resynthesised clips kept off the truth, a direct comb head, "I'd be happy to rerun the resynthesis to get measured harmonics", the source as an envelope beside the flat comb, and the monotone constraint after H2, with H1-H2 free ("For this round could we keep H2-H3 monotonically decreasing with H1-H2 the only less constrained delta?"), and the residue measure refitted with D-160 for both the count and the loss weight ("If you don't see an issue with using it for both, then both seems the most sensible"), with a length-set LPC basis, the max over bases with a shuffle null, and a flag-screened count, then "I can't see anything obviously wrong with any of the values you suggested so I'm happy to register it as-is"; seen beforehand: D-147 to D-160's results; D-080 and D-081's source-head results; the comb, the input normalisation, the f0 comb's truth ramp and `decay_hold` in the trainer; the resynthesis render code, its tract_left QC and the four resynthesised sets' stored configs; LF's harmonic levels over Rd 0.3-2.7 and Ra factors 0.5-3 (below); nothing of any model trained with a source input): a predicted source envelope as a fourth input channel, against a matched control
+
+*Status*: registered. Nothing has run.
+
+- *Why*:
+  - D-144: when the source's slope is free, a wide pole can stand in for the slope instead of a formant. D-145: a trunk that keeps the source places a wide F1 only 6-12 % better, so the source has to be used structurally. This is the input-side version (considering.md, *A source-sloped f0 comb*, Added 2026-11-27), here as an envelope beside the existing comb rather than a reshaped comb.
+  - The entry's precondition holds now. D-160 taught the model wide low-f0 bandwidths: the B2 grid failure fell from 0.81 to 0.22 and from 0.60 to 0.38, with no cost elsewhere. But it lowered VocalSet's failure on seed 1 only, and its F3 at B3 600 and F4 at wide B4 are still lost.
+  - The source's shape needs Ra beside Rd (D-158). Free per-harmonic levels carry both, and real sources' departures from LF too.
+  - *Why not a fixed slope*: the comb is a fixed function of f0, so a fixed slope only reweights it, which the trunk could learn itself. It adds no information about the clip's source.
+  - *Why not a decay branch*: 4000 decaying steps from a trunk that has read a flat comb for 16,000 is a short time to learn a new input and a new head. The synthetic headroom left after D-160 is small, so the decision has to be on real voices. The input therefore has to come from a predicted source by the end, which needs a ramp off the truth with time left after it.
+  - *Why an envelope, not a reshaped comb*: stage 2's input is log power, where a harmonic's level is the source's plus the tract's. With the source envelope on the same log scale as the spectrum channel, the first layer can form spectrum minus source, the tract's response, as one learned linear combination. A comb with source-scaled teeth mixes position and amplitude, so undoing it needs a nonlinearity. The flat comb (channel 3) keeps giving the harmonics' positions; channel 4 gives what the source contributes. The envelope is also smooth where the teeth crowd at low f0.
+- *Design*: every run starts from `d040_5b_s{1,2}/ckpt_016000.pt` (still at the peak learning rate under WSD) and trains on train_v2w in train_v2's place (D-160's mix: `synth_extra_replace`, resynthesised share 0.3).
+  - The schedule is **4000 steps at constant learning rate, then 5b's 4000-step decay** (to step 24000). In the trainer: `--decay-steps 8000` with `decay_hold=4000` (D-036's option). Branch seeds 1 and 2.
+  - **Arm E (source envelope)**: a source head in stage 1, and its output drawn as a fourth input channel to stage 2.
+  - **Arm Z (matched control)**: the same head, loss and fourth channel, with the channel held at zero (a flat envelope).
+  - So the two arms differ only in what channel 4 carries: same architecture, parameters, losses, data, data order and schedule. The head's supervision of stage 1, the extra steps and the channel itself are common to both.
+- *The source head*: a linear layer on stage 1's features (beside the f0 and voicing heads), with its own warm-up of 300 steps (the VTL head's pattern). It predicts 40 harmonic levels in dB:
+  - **H1 relative to H2 is free**, the only unconstrained step. A negative H1-H2 is legal and means pressed phonation.
+  - **From H2 to H40 the levels don't increase**: each next level is the previous minus a softplus drop.
+  - The constraint lets the curve take LF sources and steeper or two-part falls, but no peak above H2, so a formant can't be put into the envelope there.
+  - *Why*: LF's levels are nearly monotone from H2 on. Over Rd 0.3-2.7 and Ra factors 0.5-3:
+    - the only rise next to H2 is H3 over H2 at Rd 0.3, by +0.18 dB (+0.29 dB with Ra × 0.5), which the head can't represent (a 0.3 dB error at the pressed extreme);
+    - the largest rise further up is 2.4 dB, at harmonics 31-38 of breathy sources, 40-60 dB down;
+    - H1 sits up to 4 dB below H2 in pressed voices.
+  - *H3 above H2* (Hannah, for this round: H3-H2 is kept non-increasing, with H1-H2 the only free step). A rise there might be real in very pressed or irregular sources, but it is also where a rise could eat F1 at high f0: at 100 Hz H2-H3 lies at 200-300 Hz, below F1, while at 250-300 Hz H2 and H3 sit on F1. Relaxing that step is left to a later entry, informed by the count below.
+  - *Loss*: Huber (δ 1) on the error in units of 6 dB, over voiced frames and harmonics below min(4 kHz, the VQT's top). Weight 0.1. The weight is judgement; the f0 and voicing losses' share is logged in the smoke run.
+    - It is offset-invariant: the per-frame mean error over valid harmonics is subtracted, since only the shape is defined. Resynthesised levels are on each recording's own scale.
+    - On resynthesised frames it is weighted by max(0, 1 - 2 β*), where β* is the larger of the two D-160 seeds' refitted |tract_left| (before training, item 2). Frames with formant residue in the recovered source count less, down to 0 at the QC limit of 0.5. Both arms use the same weights. The formant loss keeps its stored |tract_left| weighting, unchanged.
+  - *Labels*:
+    - **synthetic clips**: all 40 levels, `source_h_db(rd, 40, ra_factor)` from each frame's Rd label and the clip's Ra factor (D-160's meta), written as a new label array. Exact: the render uses the same table. The first 8 must equal the stored `source_h_db` on every frame (checked).
+    - **resynthesised clips**: 40 levels measured on the recovered source, from a re-render of the four resynthesised sets (below). The recovered source is the clip's actual excitation, so the labels are exact for the clip, residue included (hence the weighting). Masked above 4 kHz, where the stored config's own QC stops (`qc_f_max_hz`: upper-pole errors dominate above it).
+- *The fourth channel*: the envelope on the VQT's frequency axis, on the spectrum channel's own scale: (L(f) - max L) / 20, clamped at -5 as the spectrum channel is, times the voicing probability (so 0, flat, where unvoiced).
+  - L(f) interpolates the 40 levels linearly in log frequency at the predicted f0's harmonics. Below f0, H1 is held; above the last valid harmonic, the last octave's slope is held.
+  - Stage 2's first layer gets a fourth input channel whose weights start at zero. At step 16000 both arms therefore equal 5b exactly. In arm Z, the zero input leaves those weights untouched, so arm Z is "no source input" with an identical architecture.
+  - The channel passes no gradient back into the head (as for the f0 comb). The head learns only from its own loss, so nothing pushes it towards formant content.
+- *The truth ramp (arm E only)*: per clip, not per batch, since batches mix clip types.
+  - **Synthetic clips**: the envelope is drawn from the true 40 levels with probability p = 1 - (step - 16000) / 2000, otherwise from the head. So p is 0 from step 18000, leaving 6000 steps on the head's own output.
+  - **Resynthesised clips**: never the truth. Until the head's warm-up ends (step 16300) they get a zero channel, the control's content; from then on they get the head's output.
+- *Before training* (recorded, deciding nothing unless stated):
+  1. **The resynthesis re-render.** The four sets (VocalSet and Zeroth-Korean, train and val) are re-rendered with 40 stored source harmonics. The count becomes a `ResynthConfig` field, default 8, so today's behaviour is unchanged.
+     - It uses each set's stored config, seed 0, and **the original whole-file analyses** of teacher_v2_d16k (`analysis/<corpus>/bd90516ef923d592`), not `va resynth`'s windowed ones, which would give different f0 and voicing.
+     - **Reproduction check, deciding**: on 8 shards per set, the audio and every other label must be identical to the existing set, and the new H1-H8 must equal the stored ones. If they aren't, the code has drifted since 798bc0a / d8f5630; that is reported and nothing trains until it is understood.
+     - It is timed on the 8 shards first.
+  2. **The residue measure, refitted with D-160.** The stored tract_left is β from fitting the recovered source's harmonics with LF, gain, tilt and β times the tract response from teacher_v2_d16k's formant tracks, with the bandwidth prior's bandwidths (`source_qc`).
+     - So it detects residue only where those tracks put a formant: residue at an F2 the old teacher misread, the dropped-formant case, goes unseen. And the prior's bandwidths are the narrow low-f0 ones D-155 and D-156 found too narrow, which underestimates residue from wide formants.
+     - **Two bases, one fit each** (not a joint fit, since overlapping bases are collinear). β is refitted on the re-rendered recovered source with `source_qc`'s fit and each basis's formants and bandwidths:
+       - **model**: the recordings analysed with both D-160 seeds (inference on training-pool recordings and the resynthesised validation sets' recordings; GPU). The seeds share data and trunk and fail on similar frames, so they count as one estimate: β_model = the larger of the two seeds' |β|.
+       - **LPC**: Praat Burg (5 formants, 10 ms step, interpolated to the frame times) with the ceiling set by the speaker's length, 5c / (2L), about 5000 Hz at 17.5 cm. L is the median of D-160's VTL head (seed mean) over that speaker's voiced frames; speakers are numeric ids. Praat's raw poles below the ceiling are used, not slot assignments, since the basis is the whole tract response.
+         - *Why*: Praat sees F2 on the frames where the model drops it (D-152's failing frames: Praat 474 / 798 / 2413 Hz, the model 445 / 2360), and its errors (locking onto harmonics, merging close formants at high f0) differ from the model's. IAIF is LPC-based too, so the two can fail together, most likely where formants merge. Burg with a length-set ceiling still differs from IAIF's fixed-order LPC (order 18 at 16 kHz).
+         - **Stable poles only**: a pole joins the basis only if a pole within 5 % of its frequency is present in each of the ±2 neighbouring frames, and its bandwidth is under 700 Hz (Praat inflates bandwidths, D-156). That removes most poles from noise or a harmonic. The tolerance and the cap are judgement.
+       - **β* = max(β_model, β_LPC).** Taking the union is deliberate: the bases are there to cover each other's blind spots, and calling a frame with residue clean is the costly error. A median would discard LPC exactly where it alone finds a formant the seeds missed.
+     - **Shuffle null per basis**: β refitted against a deliberately wrong basis, the formants of another voiced frame of the same speaker at least 1 s away whose F1 or F2 differs by more than 15 %. It is run on the real recovered sources. Reported: the share of frames with |β| ≥ 0.1 under the null, per basis (the false-residue rate).
+       - **Rule, set now**: if LPC's null rate is above 10 %, the clean shares are reported and Hannah decides on the combination before training. Otherwise β* stands.
+     - The audio and the labels are unchanged; only the residue measure changes.
+     - Reported: the agreement between the old β and the new, between the two seeds, and between model and LPC.
+     - β* is used for the count's clean frames (item 4) and the source loss's weight.
+  3. **The synthetic 40-level labels** for train_v2w and train_v2's validation clips, with their first 8 checked on every frame.
+  4. **Monotonicity of real sources**, on the new resynthesised labels below 4 kHz. On these frames the count depends on the inverse filtering, so it is made on **clean frames**: voiced, with β* under 0.1. The number and share of clean frames, per set and by f0, are reported first: under β*, β_model alone and β_LPC alone. If they are too few to read (Hannah decides; the count stays reported-only either way), that is said before training.
+     - **A flag-screened variant**, reported: the same count under β* with flag B's frames removed (D-142: 5b's flag at its own thresholds, 0.89 and 0.61), on VocalSet only. On speech flag B marks something else (D-151), so it isn't applied to Zeroth-Korean. If the two counts agree, the residue isn't concentrated where the models fail.
+     - Reported, deciding nothing: the distribution of each step's rise (H3-H2 on its own, then H4-H3 and up, pooled), on clean frames and on all frames. Rises within one bandwidth of an original tracked formant are counted separately, as likely residue or source-tract interaction. The synthetic shares are reported beside them (expected near 0).
+     - The constraint stays strict from H2 up whatever the count. A substantial share above H3 would most likely be aperiodicity or residue, which the head isn't meant to represent; the H3-H2 count, split by distance from F1, informs whether a later entry relaxes that step.
+  5. A smoke run (200 steps, arm E, seed 1): the loss shares, the ramp's per-clip masks, and step 16000's outputs equal 5b's in both arms.
+- *Measures*:
+  - **Manipulation check (the head learned)**: on synthetic validation (512 clips each of train_v2 and train_v2w), the head's median offset-invariant error over H2-H40 must be at most half that of a constant shape (the training set's mean), on both seeds. Otherwise **NOT LEARNED**: the VocalSet result is reported but read as uninformative.
+    - Reported beside it: the same on the resynthesised validation sets (real sources, clean frames and all); and on VocalSet, the head's H1-H2 and its slope by singing technique (breathy against belt and straight, a sanity check).
+  - **Deciding, real voices**: D-153's VocalSet measure (D-152's 188 files, f0 ≤ 150 Hz, fixed frames, the mean frame failure share), arm E against arm Z of the same seed, with a paired bootstrap over files.
+  - **Reported**:
+    - **Same model, different channel 4**: arm E's D-155 B2 grid, D-156's B3 and B4 grids, D-157's Rd grid and D-158's off-line grid, each with channel 4 from the truth, from the head and at zero. Truth against head prices the head's error; head against zero shows whether the trunk uses the channel at all.
+    - **Absorption**: on the grids the true source is fixed while the bandwidths change, so the head's output shouldn't move. Reported: the median change in its levels at harmonics within one bandwidth of F1 (across D-155's B1 steps) and of F2 (between B2 90 and 400), split by f0 (at most 150 Hz, and above). The predicted H1-H2 is reported the same way, since it is the one free step.
+    - D-160's set, arms E and Z against 5b: resolvability on synthetic validation, front vowels (synthetic and Hillenbrand dev), failing files by vowel, flag B's AUC, and the private recording's failing takes as counts only.
+    - **Arm Z against D-160 and 5b on VocalSet**: a second reading of D-160's data change, with 4000 more steps.
+- *Rule*:
+  - If learned: **LOWER ON REAL VOICES** if, on both seeds, arm E fails less than every other run of that seed (arm Z, 5b, D-090's F5 and F5-F7 branches, D-160) and its paired interval against arm Z lies below 0.
+  - **NOT LOWER** if, on either seed, some other run of that seed fails as little or less.
+  - **MIXED** otherwise: reported, Hannah decides.
+- *Guards* (for joining the recipe, separate from the reading): D-051's through D-065's scoring, arm E against 5b, as in D-160, with D-065's note on single-seed guard failures. Arm Z is scored on the same, reported.
+- *Caveats*:
+  - Two seeds and one control each. The paired bootstrap covers files, not training noise; the comparison against every other run of the seed stands in for that (D-159: from-scratch runs move 0.02-0.08, branches less).
+  - Above 4 kHz the head learns only LF shapes. At f0 100 Hz, 40 harmonics end at 4 kHz anyway; at higher f0 the upper harmonics are LF-taught.
+  - Substantial aperiodicity fills the upper harmonics with noise. Their measured levels then flatten, which a non-increasing curve can follow. The envelope carries harmonic levels only, not the noise.
+  - Stage 1 is small (16 channels into a BiGRU or dilated convolutions). If it can't estimate the source, the manipulation check says so; a larger head, or reading stage 2, would be the follow-up.
+  - The constraint still lets a wide formant be absorbed as a shelf in the slope (D-144's trade-off), and the free H1-H2 can take a little of a low F1 at high f0, where H1 or H2 sits on it. The absorption measures watch both.
+  - Real sources with H3 above H2, if any, are fitted with a flat H2-H3 step; the head's error on those frames is reported with the count.
+  - β* still misses residue at a formant neither basis finds. D-160 also drops formants (VocalSet failure 0.14 and 0.20), and LPC shares IAIF's family of errors where formants merge. The union narrows that but doesn't close it.
+- *Code* (off by default; golden synthesiser tests unaffected, since no synthesis changes):
+  - `ResynthConfig.n_source_harmonics` (8), a render script for the re-run with the old analysis folders, and the reproduction check;
+  - a β refit (`source_qc`'s fit with given formants and bandwidths) from D-160's analyses and the length-set Praat poles (with the stability rule), the shuffle null, and β* written beside each re-rendered set as a new per-frame array;
+  - a label pass writing `label_source_h_db40.npy` for the synthetic sets;
+  - in the teacher: `source_head` and `source_env` ("off", "zero", "pred") config fields, the constrained parameterisation (H1 free, non-increasing from H2), the fourth channel, zero-initialised weights on branch load, and the per-clip truth mask;
+  - in the trainer: the source loss with the tract_left weight, the head's warm-up group, and the ramp;
+  - tests: step-16000 equality with 5b in both arms; the parameterisation (H1 free, non-increasing from H2); the label pass's first 8; the envelope's interpolation and scale; the per-clip mask.
+- *Cost*:
+  - the re-render on the CPU (timed first; the inverse filtering dominates);
+  - D-160's analyses of the recordings (two seeds, about 5,700 training recordings plus the validation sets' recordings) on the GPU; Praat, the β refits and the shuffle null on the CPU;
+  - four runs of 8000 steps at about 3.2 h each, about 13 h on the GPU;
+  - the guards on arms E and Z (about 2.3 h per pair, D-160) on the GPU;
+  - the CPU scoring, now with three channel-4 modes on the grids, about 2 h.
+  - The vtl-mri session is told before the GPU chain starts.
