@@ -1,0 +1,5 @@
+D-161 synthetic source labels: data/synth/train_v2, 100000 clips, 30046416 frames, 40 harmonics
+  clips with an off-line Ra factor: 0 (0.0%)
+  frames with a non-finite stored source label (left NaN): 0
+  first 8 against the stored label_source_h_db: max |difference| 1.42e-14 dB
+Result: MATCHES
