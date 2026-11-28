@@ -9,6 +9,8 @@ shuffle null, β* on the re-rendered resynthesised sets, and the monotonicity co
         and each basis's shuffle null -> cache/d161/residue/CORPUS/<speaker>.npz
     python scripts/analysis/d161_residue.py assemble SET             β*, β_model and β_LPC on the re-rendered set's
         frames -> data/resynth/SET_h40/flat/label_beta_star.npy (+ beta_model, beta_lpc), cache/d161/count/SET.npz
+    python scripts/analysis/d161_residue.py recording SET            amendment 1: the per-recording weight (D-160's seeds'
+        median β) as label_beta_star; the frame-level β* kept as label_beta_star_frame
     python scripts/analysis/d161_residue.py flag                     (CPU) flag B's flagged VocalSet recordings
         (5b s2 at D-142's threshold, D-152's file median, singer length leave-one-out) -> cache/d161/flagged.json
     python scripts/analysis/d161_residue.py report                   -> reports/analysis/d161/residue.{txt,json}
@@ -355,6 +357,49 @@ def cmd_assemble(name: str) -> None:
     print(name, "assembled", n_frames, "frames", flush=True)
 
 
+MIN_REC_FRAMES = 10
+
+
+def cmd_recording(name: str) -> None:
+    """Amendment 1 (Hannah, 2026-11-28, before any training): the source loss's residue weight per recording. m = the
+    recording's median β over voiced frames for each D-160 seed, the one with the larger |median| kept; written as
+    label_beta_star (constant over the recording's frames, NaN with fewer than MIN_REC_FRAMES measured frames), so
+    the trainer's max(0, 1 - 2|β*|) is max(0, 1 - 2|m|). The frame-level β* stays as label_beta_star_frame."""
+    corpus = next(c for c, s in SETS.items() if name in s)
+    med = {}
+    for p in sorted((CACHE / f"residue/{corpus}").glob("*.npz")):
+        z = np.load(p)
+        paths = json.loads(str(z["paths"]))
+        v = z["voiced"] & np.isfinite(z["f0"])
+        for ri, path in enumerate(paths):
+            k = (z["rec"] == ri) & v
+            ms = []
+            for b in (z["b_s1"], z["b_s2"]):
+                f = k & np.isfinite(b)
+                ms.append(float(np.median(b[f])) if f.sum() >= MIN_REC_FRAMES else np.nan)
+            med[path] = np.nan if np.isnan(ms).any() else ms[int(np.argmax(np.abs(ms)))]
+    sd = ROOT / f"data/resynth/{name}_h40"
+    flat = sd / "flat"
+    fo = np.load(flat / "frame_offsets.npy")
+    frame_file, frame_copy = flat / "label_beta_star.npy", flat / "label_beta_star_frame.npy"
+    if not frame_copy.exists():
+        np.save(frame_copy, np.load(frame_file))
+    col = np.full(int(fo[-1]), np.nan, np.float32)
+    c = 0
+    for s in sorted(sd.glob("shard_*.npz")):
+        with np.load(s) as z:
+            meta = json.loads(str(z["meta"]))
+        for m in meta:
+            col[int(fo[c]) : int(fo[c + 1])] = med[m["source_path"]]
+            c += 1
+    assert c == len(fo) - 1
+    np.save(frame_file, col)
+    vals = np.array(list(med.values()))
+    w = np.clip(1 - 2 * np.abs(vals), 0, 1)
+    print(f"{name}: {len(vals)} recordings, median m {np.nanmedian(vals):+.3f}, weight mean {np.nanmean(np.where(np.isfinite(w), w, 0)):.2f},"
+          f" at 0 {np.mean(~(w > 0)):.1%}, unmeasured {np.mean(~np.isfinite(vals)):.1%}", flush=True)
+
+
 # ---------------------------------------------------------------- flag B (VocalSet)
 
 def cmd_flag() -> None:
@@ -529,6 +574,8 @@ if __name__ == "__main__":
         cmd_refit(sys.argv[2], *(int(a) for a in sys.argv[3:4]))
     elif c == "assemble":
         cmd_assemble(sys.argv[2])
+    elif c == "recording":
+        cmd_recording(sys.argv[2])
     elif c == "flag":
         cmd_flag()
     elif c == "report":
