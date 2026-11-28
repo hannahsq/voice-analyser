@@ -1,0 +1,51 @@
+D-161 before training: the residue measure (items 2 and 4)
+  β* = max(β_model, β_LPC); clean = voiced label frame with β* < 0.1; LPC: Praat Burg, 5 formants, ceiling 5c / (2L), stable poles (±2 frames within 5%, bandwidth < 700 Hz)
+
+  vocalset_train_d16k: 1817298 voiced label frames (variant 0)
+    stored tract_left reproduced to 0.0
+    measured: model 99.9%, LPC 97.5%; Spearman |old| vs model 0.8275670103119283, s1 vs s2 0.9252577647052986, model vs LPC 0.5279044703622965
+    clean frames: beta_star 366376 (20.2%; by f0 f0 <= 150 28.5%, 150-250 31.2%, > 250 14.0%); beta_model 577011 (31.8%; by f0 f0 <= 150 41.6%, 150-250 42.6%, > 250 25.3%); beta_lpc 665001 (36.6%; by f0 f0 <= 150 47.3%, 150-250 52.1%, > 250 28.2%)
+    shuffle null, share |β| >= 0.1: s1 62.3%, s2 62.2%, lpc 60.8%
+    count (clean, 366376 frames): H3-H2 > 3 dB 12.08% (> 0 26.1%; pct 50/90/95/99 [-3.26, 3.65, 5.93, 10.76]; of rises > 3 dB near a formant 0.09434815032428645); H4 and up: steps > 3 dB 21.69%, frames with any 89.8% (near a formant 0.19041926747372268)
+    count (all, 1817298 frames): H3-H2 > 3 dB 14.39% (> 0 26.8%; pct 50/90/95/99 [-3.75, 4.59, 7.38, 13.53]; of rises > 3 dB near a formant 0.11085313422787986); H4 and up: steps > 3 dB 23.34%, frames with any 88.4% (near a formant 0.21734906676034535)
+    count (clean_flag_screened, 299632 frames): H3-H2 > 3 dB 12.66% (> 0 26.8%; pct 50/90/95/99 [-3.21, 3.83, 6.13, 11.03]; of rises > 3 dB near a formant 0.09092587220801139); H4 and up: steps > 3 dB 21.40%, frames with any 88.0% (near a formant 0.19682498218217684)
+      clean, f0 <= 150: 72191 frames, H3-H2 > 3 dB 10.04% (near a formant 0.09343085840463704)
+      clean, 150-250: 136455 frames, H3-H2 > 3 dB 12.09% (near a formant 0.044787878787878786)
+      clean, > 250: 157730 frames, H3-H2 > 3 dB 13.00% (near a formant 0.13455254815898562)
+
+  vocalset_val_d16k: 647365 voiced label frames (variant 0)
+    stored tract_left reproduced to 0.0
+    measured: model 99.8%, LPC 97.8%; Spearman |old| vs model 0.7994520630509462, s1 vs s2 0.9285633663142987, model vs LPC 0.5518629305731803
+    clean frames: beta_star 122421 (18.9%; by f0 f0 <= 150 30.9%, 150-250 28.0%, > 250 10.2%); beta_model 196816 (30.4%; by f0 f0 <= 150 42.8%, 150-250 40.6%, > 250 21.0%); beta_lpc 223196 (34.5%; by f0 f0 <= 150 47.4%, 150-250 47.5%, > 250 23.4%)
+    shuffle null, share |β| >= 0.1: s1 64.9%, s2 64.8%, lpc 63.6%
+    count (clean, 122421 frames): H3-H2 > 3 dB 8.81% (> 0 21.4%; pct 50/90/95/99 [-3.93, 2.6, 4.74, 9.87]; of rises > 3 dB near a formant 0.04874884151992586); H4 and up: steps > 3 dB 22.12%, frames with any 95.5% (near a formant 0.2025562827537396)
+    count (all, 647365 frames): H3-H2 > 3 dB 13.39% (> 0 25.2%; pct 50/90/95/99 [-4.03, 4.31, 7.44, 14.58]; of rises > 3 dB near a formant 0.08661835302806499); H4 and up: steps > 3 dB 24.55%, frames with any 93.2% (near a formant 0.2214817996292833)
+    count (clean_flag_screened, 107246 frames): H3-H2 > 3 dB 8.79% (> 0 22.0%; pct 50/90/95/99 [-3.85, 2.62, 4.67, 9.88]; of rises > 3 dB near a formant 0.04826562002758036); H4 and up: steps > 3 dB 21.79%, frames with any 94.9% (near a formant 0.20095443762629883)
+      clean, f0 <= 150: 35829 frames, H3-H2 > 3 dB 2.34% (near a formant 0.2078853046594982)
+      clean, 150-250: 50953 frames, H3-H2 > 3 dB 11.27% (near a formant 0.014977359804946012)
+      clean, > 250: 35639 frames, H3-H2 > 3 dB 11.82% (near a formant 0.06316789361196866)
+
+  zeroth_korean_train_d16k: 1336542 voiced label frames (variant 0)
+    stored tract_left reproduced to 0.0
+    measured: model 100.0%, LPC 78.2%; Spearman |old| vs model 0.752894989736001, s1 vs s2 0.8952168124528179, model vs LPC 0.321741265885801
+    clean frames: beta_star 207852 (15.6%; by f0 f0 <= 150 20.8%, 150-250 16.1%, > 250 8.0%); beta_model 387768 (29.0%; by f0 f0 <= 150 35.4%, 150-250 30.1%, > 250 18.6%); beta_lpc 312205 (23.4%; by f0 f0 <= 150 34.2%, 150-250 21.6%, > 250 14.7%)
+    shuffle null, share |β| >= 0.1: s1 61.9%, s2 62.1%, lpc 62.6%
+    count (clean, 207852 frames): H3-H2 > 3 dB 15.58% (> 0 28.8%; pct 50/90/95/99 [-3.63, 4.79, 7.3, 12.9]; of rises > 3 dB near a formant 0.15459205731579273); H4 and up: steps > 3 dB 26.19%, frames with any 99.5% (near a formant 0.19305069467247213)
+    count (all, 1336542 frames): H3-H2 > 3 dB 17.10% (> 0 29.3%; pct 50/90/95/99 [-3.67, 5.64, 8.84, 16.43]; of rises > 3 dB near a formant 0.12251819371326796); H4 and up: steps > 3 dB 27.50%, frames with any 99.6% (near a formant 0.19146789302998815)
+      clean, f0 <= 150: 70543 frames, H3-H2 > 3 dB 19.16% (near a formant 0.20837340039943783)
+      clean, 150-250: 114560 frames, H3-H2 > 3 dB 11.99% (near a formant 0.14674823392323938)
+      clean, > 250: 22749 frames, H3-H2 > 3 dB 22.56% (near a formant 0.033904910366328915)
+
+  zeroth_korean_val_d16k: 197148 voiced label frames (variant 0)
+    stored tract_left reproduced to 0.0
+    measured: model 100.0%, LPC 75.7%; Spearman |old| vs model 0.7270863678662807, s1 vs s2 0.8902168302587253, model vs LPC 0.3342506283066497
+    clean frames: beta_star 30663 (15.6%; by f0 f0 <= 150 18.1%, 150-250 15.3%, > 250 9.9%); beta_model 56303 (28.6%; by f0 f0 <= 150 31.0%, 150-250 28.7%, > 250 21.6%); beta_lpc 43207 (21.9%; by f0 f0 <= 150 28.5%, 150-250 17.9%, > 250 16.3%)
+    shuffle null, share |β| >= 0.1: s1 60.9%, s2 60.9%, lpc 62.9%
+    count (clean, 30663 frames): H3-H2 > 3 dB 15.70% (> 0 28.8%; pct 50/90/95/99 [-3.94, 4.67, 6.93, 11.76]; of rises > 3 dB near a formant 0.10448691316992106); H4 and up: steps > 3 dB 27.68%, frames with any 99.6% (near a formant 0.1885243379622982)
+    count (all, 197148 frames): H3-H2 > 3 dB 14.35% (> 0 26.3%; pct 50/90/95/99 [-4.43, 4.54, 7.22, 13.6]; of rises > 3 dB near a formant 0.10593639575971732); H4 and up: steps > 3 dB 28.73%, frames with any 99.7% (near a formant 0.18587981539702458)
+      clean, f0 <= 150: 14264 frames, H3-H2 > 3 dB 19.38% (near a formant 0.14218523878437048)
+      clean, 150-250: 13410 frames, H3-H2 > 3 dB 10.13% (near a formant 0.0728476821192053)
+      clean, > 250: 2989 frames, H3-H2 > 3 dB 23.12% (near a formant 0.015918958031837915)
+
+  shuffle null pooled over the sets: s1 62.5%, s2 62.5%, lpc 61.8%
+Rule (registered): LPC null above 10 %: Hannah decides the combination

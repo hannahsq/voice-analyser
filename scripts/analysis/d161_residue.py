@@ -519,6 +519,7 @@ def cmd_report() -> None:
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # the report prints β (a Windows console is cp1252)
     c = sys.argv[1]
     if c == "analyse":
         cmd_analyse(sys.argv[2], sys.argv[3])
