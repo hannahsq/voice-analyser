@@ -51,6 +51,9 @@ class ResynthConfig:
     min_voiced_frac: float = 0.2  # QC: reject a clip with fewer voiced frames
     clip_s: tuple[float, float] = (3.0, 6.0)  # clips are cut at quiet frames within this range
     variants: int = 2  # perturbations per recording
+    # D-161: source harmonics stored in the source_h_db label (measured on the recovered source; `source_qc`
+    # measures 40). 8 is what every set before D-161 stored.
+    n_source_harmonics: int = N_SOURCE_HARMONICS
 
 
 _RD_FIT = np.round(np.arange(0.3, 2.7001, 0.05), 2)
@@ -141,7 +144,7 @@ def source_from_audio(audio: np.ndarray, analysis: dict, cfg: ResynthConfig) -> 
         source = s_iaif if cfg.method == "iaif" else s_tracks
     qc = source_qc(source, a["f0"], voiced, tracks, cfg.qc_f_max_hz)
     return {"source": source, "f0": a["f0"].astype(float), "voiced": voiced, "sonorant": sonorant, "tracks": tracks,
-            "tract_left": qc["tract_left"], "ripple_db": qc["ripple_db"], "source_h_db": qc["h_db"][:, :N_SOURCE_HARMONICS]}
+            "tract_left": qc["tract_left"], "ripple_db": qc["ripple_db"], "source_h_db": qc["h_db"][:, :cfg.n_source_harmonics]}
 
 
 def refilter(source: np.ndarray, formants: np.ndarray, bandwidths: np.ndarray, extras: dict | None = None,

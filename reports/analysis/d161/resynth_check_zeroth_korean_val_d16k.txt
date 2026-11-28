@@ -1,0 +1,12 @@
+D-161 re-render check: zeroth_korean_val_d16k, 8 of 58 shards, n_source_harmonics 40
+  from data/resynth/analysis/zeroth_korean/bd90516ef923d592, seed 0, stored config (fields defaulted: none)
+  shard     0:  36 clips,   42.0 s  identical
+  shard     8:  50 clips,   31.2 s  identical
+  shard    16:  34 clips,   49.7 s  identical
+  shard    24:  36 clips,   46.7 s  identical
+  shard    33:  28 clips,   17.9 s  identical
+  shard    41:  32 clips,   22.6 s  identical
+  shard    49:  34 clips,   21.4 s  identical
+  shard    57:   4 clips,    5.1 s  identical
+  mean 29.6 s per shard of 8 recordings (53 s wall on 6 workers); the whole set's 58 shards at that rate: 0.48 worker-hours
+Result: REPRODUCES

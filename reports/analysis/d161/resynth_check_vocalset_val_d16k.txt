@@ -1,0 +1,12 @@
+D-161 re-render check: vocalset_val_d16k, 8 of 108 shards, n_source_harmonics 40
+  from data/resynth/analysis/vocalset/bd90516ef923d592, seed 0, stored config (fields defaulted: none)
+  shard     0:  32 clips,   12.5 s  identical
+  shard    15:  16 clips,    7.0 s  identical
+  shard    31:  42 clips,   28.2 s  identical
+  shard    46:  16 clips,   10.0 s  identical
+  shard    61:  36 clips,   36.5 s  identical
+  shard    76:  42 clips,   41.9 s  identical
+  shard    92:  24 clips,   28.4 s  identical
+  shard   107:  82 clips,   90.2 s  identical
+  mean 31.9 s per shard of 8 recordings (103 s wall on 6 workers); the whole set's 108 shards at that rate: 0.96 worker-hours
+Result: REPRODUCES
