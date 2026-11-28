@@ -32,7 +32,25 @@ def heatmap_ce(logits: torch.Tensor, values_hz: torch.Tensor, mask: torch.Tensor
 
 
 WEIGHTS = {"f0": 1.0, "voicing": 0.5, "formants": 1.0, "bandwidth": 0.2, "sonorant": 0.5, "obs": 0.2, "vtl": 0.0125, "vtl_inst": 0.0125, "opening": 1.0, "upper": 1.0,
-           "formants_acoustic": 1.0, "bandwidth_acoustic": 0.2}  # D-085: the acoustic set at the closed set's weights  # vtl: D-036's registered weight
+           "formants_acoustic": 1.0, "bandwidth_acoustic": 0.2, "source": 0.1}  # source: D-161's registered weight  # D-085: the acoustic set at the closed set's weights  # vtl: D-036's registered weight
+
+
+SOURCE_F_MAX = 4000.0  # D-161: the source loss's harmonics, below min(4 kHz, the VQT's top at 7.5 kHz)
+SOURCE_UNIT_DB = 6.0
+
+
+def source_loss(pred: torch.Tensor, y: torch.Tensor, f0: torch.Tensor, voiced: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
+    """D-161: Huber (delta 1) on the level error in units of 6 dB, offset-invariant (each frame's mean error over its
+    valid harmonics subtracted: only the shape is defined), over voiced frames with at least 2 finite harmonics below
+    4 kHz, weighted by w per frame."""
+    k = torch.arange(1, pred.shape[-1] + 1, device=pred.device, dtype=torch.float32)
+    ok = torch.isfinite(y) & voiced[..., None] & (f0.float()[..., None] * k < SOURCE_F_MAX) & (w[..., None] > 0)
+    e = torch.where(ok, pred.float() - torch.nan_to_num(y.float()), torch.zeros_like(pred, dtype=torch.float32))
+    n = ok.sum(-1, keepdim=True)
+    r = torch.where(ok, (e - e.sum(-1, keepdim=True) / n.clamp_min(1)) / SOURCE_UNIT_DB, torch.zeros_like(e))
+    hub = Fn.huber_loss(r, torch.zeros_like(r), reduction="none", delta=1.0)
+    fw = w.float()[..., None] * ok * (n >= 2)
+    return (hub * fw).sum() / fw.sum().clamp_min(1e-6)
 
 
 def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[torch.Tensor, dict]:
@@ -85,5 +103,7 @@ def teacher_loss(out: dict, lab: dict, weights: dict | None = None) -> tuple[tor
         ul = out["upper_logits"]  # weight (sum / 4); frames with the formant out of band (NaN) carry no loss
         parts["upper"] = sum(heatmap_ce(ul[:, :, k], lab["upper_formants"][..., k], son, UPPER_AXIS, w_fm)
                              for k in range(ul.shape[2])) / 4
+    if "source_levels" in out and "source40" in lab:  # D-161
+        parts["source"] = source_loss(out["source_levels"], lab["source40"], lab["f0"], voiced, lab["source_w"])
     total = sum(w[k] * v for k, v in parts.items())
     return total, {k: v.detach() for k, v in parts.items()}

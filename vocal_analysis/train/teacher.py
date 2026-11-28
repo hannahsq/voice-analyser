@@ -82,6 +82,15 @@ class TrainConfig:
     # D-065: the channel's gain range for training crops (None: ChannelConfig's); validation keeps the default range
     channel_gain_db: tuple[float, float] | None = None
     tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT
+    # D-161: a source head on stage 1 and a fourth stage-2 input channel, added at a branch: "" = none; "zero" (the
+    # channel held at zero, the control); "pred" (the head's levels drawn as a source envelope). The head has its own
+    # AdamW group at the model's rate, warmed up over source_warmup steps from the branch point. "pred" only: on
+    # synthetic clips the envelope is drawn from the true levels with probability 1 - (step - decay_start) /
+    # source_truth_steps (per clip); resynthesised clips get a zero channel until the warm-up ends, then the head's.
+    # The new input channel's weights start at zero. Labels: train.data's "source40", "source_w"; weight loss_weights["source"].
+    source: str = ""
+    source_warmup: int = 300
+    source_truth_steps: int = 2000
     # D-036: an anatomical vocal-tract-length head added at a branch. None = none; "new" (initialised with vtl_seed);
     # "frozen:<head.pt>" (D-035's trained head, not updated); "tepid:<head.pt>" (shrink and perturb: 0.5 x D-035's
     # weights + 0.1 x a fresh initialisation). Its own parameter group: linear warmup over vtl_warmup steps from the
@@ -259,7 +268,8 @@ def _optimizer(model, cfg: "TrainConfig"):
 
     own = (VTL_PREFIXES + (READOUT_PREFIX if cfg.readout_lr is not None else ())
            + (SIDE_PREFIX if cfg.side_lr is not None else ()) + (OPENING_PREFIX if cfg.opening else ())
-           + (FED_PREFIX if cfg.fed_standardised else ()) + (UPPER_PREFIX if cfg.upper else ()))  # own groups, added by the trainer
+           + (FED_PREFIX if cfg.fed_standardised else ()) + (UPPER_PREFIX if cfg.upper else ())
+           + (SOURCE_PREFIX if cfg.source else ()))  # own groups, added by the trainer
     if cfg.optimizer in ("adamw", "adan"):  # the VTL head (D-036) gets its own group, added by the trainer
         return rest([p for n, p in model.named_parameters() if not n.startswith(own)])
     if cfg.optimizer in ("muon", "muon_adan"):
@@ -347,11 +357,62 @@ SIDE_PREFIX = ("enc.side.",)  # D-072: the path beside the flatten
 OPENING_PREFIX = ("opening_head.",)  # D-080
 FED_PREFIX = ("fed_heads.",)  # D-086
 UPPER_PREFIX = ("upper_heads.",)  # D-090
+SOURCE_PREFIX = ("source_head.",)  # D-161
+SOURCE_INPUT = ("enc.convs.0.conv.weight", "enc.convs.0.skip.weight")  # D-161: stage 2's input layer, one channel wider
 
 
 def _opening_gate(step: int, cfg: TrainConfig) -> float:
     rel = step - (cfg.decay_start or 0) - cfg.opening_detach
     return 0.0 if rel < 0 else min(1.0, rel / max(1, cfg.opening_gate_ramp))
+
+
+def _source_warm(step: int, cfg: TrainConfig) -> float:
+    """D-161: the source head's warm-up factor, linear over source_warmup steps from the branch point."""
+    return min(1.0, max(0.0, (step - (cfg.decay_start or 0) + 1) / max(1, cfg.source_warmup)))
+
+
+def _add_source_group(opt, params: list) -> None:
+    """D-161: the source head's own AdamW (weight decay 0.01) at the model's schedule x its warm-up."""
+    import torch
+
+    if isinstance(opt, _Combined):
+        own = torch.optim.AdamW(params, lr=0.0, weight_decay=0.01)
+        own.param_groups[0].update(lr_scale=1.0, source=True)
+        opt.add(own)
+    elif isinstance(opt, torch.optim.AdamW):
+        opt.add_param_group({"params": params, "lr": 0.0, "weight_decay": 0.01, "lr_scale": 1.0, "source": True})
+    else:
+        raise NotImplementedError("the source head beside a single non-AdamW optimiser")
+
+
+def _widen_input(ck_model: dict, model) -> None:
+    """D-161: stage 2's input layer from a checkpoint one channel narrower; the new channel's weights at zero."""
+    import torch
+
+    own = model.state_dict()
+    for k in SOURCE_INPUT:
+        v, tgt = ck_model[k], own[k]
+        if v.shape != tgt.shape:
+            w = torch.zeros(tgt.shape, dtype=v.dtype)
+            w[:, : v.shape[1]] = v
+            ck_model[k] = w
+
+
+def _widen_opt_state(opt, model) -> None:
+    """D-161: after loading the optimiser state, pad the widened input layer's state tensors with zeros."""
+    import torch
+
+    params = dict(model.named_parameters())
+    targets = {id(params[k]) for k in SOURCE_INPUT}
+    for o in (opt.opts if isinstance(opt, _Combined) else [opt]):
+        for p, st in o.state.items():
+            if id(p) not in targets:
+                continue
+            for name, v in list(st.items()):
+                if torch.is_tensor(v) and v.dim() == p.dim() and v.shape != p.shape:
+                    w = torch.zeros(p.shape, dtype=v.dtype, device=v.device)
+                    w[:, : v.shape[1]] = v
+                    st[name] = w
 
 
 def _add_readout_group(opt, params: list, cfg: TrainConfig, lr: float | None = None) -> None:
@@ -688,6 +749,15 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         model_cfg = replace(model_cfg, n_upper=cfg.upper)
     if cfg.fed_truth_steps is not None and cfg.decay_start is None:
         raise ValueError("fed_truth_steps is counted from a branch point (decay_start)")
+    new_source = bool(cfg.source) and not model_cfg.source_head  # D-161: added at this branch
+    if cfg.source:
+        if cfg.source not in ("zero", "pred"):
+            raise ValueError(f"unknown source {cfg.source!r}")
+        if model_cfg.source_head and model_cfg.source_env != cfg.source:
+            raise ValueError(f"the checkpoint's source channel is {model_cfg.source_env!r}, not {cfg.source!r}")
+        if new_source and cfg.decay_start is None:
+            raise ValueError("source is added at a branch point (decay_start)")
+        model_cfg = replace(model_cfg, source_head=True, source_env=cfg.source)
     if cfg.acoustic:  # D-085: from scratch only
         model_cfg = replace(model_cfg, acoustic_heads=True)
     if cfg.vtl_link:
@@ -750,13 +820,20 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
     up_params = [p for n, p in model.named_parameters() if n.startswith(UPPER_PREFIX)] if cfg.upper else []
     if up_params and not new_upper:
         _add_readout_group(opt, up_params, cfg, lr=cfg.upper_lr)  # resuming
+    src_params = [p for n, p in model.named_parameters() if n.startswith(SOURCE_PREFIX)] if cfg.source else []
+    if src_params and not new_source:
+        _add_source_group(opt, src_params)  # resuming
     if ck is not None:
-        if new_vtl or new_readout or new_side or new_opening or new_fed or new_upper:
+        if new_source:
+            _widen_input(ck["model"], model)
+        if new_vtl or new_readout or new_side or new_opening or new_fed or new_upper or new_source:
             missing, unexpected = model.load_state_dict(ck["model"], strict=False)
-            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX + OPENING_PREFIX + FED_PREFIX + UPPER_PREFIX) for k in missing), (missing, unexpected)
+            assert not unexpected and all(k.startswith(VTL_PREFIXES + READOUT_PREFIX + SIDE_PREFIX + OPENING_PREFIX + FED_PREFIX + UPPER_PREFIX + SOURCE_PREFIX) for k in missing), (missing, unexpected)
         else:
             model.load_state_dict(ck["model"])
         opt.load_state_dict(ck["opt"])
+        if new_source:
+            _widen_opt_state(opt, model)
         step = ck["step"]
         torch.manual_seed(cfg.seed + 7919 * step)  # a resumed run or branch must not replay the data from step 0
         log(f"{'resumed' if start == last else f'branched from {start}'} at step {step}")
@@ -777,6 +854,9 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         log(f"side path {cfg.proj_side}: {sum(p.numel() for p in side_params):,} parameters, output at zero")
     if new_opening:
         _add_readout_group(opt, op_params, cfg, lr=cfg.opening_lr)
+    if new_source:
+        _add_source_group(opt, src_params)
+        log(f"source head ({cfg.source}): {sum(p.numel() for p in src_params):,} parameters; input channel 4 at zero")
     if new_upper:
         _add_readout_group(opt, up_params, cfg, lr=cfg.upper_lr)
         log(f"upper formant heads: {cfg.upper}, {sum(p.numel() for p in up_params):,} parameters")
@@ -812,7 +892,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         raise FileNotFoundError(f"obs_head needs {flat}'s observability store (obs_store.write_store)")
     vtl, vti = bool(cfg.vtl), bool(cfg.vtl_inst)
     ds = SynthCrops(flat, train_ids, cfg.n_frames, channel, seed=cfg.seed, epoch_size=epoch, observability=obs, vtl=vtl,
-                    vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label, acoustic=cfg.acoustic)
+                    vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label, acoustic=cfg.acoustic, source40=bool(cfg.source))
     if cfg.resynth:
         parts, sizes = [], []
         for d in cfg.resynth:
@@ -820,7 +900,7 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             n = json.loads((rflat / "done").read_text())["n_clips"]
             parts.append(SynthCrops(rflat, np.arange(n), cfg.n_frames, channel, seed=cfg.seed + 1 + len(parts),
                                     epoch_size=epoch, tract_left_weight=cfg.tract_left_weight, observability=obs, vtl=vtl,
-                                    vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic))
+                                    vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic, source40=bool(cfg.source)))
             sizes.append(n)
         weights = [1.0 - cfg.resynth_frac] + [cfg.resynth_frac * n / sum(sizes) for n in sizes]
         if not cfg.synth_extra:
@@ -836,10 +916,10 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             xtr, xva = split_ids(n)
             xseed = cfg.seed if cfg.synth_extra_replace else cfg.seed + 101 + len(xparts)  # replace: the main set's seed
             xparts.append(SynthCrops(xflat, xtr, cfg.n_frames, channel, seed=xseed, epoch_size=epoch,
-                                     observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic))
+                                     observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic, source40=bool(cfg.source)))
             xsizes.append(len(xtr))
             extra_val[f"eval_extra:{Path(d).name}"] = SynthCrops(xflat, xva[: cfg.val_clips], cfg.n_frames, val_channel, seed=12345,
-                                                                  fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic)
+                                                                  fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic, source40=bool(cfg.source))
         f = cfg.synth_extra_frac
         if cfg.synth_extra_replace:  # in the main set's place, position and seed: the mix is the usual one with the set swapped
             if len(xparts) != 1:
@@ -857,14 +937,14 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         n = json.loads((lflat / "done").read_text())["n_clips"]
         ltr, lva = split_ids(n)
         lpart = SynthCrops(lflat, ltr, cfg.n_frames, channel, seed=cfg.seed + 211, epoch_size=epoch, observability=obs,
-                           vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic)
+                           vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic, source40=bool(cfg.source))
         if isinstance(ds, MixedCrops):
             ds = MixedCrops([*ds.parts, lpart], [*ds.p, 0.0], epoch, seed=cfg.seed)
         else:
             ds = MixedCrops([ds, lpart], [1.0, 0.0], epoch, seed=cfg.seed)
         long_part = len(ds.parts) - 1
         extra_val["eval_long"] = SynthCrops(lflat, lva[: cfg.val_clips], cfg.long_val_frames, val_channel, seed=12345,
-                                            fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic)
+                                            fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic, source40=bool(cfg.source))
         log(f"long crops: {len(ltr):,} clips of {lflat.parent.name}, {cfg.long_batch_frac:.0%} of batches at "
             f"{tuple(cfg.long_frames)} frames")
     common = dict(num_workers=cfg.workers, collate_fn=collate, persistent_workers=True, pin_memory=False, prefetch_factor=4)
@@ -877,16 +957,16 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
         loader = DataLoader(ds, cfg.batch, drop_last=True, **common)
     # vtl only adds the label (no random draws), so the crops stay those of runs before it was passed
     val_ds = SynthCrops(flat, val_ids, cfg.n_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl, vtl_inst=vti, opening=cfg.opening, acoustic=cfg.acoustic,
-                        formant_label=cfg.formant_label)
+                        formant_label=cfg.formant_label, source40=bool(cfg.source))
     short_ds = SynthCrops(flat, val_ids, cfg.val_short_frames, val_channel, seed=12345, fixed=True, observability=obs, vtl=vtl,
-                          vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label, acoustic=cfg.acoustic)
+                          vtl_inst=vti, opening=cfg.opening, formant_label=cfg.formant_label, acoustic=cfg.acoustic, source40=bool(cfg.source))
     resynth_val = {}
     for d in cfg.resynth_val:
         rflat = consolidate(d, log=log)
         n = json.loads((rflat / "done").read_text())["n_clips"]
         ids = np.random.default_rng(0).permutation(n)[: cfg.val_clips]  # spread over recordings, fixed
         resynth_val[f"eval_resynth:{Path(d).name}"] = SynthCrops(rflat, np.sort(ids), cfg.n_frames, val_channel, seed=12345, fixed=True,
-                                                                  tract_left_weight=cfg.tract_left_weight, opening=cfg.opening, acoustic=cfg.acoustic)
+                                                                  tract_left_weight=cfg.tract_left_weight, opening=cfg.opening, acoustic=cfg.acoustic, source40=bool(cfg.source))
     vq = TorchVQT(device)
     val_sets = {"eval": cache_batches(DataLoader(val_ds, cfg.batch, num_workers=4, collate_fn=collate), vq, device),
                 "eval_short": cache_batches(DataLoader(short_ds, cfg.batch * cfg.n_frames // cfg.val_short_frames,
@@ -933,7 +1013,8 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 break
             if not sf:
                 for g in opt.param_groups:
-                    g["lr"] = (_vtl_lr if g.get("vtl") else _lr)(step, cfg) * g.get("lr_scale", 1.0)
+                    g["lr"] = ((_vtl_lr if g.get("vtl") else _lr)(step, cfg) * g.get("lr_scale", 1.0)
+                               * (_source_warm(step, cfg) if g.get("source") else 1.0))
             if cfg.vtl:
                 model.vtl_gate = _vtl_gate(step, cfg)
             if cfg.opening:
@@ -950,8 +1031,20 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
                 fed = _fed_bins(lab["formants"]) if p_fed > 0 and rng.random() < p_fed else None
                 p_link = _p_link_truth(step, cfg) if cfg.vtl_link else 0.0
                 ifed = lab["vtl_inst"] if p_link > 0 and "vtl_inst" in lab and rng.random() < p_link else None
+                sfed = szero = None
+                if cfg.source == "pred":  # D-161: per clip; its own generator, so the other draws are unchanged
+                    rel = step - (cfg.decay_start or 0)
+                    syn = lab["source_truth"][:, 0]
+                    p_s = max(0.0, 1.0 - rel / max(1, cfg.source_truth_steps))
+                    if p_s > 0:
+                        draw = np.random.default_rng([cfg.seed, 161, step]).random(len(syn)) < p_s
+                        pick = syn & torch.from_numpy(draw).to(syn.device)
+                        if bool(pick.any()):
+                            sfed = torch.where(pick[:, None, None], lab["source40"], torch.full_like(lab["source40"], float("nan")))
+                    if rel < cfg.source_warmup:
+                        szero = ~syn
                 out_ = model(lp, comb_f0=comb_f0 if truth else None, comb_voiced=lab["voiced"].float() if truth else None,
-                             formant_fed=fed, vtl_inst_fed=ifed)
+                             formant_fed=fed, vtl_inst_fed=ifed, source_fed=sfed, source_zero=szero)
             loss, parts = teacher_loss(out_, lab, cfg.loss_weights if aux is None else aux.weights())
             if aux is not None:
                 aux.update(parts)
@@ -972,7 +1065,13 @@ def train(cfg: TrainConfig, model_cfg: TeacherConfig | None = None, log=print) -
             step += 1
             seen += lab["f0"].numel()  # frames
             # summed on the GPU and read once per log interval: a float() here would make every step wait for it
-            for k, v in {**parts, "loss": loss.detach(), "grad_norm": gn.detach()}.items():
+            logged = {**parts, "loss": loss.detach(), "grad_norm": gn.detach()}
+            if cfg.source == "pred":  # D-161: the shares of clips fed the true levels and held at zero (logged only)
+                logged["source_fed_clips"] = (torch.isfinite(sfed).all(-1)[:, 0].float().mean() if sfed is not None
+                                              else torch.zeros((), device=device))
+                logged["source_zero_clips"] = szero.float().mean() if szero is not None else torch.zeros((), device=device)
+                logged["source_synth_clips"] = lab["source_truth"][:, 0].float().mean()
+            for k, v in logged.items():
                 acc[k] = acc[k] + v if k in acc else v.float()
             if step % cfg.log_every == 0:
                 acc = {k: float(v) for k, v in acc.items()}

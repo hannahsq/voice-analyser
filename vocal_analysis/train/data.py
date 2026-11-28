@@ -100,7 +100,7 @@ def _pad_labels(key: str, v: np.ndarray, n: int) -> np.ndarray:
     keep finite on every frame (f0 carries its contour through unvoiced frames; the comb reads it), repeat the last."""
     if v.dtype == bool:
         return np.zeros((n,) + v.shape[1:], bool)
-    if key in ("formants", "bandwidths", "vtl", "vtl_inst", "glottal_opening", *OPTIONAL_LABEL_KEYS):
+    if key in ("formants", "bandwidths", "vtl", "vtl_inst", "glottal_opening", "source40", *OPTIONAL_LABEL_KEYS):
         return np.full((n,) + v.shape[1:], np.nan, v.dtype)
     return np.repeat(v[-1:], n, axis=0)
 
@@ -117,7 +117,7 @@ class SynthCrops:
                  fixed: bool = False, tract_left_weight: tuple[float, float] = TRACT_LEFT_WEIGHT,
                  observability: bool = False, obs_config=None, obs_floor: str = "recording",
                  obs_rec_snr_db: float | None = None, vtl: bool = False, vtl_inst: bool = False,
-                 formant_label: str = "formants", opening: bool = False, acoustic: bool = False):
+                 formant_label: str = "formants", opening: bool = False, acoustic: bool = False, source40: bool = False):
         self.dir = Path(flat_dir)
         self.clip_ids = np.asarray(clip_ids)
         self.n_frames = n_frames
@@ -144,6 +144,11 @@ class SynthCrops:
         # D-085: also "formants_acoustic" and "bandwidths_acoustic" (the closed labels where a set has no acoustic ones:
         # the two are equal on uncoupled audio)
         self.acoustic = acoustic
+        # D-161: also "source40" (the 40 source harmonic levels, dB: label_source_h_db40 on synthetic sets, a 40-wide
+        # label_source_h_db on the re-rendered resynthesised ones), "source_w" (1 on synthetic frames; max(0, 1 - 2 beta*)
+        # on resynthesised ones, 0 where beta* is unmeasured) and "source_truth" (True on synthetic frames: the clips the
+        # truth ramp may feed)
+        self.source40 = source40
         self._arrays = None
 
     def _open(self):
@@ -167,6 +172,13 @@ class SynthCrops:
                 self._arrays["vtl_ok"] = np.load(self.dir / "clip_tube.npy") & ~np.load(self.dir / "clip_length_from_f0.npy")
                 if self.vtl_inst and (self.dir / "label_length_inst_cm.npy").exists():
                     self._arrays["vtl_inst_frames"] = load("label_length_inst_cm.npy")
+            if self.source40:
+                f40 = self.dir / "label_source_h_db40.npy"
+                self._arrays["source40"] = load(f40.name) if f40.exists() else self._arrays["source_h_db"]
+                if self._arrays["source40"].shape[1] != 40:
+                    raise ValueError(f"{self.dir}: no 40-harmonic source label")
+                bs = self.dir / "label_beta_star.npy"
+                self._arrays["beta_star"] = load(bs.name) if bs.exists() else None
             tl = self.dir / "clip_tract_left.npy"
             self._arrays["clip_weight"] = formant_weight(np.load(tl), self.tract_left_weight) if tl.exists() else None
         return self._arrays
@@ -190,6 +202,18 @@ class SynthCrops:
         x = arr["audio"][a0:a1].astype(np.float32) / INT16_SCALE
         n_clip_frames = int(f1_ - f0_)
         lab = {k: np.asarray(arr[k][f0_:f1_]) for k in LABEL_KEYS}
+        lab["source_h_db"] = lab["source_h_db"][:, :8]  # D-161: the re-rendered resynthesised sets store 40
+        if self.source40:
+            lab["source40"] = np.asarray(arr["source40"][f0_:f1_], np.float32)
+            synthetic = arr["clip_weight"] is None
+            if synthetic:
+                lab["source_w"] = np.ones(n_clip_frames, np.float32)
+            elif arr["beta_star"] is not None:
+                b = np.asarray(arr["beta_star"][f0_:f1_], np.float32)
+                lab["source_w"] = np.where(np.isfinite(b), np.clip(1.0 - 2.0 * np.abs(b), 0.0, 1.0), 0.0).astype(np.float32)
+            else:
+                raise ValueError(f"{self.dir}: a resynthesised set needs label_beta_star (D-161) for the source loss")
+            lab["source_truth"] = np.full(n_clip_frames, synthetic)
         if self.acoustic:
             lab.update({k: np.asarray(arr[k][f0_:f1_]) for k in ("formants_acoustic", "bandwidths_acoustic")})
         if self.opening:

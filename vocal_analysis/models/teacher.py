@@ -103,6 +103,46 @@ class TeacherConfig:
     causal: bool = False
     attn_window: int = 0
     lookahead: int = 0
+    # D-161: a source head on stage 1 ("source_head", linear): the source's harmonic levels H1-H40 in dB relative to H2,
+    # H1 free and non-increasing from H2 (`source_levels`). source_env: "off" (no fourth channel); "zero" (a fourth
+    # stage-2 input channel held at zero, the control); "pred" (the head's levels drawn as an envelope on the VQT axis,
+    # `source_envelope`; the trainer may feed the true levels per clip). The channel passes no gradient to the head.
+    source_head: bool = False
+    source_env: str = "off"
+
+
+SOURCE_H = 40  # D-161: harmonics in the source head and envelope
+SOURCE_DB = 6.0  # dB per unit of the head's raw outputs (the loss's unit)
+
+
+def source_levels(raw: torch.Tensor) -> torch.Tensor:
+    """(..., SOURCE_H - 1) raw head outputs -> (..., SOURCE_H) levels in dB relative to H2: H1 - H2 = SOURCE_DB x raw[0],
+    then H_{k+1} = H_k - SOURCE_DB x softplus(raw[k]) for k = 2..SOURCE_H - 1 (non-increasing from H2)."""
+    h1 = SOURCE_DB * raw[..., :1]
+    drops = SOURCE_DB * Fn.softplus(raw[..., 1:].float())
+    rest = -torch.cumsum(drops, -1)
+    return torch.cat([h1.float(), torch.zeros_like(h1, dtype=torch.float32), rest], -1)
+
+
+def source_envelope(levels: torch.Tensor, f0_hz: torch.Tensor, voiced_p: torch.Tensor, log2_vqt: torch.Tensor) -> torch.Tensor:
+    """(B, T, SOURCE_H) levels (dB, any offset), f0 (B, T), voicing (B, T) -> (B, 1, F, T) envelope on the VQT axis, on
+    the spectrum channel's scale: (L(f) - max L) / 20, clamped at -5, times the voicing probability. L(f) is linear in
+    log frequency between harmonics, H1 held below f0, the H39-H40 slope (per log2) held above H40."""
+    lv = levels.float()
+    lv = lv - lv.amax(-1, keepdim=True)
+    u = log2_vqt[None, None, :] - torch.log2(f0_hz.float().clamp_min(20.0))[..., None]  # (B, T, F): log2 harmonic number
+    lk = torch.log2(torch.arange(1, SOURCE_H + 1, device=lv.device, dtype=torch.float32))
+    kr = torch.exp2(u)
+    k0 = torch.floor(kr).clamp(1, SOURCE_H - 1).long()  # lower harmonic number, 1..SOURCE_H-1
+    a = torch.gather(lv, -1, k0 - 1)
+    b = torch.gather(lv, -1, k0)
+    w = ((u - lk[k0 - 1]) / (lk[k0] - lk[k0 - 1])).clamp(0.0, 1.0)
+    env = a + w * (b - a)
+    slope = (lv[..., -1:] - lv[..., -2:-1]) / (lk[-1] - lk[-2])
+    env = torch.where(u < 0, lv[..., :1], env)
+    env = torch.where(u > lk[-1], lv[..., -1:] + slope * (u - lk[-1]), env)
+    out = (env / 20.0).clamp_min(-5.0) * voiced_p.float()[..., None]
+    return out.transpose(1, 2)[:, None]
 
 
 class _GradGate(torch.autograd.Function):
@@ -513,7 +553,13 @@ class Teacher(nn.Module):
         self.f0_net = Encoder(2, (c1, c1), ((1, 2, 4), (1, 2)), 256, cfg.f0_gru_hidden, 1, "conv" if conformer else "gru", cfg)
         self.f0_head = nn.Linear(self.f0_net.out_dim, F0_AXIS.n_bins)
         self.voicing_head = nn.Linear(self.f0_net.out_dim, 1)
-        c_in = 3 if cfg.comb else 2
+        if cfg.source_env not in ("off", "zero", "pred"):
+            raise ValueError(f"unknown source_env {cfg.source_env!r}")
+        if cfg.source_env != "off" and not (cfg.source_head and cfg.comb):
+            raise ValueError("source_env needs source_head and the comb")
+        if cfg.source_head:  # D-161
+            self.source_head = nn.Linear(self.f0_net.out_dim, SOURCE_H - 1)
+        c_in = (3 if cfg.comb else 2) + (cfg.source_env != "off")
         self.enc = Encoder(c_in, cfg.channels, (cfg.full_res_dilations, (1, 2, 4, 8), (1, 2)), cfg.embed, cfg.gru_hidden,
                            cfg.gru_layers, cfg.temporal, cfg, side=cfg.proj_side)
         d = self.enc.out_dim
@@ -586,21 +632,24 @@ class Teacher(nn.Module):
         return torch.exp2((f0_logits.softmax(-1) * self.f0_log2).sum(-1))
 
     def forward(self, logpow: torch.Tensor, comb_f0: torch.Tensor | None = None, comb_voiced: torch.Tensor | None = None,
-                formant_fed: torch.Tensor | None = None, vtl_inst_fed: torch.Tensor | None = None) -> dict:
+                formant_fed: torch.Tensor | None = None, vtl_inst_fed: torch.Tensor | None = None,
+                source_fed: torch.Tensor | None = None, source_zero: torch.Tensor | None = None) -> dict:
         """logpow: (B, F, T) VQT log power. comb_f0/comb_voiced override the comb source (teacher forcing).
         formant_fed: (B, T, N) bin indices fed to later formant heads and the mask in place of the chain's own means,
         NaN where not given (D-086, teacher forcing of the chain). vtl_inst_fed: (B, T) log2 cm read by vtl_link in place
-        of the instantaneous head's own (detached) output, NaN where not given (D-085)."""
+        of the instantaneous head's own (detached) output, NaN where not given (D-085). source_fed: (B, T, SOURCE_H) dB
+        levels drawn into the source envelope in place of the head's, frames with any NaN keeping the head's (D-161's
+        truth ramp); source_zero: (B,) bool, clips whose envelope channel is held at zero."""
         la = self.cfg.lookahead if self.cfg.causal else 0
         if la:  # D-128: L frames of silence appended; output t = the causal output at t + L
-            if any(v is not None for v in (comb_f0, comb_voiced, formant_fed, vtl_inst_fed)):
+            if any(v is not None for v in (comb_f0, comb_voiced, formant_fed, vtl_inst_fed, source_fed, source_zero)):
                 raise ValueError("teacher forcing is not available with lookahead")
             logpow = Fn.pad(logpow, (0, la), value=-100.0)
         x = normalise(logpow)
         h0 = self.f0_net(x)
         film = self.cfg.readout in ("film", "film_residual", *QUERY_READOUTS)
         enc = (lambda xc: self.enc(xc, maps=True)) if film else (lambda xc: (self.enc(xc), None))
-        out = self._outputs(x, h0, enc, comb_f0, comb_voiced, formant_fed, vtl_inst_fed)
+        out = self._outputs(x, h0, enc, comb_f0, comb_voiced, formant_fed, vtl_inst_fed, source_fed, source_zero)
         return {k: v[:, la:] for k, v in out.items()} if la else out
 
     def step(self, logpow: torch.Tensor, state: dict | None = None) -> tuple[dict, dict]:
@@ -619,15 +668,30 @@ class Teacher(nn.Module):
             h, new["enc"] = self.enc.step(xc, st.get("enc"))
             return h, None
 
-        return self._outputs(x, h0, enc, None, None, None, None), new
+        return self._outputs(x, h0, enc, None, None, None, None, None, None), new
 
-    def _outputs(self, x, h0, enc, comb_f0, comb_voiced, formant_fed, vtl_inst_fed) -> dict:
+    def _outputs(self, x, h0, enc, comb_f0, comb_voiced, formant_fed, vtl_inst_fed, source_fed=None, source_zero=None) -> dict:
         out = {"f0_logits": self.f0_head(h0), "voicing_logit": self.voicing_head(h0)[..., 0]}
+        if self.cfg.source_head:  # D-161
+            out["source_levels"] = source_levels(self.source_head(h0))
         if self.cfg.comb:
             with torch.no_grad():
                 f0 = comb_f0 if comb_f0 is not None else self.expected_f0(out["f0_logits"].float())
                 vp = comb_voiced if comb_voiced is not None else torch.sigmoid(out["voicing_logit"].float())
             x = torch.cat([x, self.comb(f0, vp).to(x.dtype)], 1)
+            if self.cfg.source_env != "off":  # D-161: the fourth channel, no gradient to the head
+                with torch.no_grad():
+                    if self.cfg.source_env == "zero":
+                        env = torch.zeros_like(x[:, :1])
+                    else:
+                        lv = out["source_levels"].detach().float()
+                        if source_fed is not None:
+                            use = torch.isfinite(source_fed).all(-1, keepdim=True)
+                            lv = torch.where(use, torch.nan_to_num(source_fed.float()), lv)
+                        env = source_envelope(lv, f0, vp, self.log2_vqt)
+                        if source_zero is not None:
+                            env = torch.where(source_zero[:, None, None, None], torch.zeros_like(env), env)
+                x = torch.cat([x, env.to(x.dtype)], 1)
         film = self.cfg.readout in ("film", "film_residual", *QUERY_READOUTS)
         flat = self.cfg.readout not in ("film", *QUERY_READOUTS)
         h, kept = enc(x)
